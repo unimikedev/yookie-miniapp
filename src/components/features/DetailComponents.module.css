@@ -1,0 +1,521 @@
+/* ══════════════════════════════════════════════════════════
+   Detail Page Components — modern dark minimalism
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Chip ────────────────────────────────────────────────── */
+.chipRow {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-wrap: nowrap;
+}
+
+.chipRow::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  background: var(--color-surface);
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.chipActive {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-weight: 600;
+}
+
+/* ── InfoCard ─────────────────────────────────────────────── */
+.infoCard {
+  flex: 1;
+  min-width: 0;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.infoCardIcon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.infoCardLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.infoCardValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ── ServiceCard ─────────────────────────────────────────── */
+.serviceCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1.5px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.serviceCard:active {
+  transform: scale(0.98);
+}
+
+.serviceCardSelected {
+  border-color: var(--color-accent);
+}
+
+.serviceInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.serviceName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.servicePrice {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.serviceMeta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.serviceAction {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.serviceCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: rgba(154, 210, 64, 0.15);
+}
+
+.serviceSelectBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 14px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+/* ── ReviewCard ────────────────────────────────────────────── */
+.reviewCard {
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reviewAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.reviewAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reviewAvatarFallback {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.reviewMeta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reviewerName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reviewDate {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.reviewRating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-star-gold);
+  flex-shrink: 0;
+}
+
+.reviewRatingValue {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.reviewComment {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 0;
+  padding-left: 46px; /* align with text, skip avatar */
+}
+
+/* ── SpecialistCard ────────────────────────────────────────── */
+.specialistCard {
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.specialistCard:active {
+  transform: scale(0.96);
+}
+
+.specialistPhotoWrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+
+.specialistPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.specialistPhotoFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.specialistInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px 12px;
+}
+
+.specialistTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.specialistName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.specialistRating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-star-gold);
+  flex-shrink: 0;
+}
+
+.specialistRole {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── MasterChip ─────────────────────────────────────────────── */
+
+.masterChipScroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 16px;
+}
+
+.masterChipScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.masterChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  height: 44px;
+  white-space: nowrap;
+}
+
+.masterChip:active {
+  opacity: 0.7;
+}
+
+.masterChipSelected {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+}
+
+.masterChipAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.masterChipAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.masterChipInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.masterChipName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.masterChipRating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.masterChipCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── ContactInfo ────────────────────────────────────────────── */
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+}
+
+.contactTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.contactLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contactLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-2xl);
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.contactLink:active {
+  opacity: 0.7;
+}
+
+.contactLink svg {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+/* ── StickyCTA ─────────────────────────────────────────────── */
+.stickyCTA {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+  background: var(--color-bg);
+  display: flex;
+  gap: 8px;
+  z-index: 50;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.stickyCTABtn {
+  flex: 1;
+  height: 52px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.stickyCTABtn:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.stickyCTADisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stickyCTASecondary {
+  height: 52px;
+  padding: 0 20px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.stickyCTASecondary:active {
+  opacity: 0.8;
+}

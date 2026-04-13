@@ -1,0 +1,245 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 108px);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border-mid);
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.025em;
+}
+
+.content {
+  max-width: 448px;
+  margin: 0 auto;
+  padding: 24px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.profileSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 48px;
+}
+
+.avatarWrap {
+  padding-bottom: 8px;
+}
+
+.avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface-elevated);
+  overflow: hidden;
+  background: var(--color-surface-elevated);
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.cameraBtn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-text);
+  border: 2px solid var(--color-bg);
+}
+
+.userName {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-text);
+  letter-spacing: -0.025em;
+  text-align: center;
+}
+
+.userSub {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.025em;
+  text-align: center;
+}
+
+.editBtn {
+  margin-top: 8px;
+  padding: 10px 32px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-bg);
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  transition: opacity 0.15s;
+  cursor: pointer;
+}
+
+.editBtn:active {
+  opacity: 0.8;
+}
+
+/* ── Theme toggle ─────────────────────────────────────── */
+.themeToggle {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+}
+
+.themeBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: none;
+  text-align: left;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.themeBtn:active {
+  background: var(--color-surface-elevated);
+}
+
+.themeIcon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.themeLabel {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.themeValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-3xl);
+}
+
+.statLabel {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px;
+  background: var(--color-bg);
+  width: 100%;
+  text-align: left;
+  transition: opacity 0.15s;
+}
+
+.menuItem:active {
+  opacity: 0.7;
+}
+
+.menuItemBorder {
+  border-top: 1px solid var(--color-border-mid);
+}
+
+.menuItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menuIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-3xl);
+  background: var(--color-surface-elevated);
+  flex-shrink: 0;
+}
+
+.menuLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.menuLabelDanger {
+  color: var(--color-error);
+}

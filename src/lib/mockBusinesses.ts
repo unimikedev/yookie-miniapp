@@ -1,0 +1,253 @@
+/**
+ * Mock data for development/testing.
+ * IDs match the seeded Supabase data (see backend/src/seed.ts).
+ */
+
+import { Business, Master, Service } from './api/types'
+
+export const MOCK_BUSINESSES: Business[] = [
+  {
+    id: 'a1111111-1111-4111-b111-111111111111',
+    name: 'Glam Studio',
+    description: 'Современный салон красоты в самом центре Ташкента. Причёски, макияж, уход за кожей.',
+    category: 'hair',
+    address: 'ул. Амира Темура, 17, Ташкент',
+    city: 'Tashkent',
+    phone: '+998901234567',
+    instagram: 'glamstudio_uz',
+    working_hours: {
+      mon: { open: '09:00', close: '20:00' },
+      tue: { open: '09:00', close: '20:00' },
+      wed: { open: '09:00', close: '20:00' },
+      thu: { open: '09:00', close: '20:00' },
+      fri: { open: '09:00', close: '20:00' },
+      sat: { open: '10:00', close: '18:00' },
+    },
+    slot_duration_min: 60,
+    is_active: true,
+    rating: 4.9,
+    lat: 41.2995,
+    lng: 69.2401,
+  },
+  {
+    id: 'a2222222-2222-4222-b222-222222222222',
+    name: 'Blade & Fade',
+    description: 'Барбершоп с европейским подходом. Стрижки, бритьё и уход за бородой.',
+    category: 'barber',
+    address: 'пр. Навои, 23, Ташкент',
+    city: 'Tashkent',
+    phone: '+998907654321',
+    instagram: 'blade_fade_uz',
+    working_hours: {
+      mon: { open: '10:00', close: '21:00' },
+      tue: { open: '10:00', close: '21:00' },
+      wed: { open: '10:00', close: '21:00' },
+      thu: { open: '10:00', close: '21:00' },
+      fri: { open: '10:00', close: '21:00' },
+      sat: { open: '10:00', close: '19:00' },
+      sun: { open: '11:00', close: '17:00' },
+    },
+    slot_duration_min: 45,
+    is_active: true,
+    rating: 4.8,
+    lat: 41.3111,
+    lng: 69.2799,
+  },
+  {
+    id: 'a3333333-3333-4333-b333-333333333333',
+    name: 'Nail Lab',
+    description: 'Маникюр и педикюр нового поколения. Гелевые покрытия, наращивание, дизайн.',
+    category: 'nail',
+    address: 'ул. Шота Руставели, 8, Ташкент',
+    city: 'Tashkent',
+    phone: '+998901112233',
+    instagram: 'naillab_tashkent',
+    working_hours: {
+      mon: { open: '09:00', close: '20:00' },
+      tue: { open: '09:00', close: '20:00' },
+      wed: { open: '09:00', close: '20:00' },
+      thu: { open: '09:00', close: '20:00' },
+      fri: { open: '09:00', close: '20:00' },
+      sat: { open: '09:00', close: '19:00' },
+    },
+    slot_duration_min: 90,
+    is_active: true,
+    rating: 4.7,
+    lat: 41.2910,
+    lng: 69.2567,
+  },
+  {
+    id: 'a4444444-4444-4444-b444-444444444444',
+    name: 'Zen Spa',
+    description: 'Спа-центр для полного расслабления. Массаж, обёртывания, хаммам.',
+    category: 'spa_massage',
+    address: 'ул. Мустакиллик, 55, Ташкент',
+    city: 'Tashkent',
+    phone: '+998905556677',
+    instagram: 'zen_spa_uz',
+    working_hours: {
+      mon: { open: '10:00', close: '21:00' },
+      tue: { open: '10:00', close: '21:00' },
+      wed: { open: '10:00', close: '21:00' },
+      thu: { open: '10:00', close: '21:00' },
+      fri: { open: '10:00', close: '21:00' },
+      sat: { open: '10:00', close: '21:00' },
+      sun: { open: '11:00', close: '20:00' },
+    },
+    slot_duration_min: 60,
+    is_active: true,
+    rating: 4.9,
+    lat: 41.3001,
+    lng: 69.2700,
+  },
+  {
+    id: 'a5555555-5555-4555-b555-555555555555',
+    name: 'Brow House',
+    description: 'Студия бровей и ресниц. Коррекция, окрашивание, ламинирование.',
+    category: 'brow_lash',
+    address: 'ул. Ойбек, 12, Ташкент',
+    city: 'Tashkent',
+    phone: '+998909988776',
+    instagram: 'browhouse_uz',
+    working_hours: {
+      mon: { open: '09:30', close: '19:30' },
+      tue: { open: '09:30', close: '19:30' },
+      wed: { open: '09:30', close: '19:30' },
+      thu: { open: '09:30', close: '19:30' },
+      fri: { open: '09:30', close: '19:30' },
+      sat: { open: '10:00', close: '18:00' },
+    },
+    slot_duration_min: 60,
+    is_active: true,
+    rating: 4.6,
+    lat: 41.2975,
+    lng: 69.2650,
+  },
+  {
+    id: 'a6666666-6666-4666-b666-666666666666',
+    name: 'Derma Clinic',
+    description: 'Косметологическая клиника. Чистки, пилинги, мезотерапия и инъекции красоты.',
+    category: 'cosmetology',
+    address: 'пр. Амира Темура, 107Б, Ташкент',
+    city: 'Tashkent',
+    phone: '+998901234111',
+    instagram: 'dermaclinic_uz',
+    working_hours: {
+      mon: { open: '09:00', close: '19:00' },
+      tue: { open: '09:00', close: '19:00' },
+      wed: { open: '09:00', close: '19:00' },
+      thu: { open: '09:00', close: '19:00' },
+      fri: { open: '09:00', close: '19:00' },
+      sat: { open: '10:00', close: '17:00' },
+    },
+    slot_duration_min: 60,
+    is_active: true,
+    rating: 4.8,
+    lat: 41.3120,
+    lng: 69.2820,
+  },
+  {
+    id: 'a7777777-7777-4777-b777-777777777777',
+    name: 'Iron Gym',
+    description: 'Современный фитнес-клуб с профессиональными тренерами. Персональные тренировки.',
+    category: 'fitness',
+    address: 'ул. Лабзак, 44, Ташкент',
+    city: 'Tashkent',
+    phone: '+998901234222',
+    instagram: 'irongym_tashkent',
+    working_hours: {
+      mon: { open: '07:00', close: '22:00' },
+      tue: { open: '07:00', close: '22:00' },
+      wed: { open: '07:00', close: '22:00' },
+      thu: { open: '07:00', close: '22:00' },
+      fri: { open: '07:00', close: '22:00' },
+      sat: { open: '08:00', close: '21:00' },
+      sun: { open: '09:00', close: '20:00' },
+    },
+    slot_duration_min: 60,
+    is_active: true,
+    rating: 4.5,
+    lat: 41.3050,
+    lng: 69.2750,
+  },
+  {
+    id: 'a8888888-8888-4888-b888-888888888888',
+    name: 'Ink Masters',
+    description: 'Тату-студия для смелых. Хэндпоук, реализм, акварель — любые стили.',
+    category: 'tattoo',
+    address: 'ул. Паркентская, 31, Ташкент',
+    city: 'Tashkent',
+    phone: '+998901234333',
+    instagram: 'inkmasters_uz',
+    working_hours: {
+      tue: { open: '12:00', close: '21:00' },
+      wed: { open: '12:00', close: '21:00' },
+      thu: { open: '12:00', close: '21:00' },
+      fri: { open: '12:00', close: '21:00' },
+      sat: { open: '11:00', close: '20:00' },
+      sun: { open: '11:00', close: '20:00' },
+    },
+    slot_duration_min: 120,
+    is_active: true,
+    rating: 4.9,
+    lat: 41.3200,
+    lng: 69.2900,
+  },
+]
+
+// ─── Mock Masters ────────────────────────────────────────────────────────────
+
+export const MOCK_MASTERS: Master[] = [
+  { id: 'b1111111-1111-4111-b111-111111111111', business_id: 'a1111111-1111-4111-b111-111111111111', name: 'Алия Каримова', specialization: 'Стилист-колорист', bio: '8 лет опыта.', rating: 4.9, review_count: 124, working_days: { mon: true, tue: true, wed: true, thu: true, fri: true }, is_active: true, position: 'Старший стилист' },
+  { id: 'b1111112-1112-4112-b112-111111111112', business_id: 'a1111111-1111-4111-b111-111111111111', name: 'Диана Юсупова', specialization: 'Мастер макияжа', bio: 'Свадебный макияж.', rating: 4.8, review_count: 89, working_days: { tue: true, wed: true, thu: true, fri: true, sat: true }, is_active: true, position: 'Визажист' },
+  { id: 'b2222221-2221-4221-b221-222222222221', business_id: 'a2222222-2222-4222-b222-222222222222', name: 'Дамир Рашидов', specialization: 'Барбер', bio: 'Мастер мужских стрижек.', rating: 4.9, review_count: 201, working_days: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: true }, is_active: true, position: 'Главный барбер' },
+  { id: 'b2222222-2222-4222-b222-222222222222', business_id: 'a2222222-2222-4222-b222-222222222222', name: 'Шохрух Мирзаев', specialization: 'Барбер', bio: 'Специалист по бороде.', rating: 4.7, review_count: 145, working_days: { wed: true, thu: true, fri: true, sat: true, sun: true }, is_active: true, position: 'Барбер' },
+  { id: 'b3333331-3331-4331-b331-333333333331', business_id: 'a3333333-3333-4333-b333-333333333333', name: 'Камила Азимова', specialization: 'Мастер маникюра', bio: 'Гель-лак, наращивание.', rating: 4.8, review_count: 176, working_days: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: true }, is_active: true, position: 'Ведущий мастер' },
+  { id: 'b4444441-4441-4441-b441-444444444441', business_id: 'a4444444-4444-4444-b444-444444444444', name: 'Нилуфар Хасанова', specialization: 'Массажист', bio: 'Опыт 10 лет.', rating: 5.0, review_count: 312, working_days: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: true, sun: true }, is_active: true, position: 'Старший терапевт' },
+  { id: 'b4444442-4442-4442-b442-444444444442', business_id: 'a4444444-4444-4444-b444-444444444444', name: 'Зарина Омонова', specialization: 'Косметолог-SPA', bio: 'Обёртывания.', rating: 4.9, review_count: 198, working_days: { tue: true, wed: true, thu: true, fri: true, sat: true }, is_active: true, position: 'SPA-терапевт' },
+  { id: 'b5555551-5551-4551-b551-555555555551', business_id: 'a5555555-5555-4555-b555-555555555555', name: 'Малика Турсунова', specialization: 'Мастер бровей', bio: 'Архитектура бровей.', rating: 4.7, review_count: 93, working_days: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: true }, is_active: true, position: 'Мастер' },
+  { id: 'b6666661-6661-4661-b661-666666666661', business_id: 'a6666666-6666-4666-b666-666666666666', name: 'Гулнора Исмаилова', specialization: 'Косметолог', bio: 'Медицинская косметология.', rating: 4.9, review_count: 267, working_days: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: true }, is_active: true, position: 'Главный косметолог' },
+  { id: 'b7777771-7771-4771-b771-777777777771', business_id: 'a7777777-7777-4777-b777-777777777777', name: 'Бобур Холматов', specialization: 'Тренер', bio: 'Сертифицированный тренер.', rating: 4.6, review_count: 78, working_days: { mon: true, tue: true, wed: true, thu: true, fri: true, sat: true }, is_active: true, position: 'Тренер' },
+  { id: 'b8888881-8881-4881-b881-888888888881', business_id: 'a8888888-8888-4888-b888-888888888888', name: 'Рустам Назаров', specialization: 'Тату-мастер', bio: 'Реализм, дотворк.', rating: 5.0, review_count: 156, working_days: { tue: true, wed: true, thu: true, fri: true, sat: true, sun: true }, is_active: true, position: 'Тату-мастер' },
+]
+
+// ─── Mock Services ────────────────────────────────────────────────────────────
+
+export const MOCK_SERVICES: Service[] = [
+  { id: 'c1111111-1111-4111-c111-111111111111', business_id: 'a1111111-1111-4111-b111-111111111111', name: 'Женская стрижка', price: 80000, duration_min: 60, category: 'Стрижки', is_active: true, position: 1 },
+  { id: 'c1111112-1112-4112-c112-111111111112', business_id: 'a1111111-1111-4111-b111-111111111111', name: 'Окрашивание (однотонное)', price: 250000, duration_min: 120, category: 'Окрашивание', is_active: true, position: 2 },
+  { id: 'c1111113-1113-4113-c113-111111111113', business_id: 'a1111111-1111-4111-b111-111111111111', name: 'Дневной макияж', price: 120000, duration_min: 60, category: 'Макияж', is_active: true, position: 3 },
+  { id: 'c2222221-2221-4221-c221-222222222221', business_id: 'a2222222-2222-4222-b222-222222222222', name: 'Классическая стрижка', price: 60000, duration_min: 45, category: 'Стрижки', is_active: true, position: 1 },
+  { id: 'c2222222-2222-4222-c222-222222222222', business_id: 'a2222222-2222-4222-b222-222222222222', name: 'Стрижка + борода', price: 90000, duration_min: 60, category: 'Стрижки', is_active: true, position: 2 },
+  { id: 'c2222223-2223-4223-c223-222222222223', business_id: 'a2222222-2222-4222-b222-222222222222', name: 'Королевское бритьё', price: 70000, duration_min: 45, category: 'Уход за бородой', is_active: true, position: 3 },
+  { id: 'c3333331-3331-4331-c331-333333333331', business_id: 'a3333333-3333-4333-b333-333333333333', name: 'Маникюр с гель-лаком', price: 90000, duration_min: 90, category: 'Маникюр', is_active: true, position: 1 },
+  { id: 'c3333332-3332-4332-c332-333333333332', business_id: 'a3333333-3333-4333-b333-333333333333', name: 'Педикюр', price: 80000, duration_min: 90, category: 'Педикюр', is_active: true, position: 2 },
+  { id: 'c3333333-3333-4333-c333-333333333333', business_id: 'a3333333-3333-4333-b333-333333333333', name: 'Наращивание ногтей', price: 180000, duration_min: 120, category: 'Наращивание', is_active: true, position: 3 },
+  { id: 'c4444441-4441-4441-c441-444444444441', business_id: 'a4444444-4444-4444-b444-444444444444', name: 'Расслабляющий массаж (60 мин)', price: 150000, duration_min: 60, category: 'Массаж', is_active: true, position: 1 },
+  { id: 'c4444442-4442-4442-c442-444444444442', business_id: 'a4444444-4444-4444-b444-444444444444', name: 'Тайский массаж', price: 200000, duration_min: 90, category: 'Массаж', is_active: true, position: 2 },
+  { id: 'c4444443-4443-4443-c443-444444444443', business_id: 'a4444444-4444-4444-b444-444444444444', name: 'Хаммам', price: 180000, duration_min: 60, category: 'Спа', is_active: true, position: 3 },
+  { id: 'c5555551-5551-4551-c551-555555555551', business_id: 'a5555555-5555-4555-b555-555555555555', name: 'Архитектура бровей', price: 50000, duration_min: 60, category: 'Брови', is_active: true, position: 1 },
+  { id: 'c5555552-5552-4552-c552-555555555552', business_id: 'a5555555-5555-4555-b555-555555555555', name: 'Ламинирование ресниц', price: 120000, duration_min: 60, category: 'Ресницы', is_active: true, position: 2 },
+  { id: 'c6666661-6661-4661-c661-666666666661', business_id: 'a6666666-6666-4666-b666-666666666666', name: 'Глубокая чистка лица', price: 200000, duration_min: 90, category: 'Уход', is_active: true, position: 1 },
+  { id: 'c6666662-6662-4662-c662-666666666662', business_id: 'a6666666-6666-4666-b666-666666666666', name: 'Химический пилинг', price: 250000, duration_min: 60, category: 'Пилинги', is_active: true, position: 2 },
+  { id: 'c6666663-6663-4663-c663-666666666663', business_id: 'a6666666-6666-4666-b666-666666666666', name: 'Мезотерапия лица', price: 350000, duration_min: 60, category: 'Инъекции', is_active: true, position: 3 },
+  { id: 'c7777771-7771-4771-c771-777777777771', business_id: 'a7777777-7777-4777-b777-777777777777', name: 'Персональная тренировка (60 мин)', price: 120000, duration_min: 60, category: 'Тренировки', is_active: true, position: 1 },
+  { id: 'c7777772-7772-4772-c772-777777777772', business_id: 'a7777777-7777-4777-b777-777777777777', name: 'Составление программы тренировок', price: 80000, duration_min: 60, category: 'Консультации', is_active: true, position: 2 },
+  { id: 'c8888881-8881-4881-c881-888888888881', business_id: 'a8888888-8888-4888-b888-888888888888', name: 'Эскиз тату', price: 50000, duration_min: 60, category: 'Дизайн', is_active: true, position: 1 },
+  { id: 'c8888882-8882-4882-c882-888888888882', business_id: 'a8888888-8888-4888-b888-888888888888', name: 'Небольшое тату (до 5 см)', price: 300000, duration_min: 120, category: 'Татуировки', is_active: true, position: 2 },
+  { id: 'c8888883-8883-4883-c883-888888888883', business_id: 'a8888888-8888-4888-b888-888888888888', name: 'Среднее тату (5–15 см)', price: 700000, duration_min: 180, category: 'Татуировки', is_active: true, position: 3 },
+]
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+export function getMockBusiness(id: string): Business | undefined {
+  return MOCK_BUSINESSES.find(b => b.id === id)
+}
+
+export function getMockMasters(businessId: string): Master[] {
+  return MOCK_MASTERS.filter(m => m.business_id === businessId)
+}
+
+export function getMockServices(businessId: string): Service[] {
+  return MOCK_SERVICES.filter(s => s.business_id === businessId)
+}

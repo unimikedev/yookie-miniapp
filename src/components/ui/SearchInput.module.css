@@ -1,0 +1,104 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+  padding: 0 12px;
+}
+
+.container:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 12px 0;
+  font-size: 16px;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.input::placeholder {
+  color: var(--text-secondary);
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 16px;
+  transition: color 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+
+.clearButton:hover {
+  color: var(--accent);
+  background-color: var(--bg-tertiary);
+}
+
+.clearButton:active {
+  background-color: var(--border);
+}
+
+/* Dark mode */
+[data-theme='dark'] .container {
+  background-color: var(--bg-secondary);
+  border-color: var(--border);
+}
+
+[data-theme='dark'] .container:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+[data-theme='dark'] .icon {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .input {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .input::placeholder {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .clearButton {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .clearButton:hover {
+  color: var(--accent);
+  background-color: var(--bg-tertiary);
+}
+
+[data-theme='dark'] .clearButton:active {
+  background-color: var(--border);
+}

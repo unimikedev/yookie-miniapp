@@ -1,0 +1,55 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--color-field);
+  border-radius: var(--radius-field);
+  padding: 0 0.875rem;
+  border: var(--field-border-width) solid var(--color-field-border);
+  box-shadow: var(--shadow-field);
+  transition: box-shadow 150ms ease;
+  height: 44px;
+}
+
+.root:focus-within {
+  box-shadow: 0 0 0 2px var(--color-focus);
+}
+
+.icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--color-field-foreground);
+  min-width: 0;
+}
+
+.input::placeholder {
+  color: var(--color-field-placeholder);
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-default);
+  border: none;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.625rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 120ms ease;
+}
+
+.clearButton:hover {
+  background-color: var(--color-default-hover);
+}

@@ -1,0 +1,87 @@
+.card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.businessName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.serviceName {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.value {
+  color: var(--text-primary);
+  font-weight: 500;
+  text-align: right;
+}
+
+.price {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Dark mode */
+[data-theme='dark'] .card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}

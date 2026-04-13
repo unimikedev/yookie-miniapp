@@ -1,0 +1,39 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.75rem 1.25rem;
+  text-align: center;
+  min-height: 25rem;
+  color: var(--color-muted);
+}
+
+.icon {
+  font-size: 4rem;
+  margin-bottom: 1.25rem;
+  display: block;
+  line-height: 1;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+  margin: 0 0 0.5rem;
+}
+
+.description {
+  font-size: 1rem;
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+  max-width: 18.75rem;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+}

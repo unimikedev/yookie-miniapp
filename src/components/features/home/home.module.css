@@ -1,0 +1,736 @@
+/* ══════════════════════════════════════════════════════════
+   Home sections — cards, chips, section header.
+   All visual values come from design tokens (tokens.css).
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Section header ──────────────────────────────────────── */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  min-height: 36px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--color-text);
+  letter-spacing: -0.3px;
+}
+
+.sectionMore {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.sectionMore svg {
+  flex-shrink: 0;
+}
+
+/* ── Category chip (home search section) ─────────────────── */
+.catChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.catChipBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 17px 25px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  transition: opacity 0.15s;
+}
+
+.catChipBtn:active {
+  opacity: 0.7;
+}
+
+.catChipIcon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.catChipLabel {
+  font-family: 'Gilroy', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.catChipActive .catChipBtn {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.catChipActive .catChipLabel {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.catChipBtn[data-active="true"] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ── Visited master card (hero) ──────────────────────────── */
+.visitedCard {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 24px;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Compact horizontal carousel variant */
+.visitedCardCompact {
+  flex-direction: row;
+  align-items: center;
+  width: 300px;
+  height: 90px;
+  padding: 10px;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 24px;
+}
+
+.visitedHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.visitedHeadCompact {
+  flex: 1;
+  min-width: 0;
+}
+
+.visitedInfoCompact {
+  min-width: 0;
+}
+
+.visitedAvatarWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--color-surface-elevated);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.visitedAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.visitedInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.visitedTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.visitedName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.visitedBusinessSpecialization {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.visitedLastVisit {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: 1.2;
+}
+
+.visitedPriceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.visitedPrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.visitedStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-accent);
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.visitedStatusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+}
+
+.visitedFav {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.visitedCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  background: var(--color-accent);
+  color: #10193a;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  transition: opacity 0.15s;
+}
+
+.visitedCta:active {
+  opacity: 0.8;
+}
+
+.visitedCtaCompact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--color-accent);
+  color: #10193a;
+  border-radius: var(--radius-full);
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.visitedCtaCompact:active {
+  opacity: 0.8;
+}
+
+[data-theme='dark'] .visitedCtaCompact {
+  color: #fff;
+}
+
+/* ── Nearby horizontal card ──────────────────────────────── */
+.nearbyCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 300px; /* wider — content fits in one line */
+  height: 104px;
+  padding: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl); /* 24px */
+  flex-shrink: 0;
+}
+
+.nearbyCardCompact {
+  width: 280px;
+  height: 96px;
+  padding: 10px;
+}
+
+.nearbyThumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px; /* card radius(24px) - padding(12px) = 12px */
+  background: var(--color-surface-elevated);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.nearbyCardCompact .nearbyThumb {
+  width: 76px;
+  height: 76px;
+  border-radius: 10px; /* card radius(24px) - padding(10px) = 14px → visual balance */
+}
+
+.nearbyThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nearbyInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nearbyTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nearbyName {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.nearbyRating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nearbyMeta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.nearbyPrice {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Popular master vertical card 164×204 ────────────────── */
+.pmCard {
+  display: flex;
+  flex-direction: column;
+  width: 164px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pmPhotoWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 164 / 130;
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+
+.pmPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pmFavBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: rgba(24, 25, 27, 0.6);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-full);
+  transition: transform 0.15s, background 0.15s;
+  z-index: 2;
+}
+
+.pmFavBtn:active {
+  transform: scale(0.9);
+  background: rgba(24, 25, 27, 0.8);
+}
+
+.pmBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px 12px;
+}
+
+.pmTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.pmName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pmRating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.pmMeta {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.pmPrice {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* ── Popular studio large card 358×246 ───────────────────── */
+.psCard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+}
+
+.psCoverWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 358 / 166;
+  background: var(--color-surface-elevated);
+}
+
+.psCover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.psFav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Photo thumbnails row ──────────────────────────────── */
+.psThumbnails {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.psThumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: 0.7;
+  transition: opacity 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.psThumbnailActive {
+  opacity: 1;
+  border-color: var(--color-accent);
+}
+
+.psThumbnailMore {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Gilroy', sans-serif;
+  flex-shrink: 0;
+}
+
+.psBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.psInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.psName {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.psRatingRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.psReviewCount {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.psBadge {
+  padding: 6px 12px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Map preview card ────────────────────────────────────── */
+.mapCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  height: 104px;
+  padding: 16px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-3xl);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.mapCardBg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(117, 208, 74, 0.18) 0%, transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(117, 208, 74, 0.12) 0%, transparent 50%),
+    linear-gradient(135deg, #1f2937 0%, #26282b 100%);
+}
+
+.mapCardContent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text);
+}
+
+.mapCardTitle {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mapCardSub {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* ── Filter chips row ────────────────────────────────────── */
+.filterScroll {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filterScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  border: 1.5px solid transparent;
+}
+
+.filterChip:active {
+  background: var(--color-surface-elevated);
+}
+
+.filterChip[data-active="true"] {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border-color: var(--color-accent);
+  font-weight: 600;
+}
+
+.filterChipIcon {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  color: var(--color-text-secondary);
+}
+
+.filterChip[data-active="true"] .filterChipIcon {
+  color: var(--color-bg);
+}
+
+/* ── Horizontal scroll row ───────────────────────────────── */
+.hScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+
+.hScroll > *:first-child {
+  margin-left: 16px;
+}
+
+.hScroll > *:last-child {
+  margin-right: 16px;
+}
+
+.hScroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Snap behavior — magnet to left edge with 16px inset */
+.hScrollSnap {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-left: 16px;
+}
+
+.hScrollSnap > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}

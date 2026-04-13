@@ -1,0 +1,232 @@
+/* ─── ReviewForm ─────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: var(--color-surface);
+  border-radius: 24px 24px 0 0;
+  overflow-y: auto;
+  padding: 20px 20px 32px;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-secondary);
+  transition: opacity 0.15s;
+}
+
+.closeBtn:active {
+  opacity: 0.6;
+}
+
+/* Booking info */
+.bookingInfo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--color-surface-elevated);
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.bookingName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bookingMaster {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.bookingService {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* Rating section */
+.ratingSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.ratingLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.stars {
+  display: flex;
+  gap: 8px;
+}
+
+.star {
+  font-size: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: color 0.15s, transform 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+
+.star:active {
+  transform: scale(0.9);
+}
+
+.starActive {
+  color: #FBBF24;
+}
+
+.ratingText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Comment section */
+.commentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.commentLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  color: var(--color-text);
+  font-family: 'Gilroy', sans-serif;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus {
+  border-color: var(--color-accent);
+}
+
+.textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.charCount {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+/* Error */
+.error {
+  padding: 12px;
+  background: rgba(248, 113, 113, 0.1);
+  border-radius: 12px;
+  font-size: 13px;
+  color: #F87171;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 14px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  transition: opacity 0.15s;
+}
+
+.cancelBtn:active {
+  opacity: 0.7;
+}
+
+.submitBtn {
+  flex: 1;
+  padding: 14px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-bg);
+  transition: opacity 0.15s;
+}
+
+.submitBtn:active:not(:disabled) {
+  opacity: 0.85;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,0 +1,251 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: calc(var(--nav-height) + 16px);
+}
+
+.searchHeader {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--color-bg);
+  padding: 16px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-3xl);
+  height: 56px;
+}
+
+.searchIconWrap {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.filterBtn {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filterPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-mid);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.filterPill:active {
+  background: var(--color-surface-elevated);
+}
+
+.filterPillActive {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.meta {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 8px 4px 12px;
+}
+
+.metaCount {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.metaQuery {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-top: 2px;
+}
+
+.mapBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.skeletonItem {
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+
+/* ── Search section titles ───────────────────────────── */
+.searchSectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  padding: 16px 0 8px;
+}
+
+/* ── Master search result row ────────────────────────── */
+.masterSearchResult {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.masterSearchResult:active {
+  background: var(--color-surface-elevated);
+}
+
+.masterSearchAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-surface-elevated);
+}
+
+.masterSearchAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.masterSearchInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.masterSearchName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.masterSearchSpec {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Service search result row ───────────────────────── */
+.serviceSearchResult {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.serviceSearchResult:active {
+  background: var(--color-surface-elevated);
+}
+
+.serviceSearchInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.serviceSearchName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serviceSearchBiz {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

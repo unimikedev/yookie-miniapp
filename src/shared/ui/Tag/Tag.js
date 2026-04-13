@@ -1,0 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import styles from './Tag.module.css';
+export const Tag = ({ active = false, onClick, children, icon, className, 'aria-label': ariaLabel, 'aria-pressed': ariaPressed, }) => (_jsxs("button", { type: "button", className: [styles.root, active ? styles.active : '', className ?? ''].filter(Boolean).join(' '), onClick: onClick, "aria-label": ariaLabel, "aria-pressed": ariaPressed !== undefined ? ariaPressed : active, children: [icon && _jsx("span", { className: styles.icon, "aria-hidden": "true", children: icon }), _jsx("span", { children: children })] }));
+//# sourceMappingURL=Tag.js.map

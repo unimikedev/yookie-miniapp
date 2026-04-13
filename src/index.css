@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Lily+Script+One&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  /*
+   * html is the single vertical scroll container for the whole app.
+   * Reserve scrollbar space so content doesn't jump horizontally
+   * when scrollbars appear/disappear.
+   */
+  scrollbar-gutter: stable;
+}
+
+body, #root {
+  min-height: 100%;
+  width: 100%;
+  /*
+   * Block any stray horizontal overflow without making body a
+   * scroll container for y — that would hijack `position: sticky`
+   * and bind sticky elements to body instead of the viewport.
+   */
+  overflow-x: clip;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Bridge for old CSS vars */
+:root {
+  --bg-primary: var(--color-bg);
+  --bg-secondary: var(--color-surface);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-text-secondary);
+  --accent: var(--color-accent);
+  --border: var(--color-border);
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3);
+  --radius-md: var(--radius-3xl);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}

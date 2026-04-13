@@ -1,0 +1,242 @@
+/* ══════════════════════════════════════════════════════════
+   HomePage — Figma frame "Главная" 184:6540
+   ══════════════════════════════════════════════════════════ */
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+/* ── Green gradient — fixed, lowest z-index ────────────── */
+.topGradient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(180deg, rgba(154, 210, 64, 0.5) 0%, rgba(74, 143, 58, 0.5) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Main content — full-width, slides over gradient ───── */
+.mainContent {
+  position: relative;
+  z-index: 2;
+  background: var(--color-bg);
+  border-radius: 32px 32px 0 0;
+  margin-top: 16px;
+  padding-top: 16px;
+  width: 100%;
+  /* NOTE: Do NOT add overflow:hidden here — it kills sticky.
+     border-radius alone (without overflow) does NOT create
+     a new scroll container, so sticky still works.
+     The rounded corners simply won't clip children that escape,
+     which is fine — nothing visually overflows the top corners. */
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 8px;
+  min-height: 64px;
+}
+
+.headerBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.headerBtn:active {
+  opacity: 0.75;
+}
+
+.logoBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.logoImage {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+.logoSub {
+  font-family: 'Gilroy', sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Search — sticky, pins to top of viewport ──────────── */
+.searchWrap {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  padding: 6px 16px 4px;
+  display: flex;
+  align-items: center;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 12px 16px;
+  padding-right: 100px; /* space for city badge */
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-3xl);
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.cityBadgeInside {
+  position: absolute;
+  right: 28px; /* 16px padding + 12px offset */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-family: 'Gilroy', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  z-index: 2;
+}
+
+.cityBadgeInside:active {
+  background: var(--color-surface);
+}
+
+.searchBox:active {
+  background: var(--color-surface);
+}
+
+.searchIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.searchPlaceholder {
+  font-family: 'Gilroy', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.searchPlaceholderStatic {
+  flex-shrink: 0;
+}
+
+.searchPlaceholderTyped {
+  position: relative;
+  display: inline-block;
+  min-width: 120px;
+}
+
+.typingCursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: var(--color-accent);
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* ── Category chips — separate block, scrolls normally ─── */
+.catRow {
+  display: flex;
+  gap: 12px;
+  padding: 8px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.catRow::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Content sections ───────────────────────────────────── */
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px; /* more gap between sections */
+  padding-top: 20px; /* increased from 10px — more air after categories */
+  padding-bottom: 120px; /* space for floating pill nav */
+}
+
+.sectionInner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Visited carousel (horizontal cards) ────────────────── */
+.visitedCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.emptySection {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ── Skeleton ───────────────────────────────────────────── */
+.skeleton {
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+  margin: 0 16px;
+}

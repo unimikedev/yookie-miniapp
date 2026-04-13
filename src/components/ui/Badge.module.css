@@ -1,0 +1,62 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.success {
+  background-color: rgba(52, 199, 89, 0.15);
+  color: #34c759;
+}
+
+.warning {
+  background-color: rgba(255, 149, 0, 0.15);
+  color: #ff9500;
+}
+
+.error {
+  background-color: rgba(255, 59, 48, 0.15);
+  color: #ff3b30;
+}
+
+.info {
+  background-color: rgba(0, 122, 255, 0.15);
+  color: #007aff;
+}
+
+.neutral {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .success {
+  background-color: rgba(52, 199, 89, 0.15);
+  color: #34c759;
+}
+
+[data-theme='dark'] .warning {
+  background-color: rgba(255, 149, 0, 0.15);
+  color: #ff9500;
+}
+
+[data-theme='dark'] .error {
+  background-color: rgba(255, 59, 48, 0.15);
+  color: #ff3b30;
+}
+
+[data-theme='dark'] .info {
+  background-color: rgba(0, 122, 255, 0.15);
+  color: #007aff;
+}
+
+[data-theme='dark'] .neutral {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+}

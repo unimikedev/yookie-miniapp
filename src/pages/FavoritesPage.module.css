@@ -1,0 +1,223 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: calc(var(--nav-height) + 16px);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border-mid);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+}
+
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.025em;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px 16px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sectionCount {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.studioCard {
+  border-radius: var(--radius-3xl);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.studioImageWrap {
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+}
+
+.studioImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.studioImageFallback {
+  width: 100%;
+  height: 100%;
+  background: var(--color-surface-elevated);
+}
+
+.heartBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-bg);
+  border-radius: var(--radius-full);
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.15);
+}
+
+.studioBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.studioNameRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.studioName {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ratingNum {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.reviewCount {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.categoryBadge {
+  padding: 4px 8px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-xl);
+}
+
+.categoryBadge span {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.description {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  padding-bottom: 4px;
+}
+
+.ctaBtn {
+  padding: 14px 0;
+  background: var(--color-accent);
+  border-radius: var(--radius-3xl);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-bg);
+  text-align: center;
+  width: 100%;
+  transition: opacity 0.15s;
+}
+
+.ctaBtn:active {
+  opacity: 0.8;
+}
+
+.skeletonCard {
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+}
+
+.skeletonPlaceholder {
+  width: 100%;
+  height: 300px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-3xl);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px;
+  text-align: center;
+  gap: 8px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.emptySub {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}

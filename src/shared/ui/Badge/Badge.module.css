@@ -1,0 +1,17 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.variant-neutral { background-color: var(--color-default); color: var(--color-default-foreground); }
+.variant-success { background-color: var(--color-success-soft); color: var(--color-success-soft-foreground); }
+.variant-warning { background-color: var(--color-warning-soft); color: var(--color-warning-soft-foreground); }
+.variant-error   { background-color: var(--color-danger-soft);  color: var(--color-danger-soft-foreground); }
+.variant-info    { background-color: var(--color-accent-soft);  color: var(--color-accent-soft-foreground); }

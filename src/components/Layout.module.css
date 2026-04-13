@@ -1,0 +1,24 @@
+/*
+ * Layout — no internal scroll container.
+ * The html/body is the single scroll container for the whole app
+ * (see index.css). Do NOT set overflow on .layout or .main, otherwise
+ * `position: sticky` inside pages will bind to .main (which never
+ * actually scrolls) instead of the viewport.
+ */
+.layout {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.main {
+  flex: 1;
+  padding-top: var(--safe-area-top);
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.main.withNav {
+  padding-bottom: calc(60px + var(--safe-area-bottom));
+}

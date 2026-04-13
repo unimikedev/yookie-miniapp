@@ -1,0 +1,177 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: calc(var(--nav-height) + 16px);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border-mid);
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.025em;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 16px;
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.servicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.serviceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+}
+
+.serviceNumber {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.serviceInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.serviceName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.serviceMeta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.masterSelect {
+  padding: 8px 12px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Gilroy', sans-serif;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  flex-shrink: 0;
+  max-width: 120px;
+}
+
+.masterSelectFilled {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Summary */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.summaryRow span:first-child {
+  color: var(--color-text-secondary);
+}
+
+.summaryRow span:last-child {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.totalPrice {
+  color: var(--color-accent) !important;
+  font-weight: 700 !important;
+}
+
+/* Continue button */
+.continueBtn {
+  padding: 16px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-bg);
+  transition: opacity 0.15s;
+}
+
+.continueBtn:active:not(.continueBtnDisabled) {
+  opacity: 0.85;
+}
+
+.continueBtnDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Skeleton */
+.skeletonCard {
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+}
