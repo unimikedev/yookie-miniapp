@@ -94,26 +94,27 @@ export default function BookingFlowPage() {
         ?? `${bookingStore.selectedDate}T${bookingStore.selectedSlot.start}:00`
 
       // Multi-service booking: create separate booking for each service
+      // All services start at the same time (different masters work in parallel)
       if (bookingStore.selectedServices.length > 0) {
-        let currentTime = new Date(startsAt);
+        const results = await Promise.allSettled(
+          bookingStore.selectedServices.map((svc) =>
+            createBooking({
+              businessId: bookingStore.selectedBusiness.id,
+              masterId: svc.masterId!,
+              serviceId: svc.service.id,
+              startsAt,
+              clientPhone: effectivePhone,
+              clientName,
+              notes: notes || undefined,
+            })
+          )
+        );
 
-        // Create bookings sequentially so each service starts after the previous ends
-        for (const svc of bookingStore.selectedServices) {
-          const serviceStart = new Date(currentTime);
-          const serviceEnd = new Date(currentTime.getTime() + svc.service.duration_min * 60 * 1000);
-
-          await createBooking({
-            businessId: bookingStore.selectedBusiness.id,
-            masterId: svc.masterId!,
-            serviceId: svc.service.id,
-            startsAt: serviceStart.toISOString(),
-            clientPhone: effectivePhone,
-            clientName,
-            notes: notes || undefined,
-          });
-
-          // Next service starts when this one ends
-          currentTime = serviceEnd;
+        // Check for failures
+        const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+        if (failures.length > 0) {
+          const err = failures[0].reason;
+          throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей');
         }
       } else {
         // Legacy single service booking
