@@ -41,6 +41,22 @@ import type {
 } from '../lib/api/home';
 import { getMockBusinessImage, getMockMasterImage } from '../lib/utils/mockImages';
 
+/** Real master data embedded in API response */
+interface ApiMaster {
+  id: string;
+  name: string;
+  specialization: string | null;
+  rating: number;
+  photo_url: string | null;
+  is_active: boolean;
+}
+
+interface ApiBusiness extends Business {
+  masters?: ApiMaster[];
+  min_price?: number;
+  distance_km?: number | null;
+}
+
 interface UseHomeDataResult {
   data: HomePageData | null;
   isLoading: boolean;
@@ -85,18 +101,23 @@ function toVisited(b: Business): VisitedMasterCard {
     year: 'numeric',
   });
 
+  // Use real master from API if available
+  const apiMasters = (b as ApiBusiness).masters ?? [];
+  const activeMasters = apiMasters.filter((m: ApiMaster) => m.is_active);
+  const master = activeMasters[0] ?? null;
+
   return {
     id: `visited-${b.id}`,
-    masterName: firstMasterName(b),
+    masterName: master?.name ?? firstMasterName(b),
     businessName: b.name,
-    specialization: CATEGORY_LABELS[b.category],
+    specialization: master?.specialization ?? CATEGORY_LABELS[b.category] ?? '',
     distanceMeters: seedDistance(b.id),
     priceFrom: seedPrice(b.id),
-    rating: b.rating ?? seedRating(b.id),
-    photoUrl: getMockMasterImage(b.id),
+    rating: master?.rating ?? b.rating ?? seedRating(b.id),
+    photoUrl: master?.photo_url ?? getMockMasterImage(b.id),
     hasSlotsToday: (hashInt(b.id) & 1) === 0,
     businessId: b.id,
-    masterId: pickMasterId(b.id, 0),
+    masterId: master?.id ?? pickMasterId(b.id, 0),
     lastVisitDate: formattedDate,
   };
 }
@@ -117,16 +138,22 @@ function toNearby(b: Business): NearbyBusinessCard {
 
 function toPopularMaster(b: Business, idx: number): PopularMasterCard {
   const seed = b.id + '-pm-' + idx;
+
+  // Use real master from API if available
+  const apiMasters = (b as ApiBusiness).masters ?? [];
+  const activeMasters = apiMasters.filter((m: ApiMaster) => m.is_active);
+  const master = activeMasters[idx % Math.max(1, activeMasters.length)] ?? null;
+
   return {
     id: `pm-${b.id}-${idx}`,
-    name: nthMasterName(idx),
-    specialization: masterSpecialization(b.category),
+    name: master?.name ?? nthMasterName(idx),
+    specialization: master?.specialization ?? masterSpecialization(b.category),
     distanceMeters: seedDistance(seed),
     priceFrom: seedPrice(seed),
-    rating: seedRating(seed),
-    photoUrl: getMockMasterImage(seed),
+    rating: master?.rating ?? seedRating(seed),
+    photoUrl: master?.photo_url ?? getMockMasterImage(seed),
     businessId: b.id,
-    masterId: pickMasterId(b.id, idx),
+    masterId: master?.id ?? pickMasterId(b.id, idx),
   };
 }
 

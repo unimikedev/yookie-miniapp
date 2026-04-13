@@ -95,18 +95,26 @@ export default function BookingFlowPage() {
 
       // Multi-service booking: create separate booking for each service
       if (bookingStore.selectedServices.length > 0) {
-        // For now, create one booking with the first service/master
-        // In a full implementation, we'd create separate bookings
-        const firstService = bookingStore.selectedServices[0]
-        await createBooking({
-          businessId: bookingStore.selectedBusiness.id,
-          masterId: firstService.masterId!,
-          serviceId: firstService.service.id,
-          startsAt,
-          clientPhone: effectivePhone,
-          clientName,
-          notes: notes || undefined,
-        })
+        let currentTime = new Date(startsAt);
+
+        // Create bookings sequentially so each service starts after the previous ends
+        for (const svc of bookingStore.selectedServices) {
+          const serviceStart = new Date(currentTime);
+          const serviceEnd = new Date(currentTime.getTime() + svc.service.duration_min * 60 * 1000);
+
+          await createBooking({
+            businessId: bookingStore.selectedBusiness.id,
+            masterId: svc.masterId!,
+            serviceId: svc.service.id,
+            startsAt: serviceStart.toISOString(),
+            clientPhone: effectivePhone,
+            clientName,
+            notes: notes || undefined,
+          });
+
+          // Next service starts when this one ends
+          currentTime = serviceEnd;
+        }
       } else {
         // Legacy single service booking
         if (!bookingStore.selectedService || !bookingStore.selectedMaster) {
@@ -142,12 +150,19 @@ export default function BookingFlowPage() {
   }
 
   if (successState) {
+    const multiCount = bookingStore.selectedServices?.length ?? 1;
     return (
       <div className={styles.container}>
         <div className={styles.successContainer}>
           <div className={styles.successCheckmark}>✓</div>
-          <h2 className={styles.successTitle}>Запись подтверждена!</h2>
-          <p className={styles.successMessage}>Вы можете просмотреть детали в разделе "Мои записи"</p>
+          <h2 className={styles.successTitle}>
+            {multiCount > 1 ? `${multiCount} записи созданы!` : 'Запись подтверждена!'}
+          </h2>
+          <p className={styles.successMessage}>
+            {multiCount > 1
+              ? `Создано ${multiCount} отдельных записей для каждой услуги. Вы можете просмотреть их в разделе «Мои записи»`
+              : 'Вы можете просмотреть детали в разделе «Мои записи»'}
+          </p>
           <p className={styles.successSubtext}>Перенаправление...</p>
         </div>
       </div>
