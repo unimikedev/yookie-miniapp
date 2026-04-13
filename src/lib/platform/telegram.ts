@@ -134,17 +134,8 @@ export class TelegramPlatform implements PlatformProvider {
     const user = this.mapUser(this.webApp.initDataUnsafe.user)
     const colorScheme = this.mapColorScheme(this.webApp.themeParams)
 
-    // Expand to fill available space (prevents bottom bar overlap)
-    this.webApp.expand()
-
-    // Enable closing confirmation to prevent accidental exits
-    this.webApp.enableClosingConfirmation()
-
     // Apply Telegram theme colors as CSS custom properties
     this.applyThemeColors()
-
-    // Set safe-area insets from Telegram contentSafeAreaInset
-    this.applySafeAreaInsets()
 
     // Set data-theme on html for CSS targeting
     document.documentElement.setAttribute('data-theme', this.webApp.colorScheme)
@@ -152,6 +143,19 @@ export class TelegramPlatform implements PlatformProvider {
     // Set CSS custom properties for viewport
     document.documentElement.style.setProperty('--viewport-height', `${this.webApp.viewportHeight}px`)
     document.documentElement.style.setProperty('--viewport-stable-height', `${this.webApp.viewportStableHeight}px`)
+
+    // IMPORTANT: expand() and enableClosingConfirmation() MUST be called before ready()
+    // Telegram WebApp requires these before marking as ready
+    try {
+      this.webApp.expand()
+    } catch (e) {
+      console.warn('[TelegramPlatform] expand() failed:', e)
+    }
+    try {
+      this.webApp.enableClosingConfirmation()
+    } catch (e) {
+      console.warn('[TelegramPlatform] enableClosingConfirmation() failed:', e)
+    }
 
     this.setupThemeListener()
     this.setupViewportListener()
@@ -169,7 +173,7 @@ export class TelegramPlatform implements PlatformProvider {
 
   private applyThemeColors(): void {
     const tp = this.webApp.themeParams
-    const map = {
+    const map: Record<string, string | undefined> = {
       '--tg-theme-bg-color': tp.bg_color,
       '--tg-theme-text-color': tp.text_color,
       '--tg-theme-hint-color': tp.hint_text_color,
@@ -183,20 +187,6 @@ export class TelegramPlatform implements PlatformProvider {
         document.documentElement.style.setProperty(prop, value)
       }
     }
-  }
-
-  private applySafeAreaInsets(): void {
-    // Telegram WebApp provides contentSafeAreaInset via CSS env() variables
-    // We bridge them to our --safe-area-* custom properties
-    const safeAreaTop = 'env(safe-area-inset-top, 0px)'
-    const safeAreaBottom = 'env(safe-area-inset-bottom, 0px)'
-    const safeAreaLeft = 'env(safe-area-inset-left, 0px)'
-    const safeAreaRight = 'env(safe-area-inset-right, 0px)'
-
-    document.documentElement.style.setProperty('--safe-area-top', safeAreaTop)
-    document.documentElement.style.setProperty('--safe-area-bottom', safeAreaBottom)
-    document.documentElement.style.setProperty('--safe-area-left', safeAreaLeft)
-    document.documentElement.style.setProperty('--safe-area-right', safeAreaRight)
   }
 
   private setupViewportListener(): void {

@@ -20,5 +20,6 @@
 }
 
 .main.withNav {
-  padding-bottom: calc(60px + var(--safe-area-bottom));
+  /* BottomNav is 72px + 12px gap = 84px above safe area */
+  padding-bottom: calc(84px + var(--safe-area-bottom));
 }

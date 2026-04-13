@@ -5,10 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="theme-color" content="#ffffff" />
-    <title>Yookie - Бронирование</title>
+    <meta name="theme-color" content="#1a1d22" />
+    <title>Yookie</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://api-maps.yandex.ru/2.1/?apikey=d33a5f54-e298-4863-8dfc-c7ef9e0b25fe&lang=ru_RU" type="text/javascript"></script>
+    <style>
+      /* Inline critical CSS to prevent FOUC and set proper safe areas immediately */
+      :root {
+        /* Device safe area (iPhone notch, home indicator) */
+        --device-safe-bottom: env(safe-area-inset-bottom, 0px);
+        --device-safe-top: env(safe-area-inset-top, 0px);
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100%;
+        background: #0F1115;
+        color: #FFF;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #root {
+        min-height: 100%;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

@@ -23,8 +23,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  /* Use stable viewport height to avoid bottom bar overlap */
-  max-height: calc(100dvh - env(safe-area-inset-bottom, 0px));
+  /* Account for Telegram bottom bar + device home indicator */
+  max-height: calc(100dvh - var(--safe-area-bottom, 0px));
   background-color: var(--bg-primary);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: var(--shadow-lg);
@@ -104,7 +104,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(20px + var(--safe-area-bottom, 0px));
 }
 
 .content::-webkit-scrollbar {

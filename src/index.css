@@ -25,14 +25,32 @@ body, #root {
 }
 
 /*
- * Safe-area padding — works both in Telegram (via env() from viewport-fit=cover)
- * and in regular browsers (resolves to 0).
+ * Safe-area padding — combines device safe areas (iPhone notch/home indicator)
+ * with Telegram content safe areas (Telegram's own UI overlays like header
+ * and bottom bar).
+ *
+ * Telegram sets --tg-content-safe-area-inset-* CSS vars automatically.
+ * Device safe areas come from env(safe-area-inset-*) via viewport-fit=cover.
  */
 :root {
-  --safe-area-top: env(safe-area-inset-top, 0px);
-  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-area-left: env(safe-area-inset-left, 0px);
-  --safe-area-right: env(safe-area-inset-right, 0px);
+  /* Bottom: device home indicator + Telegram bottom bar */
+  --safe-area-bottom: calc(
+    env(safe-area-inset-bottom, 0px) +
+    var(--tg-content-safe-area-inset-bottom, 0px)
+  );
+  /* Top: device notch + Telegram header */
+  --safe-area-top: calc(
+    env(safe-area-inset-top, 0px) +
+    var(--tg-content-safe-area-inset-top, 0px)
+  );
+  --safe-area-left: calc(
+    env(safe-area-inset-left, 0px) +
+    var(--tg-content-safe-area-inset-left, 0px)
+  );
+  --safe-area-right: calc(
+    env(safe-area-inset-right, 0px) +
+    var(--tg-content-safe-area-inset-right, 0px)
+  );
 }
 
 /* Bridge for old CSS vars */
