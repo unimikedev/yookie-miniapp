@@ -38,7 +38,7 @@
 
 .pageHeaderTitle {
   flex: 1;
-  font-size: 16px;
+  font: var(--text-body-lg);
   font-weight: 600;
   color: var(--color-text);
   text-align: center;
@@ -116,8 +116,7 @@
 
 .coverTitle {
   flex: 1;
-  font-size: 16px;
-  font-weight: 700;
+  font: var(--text-h3);
   color: #F9FAFB;
   text-align: center;
   margin: 0 8px;
@@ -167,16 +166,13 @@
 }
 
 .infoTitle {
-  font-size: 22px;
-  font-weight: 800;
+  font: var(--text-h1);
   color: var(--color-text);
-  line-height: 1.2;
   margin: 0 0 4px;
 }
 
 .infoCategory {
-  font-size: 13px;
-  font-weight: 500;
+  font: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
 
@@ -189,7 +185,7 @@
 }
 
 .infoRatingValue {
-  font-size: 16px;
+  font: var(--text-body-lg);
   font-weight: 700;
   color: var(--color-text);
   display: inline-flex;
@@ -198,7 +194,7 @@
 }
 
 .infoRatingCount {
-  font-size: 11px;
+  font: var(--text-caption-xs);
   color: var(--color-text-secondary);
 }
 
@@ -207,7 +203,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 10px;
-  font-size: 14px;
+  font: var(--text-body);
   color: var(--color-text-secondary);
 }
 
@@ -242,15 +238,13 @@
 }
 
 .sectionTitle {
-  font-size: 18px;
-  font-weight: 700;
+  font: var(--text-h3);
   color: var(--color-text);
   margin: 0;
 }
 
 .seeAllBtn {
-  font-size: 14px;
-  font-weight: 500;
+  font: var(--text-body);
   color: var(--color-accent);
   background: none;
   border: none;
@@ -271,7 +265,8 @@
 
 /* ── About text ──────────────────────────────────────────── */
 .aboutText {
-  font-size: 15px;
+  font: var(--text-body-sm);
+  font-weight: 500;
   line-height: 1.6;
   color: var(--color-text-secondary);
   margin: 0 0 16px;
@@ -332,15 +327,13 @@
 }
 
 .dateChipDay {
-  font-size: 11px;
-  font-weight: 500;
+  font: var(--text-caption-xs);
   color: var(--color-text-secondary);
   text-transform: uppercase;
 }
 
 .dateChipNum {
-  font-size: 18px;
-  font-weight: 700;
+  font: var(--text-h3);
   color: var(--color-text);
 }
 
@@ -366,8 +359,7 @@
   padding: 0 16px;
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 14px;
-  font-weight: 600;
+  font: var(--text-button-sm);
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -431,8 +423,7 @@
   height: 44px;
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 14px;
-  font-weight: 600;
+  font: var(--text-button-sm);
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -462,8 +453,7 @@
 }
 
 .confirmationTitle {
-  font-size: 18px;
-  font-weight: 700;
+  font: var(--text-h3);
   color: var(--color-text);
   margin: 0;
 }
@@ -478,22 +468,21 @@
 }
 
 .confirmationBusiness {
-  font-size: 15px;
-  font-weight: 700;
+  font: var(--text-title);
   color: var(--color-text);
 }
 
 .confirmationService {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font: var(--text-body-sm);
   color: var(--color-text-secondary);
 }
 
 .confirmationDetail {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font: var(--text-body-sm);
   color: var(--color-text-muted);
 }
 
@@ -505,8 +494,7 @@
 .confirmationTotal {
   display: flex;
   justify-content: space-between;
-  font-size: 15px;
-  font-weight: 700;
+  font: var(--text-title);
   color: var(--color-text);
   padding-top: 8px;
   border-top: 1px solid var(--color-border);
@@ -530,7 +518,8 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
   color: var(--color-text);
-  font-size: 15px;
+  font: var(--text-title);
+  font-weight: 400;
   font-family: 'Gilroy', sans-serif;
   outline: none;
   transition: border-color 0.15s;
@@ -548,7 +537,7 @@
   padding: 12px;
   background: rgba(248, 113, 113, 0.1);
   border-radius: var(--radius-2xl);
-  font-size: 13px;
+  font: var(--text-body-sm);
   color: #F87171;
   text-align: center;
 }
@@ -570,14 +559,13 @@
 }
 
 .errorTitle {
-  font-size: 20px;
-  font-weight: 700;
+  font: var(--text-h2);
   color: var(--color-text);
   margin: 0 0 8px;
 }
 
 .errorDescription {
-  font-size: 14px;
+  font: var(--text-body);
   color: var(--color-text-secondary);
   line-height: 1.5;
   margin: 0 0 28px;
@@ -594,8 +582,7 @@
   height: 48px;
   background: var(--color-accent);
   color: var(--color-bg);
-  font-size: 15px;
-  font-weight: 700;
+  font: var(--text-title);
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -612,8 +599,7 @@
   height: 48px;
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 15px;
-  font-weight: 600;
+  font: var(--text-button-sm);
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -629,7 +615,7 @@
   padding: 16px;
   background: var(--color-accent);
   border-radius: var(--radius-full);
-  font-size: 16px;
+  font: var(--text-body-lg);
   font-weight: 700;
   color: var(--color-bg);
   transition: opacity 0.15s;

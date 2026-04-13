@@ -51,10 +51,11 @@
 }
 
 .name {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
   color: var(--color-text);
-  line-height: 1.4;
+  line-height: var(--text-body-lg-lh);
+  letter-spacing: var(--text-body-lg-ls);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -65,22 +66,24 @@
   align-items: center;
   gap: 3px;
   flex-shrink: 0;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
 }
 
 .category {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
-  line-height: 1.4;
+  line-height: var(--text-caption-lh);
+  letter-spacing: var(--text-caption-ls);
 }
 
 .address {
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   color: var(--color-text-muted);
-  line-height: 1.4;
+  line-height: var(--text-caption-lh);
+  letter-spacing: var(--text-caption-ls);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

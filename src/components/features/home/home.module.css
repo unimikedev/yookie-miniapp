@@ -13,11 +13,11 @@
 }
 
 .sectionTitle {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 24px;
+  font-size: var(--text-h2-size);
+  font-weight: var(--text-h2-weight);
+  line-height: var(--text-h2-lh);
+  letter-spacing: var(--text-h2-ls);
   color: var(--color-text);
-  letter-spacing: -0.3px;
 }
 
 .sectionMore {
@@ -27,8 +27,8 @@
   padding: 8px 16px;
   background: var(--color-surface);
   border-radius: var(--radius-full);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text);
 }
 
@@ -62,15 +62,14 @@
 }
 
 .catChipIcon {
-  font-size: 22px;
+  font-size: var(--text-h1-size);
   line-height: 1;
 }
 
 .catChipLabel {
-  font-family: 'Gilroy', sans-serif;
-  font-size: 12.5px;
-  font-weight: 500;
-  line-height: 16px;
+  font-size: var(--text-chip-label-size);
+  font-weight: var(--text-chip-label-weight);
+  line-height: var(--text-chip-label-lh);
   color: var(--color-text-secondary);
   text-align: center;
   white-space: nowrap;
@@ -83,7 +82,7 @@
 
 .catChipActive .catChipLabel {
   color: var(--color-text);
-  font-weight: 600;
+  font-weight: var(--text-title-weight);
 }
 
 .catChipBtn[data-active="true"] {
@@ -162,31 +161,31 @@
 }
 
 .visitedName {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
   color: var(--color-text);
-  letter-spacing: -0.2px;
+  letter-spacing: var(--text-title-ls);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: var(--text-title-lh);
 }
 
 .visitedBusinessSpecialization {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: var(--text-caption-lh);
 }
 
 .visitedLastVisit {
-  font-size: 11px;
-  font-weight: 400;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
   color: var(--color-text-muted);
-  line-height: 1.2;
+  line-height: var(--text-caption-xs-lh);
 }
 
 .visitedPriceRow {
@@ -198,8 +197,8 @@
 }
 
 .visitedPrice {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
   white-space: nowrap;
   flex-shrink: 0;
@@ -209,8 +208,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
   color: var(--color-accent);
   white-space: nowrap;
   flex-shrink: 1;
@@ -243,9 +242,9 @@
   background: var(--color-accent);
   color: #10193a;
   border-radius: var(--radius-full);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
+  font-size: var(--text-button-size);
+  font-weight: var(--text-button-weight);
+  letter-spacing: var(--text-button-ls);
   transition: opacity 0.15s;
 }
 
@@ -335,40 +334,40 @@
 
 .nearbyName {
   flex: 1;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
   color: var(--color-text);
-  letter-spacing: -0.2px;
+  letter-spacing: var(--text-title-ls);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: var(--text-title-lh);
 }
 
 .nearbyRating {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
 }
 
 .nearbyMeta {
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: var(--text-caption-lh);
 }
 
 .nearbyPrice {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
   white-space: nowrap;
   flex-shrink: 0;
@@ -438,10 +437,10 @@
 }
 
 .pmName {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--text-title-sm-size);
+  font-weight: var(--text-title-sm-weight);
   color: var(--color-text);
-  letter-spacing: -0.2px;
+  letter-spacing: var(--text-title-sm-ls);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -451,19 +450,19 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
 }
 
 .pmMeta {
-  font-size: 11px;
+  font-size: var(--text-caption-xs-size);
   color: var(--color-text-secondary);
 }
 
 .pmPrice {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
 }
 
@@ -545,8 +544,8 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   font-family: 'Gilroy', sans-serif;
   flex-shrink: 0;
 }
@@ -567,10 +566,10 @@
 }
 
 .psName {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
   color: var(--color-text);
-  letter-spacing: -0.2px;
+  letter-spacing: var(--text-title-ls);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -580,25 +579,25 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
 }
 
 .psReviewCount {
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: var(--text-body-weight);
 }
 
 .psBadge {
   padding: 6px 12px;
   background: var(--color-surface-elevated);
   border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: var(--text-micro-ls);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -639,12 +638,12 @@
 }
 
 .mapCardTitle {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--text-title-sm-size);
+  font-weight: var(--text-title-sm-weight);
 }
 
 .mapCardSub {
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   color: var(--color-text-secondary);
 }
 
@@ -670,8 +669,8 @@
   padding: 0 16px;
   background: var(--color-surface);
   border-radius: var(--radius-full);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text);
   white-space: nowrap;
   flex-shrink: 0;
@@ -687,7 +686,7 @@
   background: var(--color-accent);
   color: var(--color-bg);
   border-color: var(--color-accent);
-  font-weight: 600;
+  font-weight: var(--text-caption-weight);
 }
 
 .filterChipIcon {

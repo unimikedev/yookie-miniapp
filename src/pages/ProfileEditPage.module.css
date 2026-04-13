@@ -34,8 +34,8 @@
 
 .headerTitle {
   font-family: 'Gilroy', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
   color: var(--color-text);
   margin: 0;
 }
@@ -61,8 +61,8 @@
 
 .fieldLabel {
   font-family: 'Gilroy', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -73,8 +73,8 @@
   border: none;
   outline: none;
   font-family: 'Gilroy', sans-serif;
-  font-size: 17px;
-  font-weight: 600;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
   color: var(--color-text);
   padding: 0;
   width: 100%;
@@ -97,8 +97,8 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   font-family: 'Gilroy', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -122,8 +122,8 @@
   border: none;
   border-radius: var(--radius-full);
   font-family: 'Gilroy', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
   cursor: pointer;
   transition: opacity 0.15s;
 }

@@ -45,15 +45,15 @@
   background: var(--accent);
   border-color: var(--accent);
   color: white;
-  font-weight: 600;
+  font-weight: var(--text-caption-weight);
 }
 
 .dayOfWeek {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
   color: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--text-micro-ls);
 }
 
 .day.selected .dayOfWeek {
@@ -61,10 +61,10 @@
 }
 
 .dayNumber {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
   color: var(--text-primary);
-  line-height: 1;
+  line-height: var(--text-body-lg-lh);
 }
 
 .day.selected .dayNumber {
@@ -72,8 +72,8 @@
 }
 
 .month {
-  font-size: 9px;
-  font-weight: 500;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
   color: var(--text-secondary);
   text-transform: uppercase;
 }
@@ -84,11 +84,11 @@
 }
 
 .today {
-  font-size: 9px;
-  font-weight: 600;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
   color: var(--accent);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--text-micro-ls);
 }
 
 .day.selected .today {

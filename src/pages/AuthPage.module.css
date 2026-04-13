@@ -61,7 +61,7 @@
 }
 
 .title {
-  font-size: 26px;
+  font-size: var(--text-h1-size);
   font-weight: 800;
   color: var(--color-text);
   letter-spacing: -0.5px;
@@ -69,7 +69,7 @@
 }
 
 .subtitle {
-  font-size: 15px;
+  font-size: var(--text-title-size);
   color: var(--color-text-muted);
   line-height: 1.5;
   margin-bottom: 32px;
@@ -102,11 +102,11 @@
 }
 
 .flag {
-  font-size: 18px;
+  font-size: var(--text-h3-size);
 }
 
 .code {
-  font-size: 15px;
+  font-size: var(--text-title-size);
   font-weight: 700;
   color: var(--color-text);
 }
@@ -114,7 +114,7 @@
 .phoneInput {
   flex: 1;
   padding: 15px 14px;
-  font-size: 17px;
+  font-size: var(--text-h3-size);
   font-weight: 600;
   color: var(--color-text);
   background: transparent;
@@ -131,7 +131,7 @@
 /* ─── Error ──────────────────────────────────────────────────────────────── */
 
 .errorText {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-error);
   margin-bottom: 12px;
   text-align: center;
@@ -145,7 +145,7 @@
   background: var(--color-accent);
   color: #111;
   border-radius: var(--radius-full);
-  font-size: 17px;
+  font-size: var(--text-h3-size);
   font-weight: 700;
   transition: opacity 0.15s, transform 0.15s;
   margin-top: 8px;
@@ -163,7 +163,7 @@
 /* ─── Agreement ──────────────────────────────────────────────────────────── */
 
 .agreement {
-  font-size: 12px;
+  font-size: var(--text-caption-size);
   color: var(--color-text-muted);
   text-align: center;
   margin-top: 16px;
@@ -191,7 +191,7 @@
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   text-align: center;
-  font-size: 28px;
+  font-size: var(--text-h1-size);
   font-weight: 800;
   color: var(--color-text);
   caret-color: var(--color-accent);
@@ -216,12 +216,12 @@
 }
 
 .resendTimer {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-muted);
 }
 
 .resendBtn {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   font-weight: 700;
   color: var(--color-accent);
   transition: opacity 0.15s;
@@ -244,7 +244,7 @@
   height: 56px;
   border-radius: var(--radius-xl);
   background: var(--color-surface);
-  font-size: 22px;
+  font-size: var(--text-h1-size);
   font-weight: 600;
   color: var(--color-text);
   display: flex;

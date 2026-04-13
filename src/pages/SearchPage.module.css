@@ -43,7 +43,7 @@
   border: none;
   outline: none;
   font-family: inherit;
-  font-size: 16px;
+  font-size: var(--text-body-lg-size);
   color: var(--color-text);
   caret-color: var(--color-accent);
 }
@@ -81,8 +81,8 @@
   background: var(--color-bg);
   border: 1px solid var(--color-border-mid);
   border-radius: var(--radius-full);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text);
   white-space: nowrap;
   flex-shrink: 0;
@@ -107,16 +107,16 @@
 }
 
 .metaCount {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-muted);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--text-micro-ls);
   text-transform: uppercase;
 }
 
 .metaQuery {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text);
   margin-top: 2px;
 }
@@ -125,8 +125,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-accent);
 }
 
@@ -145,8 +145,8 @@
 
 /* ── Search section titles ───────────────────────────── */
 .searchSectionTitle {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
   color: var(--color-text);
   padding: 16px 0 8px;
 }
@@ -193,8 +193,8 @@
 }
 
 .masterSearchName {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-button-sm-weight);
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
@@ -202,7 +202,7 @@
 }
 
 .masterSearchSpec {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -236,8 +236,8 @@
 }
 
 .serviceSearchName {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-button-sm-weight);
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
@@ -245,7 +245,7 @@
 }
 
 .serviceSearchBiz {
-  font-size: 13px;
+  font-size: var(--text-body-sm-size);
   color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;

@@ -60,15 +60,15 @@
 }
 
 .label {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 14px;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
+  line-height: var(--text-caption-xs-lh);
   color: var(--color-text-muted);
   white-space: nowrap;
-  letter-spacing: -0.1px;
+  letter-spacing: var(--text-caption-xs-ls);
 }
 
 .labelActive {
   color: var(--color-accent);
-  font-weight: 600;
+  font-weight: var(--text-caption-weight);
 }

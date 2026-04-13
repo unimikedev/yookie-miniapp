@@ -33,14 +33,14 @@
 }
 
 .currentLabel {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
 }
 
 .currentValue {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
   color: var(--color-text);
 }
 
@@ -52,8 +52,8 @@
 }
 
 .sectionTitle {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
   color: var(--color-text);
   margin: 0;
 }
@@ -93,15 +93,15 @@
 }
 
 .dateChipDay {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
   color: var(--color-text-secondary);
   text-transform: uppercase;
 }
 
 .dateChipNum {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
   color: var(--color-text);
 }
 
@@ -126,8 +126,8 @@
   padding: 0 16px;
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -174,7 +174,8 @@
 }
 
 .emptyText {
-  font-size: 14px;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
   margin: 0;
   padding: 12px 0;
@@ -186,13 +187,13 @@
   height: 52px;
   background: var(--color-accent);
   color: var(--color-bg);
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
   border: none;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: opacity 0.15s;
-  font-family: 'Gilroy', sans-serif;
+  font-family: var(--font-family);
 }
 
 .confirmBtn:active:not(:disabled) {

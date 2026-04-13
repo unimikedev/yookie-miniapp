@@ -71,9 +71,9 @@
 
 .searchPlaceholder {
   font-family: var(--font-family);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
+  line-height: var(--text-body-lg-lh);
   color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -115,9 +115,9 @@
 
 .filterPillLabel {
   font-family: var(--font-family);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-lh);
   color: var(--color-text);
   text-align: center;
   white-space: nowrap;
@@ -239,9 +239,9 @@
 
 .mapCardTitle {
   font-family: var(--font-family);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 28px;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-lh);
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
@@ -265,9 +265,9 @@
 
 .mapCardRatingText {
   font-family: var(--font-family);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 18px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-caption-lh);
   color: var(--color-text);
   white-space: nowrap;
 }
@@ -280,9 +280,9 @@
 
 .mapCardSubtitle {
   font-family: var(--font-family);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 16px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-caption-lh);
   color: var(--color-text-secondary);
 }
 
@@ -301,9 +301,9 @@
 
 .mapCardPriceText {
   font-family: var(--font-family);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 20px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-body-lh);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
@@ -331,9 +331,9 @@
 }
 
 .priceBubbleText {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 16px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-caption-lh);
   color: var(--color-text);
 }
 

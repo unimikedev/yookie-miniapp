@@ -10,23 +10,23 @@
 }
 
 .icon {
-  font-size: 4rem;
+  font-size: var(--text-display-size);
   margin-bottom: 1.25rem;
   display: block;
-  line-height: 1;
+  line-height: var(--text-display-lh);
 }
 
 .title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: var(--text-h2-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-foreground);
   margin: 0 0 0.5rem;
 }
 
 .description {
-  font-size: 1rem;
+  font-size: var(--text-body-lg-size);
   color: var(--color-muted);
-  line-height: 1.5;
+  line-height: var(--text-body-lh);
   margin: 0 0 1.5rem;
   max-width: 18.75rem;
 }

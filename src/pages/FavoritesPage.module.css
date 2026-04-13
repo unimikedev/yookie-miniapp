@@ -39,10 +39,10 @@
 }
 
 .headerTitle {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
-  letter-spacing: -0.025em;
+  letter-spacing: var(--text-h2-ls);
 }
 
 .content {
@@ -65,14 +65,14 @@
 }
 
 .sectionTitle {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--text-h1-size);
+  font-weight: var(--text-h1-weight);
   color: var(--color-text);
 }
 
 .sectionCount {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
 }
 
@@ -129,8 +129,8 @@
 }
 
 .studioName {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
   color: var(--color-text);
 }
 
@@ -142,14 +142,14 @@
 }
 
 .ratingNum {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
 }
 
 .reviewCount {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
 }
 
@@ -160,16 +160,16 @@
 }
 
 .categoryBadge span {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: var(--text-micro-size);
+  font-weight: var(--text-micro-weight);
   color: var(--color-text-secondary);
 }
 
 .description {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
-  line-height: 1.5;
+  line-height: var(--text-body-lh);
   padding-bottom: 4px;
 }
 
@@ -177,8 +177,8 @@
   padding: 14px 0;
   background: var(--color-accent);
   border-radius: var(--radius-3xl);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
   color: var(--color-bg);
   text-align: center;
   width: 100%;
@@ -211,13 +211,13 @@
 }
 
 .emptyTitle {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
   color: var(--color-text);
 }
 
 .emptySub {
-  font-size: 14px;
+  font-size: var(--text-body-size);
   color: var(--color-text-muted);
   margin-bottom: 16px;
 }
