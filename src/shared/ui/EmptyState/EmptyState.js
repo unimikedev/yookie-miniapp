@@ -1,4 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import styles from './EmptyState.module.css';
-export const EmptyState = ({ icon = '📭', title, description, action, }) => (_jsxs("div", { className: styles.root, role: "status", "aria-label": title, children: [_jsx("div", { className: styles.icon, "aria-hidden": "true", children: icon }), _jsx("h2", { className: styles.title, children: title }), description && _jsx("p", { className: styles.description, children: description }), action && _jsx("div", { className: styles.action, children: action })] }));
-//# sourceMappingURL=EmptyState.js.map
