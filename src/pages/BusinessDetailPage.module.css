@@ -6,11 +6,13 @@
 .page {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--color-bg);
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  /* Safe area: device + Telegram bottom bar */
+  padding-bottom: calc(80px + var(--safe-area-bottom));
 }
 
 /* ── Page header (fixed, frosted glass) ──────────────────── */
@@ -23,7 +25,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: max(env(safe-area-inset-top), 8px) 16px 8px;
+  padding: max(var(--safe-area-top), 8px) 16px 8px;
   min-height: 56px;
   background: color-mix(in srgb, var(--color-bg) 80%, transparent);
   backdrop-filter: blur(16px);
@@ -31,7 +33,7 @@
 }
 
 .pageHeaderSpacer {
-  height: 56px;
+  height: calc(56px + var(--safe-area-top));
 }
 
 .pageHeaderTitle {

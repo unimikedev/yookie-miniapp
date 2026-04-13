@@ -8,6 +8,7 @@ import ReviewForm from '@/components/features/ReviewForm'
 import RescheduleBottomSheet from '@/components/features/RescheduleBottomSheet'
 import { useAuthStore } from '@/stores/authStore'
 import { useOverlayStore } from '@/stores/overlayStore'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import styles from './MyBookingsPage.module.css'
 
 const CalendarIcon = () => (
@@ -39,6 +40,9 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 
 export default function MyBookingsPage() {
   const navigate = useNavigate()
+  // Telegram native BackButton (replaces inline back arrow)
+  useTelegramBackButton(true)
+
   const [tab, setTab] = useState<'active' | 'completed'>('active')
   const { bookings, isLoading, refetch } = useBookings()
 
@@ -161,11 +165,7 @@ export default function MyBookingsPage() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.83 9L9.43 14.6L8 16L0 8L8 0L9.43 1.4L3.83 7H16V9H3.83Z" fill="#F9FAFB"/></svg>
-        </button>
         <span className={styles.headerTitle}>Мои записи</span>
-        <div style={{ width: 40 }} />
       </header>
 
       <div className={styles.content}>

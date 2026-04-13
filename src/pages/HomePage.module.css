@@ -5,7 +5,11 @@
 .page {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--color-bg);
+  /* Safe area: device + Telegram UI + extra 16px breathing room */
+  padding-top: var(--safe-area-top);
+  padding-bottom: calc(var(--safe-area-bottom) + 16px);
 }
 
 /* ── Green gradient — fixed, lowest z-index ────────────── */
@@ -93,7 +97,7 @@
   top: 0;
   z-index: 10;
   background: var(--color-bg);
-  padding: 6px 16px 4px;
+  padding: calc(6px + var(--safe-area-top)) 16px 4px;
   display: flex;
   align-items: center;
 }

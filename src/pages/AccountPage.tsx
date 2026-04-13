@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { fetchClientStats } from '@/lib/api/clients'
 import styles from './AccountPage.module.css'
 
@@ -57,6 +58,9 @@ export default function AccountPage() {
   const themeStore = useThemeStore()
   const authStore = useAuthStore()
   const user = platform.user
+
+  // Telegram native BackButton (replaces inline back arrow)
+  useTelegramBackButton(true)
 
   const [stats, setStats] = useState<{ joinDays: number; totalBookings: number; loyaltyPoints: number }>({
     joinDays: 0,
