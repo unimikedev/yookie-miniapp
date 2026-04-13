@@ -18,24 +18,12 @@ export default function Layout({ children }: LayoutProps) {
 
   const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
 
+  // Telegram platform already sets --viewport-height, --viewport-stable-height,
+  // and --safe-area-* CSS vars during init. No need for window resize listener.
   useEffect(() => {
     const isDark = platform.theme === 'dark'
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
-
-    document.documentElement.style.setProperty('--viewport-height', `${platform.viewportHeight}px`)
-    document.documentElement.style.setProperty('--viewport-stable-height', `${platform.viewportStableHeight}px`)
-  }, [platform.theme, platform.viewportHeight, platform.viewportStableHeight])
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerHeight !== platform.viewportHeight) {
-        document.documentElement.style.setProperty('--viewport-height', `${window.innerHeight}px`)
-      }
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [platform.viewportHeight])
+  }, [platform.theme])
 
   return (
     <div className={styles.layout}>

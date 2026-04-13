@@ -46,6 +46,33 @@ interface TelegramWebApp {
   bottomBarColor: string
   isIframed: boolean
 
+  // BackButton
+  BackButton: {
+    isVisible: boolean
+    onClick(callback: () => void): void
+    offClick(callback: () => void): void
+    show(): void
+    hide(): void
+  }
+  // MainButton
+  MainButton: {
+    isVisible: boolean
+    text: string
+    color: string
+    textColor: string
+    isActive: boolean
+    isProgressVisible: boolean
+    setText(text: string): void
+    onClick(callback: () => void): void
+    offClick(callback: () => void): void
+    show(): void
+    hide(): void
+    enable(): void
+    disable(): void
+    showProgress(leaveActive?: boolean): void
+    hideProgress(): void
+  }
+
   expand(): void
   close(): void
   enableClosingConfirmation(): void
@@ -107,7 +134,27 @@ export class TelegramPlatform implements PlatformProvider {
     const user = this.mapUser(this.webApp.initDataUnsafe.user)
     const colorScheme = this.mapColorScheme(this.webApp.themeParams)
 
+    // Expand to fill available space (prevents bottom bar overlap)
+    this.webApp.expand()
+
+    // Enable closing confirmation to prevent accidental exits
+    this.webApp.enableClosingConfirmation()
+
+    // Apply Telegram theme colors as CSS custom properties
+    this.applyThemeColors()
+
+    // Set safe-area insets from Telegram contentSafeAreaInset
+    this.applySafeAreaInsets()
+
+    // Set data-theme on html for CSS targeting
+    document.documentElement.setAttribute('data-theme', this.webApp.colorScheme)
+
+    // Set CSS custom properties for viewport
+    document.documentElement.style.setProperty('--viewport-height', `${this.webApp.viewportHeight}px`)
+    document.documentElement.style.setProperty('--viewport-stable-height', `${this.webApp.viewportStableHeight}px`)
+
     this.setupThemeListener()
+    this.setupViewportListener()
 
     return {
       user,
@@ -118,6 +165,45 @@ export class TelegramPlatform implements PlatformProvider {
       viewportStableHeight: this.webApp.viewportStableHeight,
       platform: this.mapPlatform(this.webApp.platform),
     }
+  }
+
+  private applyThemeColors(): void {
+    const tp = this.webApp.themeParams
+    const map = {
+      '--tg-theme-bg-color': tp.bg_color,
+      '--tg-theme-text-color': tp.text_color,
+      '--tg-theme-hint-color': tp.hint_text_color,
+      '--tg-theme-link-color': tp.link_color,
+      '--tg-theme-button-color': tp.button_color,
+      '--tg-theme-button-text-color': tp.button_text_color,
+      '--tg-theme-secondary-bg-color': tp.secondary_bg_color,
+    }
+    for (const [prop, value] of Object.entries(map)) {
+      if (value) {
+        document.documentElement.style.setProperty(prop, value)
+      }
+    }
+  }
+
+  private applySafeAreaInsets(): void {
+    // Telegram WebApp provides contentSafeAreaInset via CSS env() variables
+    // We bridge them to our --safe-area-* custom properties
+    const safeAreaTop = 'env(safe-area-inset-top, 0px)'
+    const safeAreaBottom = 'env(safe-area-inset-bottom, 0px)'
+    const safeAreaLeft = 'env(safe-area-inset-left, 0px)'
+    const safeAreaRight = 'env(safe-area-inset-right, 0px)'
+
+    document.documentElement.style.setProperty('--safe-area-top', safeAreaTop)
+    document.documentElement.style.setProperty('--safe-area-bottom', safeAreaBottom)
+    document.documentElement.style.setProperty('--safe-area-left', safeAreaLeft)
+    document.documentElement.style.setProperty('--safe-area-right', safeAreaRight)
+  }
+
+  private setupViewportListener(): void {
+    this.webApp.onEvent('viewportChanged', () => {
+      document.documentElement.style.setProperty('--viewport-height', `${this.webApp.viewportHeight}px`)
+      document.documentElement.style.setProperty('--viewport-stable-height', `${this.webApp.viewportStableHeight}px`)
+    })
   }
 
   getUser(): PlatformUser | null {
@@ -228,7 +314,54 @@ export class TelegramPlatform implements PlatformProvider {
 
   private setupThemeListener(): void {
     this.webApp.onEvent('themeChanged', () => {
+      // Update CSS variables and data-theme on theme change
+      document.documentElement.setAttribute('data-theme', this.webApp.colorScheme)
+      this.applyThemeColors()
+      // Notify React context
       this.themeChangeCallbacks.forEach((callback) => callback())
     })
+  }
+
+  // ─── Telegram WebApp specific helpers ──────────────────
+
+  /** Show Telegram native BackButton */
+  showBackButton(onClick: () => void): void {
+    this.webApp.BackButton.onClick(onClick)
+    this.webApp.BackButton.show()
+  }
+
+  /** Hide Telegram native BackButton */
+  hideBackButton(): void {
+    this.webApp.BackButton.offClick(() => {})
+    this.webApp.BackButton.hide()
+  }
+
+  /** Set Telegram MainButton text and show it */
+  setMainButton(text: string, onClick: () => void, options?: { isEnabled?: boolean; isProgressVisible?: boolean }): void {
+    this.webApp.MainButton.offClick(() => {})
+    this.webApp.MainButton.setText(text)
+    this.webApp.MainButton.onClick(onClick)
+    if (options?.isEnabled === false) {
+      this.webApp.MainButton.disable()
+    } else {
+      this.webApp.MainButton.enable()
+    }
+    if (options?.isProgressVisible) {
+      this.webApp.MainButton.showProgress()
+    } else {
+      this.webApp.MainButton.hideProgress()
+    }
+    this.webApp.MainButton.show()
+  }
+
+  /** Hide Telegram MAINButton */
+  hideMainButton(): void {
+    this.webApp.MainButton.offClick(() => {})
+    this.webApp.MainButton.hide()
+  }
+
+  /** Get raw WebApp instance (escape hatch) */
+  getWebApp(): TelegramWebApp {
+    return this.webApp
   }
 }

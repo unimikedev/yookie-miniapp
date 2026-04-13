@@ -7,28 +7,32 @@
 }
 
 html {
+  /* Use Telegram viewport height; fallback to 100dvh for web browsers */
   height: 100%;
-  /*
-   * html is the single vertical scroll container for the whole app.
-   * Reserve scrollbar space so content doesn't jump horizontally
-   * when scrollbars appear/disappear.
-   */
+  height: 100dvh;
   scrollbar-gutter: stable;
 }
 
 body, #root {
   min-height: 100%;
+  min-height: 100dvh;
   width: 100%;
-  /*
-   * Block any stray horizontal overflow without making body a
-   * scroll container for y — that would hijack `position: sticky`
-   * and bind sticky elements to body instead of the viewport.
-   */
   overflow-x: clip;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Safe-area padding — works both in Telegram (via env() from viewport-fit=cover)
+ * and in regular browsers (resolves to 0).
+ */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
 }
 
 /* Bridge for old CSS vars */
@@ -49,11 +53,13 @@ button {
   border: none;
   background: none;
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 img {

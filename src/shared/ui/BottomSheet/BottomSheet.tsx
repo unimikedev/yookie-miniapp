@@ -1,4 +1,5 @@
 import React, { ReactNode, useRef, useEffect } from 'react';
+import { useOverlayStore } from '@/stores/overlayStore';
 import styles from './BottomSheet.module.css';
 
 export interface BottomSheetProps {
@@ -19,18 +20,22 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const sheetRef = useRef<HTMLDivElement>(null);
   const startYRef = useRef<number>(0);
   const startTransformRef = useRef<number>(0);
+  const { open: openOverlay, close: closeOverlay } = useOverlayStore();
 
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
+      openOverlay();
     } else {
       document.body.style.overflow = '';
+      closeOverlay();
     }
 
     return () => {
       document.body.style.overflow = '';
+      closeOverlay();
     };
-  }, [open]);
+  }, [open, openOverlay, closeOverlay]);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     const handle = e.currentTarget.closest(`.${styles.handle}`);

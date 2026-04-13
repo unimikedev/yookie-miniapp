@@ -23,6 +23,7 @@ import { useBusiness } from '@/hooks/useBusiness'
 import { useSlots } from '@/hooks/useSlots'
 import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { createBooking } from '@/lib/api/bookings'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
@@ -55,6 +56,10 @@ function formatDate(dateStr: string): string {
 export default function BusinessDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+
+  // Telegram native BackButton
+  useTelegramBackButton(true)
+
   const [activeTab, setActiveTab] = useState(0)
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [reviewsLoading, setReviewsLoading] = useState(false)

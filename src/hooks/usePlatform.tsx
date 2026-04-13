@@ -34,11 +34,17 @@ export function PlatformContextProvider({ children }: PlatformProviderProps) {
         platformInstance.ready()
 
         platformInstance.onThemeChanged(() => {
+          // Read current platform state — Telegram's themeChanged event
+          // provides the new colorScheme via themeParams
           setContext((prev) => {
             if (!prev) return prev
+            // Telegram sends 'light' or 'dark' — we toggle accordingly
+            const newTheme = prev.theme === 'light' ? 'dark' : 'light'
             return {
               ...prev,
-              theme: platformContext.theme === 'light' ? 'dark' : 'light',
+              theme: newTheme,
+              viewportHeight: prev.viewportHeight,
+              viewportStableHeight: prev.viewportStableHeight,
             }
           })
         })

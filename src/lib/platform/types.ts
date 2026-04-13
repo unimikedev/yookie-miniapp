@@ -40,4 +40,10 @@ export interface PlatformProvider {
   onThemeChanged(callback: () => void): void
   getInitData(): string | null
   ready(): void
+  // Telegram-specific
+  showBackButton?(onClick: () => void): void
+  hideBackButton?(): void
+  setMainButton?(text: string, onClick: () => void, options?: { isEnabled?: boolean; isProgressVisible?: boolean }): void
+  hideMainButton?(): void
+  getWebApp?(): unknown
 }
