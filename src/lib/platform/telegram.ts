@@ -144,17 +144,11 @@ export class TelegramPlatform implements PlatformProvider {
     document.documentElement.style.setProperty('--viewport-height', `${this.webApp.viewportHeight}px`)
     document.documentElement.style.setProperty('--viewport-stable-height', `${this.webApp.viewportStableHeight}px`)
 
-    // IMPORTANT: expand() and enableClosingConfirmation() MUST be called before ready()
-    // Telegram WebApp requires these before marking as ready
+    // Expand app first (before ready)
     try {
       this.webApp.expand()
     } catch (e) {
       console.warn('[TelegramPlatform] expand() failed:', e)
-    }
-    try {
-      this.webApp.enableClosingConfirmation()
-    } catch (e) {
-      console.warn('[TelegramPlatform] enableClosingConfirmation() failed:', e)
     }
 
     this.setupThemeListener()
@@ -168,6 +162,17 @@ export class TelegramPlatform implements PlatformProvider {
       viewportHeight: this.webApp.viewportHeight,
       viewportStableHeight: this.webApp.viewportStableHeight,
       platform: this.mapPlatform(this.webApp.platform),
+    }
+  }
+
+  ready(): void {
+    // Call ready() first to signal to Telegram that the app is initialized
+    this.webApp.ready()
+    // Then enable closing confirmation (must be after ready())
+    try {
+      this.webApp.enableClosingConfirmation()
+    } catch (e) {
+      console.warn('[TelegramPlatform] enableClosingConfirmation() failed:', e)
     }
   }
 
