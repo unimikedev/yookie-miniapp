@@ -25,30 +25,24 @@ body, #root {
 }
 
 /*
- * Safe-area padding — combines device safe areas (iPhone notch/home indicator)
- * with Telegram content safe areas (Telegram's own UI overlays like header
+ * Safe-area padding — combines device safe areas (system status bar,
+ * home indicator) with Telegram content safe areas (Telegram's header
  * and bottom bar).
  *
- * Telegram sets --tg-content-safe-area-inset-* CSS vars automatically.
- * Device safe areas come from env(safe-area-inset-*) via viewport-fit=cover.
- *
- * On Android fullscreen, Telegram vars can be too large, so we cap them
- * with a sensible maximum.
+ * --tg-content-safe-area-inset-top    = Telegram header + Android system bar
+ * --tg-content-safe-area-inset-bottom = Telegram bottom bar + home indicator
+ * env(safe-area-inset-*)               = device notch/home indicator
  */
 :root {
-  /* Cap Telegram vars at reasonable maximums to avoid huge gaps on Android fullscreen */
-  --tg-safe-bottom: min(var(--tg-content-safe-area-inset-bottom, 0px), 16px);
-  --tg-safe-top: min(var(--tg-content-safe-area-inset-top, 0px), 12px);
-
-  /* Bottom: device home indicator + Telegram bottom bar (capped) */
+  /* Bottom: device home indicator + Telegram bottom bar */
   --safe-area-bottom: calc(
     env(safe-area-inset-bottom, 0px) +
-    var(--tg-safe-bottom, 0px)
+    var(--tg-content-safe-area-inset-bottom, 0px)
   );
-  /* Top: device notch + Telegram header (capped) */
+  /* Top: Telegram header + system status bar */
   --safe-area-top: calc(
     env(safe-area-inset-top, 0px) +
-    var(--tg-safe-top, 0px)
+    var(--tg-content-safe-area-inset-top, 0px)
   );
   --safe-area-left: calc(
     env(safe-area-inset-left, 0px) +
