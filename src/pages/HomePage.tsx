@@ -238,13 +238,13 @@ export default function HomePage() {
           <div className={styles.searchBox} onClick={() => navigate('/search')} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && navigate('/search')}>
             <span className={styles.searchIcon}><SearchIcon /></span>
             <span className={styles.searchPlaceholder}><TypingPlaceholder /></span>
+            <button className={styles.cityBadgeInside} onClick={(e) => { e.stopPropagation(); setCitySelectorOpen(true); }} aria-label="Смена города">
+              <span>{city.name}</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
-          <button className={styles.cityBadgeInside} onClick={(e) => { e.stopPropagation(); setCitySelectorOpen(true); }} aria-label="Смена города">
-            <span>{city.name}</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
         </div>
 
         {/* Category chips */}
