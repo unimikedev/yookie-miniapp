@@ -32,6 +32,9 @@ body, #root {
  * --tg-content-safe-area-inset-top    = Telegram header + Android system bar
  * --tg-content-safe-area-inset-bottom = Telegram bottom bar + home indicator
  * env(safe-area-inset-*)               = device notch/home indicator
+ *
+ * On Android fullscreen the top value is ~16px too large, so we subtract it.
+ * On desktop windowed the value is 0, so we enforce a 16px minimum.
  */
 :root {
   /* Bottom: device home indicator + Telegram bottom bar */
@@ -39,10 +42,10 @@ body, #root {
     env(safe-area-inset-bottom, 0px) +
     var(--tg-content-safe-area-inset-bottom, 0px)
   );
-  /* Top: Telegram header + system status bar */
-  --safe-area-top: calc(
-    env(safe-area-inset-top, 0px) +
-    var(--tg-content-safe-area-inset-top, 0px)
+  /* Top: Telegram header + system status bar - 16px compensation, min 16px */
+  --safe-area-top: max(
+    16px,
+    calc(env(safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) - 16px)
   );
   --safe-area-left: calc(
     env(safe-area-inset-left, 0px) +
