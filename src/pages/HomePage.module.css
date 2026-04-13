@@ -4,7 +4,6 @@
 
 .page {
   position: relative;
-  min-height: 100vh;
   min-height: 100dvh;
   background: var(--color-bg);
   /* Safe area: device + Telegram UI + extra 16px breathing room */
@@ -12,32 +11,28 @@
   padding-bottom: calc(var(--safe-area-bottom) + 16px);
 }
 
-/* ── Green gradient — fixed, lowest z-index ────────────── */
+/* ── Green gradient — fills top of page ────────────── */
 .topGradient {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  height: 40%;
+  min-height: 200px;
   background: linear-gradient(180deg, rgba(154, 210, 64, 0.5) 0%, rgba(74, 143, 58, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
 }
 
-/* ── Main content — full-width, slides over gradient ───── */
+/* ── Main content — slides over gradient ───── */
 .mainContent {
   position: relative;
   z-index: 2;
   background: var(--color-bg);
   border-radius: 32px 32px 0 0;
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 0;
+  padding-top: 12px;
   width: 100%;
-  /* NOTE: Do NOT add overflow:hidden here — it kills sticky.
-     border-radius alone (without overflow) does NOT create
-     a new scroll container, so sticky still works.
-     The rounded corners simply won't clip children that escape,
-     which is fine — nothing visually overflows the top corners. */
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -97,19 +92,17 @@
   top: 0;
   z-index: 10;
   background: var(--color-bg);
-  padding: calc(6px + var(--safe-area-top)) 16px 4px;
-  display: flex;
-  align-items: center;
+  padding: calc(10px + var(--safe-area-top)) 16px 10px;
 }
 
 .searchBox {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   height: 56px;
-  padding: 12px 16px;
-  padding-right: 100px; /* space for city badge */
-  background: var(--color-bg);
+  padding: 0 16px;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-3xl);
   cursor: pointer;
@@ -119,7 +112,7 @@
 
 .cityBadgeInside {
   position: absolute;
-  right: 28px; /* 16px padding + 12px offset */
+  right: 16px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
