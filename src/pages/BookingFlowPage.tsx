@@ -21,15 +21,15 @@ export default function BookingFlowPage() {
   const [error, setError] = useState<string | null>(null)
   const [successState, setSuccessState] = useState(false)
 
-  // Check if we have valid booking data (either legacy single or new multi-service)
+  // Check if we have valid booking data
   const hasValidData = () => {
     if (!bookingStore.selectedBusiness || !bookingStore.selectedDate || !bookingStore.selectedSlot) return false
-    // Multi-service mode
+    // Multi-service mode (primary flow)
     if (bookingStore.selectedServices.length > 0) {
       return bookingStore.selectedServices.every((s) => s.masterId !== null)
     }
-    // Legacy single mode
-    return bookingStore.selectedService && bookingStore.selectedMaster
+    // Legacy single mode: selectedMaster set from MasterDetailPage
+    return bookingStore.selectedMaster !== null
   }
 
   // Redirect if no selections
@@ -93,45 +93,35 @@ export default function BookingFlowPage() {
       const startsAt = bookingStore.selectedSlot.id
         ?? `${bookingStore.selectedDate}T${bookingStore.selectedSlot.start}:00`
 
-      // Multi-service booking: create separate booking for each service
+      // Create a separate booking for each selected service
       // All services start at the same time (different masters work in parallel)
-      if (bookingStore.selectedServices.length > 0) {
-        const results = await Promise.allSettled(
-          bookingStore.selectedServices.map((svc) =>
-            createBooking({
-              businessId: bookingStore.selectedBusiness.id,
-              masterId: svc.masterId!,
-              serviceId: svc.service.id,
-              startsAt,
-              clientPhone: effectivePhone,
-              clientName,
-              notes: notes || undefined,
-            })
-          )
-        );
-
-        // Check for failures
-        const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
-        if (failures.length > 0) {
-          const err = failures[0].reason;
-          throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей');
-        }
-      } else {
-        // Legacy single service booking
-        if (!bookingStore.selectedService || !bookingStore.selectedMaster) {
-          throw new Error('Missing service or master')
-        }
-        await createBooking({
-          businessId: bookingStore.selectedBusiness.id,
-          masterId: bookingStore.selectedMaster.id,
-          serviceId: bookingStore.selectedService.id,
-          startsAt,
-          clientPhone: effectivePhone,
-          clientName,
-          notes: notes || undefined,
-        })
+      const services = bookingStore.selectedServices
+      if (services.length === 0) {
+        throw new Error('No services selected')
       }
 
+      const results = await Promise.allSettled(
+        services.map((svc) =>
+          createBooking({
+            businessId: bookingStore.selectedBusiness!.id,
+            masterId: svc.masterId!,
+            serviceId: svc.service.id,
+            startsAt,
+            clientPhone: effectivePhone,
+            clientName,
+            notes: notes || undefined,
+          })
+        )
+      );
+
+      // Check for failures
+      const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+      if (failures.length > 0) {
+        const err = failures[0].reason;
+        throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей');
+      }
+
+      setBookedCount(services.length)
       setSuccessState(true)
       bookingStore.reset()
 
@@ -150,8 +140,11 @@ export default function BookingFlowPage() {
     return null
   }
 
+  // Store the count before reset (for success message)
+  const [bookedCount, setBookedCount] = useState(0)
+
   if (successState) {
-    const multiCount = bookingStore.selectedServices?.length ?? 1;
+    const multiCount = bookedCount || 1;
     return (
       <div className={styles.container}>
         <div className={styles.successContainer}>
@@ -173,9 +166,7 @@ export default function BookingFlowPage() {
   // Determine which services to show
   const servicesToShow = bookingStore.selectedServices.length > 0
     ? bookingStore.selectedServices
-    : bookingStore.selectedService
-      ? [{ service: bookingStore.selectedService, masterId: bookingStore.selectedMaster?.id || null }]
-      : []
+    : []
 
   const totalPrice = servicesToShow.reduce((sum, s) => sum + (s.service.price || 0), 0)
   const totalDuration = servicesToShow.reduce((sum, s) => sum + (s.service.duration_min || 30), 0)

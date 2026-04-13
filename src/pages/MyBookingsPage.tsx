@@ -93,12 +93,15 @@ export default function MyBookingsPage() {
     return `${startStr}–${endStr}`
   }
 
-  const handleCancel = async (bookingId: string) => {
+  // Cancel all bookings in a group (multi-service = multiple booking IDs)
+  const handleCancelGroup = async (group: typeof bookings) => {
     if (!phone) return
-    setCancelLoading(bookingId)
+    const firstId = group[0].id
+    setCancelLoading(firstId)
     setCancelError(null)
     try {
-      await cancelBooking(bookingId, phone)
+      // Cancel all bookings in the group in parallel
+      await Promise.all(group.map(b => cancelBooking(b.id, phone)))
       refetch()
     } catch {
       setCancelError('Не удалось отменить запись. Попробуйте позже.')
@@ -107,8 +110,12 @@ export default function MyBookingsPage() {
     }
   }
 
-  const handleRescheduleOpen = (bookingId: string) => {
-    setRescheduleBookingId(bookingId)
+  // Store the full group of booking IDs being rescheduled
+  const [rescheduleGroupIds, setRescheduleGroupIds] = useState<string[]>([])
+
+  const handleRescheduleOpen = (group: typeof bookings) => {
+    setRescheduleBookingId(group[0].id)
+    setRescheduleGroupIds(group.map(b => b.id))
     setRescheduleError(null)
   }
 
@@ -117,12 +124,18 @@ export default function MyBookingsPage() {
     setRescheduleLoading(true)
     setRescheduleError(null)
     try {
-      await rescheduleBooking(rescheduleBookingId, {
-        phone,
-        startsAt: newStartsAt,
-        masterId: newMasterId,
-      })
+      // Reschedule all bookings in the group to the same new time
+      await Promise.all(
+        rescheduleGroupIds.map(id =>
+          rescheduleBooking(id, {
+            phone,
+            startsAt: newStartsAt,
+            masterId: newMasterId,
+          })
+        )
+      )
       setRescheduleBookingId(null)
+      setRescheduleGroupIds([])
       closeOverlay()
       refetch()
     } catch (err) {
@@ -265,14 +278,14 @@ export default function MyBookingsPage() {
                         <button
                           className={styles.btnCancel}
                           disabled={isCancelling || rescheduleLoading}
-                          onClick={() => handleCancel(first.id)}
+                          onClick={() => handleCancelGroup(group)}
                         >
                           {isCancelling ? 'Отмена...' : 'Отменить'}
                         </button>
                         <button
                           className={styles.btnSecondary}
                           disabled={rescheduleLoading}
-                          onClick={() => handleRescheduleOpen(first.id)}
+                          onClick={() => handleRescheduleOpen(group)}
                         >
                           Перенести
                         </button>
@@ -351,13 +364,22 @@ export default function MyBookingsPage() {
       {rescheduleBookingData && (
         <RescheduleBottomSheet
           open={!!rescheduleBookingId}
-          onClose={() => setRescheduleBookingId(null)}
+          onClose={() => { setRescheduleBookingId(null); setRescheduleGroupIds([]); }}
           businessId={rescheduleBookingData.business_id}
           masterId={rescheduleBookingData.master_id}
           currentStartsAt={rescheduleBookingData.starts_at}
           onConfirm={handleRescheduleConfirm}
           loading={rescheduleLoading}
+          serviceId={(rescheduleBookingData.services as { id?: string } | null)?.id}
           serviceDurationMin={(() => {
+            // Sum total duration of ALL bookings in the group being rescheduled
+            const groupBookings = bookings.filter(b => rescheduleGroupIds.includes(b.id))
+            if (groupBookings.length > 1) {
+              return groupBookings.reduce((sum, b) => {
+                const dur = (b.services as { duration_min?: number } | null)?.duration_min
+                return sum + (dur || Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60000))
+              }, 0)
+            }
             const svc = rescheduleBookingData.services as { duration_min?: number } | null
             if (svc?.duration_min) return svc.duration_min
             if (rescheduleBookingData.ends_at) {

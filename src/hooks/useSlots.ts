@@ -48,7 +48,8 @@ interface UseSlotsResult {
 export function useSlots(
   businessId: string | undefined,
   masterId: string | undefined,
-  date: string | undefined
+  date: string | undefined,
+  serviceId?: string | undefined
 ): UseSlotsResult {
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +69,7 @@ export function useSlots(
       setError(null);
 
       try {
-        const slotsData = await fetchSlots(businessId, masterId, date);
+        const slotsData = await fetchSlots(businessId, masterId, date, serviceId);
 
         if (!controller.signal.aborted) {
           // Use API data when available; fall back to mock slots if empty (DEV only)
@@ -102,7 +103,7 @@ export function useSlots(
     return () => {
       controller.abort();
     };
-  }, [businessId, masterId, date]);
+  }, [businessId, masterId, date, serviceId]);
 
   const refetch = async () => {
     if (!businessId || !masterId || !date) {
@@ -113,7 +114,7 @@ export function useSlots(
     setError(null);
 
     try {
-      const slotsData = await fetchSlots(businessId, masterId, date);
+      const slotsData = await fetchSlots(businessId, masterId, date, serviceId);
       if (slotsData.length > 0) {
         setSlots(slotsData);
       } else if (import.meta.env.DEV) {

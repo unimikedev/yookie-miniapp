@@ -64,8 +64,6 @@ export const SlotGrid: React.FC<SlotGridProps> = ({ slots, selectedSlot, onSelec
     };
 
     slots.forEach((slot) => {
-      if (!slot.is_available) return;
-
       const date = parseTime(slot.start);
       if (!date) return;
 
@@ -106,17 +104,18 @@ export const SlotGrid: React.FC<SlotGridProps> = ({ slots, selectedSlot, onSelec
             const isSelected =
               selectedSlot === slot.id || selectedSlot === slot.start;
             const isPast = isPastSlot(slot);
+            const isUnavailable = !slot.is_available || isPast;
             const time = formatTime(slot.start);
 
             return (
               <button
                 key={slot.id || slot.start}
                 className={`${styles.slot} ${isSelected ? styles.selected : ''} ${
-                  isPast ? styles.disabled : ''
+                  isUnavailable ? styles.disabled : ''
                 }`}
                 onClick={() => handleSlotClick(slot)}
-                disabled={isPast}
-                aria-label={`${time}${isPast ? ', unavailable' : ''}`}
+                disabled={isUnavailable}
+                aria-label={`${time}${isUnavailable ? ', unavailable' : ''}`}
                 aria-pressed={isSelected}
               >
                 {time}
@@ -136,6 +135,9 @@ export const SlotGrid: React.FC<SlotGridProps> = ({ slots, selectedSlot, onSelec
 
       {slots.length === 0 && (
         <div className={styles.empty}>Нет доступных слотов</div>
+      )}
+      {slots.length > 0 && !slots.some(s => s.is_available && !isPastSlot(s)) && (
+        <div className={styles.empty}>Все слоты заняты</div>
       )}
     </div>
   );

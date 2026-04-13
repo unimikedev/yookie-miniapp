@@ -95,7 +95,9 @@ export default function BusinessDetailPage() {
 
   // Compute activeMasterId BEFORE useSlots call
   const activeMasterId = selectedServices.find(s => s.masterId !== null)?.masterId ?? undefined
-  const { slots, isLoading: slotsLoading } = useSlots(id, activeMasterId, selectedDate ?? undefined)
+  // Pass first selected service's ID so backend uses correct service duration for slot generation
+  const activeServiceId = selectedServices.length > 0 ? selectedServices[0].service.id : undefined
+  const { slots, isLoading: slotsLoading } = useSlots(id, activeMasterId, selectedDate ?? undefined, activeServiceId)
 
   useEffect(() => {
     if (business) setBusiness(business)
@@ -184,20 +186,45 @@ export default function BusinessDetailPage() {
       setBookingError('Введите полный номер телефона (+998 XX XXX-XX-XX)')
       return
     }
-    if (!business || !activeMasterId || !selectedSlot) return
+    if (!business || !selectedSlot) return
 
     setBookingLoading(true)
     setBookingError(null)
     try {
       const startsAt = selectedSlot.id ?? `${selectedDate}T${selectedSlot.start}:00`
-      await createBooking({
-        businessId: business.id,
-        masterId: activeMasterId,
-        serviceId: selectedServices[0].service.id,
-        startsAt,
-        clientPhone: effectivePhone,
-        clientName,
-      })
+
+      // Create a separate booking for each selected service (parallel masters)
+      if (selectedServices.length > 1) {
+        const results = await Promise.allSettled(
+          selectedServices.map((svc) =>
+            createBooking({
+              businessId: business.id,
+              masterId: svc.masterId!,
+              serviceId: svc.service.id,
+              startsAt,
+              clientPhone: effectivePhone,
+              clientName,
+            })
+          )
+        )
+        const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[]
+        if (failures.length > 0) {
+          const err = failures[0].reason
+          throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей')
+        }
+      } else {
+        // Single service booking
+        const svc = selectedServices[0]
+        await createBooking({
+          businessId: business.id,
+          masterId: svc.masterId!,
+          serviceId: svc.service.id,
+          startsAt,
+          clientPhone: effectivePhone,
+          clientName,
+        })
+      }
+
       navigate('/my-bookings')
     } catch (err) {
       setBookingError(err instanceof Error ? err.message : 'Ошибка при создании записи')
@@ -551,10 +578,20 @@ export default function BusinessDetailPage() {
                       <span>{s.service.price.toLocaleString('ru')} сўм</span>
                     </div>
                   ))}
-                  <div className={styles.confirmationDetail}>
-                    <span>Мастер:</span>
-                    <span>{masters.find(m => m.id === activeMasterId)?.name}</span>
-                  </div>
+                  {/* Show per-service master when multiple services have different masters */}
+                  {selectedServices.length > 1 ? (
+                    selectedServices.map((s) => (
+                      <div key={`master-${s.service.id}`} className={styles.confirmationDetail}>
+                        <span>{s.service.name}:</span>
+                        <span>{masters.find(m => m.id === s.masterId)?.name ?? '—'}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className={styles.confirmationDetail}>
+                      <span>Мастер:</span>
+                      <span>{masters.find(m => m.id === activeMasterId)?.name}</span>
+                    </div>
+                  )}
                   <div className={styles.confirmationDetail}>
                     <span>Дата:</span>
                     <span>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>

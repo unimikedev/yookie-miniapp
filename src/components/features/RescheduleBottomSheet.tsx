@@ -13,6 +13,8 @@ interface RescheduleBottomSheetProps {
   currentStartsAt: string
   onConfirm: (newStartsAt: string, newMasterId: string) => void
   loading?: boolean
+  serviceId?: string
+  serviceDurationMin?: number
 }
 
 export default function RescheduleBottomSheet({
@@ -23,8 +25,9 @@ export default function RescheduleBottomSheet({
   currentStartsAt,
   onConfirm,
   loading = false,
+  serviceId,
   serviceDurationMin,
-}: RescheduleBottomSheetProps & { serviceDurationMin?: number }) {
+}: RescheduleBottomSheetProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
   const [selectedMasterId, setSelectedMasterId] = useState(masterId)
@@ -45,10 +48,18 @@ export default function RescheduleBottomSheet({
     }
   }, [])
 
-  const { slots, isLoading: slotsLoading } = useSlots(businessId, selectedMasterId, selectedDate ?? undefined)
+  const { slots, isLoading: slotsLoading } = useSlots(businessId, selectedMasterId, selectedDate ?? undefined, serviceId)
+
+  // Derive slot step from actual slot data (gap between consecutive slots)
+  const slotDuration = (() => {
+    if (slots.length < 2) return 30
+    const t0 = slots[0].id ? new Date(slots[0].id).getTime() : 0
+    const t1 = slots[1].id ? new Date(slots[1].id).getTime() : 0
+    if (t0 && t1) return Math.round((t1 - t0) / 60000)
+    return 30
+  })()
 
   // Compute how many slots the booking occupies
-  const slotDuration = 30 // default slot step
   const slotsOccupied = serviceDurationMin
     ? Math.max(1, Math.ceil(serviceDurationMin / slotDuration))
     : 1

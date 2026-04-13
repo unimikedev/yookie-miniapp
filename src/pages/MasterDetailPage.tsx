@@ -71,7 +71,6 @@ export default function MasterDetailPage() {
     : getCleanPhone(clientPhone)
 
   const { services, masters, business, isLoading: businessLoading } = useBusiness(id)
-  const { slots, isLoading: slotsLoading, error: slotsError } = useSlots(id, masterId, selectedDate ?? undefined)
 
   const selectedServices = useBookingStore((s) => s.selectedServices)
   const selectedSlot = useBookingStore((s) => s.selectedSlot)
@@ -79,6 +78,10 @@ export default function MasterDetailPage() {
   const setSlot = useBookingStore((s) => s.setSlot)
   const setMaster = useBookingStore((s) => s.setMaster)
   const setDate = useBookingStore((s) => s.setDate)
+
+  // Pass first selected service's ID so backend uses correct service duration
+  const activeServiceId = selectedServices.length > 0 ? selectedServices[0].service.id : undefined
+  const { slots, isLoading: slotsLoading, error: slotsError } = useSlots(id, masterId, selectedDate ?? undefined, activeServiceId)
 
   const currentMaster = useMemo(
     () => masters.find((m) => m.id === masterId),
@@ -174,14 +177,37 @@ export default function MasterDetailPage() {
     setBookingError(null)
     try {
       const startsAt = selectedSlot.id ?? `${selectedDate}T${selectedSlot.start}:00`
-      await createBooking({
-        businessId: business.id,
-        masterId: currentMaster.id,
-        serviceId: selectedServices[0].service.id,
-        startsAt,
-        clientPhone: effectivePhone,
-        clientName,
-      })
+
+      // Create a booking for each selected service (all use this master)
+      if (selectedServices.length > 1) {
+        const results = await Promise.allSettled(
+          selectedServices.map((svc) =>
+            createBooking({
+              businessId: business.id,
+              masterId: currentMaster.id,
+              serviceId: svc.service.id,
+              startsAt,
+              clientPhone: effectivePhone,
+              clientName,
+            })
+          )
+        )
+        const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[]
+        if (failures.length > 0) {
+          const err = failures[0].reason
+          throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей')
+        }
+      } else {
+        await createBooking({
+          businessId: business.id,
+          masterId: currentMaster.id,
+          serviceId: selectedServices[0].service.id,
+          startsAt,
+          clientPhone: effectivePhone,
+          clientName,
+        })
+      }
+
       navigate('/my-bookings')
     } catch (err) {
       setBookingError(err instanceof Error ? err.message : 'Ошибка при создании записи')

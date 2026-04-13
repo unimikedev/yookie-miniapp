@@ -37,11 +37,15 @@ interface BackendSlotResult {
 export async function fetchSlots(
   businessId: string,
   masterId: string,
-  date: string // YYYY-MM-DD format
+  date: string, // YYYY-MM-DD format
+  serviceId?: string
 ): Promise<TimeSlot[]> {
+  const params: Record<string, string> = { date, masterId }
+  if (serviceId) params.serviceId = serviceId
+
   const response = await api.get<{ data: BackendSlotResult[] }>(
     `/businesses/${businessId}/slots`,
-    { date, masterId }
+    params
   );
 
   // Backend returns array of SlotResult per master — find ours
