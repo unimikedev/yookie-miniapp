@@ -6,8 +6,8 @@
   position: relative;
   min-height: 100dvh;
   background: var(--color-bg);
-  /* Safe area: device + Telegram UI + extra 16px breathing room */
-  padding-top: var(--safe-area-top);
+  /* Safe area + 8px extra padding */
+  padding-top: calc(var(--safe-area-top) + 8px);
   padding-bottom: calc(var(--safe-area-bottom) + 16px);
 }
 
@@ -17,8 +17,8 @@
   top: 0;
   left: 0;
   right: 0;
-  /* Telegram header + system bar + extend behind mainContent rounded corners */
-  height: calc(var(--safe-area-top) + 64px);
+  /* Telegram header + system bar + extra 8px + 64px for rounded corners overlap */
+  height: calc(var(--safe-area-top) + 8px + 64px);
   background: linear-gradient(180deg, rgba(154, 210, 64, 0.5) 0%, rgba(74, 143, 58, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
@@ -114,7 +114,7 @@
 
 .cityBadgeInside {
   position: absolute;
-  right: 16px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;

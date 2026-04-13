@@ -1,8 +1,7 @@
 .page {
-  min-height: 100vh;
   min-height: 100dvh;
   background: var(--color-bg);
-  padding-top: var(--safe-area-top);
+  padding-top: calc(var(--safe-area-top) / 2);
   padding-bottom: calc(var(--nav-height) + var(--safe-area-bottom) + 16px);
 }
 

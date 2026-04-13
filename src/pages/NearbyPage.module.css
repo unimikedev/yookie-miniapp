@@ -45,7 +45,7 @@
   pointer-events: auto;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  padding: 16px 16px 16px 16px;
+  padding: calc(16px + var(--safe-area-top)) 16px 16px 16px;
 }
 
 .searchBox {
@@ -155,7 +155,7 @@
 
 .carouselLayer {
   position: absolute;
-  bottom: 100px;
+  bottom: calc(100px + var(--safe-area-bottom));
   left: 0;
   right: 0;
   z-index: 10;

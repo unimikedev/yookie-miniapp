@@ -262,10 +262,6 @@ export class TelegramPlatform implements PlatformProvider {
     return this.webApp.initData || null
   }
 
-  ready(): void {
-    this.webApp.ready()
-  }
-
   private mapUser(telegramUser?: TelegramWebApp['initDataUnsafe']['user']): PlatformUser | null {
     if (!telegramUser) {
       return null

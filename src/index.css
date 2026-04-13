@@ -42,10 +42,10 @@ body, #root {
     env(safe-area-inset-bottom, 0px) +
     var(--tg-content-safe-area-inset-bottom, 0px)
   );
-  /* Top: Telegram header + system status bar - 16px compensation, min 16px */
+  /* Top: Telegram header + system status bar - 8px compensation, min 16px */
   --safe-area-top: max(
     16px,
-    calc(env(safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) - 16px)
+    calc(env(safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) - 8px)
   );
   --safe-area-left: calc(
     env(safe-area-inset-left, 0px) +
