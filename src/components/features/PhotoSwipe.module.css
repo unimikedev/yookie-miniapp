@@ -16,22 +16,15 @@
   display: block;
 }
 
-/* Bottom controls: dots + thumbnails */
-.bottomControls {
+/* Dots — exactly centered horizontally, 32px from bottom */
+.dots {
   position: absolute;
   bottom: 32px;
-  left: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  z-index: 2;
-}
-
-.dots {
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   gap: 6px;
+  z-index: 2;
 }
 
 .dot {
@@ -48,10 +41,15 @@
   border-radius: 3px;
 }
 
+/* Thumbnails — right-aligned with 16px padding */
 .thumbnails {
+  position: absolute;
+  bottom: 32px;
+  right: 16px;
   display: flex;
   gap: 4px;
   align-items: center;
+  z-index: 2;
 }
 
 .thumbnail {

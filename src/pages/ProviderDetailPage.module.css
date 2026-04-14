@@ -155,18 +155,19 @@
   border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
 }
 
-.infoContent {
+.infoHeader {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 12px;
-  padding: 16px 16px 0;
+  padding: 16px;
 }
 
 .infoTitleWrap {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  text-align: right;
 }
 
 .infoTitle {
@@ -176,15 +177,14 @@
   letter-spacing: var(--text-h1-ls);
   color: var(--color-text);
   margin: 0;
-  text-align: center;
 }
 
 .infoRatingRow {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .infoRatingValue {
@@ -217,7 +217,7 @@
 .infoAddress {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 6px;
   margin-top: 12px;
   padding: 0 16px;
