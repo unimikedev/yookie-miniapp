@@ -205,4 +205,28 @@ export interface FetchBusinessesParams {
   search?: string;
   page?: number;
   limit?: number;
+  /** Geo-search params */
+  lat?: number;
+  lng?: number;
+  radius?: number; // km
+  sort?: 'rating' | 'price_asc' | 'price_desc' | 'popular' | 'distance';
+  priceMin?: number;
+  priceMax?: number;
+  minRating?: number;
+}
+
+/** Business with computed distance (returned from geo-search) */
+export interface NearbyBusinessResult extends Business {
+  rating: number;
+  review_count: number;
+  min_price: number;
+  distance_km: number | null;
+  masters: Master[];
+}
+
+export interface RouteResult {
+  distance_km: number | null;
+  duration_min: number | null;
+  polyline: [number, number][] | null;
+  source: 'yandex' | 'estimate';
 }

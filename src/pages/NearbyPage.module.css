@@ -1,6 +1,6 @@
 /**
- * NearbyPage — Map View (Figma node 113:3599)
- * Dark-themed full-screen map with search, filters, price markers, and carousel.
+ * NearbyPage — Map View with filters, search, and business cards.
+ * Dark-themed full-screen layout.
  */
 
 .page {
@@ -43,21 +43,21 @@
 
 .searchRow {
   pointer-events: auto;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: calc(16px + var(--safe-area-top)) 16px 16px 16px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: calc(12px + var(--safe-area-top)) 16px 12px 16px;
 }
 
 .searchBox {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 56px;
-  padding: 12px 16px;
+  gap: 10px;
+  height: 48px;
+  padding: 0 16px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 24px;
-  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .searchIcon {
@@ -65,19 +65,36 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
-.searchPlaceholder {
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
   font-family: var(--font-family);
-  font-size: var(--text-body-lg-size);
-  font-weight: var(--text-body-lg-weight);
-  line-height: var(--text-body-lg-lh);
+  font-size: var(--text-body-size);
+  color: var(--color-text);
+  min-width: 0;
+}
+
+.searchInput::placeholder {
   color: var(--color-text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.clearBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-surface);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* ─── Filter Pills ───────────────────────────────────────────────────────── */
@@ -86,7 +103,7 @@
   pointer-events: auto;
   display: flex;
   gap: 8px;
-  padding: 0 24px;
+  padding: 0 16px 8px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -99,63 +116,258 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 17px;
+  padding: 8px 14px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 32px;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   flex-shrink: 0;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s;
+  color: var(--color-text);
 }
 
 .filterPill:active {
-  background: var(--color-surface-elevated);
+  transform: scale(0.97);
 }
 
 .filterPillLabel {
   font-family: var(--font-family);
-  font-size: var(--text-body-size);
-  font-weight: var(--text-body-weight);
-  line-height: var(--text-body-lh);
-  color: var(--color-text);
-  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
 .filterPillActive {
   background: var(--color-accent);
   border-color: var(--color-accent);
-}
-
-.filterPillActive .filterPillLabel {
-  color: var(--color-bg);
+  color: #18191B;
 }
 
 .filterIcon {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-shrink: 0;
 }
 
-/* Chevron for Price dropdown */
-.chevronDown {
-  width: 9px;
-  height: 6px;
+.filterCloseIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
-/* Close icon for active filter */
-.closeIcon {
-  width: 10px;
-  height: 10px;
+/* ─── Filter Panel (expanded) ────────────────────────────────────────────── */
+
+.filterPanel {
+  pointer-events: auto;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterSectionTitle {
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filterOptions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterOption {
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filterOption:active {
+  transform: scale(0.97);
+}
+
+.filterOptionActive {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #18191B;
+  font-weight: 600;
+}
+
+.clearFiltersBtn {
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: center;
+}
+
+/* ─── Locate Me Button ───────────────────────────────────────────────────── */
+
+.locateBtn {
+  position: absolute;
+  right: 16px;
+  bottom: calc(220px + var(--safe-area-bottom));
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-accent);
+  transition: transform 0.15s;
+}
+
+.locateBtn:active {
+  transform: scale(0.93);
+}
+
+/* ─── Route Badge ────────────────────────────────────────────────────────── */
+
+.routeBadge {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(200px + var(--safe-area-bottom));
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.routeBadgeSep {
+  color: var(--color-text-muted);
+}
+
+.routeNavBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-accent);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #18191B;
+  margin-left: 4px;
+}
+
+/* ─── Geo Banner ─────────────────────────────────────────────────────────── */
+
+.geoBanner {
+  position: absolute;
+  top: calc(130px + var(--safe-area-top));
+  left: 16px;
+  right: 16px;
+  z-index: 10;
+  padding: 10px 16px;
+  background: rgba(30, 30, 30, 0.9);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  pointer-events: auto;
+}
+
+/* ─── Loading Indicator ──────────────────────────────────────────────────── */
+
+.loadingIndicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  font-family: var(--font-family);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.loadingDot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ─── Results Count ──────────────────────────────────────────────────────── */
+
+.resultsCount {
+  position: absolute;
+  left: 16px;
+  bottom: calc(178px + var(--safe-area-bottom));
+  z-index: 10;
+  padding: 6px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 /* ─── Bottom Carousel ────────────────────────────────────────────────────── */
 
 .carouselLayer {
   position: absolute;
-  bottom: calc(100px + var(--safe-area-bottom));
+  bottom: calc(80px + var(--safe-area-bottom));
   left: 0;
   right: 0;
   z-index: 10;
@@ -168,7 +380,7 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  padding: 12px 12px;
+  padding: 12px 16px;
   pointer-events: auto;
 }
 
@@ -181,26 +393,30 @@
 .mapCard {
   display: flex;
   align-items: stretch;
-  min-width: 300px;
-  width: 336px;
-  height: 104px;
+  min-width: 280px;
+  width: 320px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   flex-shrink: 0;
   scroll-snap-align: start;
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: all 0.2s;
 }
 
 .mapCard:active {
   transform: scale(0.98);
 }
 
+.mapCardActive {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 12px rgba(154,210,64,0.3);
+}
+
 .mapCardImage {
-  width: 112px;
+  width: 100px;
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
@@ -223,10 +439,10 @@
 
 .mapCardBody {
   flex: 1;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -239,9 +455,8 @@
 
 .mapCardTitle {
   font-family: var(--font-family);
-  font-size: var(--text-h3-size);
-  font-weight: var(--text-h3-weight);
-  line-height: var(--text-h3-lh);
+  font-size: 14px;
+  font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
@@ -251,61 +466,77 @@
 .mapCardRating {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   flex-shrink: 0;
-  padding: 0 4px;
-  height: 22px;
-}
-
-.mapCardRatingStar {
-  width: 12px;
-  height: 12px;
-  color: var(--color-star-gold);
 }
 
 .mapCardRatingText {
   font-family: var(--font-family);
-  font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
-  line-height: var(--text-caption-lh);
+  font-size: 12px;
+  font-weight: 500;
   color: var(--color-text);
-  white-space: nowrap;
 }
 
 .mapCardMeta {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .mapCardSubtitle {
   font-family: var(--font-family);
-  font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
-  line-height: var(--text-caption-lh);
+  font-size: 12px;
   color: var(--color-text-secondary);
 }
 
 .mapCardPriceRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .mapCardPriceIcon {
-  width: 16px;
-  height: 16px;
-  color: var(--color-text-secondary);
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
 .mapCardPriceText {
   font-family: var(--font-family);
-  font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
-  line-height: var(--text-body-lh);
+  font-size: 12px;
   color: var(--color-text-secondary);
+}
+
+.mapCardAddress {
+  font-family: var(--font-family);
+  font-size: 11px;
+  color: var(--color-text-muted);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* ─── Empty Card ─────────────────────────────────────────────────────────── */
+
+.emptyCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 280px;
+  width: 320px;
+  padding: 24px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.emptyCardText {
+  font-family: var(--font-family);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
 /* ─── Price Bubble (custom Yandex Map placemark) ─────────────────────────── */
@@ -313,65 +544,38 @@
 .priceBubble {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 13px;
+  gap: 4px;
+  padding: 6px 12px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 9999px;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   cursor: pointer;
   white-space: nowrap;
   font-family: var(--font-family);
+  transition: all 0.15s;
 }
 
 .priceBubbleActive {
   background: var(--color-accent);
   border-color: var(--color-accent);
-  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(154,210,64,0.4);
+  transform: scale(1.1);
 }
 
 .priceBubbleText {
-  font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
-  line-height: var(--text-caption-lh);
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-text);
 }
 
 .priceBubbleActive .priceBubbleText {
-  color: #1d2d52;
+  color: #18191B;
 }
 
-.priceBubbleIcon {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-}
+/* ─── Pulse animation for user dot ───────────────────────────────────────── */
 
-/* ─── User Location Dot ──────────────────────────────────────────────────── */
-
-.userDot {
-  position: relative;
-  width: 16px;
-  height: 16px;
-}
-
-.userDotInner {
-  width: 16px;
-  height: 16px;
-  background: var(--color-accent);
-  border: 2px solid var(--color-bg);
-  border-radius: 50%;
-  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
-}
-
-.userDotGlow {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(189, 255, 74, 0.2);
-  border-radius: 50%;
-  pointer-events: none;
+@keyframes userPulse {
+  0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.3; }
+  50% { transform: translate(-50%,-50%) scale(1.3); opacity: 0.1; }
 }

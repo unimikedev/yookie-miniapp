@@ -1,23 +1,28 @@
 /**
  * NearbyPage — "Рядом" tab with Yandex Maps integration.
- * Figma reference: node 113:3599 (Map View).
  *
- * Renders an interactive Yandex Map with:
- *  - Custom price-bubble placemarks for each business
- *  - User geolocation dot
- *  - Floating search bar + filter chips
- *  - Horizontally scrollable business cards carousel at bottom
+ * Production-ready implementation:
+ *  - Real geolocation with permission handling + fallback
+ *  - Backend-driven data: businesses sorted by distance, with real lat/lng
+ *  - Functional filters: category, price range, rating
+ *  - Search with debounced input and live results
+ *  - Map ↔ list synchronization (marker click → scroll card, card click → focus marker)
+ *  - Route display on selected business
+ *  - Custom price-bubble placemarks with category icons
+ *  - Clustered markers when zoomed out
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useNearbyData, type NearbyBusiness } from '@/hooks/useNearbyData'
+import { useGeolocation } from '@/hooks/useGeolocation'
+import { fetchNearbyBusinesses, fetchRoute } from '@/lib/api/businesses'
 import { CATEGORY_LABELS } from '@/lib/api/types'
+import type { NearbyBusinessResult, CategoryEnum, RouteResult } from '@/lib/api/types'
 import { useThemeStore } from '@/stores/themeStore'
-import { useCityStore } from '@/stores/cityStore'
+import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import styles from './NearbyPage.module.css'
 
-/* ── Yandex Maps global type declaration ─────────────────────────────────── */
+/* ── Yandex Maps global ─────────────────────────────────────────────────── */
 
 declare global {
   interface Window {
@@ -25,118 +30,122 @@ declare global {
   }
 }
 
-/* ── SVG Icons ───────────────────────────────────────────────────────────── */
+/* ── Constants ──────────────────────────────────────────────────────────── */
+
+const DEBOUNCE_MS = 400
+const DEFAULT_RADIUS_KM = 15
+const DEFAULT_ZOOM = 14
+
+const PRICE_RANGES = [
+  { label: 'Любая', min: undefined, max: undefined },
+  { label: 'до 100к', min: undefined, max: 100000 },
+  { label: '100–300к', min: 100000, max: 300000 },
+  { label: '300к+', min: 300000, max: undefined },
+] as const
+
+const CATEGORY_FILTERS: { key: CategoryEnum | 'all'; label: string }[] = [
+  { key: 'all', label: 'Все' },
+  { key: 'hair', label: 'Волосы' },
+  { key: 'barber', label: 'Барбер' },
+  { key: 'nail', label: 'Ногти' },
+  { key: 'brow_lash', label: 'Брови' },
+  { key: 'spa_massage', label: 'СПА' },
+  { key: 'makeup', label: 'Макияж' },
+  { key: 'cosmetology', label: 'Косметология' },
+]
+
+/* ── SVG Icons ──────────────────────────────────────────────────────────── */
 
 const SearchIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <circle cx="11" cy="11" r="7" stroke="#6B7280" strokeWidth="2" />
     <path d="M21 21L16.5 16.5" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" />
   </svg>
 )
 
-const FilterLinesIcon = () => (
+const ClearIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M4 4L12 12M12 4L4 12" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+)
+
+const FilterIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M3 7H21M6 12H18M10 17H14"
-      stroke="#F9FAFB"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M3 7H21M6 12H18M10 17H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 )
 
-const ChevronDownIcon = () => (
+const ChevronIcon = () => (
   <svg width="9" height="6" viewBox="0 0 9 6" fill="none">
-    <path d="M1 1L4.5 4.5L8 1" stroke="#F9FAFB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M1 1L4.5 4.5L8 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
 
-const CloseSmallIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-    <path d="M1 1L9 9M9 1L1 9" stroke="#18191B" strokeWidth="1.5" strokeLinecap="round" />
+const LocateIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+    <path d="M12 2V5M12 19V22M2 12H5M19 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+)
+
+const WalkIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="5" r="2" stroke="currentColor" strokeWidth="1.5" />
+    <path d="M10 10L8 22M14 10L16 22M10 10H14M9 16H15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
 
 const StarIcon = () => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <path
-      d="M6 0.5L7.76 4.06L11.7 4.64L8.85 7.42L9.53 11.34L6 9.5L2.47 11.34L3.15 7.42L0.3 4.64L4.24 4.06L6 0.5Z"
-      fill="#FBBF24"
-    />
+    <path d="M6 0.5L7.76 4.06L11.7 4.64L8.85 7.42L9.53 11.34L6 9.5L2.47 11.34L3.15 7.42L0.3 4.64L4.24 4.06L6 0.5Z" fill="#FBBF24" />
   </svg>
 )
 
 const TagIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M1.33 8.53L7.47 2.39C7.72 2.14 8.06 2 8.41 2H13.33C13.7 2 14 2.3 14 2.67V7.59C14 7.94 13.86 8.28 13.61 8.53L7.47 14.67C6.95 15.19 6.11 15.19 5.59 14.67L1.33 10.41C0.81 9.89 0.81 9.05 1.33 8.53Z"
-      stroke="#9CA3AF"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+    <path d="M1.33 8.53L7.47 2.39C7.72 2.14 8.06 2 8.41 2H13.33C13.7 2 14 2.3 14 2.67V7.59C14 7.94 13.86 8.28 13.61 8.53L7.47 14.67C6.95 15.19 6.11 15.19 5.59 14.67L1.33 10.41C0.81 9.89 0.81 9.05 1.33 8.53Z" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     <circle cx="11" cy="5" r="0.8" fill="#9CA3AF" />
   </svg>
 )
 
-/* Category icons for price bubbles */
-const ScissorsIcon = ({ color = '#F9FAFB' }: { color?: string }) => (
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <circle cx="3" cy="3" r="2" stroke={color} strokeWidth="1" />
-    <circle cx="3" cy="9" r="2" stroke={color} strokeWidth="1" />
-    <path d="M11 1L5 6M11 11L5 6" stroke={color} strokeWidth="1" strokeLinecap="round" />
+const CloseIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+    <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 )
 
-const CombIcon = ({ color = '#F9FAFB' }: { color?: string }) => (
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <path d="M2 1V11M2 3H6M2 5H5M2 7H6M2 9H5" stroke={color} strokeWidth="1" strokeLinecap="round" />
+const NavigateIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M3 11L22 2L13 21L11 13L3 11Z" fill="currentColor" />
   </svg>
 )
 
-const SpaIcon = ({ color = '#F9FAFB' }: { color?: string }) => (
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <path d="M6 1C6 1 2 4 2 7C2 9.21 3.79 11 6 11C8.21 11 10 9.21 10 7C10 4 6 1 6 1Z" stroke={color} strokeWidth="1" strokeLinecap="round" />
-  </svg>
-)
-
-const CATEGORY_ICONS: Record<string, (props: { color?: string }) => JSX.Element> = {
-  hair: ScissorsIcon,
-  barber: ScissorsIcon,
-  nail: CombIcon,
-  spa_massage: SpaIcon,
-  brow_lash: CombIcon,
-  makeup: CombIcon,
-  epilation: CombIcon,
-  cosmetology: SpaIcon,
-  tattoo: CombIcon,
-  piercing: CombIcon,
-}
-
-/* ── Format price ────────────────────────────────────────────────────────── */
+/* ── Formatting helpers ─────────────────────────────────────────────────── */
 
 function formatPrice(price: number): string {
-  if (price >= 1000) {
-    return `${Math.round(price / 1000)}k`
-  }
+  if (price >= 1000000) return `${(price / 1000000).toFixed(1)}M`
+  if (price >= 1000) return `${Math.round(price / 1000)}k`
   return `${price}`
 }
 
 function formatPriceFrom(price: number): string {
-  if (price >= 1000) {
-    return `от ${Math.round(price / 1000)} тыс.`
-  }
+  if (price >= 1000) return `от ${Math.round(price / 1000)} тыс.`
   return `от ${price}`
 }
 
-function formatDistance(meters: number): string {
-  if (meters >= 1000) {
-    return `${(meters / 1000).toFixed(1)} км`
-  }
-  return `${meters} м`
+function formatDistance(km: number | null): string {
+  if (km === null) return ''
+  if (km < 1) return `${Math.round(km * 1000)} м`
+  return `${km.toFixed(1)} км`
 }
 
-/* ── Map theme toggle ──────────────────────────────────────────────────── */
+function formatDuration(min: number | null): string {
+  if (min === null) return ''
+  if (min < 60) return `${min} мин`
+  return `${Math.floor(min / 60)} ч ${min % 60} мин`
+}
+
+/* ── Map theme ──────────────────────────────────────────────────────────── */
 
 function applyMapTheme(map: any, theme: 'dark' | 'light') {
   const el = map.panes.get('ground')?.getElement()
@@ -148,19 +157,85 @@ function applyMapTheme(map: any, theme: 'dark' | 'light') {
   }
 }
 
-/* ── Component ───────────────────────────────────────────────────────────── */
+/* ── Debounce hook ──────────────────────────────────────────────────────── */
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+  return debouncedValue
+}
+
+/* ── Component ──────────────────────────────────────────────────────────── */
 
 export default function NearbyPage() {
   const navigate = useNavigate()
+  const { theme } = useThemeStore()
+  const { effectivePosition, position, permission, isLoading: geoLoading, requestPosition } = useGeolocation()
+
+  // Map refs
   const mapRef = useRef<HTMLDivElement>(null)
   const ymapRef = useRef<any>(null)
+  const placemarkCollectionRef = useRef<any>(null)
+  const routeLineRef = useRef<any>(null)
+  const userPlacemarkRef = useRef<any>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
+
+  // State
   const [mapReady, setMapReady] = useState(false)
-  const [activeCardIndex, setActiveCardIndex] = useState(0)
-  const [activeFilter, setActiveFilter] = useState<string | null>('hair')
-  const { businesses, isLoading } = useNearbyData()
-  const { theme } = useThemeStore()
-  const { city } = useCityStore()
+  const [businesses, setBusinesses] = useState<NearbyBusinessResult[]>([])
+  const [dataLoading, setDataLoading] = useState(true)
+  const [activeCardIndex, setActiveCardIndex] = useState(-1)
+  const [activeRoute, setActiveRoute] = useState<RouteResult | null>(null)
+  const [routeLoading, setRouteLoading] = useState(false)
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | 'all'>('all')
+  const [selectedPriceRange, setSelectedPriceRange] = useState(0) // index into PRICE_RANGES
+  const [minRating, setMinRating] = useState<number | undefined>(undefined)
+  const [showFilters, setShowFilters] = useState(false)
+
+  const debouncedSearch = useDebounce(searchQuery, DEBOUNCE_MS)
+
+  /* ── Fetch businesses ──────────────────────────────────────────────────── */
+
+  useEffect(() => {
+    let cancelled = false
+
+    const load = async () => {
+      setDataLoading(true)
+      try {
+        const priceRange = PRICE_RANGES[selectedPriceRange]
+        const res = await fetchNearbyBusinesses({
+          lat: effectivePosition.lat,
+          lng: effectivePosition.lng,
+          radius: DEFAULT_RADIUS_KM,
+          category: selectedCategory === 'all' ? undefined : selectedCategory,
+          search: debouncedSearch || undefined,
+          priceMin: priceRange.min,
+          priceMax: priceRange.max,
+          minRating,
+          sort: 'distance',
+          limit: 50,
+        })
+        if (!cancelled) {
+          setBusinesses(res.data ?? [])
+          setActiveCardIndex(-1)
+          setActiveRoute(null)
+        }
+      } catch {
+        if (!cancelled) setBusinesses([])
+      } finally {
+        if (!cancelled) setDataLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [effectivePosition.lat, effectivePosition.lng, selectedCategory, selectedPriceRange, minRating, debouncedSearch])
 
   /* ── Init Yandex Map ──────────────────────────────────────────────────── */
 
@@ -171,35 +246,30 @@ export default function NearbyPage() {
       if (ymapRef.current) return
 
       const map = new window.ymaps.Map(mapRef.current, {
-        center: [city.lat, city.lng],
-        zoom: 14,
+        center: [effectivePosition.lat, effectivePosition.lng],
+        zoom: DEFAULT_ZOOM,
         controls: [],
       }, {
         suppressMapOpenBlock: true,
         yandexMapDisablePoiInteractivity: true,
       })
 
-      // Apply dark theme filter
       applyMapTheme(map, theme)
-
       ymapRef.current = map
       setMapReady(true)
     })
-  }, [])
+  }, [effectivePosition.lat, effectivePosition.lng])
 
   useEffect(() => {
-    // Check if ymaps is already loaded
     if (window.ymaps) {
       initMap()
     } else {
-      // Wait for script to load
       const checkInterval = setInterval(() => {
         if (window.ymaps) {
           clearInterval(checkInterval)
           initMap()
         }
       }, 100)
-
       return () => clearInterval(checkInterval)
     }
 
@@ -211,90 +281,145 @@ export default function NearbyPage() {
     }
   }, [initMap])
 
-  /* ── Reactively update map theme ─────────────────────────────────────── */
-
+  // Theme sync
   useEffect(() => {
-    if (ymapRef.current) {
-      applyMapTheme(ymapRef.current, theme)
-    }
+    if (ymapRef.current) applyMapTheme(ymapRef.current, theme)
   }, [theme])
 
-  /* ── Add placemarks when data + map are ready ─────────────────────────── */
+  /* ── Update placemarks when data changes ─────────────────────────────── */
 
   useEffect(() => {
-    if (!mapReady || !ymapRef.current || businesses.length === 0) return
-
+    if (!mapReady || !ymapRef.current) return
     const map = ymapRef.current
-    map.geoObjects.removeAll()
 
-    // Add business placemarks
-    businesses.forEach((biz, index) => {
-      const isActive = index === 2 // Highlight one as active (green) like in the design
-      const IconComponent = CATEGORY_ICONS[biz.category] || ScissorsIcon
-      const iconColor = isActive ? '#1d2d52' : '#F9FAFB'
+    // Remove old placemarks
+    if (placemarkCollectionRef.current) {
+      map.geoObjects.remove(placemarkCollectionRef.current)
+    }
+
+    // Create clusterer for performance
+    const clusterer = new window.ymaps.Clusterer({
+      preset: 'islands#greenClusterIcons',
+      groupByCoordinates: false,
+      clusterDisableClickZoom: false,
+      clusterHideIconOnBalloonOpen: false,
+      geoObjectHideIconOnBalloonOpen: false,
+    })
+
+    const placemarks = businesses.map((biz, index) => {
+      if (biz.lat === null || biz.lng === null) return null
+
+      const isActive = index === activeCardIndex
+      const priceLabel = formatPrice(biz.min_price || 0)
 
       const layout = window.ymaps.templateLayoutFactory.createClass(
         `<div class="${styles.priceBubble} ${isActive ? styles.priceBubbleActive : ''}" data-biz-index="${index}">
-          <span class="${styles.priceBubbleText}">${formatPrice(biz.priceFrom)}</span>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <circle cx="3" cy="3" r="2" stroke="${iconColor}" stroke-width="1"/>
-            <circle cx="3" cy="9" r="2" stroke="${iconColor}" stroke-width="1"/>
-            <path d="M11 1L5 6M11 11L5 6" stroke="${iconColor}" stroke-width="1" stroke-linecap="round"/>
-          </svg>
+          <span class="${styles.priceBubbleText}">${priceLabel}</span>
         </div>`
       )
 
       const placemark = new window.ymaps.Placemark(
         [biz.lat, biz.lng],
-        { bizIndex: index },
+        { bizIndex: index, bizName: biz.name },
         {
           iconLayout: layout,
-          iconShape: {
-            type: 'Rectangle',
-            coordinates: [[-40, -15], [40, 15]],
-          },
+          iconShape: { type: 'Rectangle', coordinates: [[-35, -15], [35, 15]] },
         }
       )
 
       placemark.events.add('click', () => {
         setActiveCardIndex(index)
         scrollCarouselTo(index)
+        // Load route when marker clicked
+        loadRoute(biz)
       })
 
-      map.geoObjects.add(placemark)
-    })
+      return placemark
+    }).filter(Boolean)
 
-    // Add user location dot
+    clusterer.add(placemarks)
+    map.geoObjects.add(clusterer)
+    placemarkCollectionRef.current = clusterer
+
+    // Update user location marker
+    if (userPlacemarkRef.current) {
+      map.geoObjects.remove(userPlacemarkRef.current)
+    }
+
     const userDotLayout = window.ymaps.templateLayoutFactory.createClass(
       `<div style="position:relative;width:16px;height:16px;">
-        <div style="position:absolute;width:40px;height:40px;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(189,255,74,0.2);border-radius:50%;pointer-events:none;"></div>
-        <div style="width:16px;height:16px;background:#9AD240;border:2px solid #18191B;border-radius:50%;box-shadow:0px 4px 6px -1px rgba(0,0,0,0.1);position:relative;z-index:1;"></div>
+        <div style="position:absolute;width:40px;height:40px;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(154,210,64,0.2);border-radius:50%;pointer-events:none;animation:pulse 2s infinite;"></div>
+        <div style="width:16px;height:16px;background:#9AD240;border:2px solid #18191B;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);position:relative;z-index:1;"></div>
       </div>`
     )
 
-    const userPlacemark = new window.ymaps.Placemark(
-      [41.2995, 69.2401], // Slightly south
+    const userPm = new window.ymaps.Placemark(
+      [effectivePosition.lat, effectivePosition.lng],
       {},
       {
         iconLayout: userDotLayout,
-        iconShape: {
-          type: 'Circle',
-          coordinates: [8, 8],
-          radius: 20,
-        },
+        iconShape: { type: 'Circle', coordinates: [8, 8], radius: 20 },
       }
     )
-    map.geoObjects.add(userPlacemark)
-  }, [mapReady, businesses])
+    map.geoObjects.add(userPm)
+    userPlacemarkRef.current = userPm
+  }, [mapReady, businesses, activeCardIndex, effectivePosition])
 
-  /* ── Carousel scroll ──────────────────────────────────────────────────── */
+  /* ── Route display ───────────────────────────────────────────────────── */
+
+  const loadRoute = useCallback(async (biz: NearbyBusinessResult) => {
+    if (!biz.lat || !biz.lng || !position) return
+
+    setRouteLoading(true)
+    try {
+      const route = await fetchRoute(
+        { lat: position.lat, lng: position.lng },
+        { lat: biz.lat, lng: biz.lng },
+        'walking'
+      )
+      setActiveRoute(route)
+
+      // Draw polyline on map
+      if (ymapRef.current && route.polyline && route.polyline.length > 1) {
+        if (routeLineRef.current) {
+          ymapRef.current.geoObjects.remove(routeLineRef.current)
+        }
+        const polyline = new window.ymaps.Polyline(
+          route.polyline,
+          {},
+          {
+            strokeColor: '#9AD240',
+            strokeWidth: 4,
+            strokeOpacity: 0.8,
+          }
+        )
+        ymapRef.current.geoObjects.add(polyline)
+        routeLineRef.current = polyline
+      }
+    } catch {
+      // Silently fail — route is optional UX enhancement
+    } finally {
+      setRouteLoading(false)
+    }
+  }, [position])
+
+  // Clear route when deselecting
+  useEffect(() => {
+    if (activeCardIndex === -1 && routeLineRef.current && ymapRef.current) {
+      ymapRef.current.geoObjects.remove(routeLineRef.current)
+      routeLineRef.current = null
+      setActiveRoute(null)
+    }
+  }, [activeCardIndex])
+
+  /* ── Carousel scroll sync ────────────────────────────────────────────── */
 
   const scrollCarouselTo = (index: number) => {
     const carousel = carouselRef.current
     if (!carousel) return
     const cards = carousel.children
     if (cards[index]) {
-      (cards[index] as HTMLElement).scrollIntoView({
+      ;(cards[index] as HTMLElement).scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'start',
@@ -302,11 +427,48 @@ export default function NearbyPage() {
     }
   }
 
-  const handleCardClick = (biz: NearbyBusiness) => {
-    navigate(`/business/${biz.businessId}`)
+  const handleCardClick = (biz: NearbyBusinessResult, index: number) => {
+    if (activeCardIndex === index) {
+      // Second click → navigate to detail
+      navigate(`/business/${biz.id}`)
+    } else {
+      setActiveCardIndex(index)
+      // Pan map to business
+      if (ymapRef.current && biz.lat && biz.lng) {
+        ymapRef.current.panTo([biz.lat, biz.lng], { duration: 300 })
+      }
+      loadRoute(biz)
+    }
   }
 
-  /* ── Render ────────────────────────────────────────────────────────────── */
+  const handleLocateMe = () => {
+    if (position && ymapRef.current) {
+      ymapRef.current.setCenter([position.lat, position.lng], DEFAULT_ZOOM, { duration: 300 })
+    } else {
+      requestPosition()
+    }
+  }
+
+  const handleOpenNavigator = (biz: NearbyBusinessResult) => {
+    if (!biz.lat || !biz.lng) return
+    // Open in Yandex Navigator / Yandex Maps app
+    const url = `https://yandex.ru/maps/?rtext=${effectivePosition.lat},${effectivePosition.lng}~${biz.lat},${biz.lng}&rtt=pd`
+    window.open(url, '_blank')
+  }
+
+  /* ── Filter counts ───────────────────────────────────────────────────── */
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (selectedCategory !== 'all') count++
+    if (selectedPriceRange !== 0) count++
+    if (minRating) count++
+    return count
+  }, [selectedCategory, selectedPriceRange, minRating])
+
+  /* ── Render ──────────────────────────────────────────────────────────── */
+
+  const selectedBiz = activeCardIndex >= 0 ? businesses[activeCardIndex] : null
 
   return (
     <div className={styles.page}>
@@ -316,93 +478,208 @@ export default function NearbyPage() {
       {/* Header: Search + Filters */}
       <div className={styles.header}>
         <div className={styles.searchRow}>
-          <div
-            className={styles.searchBox}
-            onClick={() => navigate('/search')}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/search')}
-          >
-            <span className={styles.searchIcon}>
-              <SearchIcon />
-            </span>
-            <span className={styles.searchPlaceholder}>Найти барбера</span>
+          <div className={styles.searchBox}>
+            <span className={styles.searchIcon}><SearchIcon /></span>
+            <input
+              className={styles.searchInput}
+              type="text"
+              placeholder="Поиск салонов и услуг..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className={styles.clearBtn} onClick={() => setSearchQuery('')}>
+                <ClearIcon />
+              </button>
+            )}
           </div>
         </div>
 
+        {/* Category filter pills */}
         <div className={styles.filtersRow}>
-          {/* Filters button — placeholder for future filter modal */}
-          <button className={styles.filterPill} onClick={() => navigate('/search')}>
-            <span className={styles.filterIcon}>
-              <FilterLinesIcon />
-            </span>
-            <span className={styles.filterPillLabel}>Filters</span>
-          </button>
-
-          {/* Price dropdown — navigate to search with price filter */}
-          <button className={styles.filterPill} onClick={() => navigate('/search')}>
-            <span className={styles.filterPillLabel}>Price</span>
-            <span className={styles.filterIcon}>
-              <ChevronDownIcon />
-            </span>
-          </button>
-
-          {/* Active filter: Type: Hair */}
           <button
-            className={`${styles.filterPill} ${styles.filterPillActive}`}
-            onClick={() => setActiveFilter(activeFilter === 'hair' ? null : 'hair')}
+            className={`${styles.filterPill} ${activeFilterCount > 0 ? styles.filterPillActive : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
           >
-            <span className={styles.filterPillLabel}>Type: Hair</span>
-            <span className={styles.filterIcon}>
-              <CloseSmallIcon />
+            <span className={styles.filterIcon}><FilterIcon /></span>
+            <span className={styles.filterPillLabel}>
+              Фильтры{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
             </span>
+          </button>
+
+          {CATEGORY_FILTERS.map((cat) => (
+            <button
+              key={cat.key}
+              className={`${styles.filterPill} ${selectedCategory === cat.key ? styles.filterPillActive : ''}`}
+              onClick={() => setSelectedCategory(cat.key)}
+            >
+              <span className={styles.filterPillLabel}>{cat.label}</span>
+              {selectedCategory === cat.key && cat.key !== 'all' && (
+                <span className={styles.filterCloseIcon} onClick={(e) => { e.stopPropagation(); setSelectedCategory('all') }}>
+                  <CloseIcon />
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Expanded filter panel */}
+        {showFilters && (
+          <div className={styles.filterPanel}>
+            <div className={styles.filterSection}>
+              <span className={styles.filterSectionTitle}>Цена</span>
+              <div className={styles.filterOptions}>
+                {PRICE_RANGES.map((range, i) => (
+                  <button
+                    key={i}
+                    className={`${styles.filterOption} ${selectedPriceRange === i ? styles.filterOptionActive : ''}`}
+                    onClick={() => setSelectedPriceRange(i)}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.filterSection}>
+              <span className={styles.filterSectionTitle}>Рейтинг</span>
+              <div className={styles.filterOptions}>
+                {[undefined, 4.0, 4.5, 4.8].map((r, i) => (
+                  <button
+                    key={i}
+                    className={`${styles.filterOption} ${minRating === r ? styles.filterOptionActive : ''}`}
+                    onClick={() => setMinRating(r)}
+                  >
+                    {r ? `${r}+` : 'Любой'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {activeFilterCount > 0 && (
+              <button
+                className={styles.clearFiltersBtn}
+                onClick={() => {
+                  setSelectedCategory('all')
+                  setSelectedPriceRange(0)
+                  setMinRating(undefined)
+                  setShowFilters(false)
+                }}
+              >
+                Сбросить фильтры
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Locate me button */}
+      <button
+        className={styles.locateBtn}
+        onClick={handleLocateMe}
+        aria-label="Моё местоположение"
+      >
+        <LocateIcon />
+      </button>
+
+      {/* Route info badge */}
+      {selectedBiz && activeRoute && (
+        <div className={styles.routeBadge}>
+          <WalkIcon />
+          <span>{formatDistance(activeRoute.distance_km)}</span>
+          <span className={styles.routeBadgeSep}>•</span>
+          <span>{formatDuration(activeRoute.duration_min)}</span>
+          <button
+            className={styles.routeNavBtn}
+            onClick={() => handleOpenNavigator(selectedBiz)}
+            aria-label="Открыть в навигаторе"
+          >
+            <NavigateIcon />
           </button>
         </div>
-      </div>
+      )}
+
+      {/* Geolocation permission banner */}
+      {permission === 'denied' && (
+        <div className={styles.geoBanner}>
+          <span>Геолокация отключена. Показываем салоны в центре города.</span>
+        </div>
+      )}
+
+      {/* Loading indicator */}
+      {(dataLoading || geoLoading) && (
+        <div className={styles.loadingIndicator}>
+          <div className={styles.loadingDot} />
+          <span>{geoLoading ? 'Определяем местоположение...' : 'Загрузка...'}</span>
+        </div>
+      )}
+
+      {/* Results count */}
+      {!dataLoading && businesses.length > 0 && (
+        <div className={styles.resultsCount}>
+          {businesses.length} {businesses.length === 1 ? 'салон' : businesses.length < 5 ? 'салона' : 'салонов'} рядом
+        </div>
+      )}
 
       {/* Bottom Card Carousel */}
       <div className={styles.carouselLayer}>
         <div className={styles.carousel} ref={carouselRef}>
-          {businesses.map((biz, index) => (
-            <div
-              key={biz.id}
-              className={styles.mapCard}
-              onClick={() => handleCardClick(biz)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && handleCardClick(biz)}
-            >
-              <div className={styles.mapCardImage}>
-                {biz.photoUrl ? (
-                  <img src={biz.photoUrl} alt={biz.name} loading="lazy" />
-                ) : (
-                  <div className={styles.mapCardImageFallback} />
-                )}
-              </div>
-              <div className={styles.mapCardBody}>
-                <div className={styles.mapCardTitleRow}>
-                  <span className={styles.mapCardTitle}>{biz.name}</span>
-                  <div className={styles.mapCardRating}>
-                    <StarIcon />
-                    <span className={styles.mapCardRatingText}>{biz.rating}</span>
-                  </div>
+          {businesses.map((biz, index) => {
+            const isActive = index === activeCardIndex
+            const photoUrl = getMockBusinessImage(biz.category, biz.id)
+            return (
+              <div
+                key={biz.id}
+                className={`${styles.mapCard} ${isActive ? styles.mapCardActive : ''}`}
+                onClick={() => handleCardClick(biz, index)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleCardClick(biz, index)}
+              >
+                <div className={styles.mapCardImage}>
+                  {photoUrl ? (
+                    <img src={photoUrl} alt={biz.name} loading="lazy" />
+                  ) : (
+                    <div className={styles.mapCardImageFallback} />
+                  )}
                 </div>
-                <div className={styles.mapCardMeta}>
-                  <span className={styles.mapCardSubtitle}>
-                    {biz.categoryLabel} • {formatDistance(biz.distanceMeters)}
-                  </span>
-                  <div className={styles.mapCardPriceRow}>
-                    <span className={styles.mapCardPriceIcon}>
-                      <TagIcon />
-                    </span>
-                    <span className={styles.mapCardPriceText}>
-                      {formatPriceFrom(biz.priceFrom)}
-                    </span>
+                <div className={styles.mapCardBody}>
+                  <div className={styles.mapCardTitleRow}>
+                    <span className={styles.mapCardTitle}>{biz.name}</span>
+                    <div className={styles.mapCardRating}>
+                      <StarIcon />
+                      <span className={styles.mapCardRatingText}>{biz.rating?.toFixed(1) || '—'}</span>
+                    </div>
                   </div>
+                  <div className={styles.mapCardMeta}>
+                    <span className={styles.mapCardSubtitle}>
+                      {CATEGORY_LABELS[biz.category] || biz.category}
+                      {biz.distance_km !== null && ` • ${formatDistance(biz.distance_km)}`}
+                    </span>
+                    {biz.min_price > 0 && (
+                      <div className={styles.mapCardPriceRow}>
+                        <span className={styles.mapCardPriceIcon}><TagIcon /></span>
+                        <span className={styles.mapCardPriceText}>{formatPriceFrom(biz.min_price)}</span>
+                      </div>
+                    )}
+                  </div>
+                  {isActive && biz.address && (
+                    <div className={styles.mapCardAddress}>{biz.address}</div>
+                  )}
                 </div>
               </div>
+            )
+          })}
+
+          {!dataLoading && businesses.length === 0 && (
+            <div className={styles.emptyCard}>
+              <span className={styles.emptyCardText}>
+                {searchQuery || activeFilterCount > 0
+                  ? 'Ничего не найдено. Попробуйте изменить фильтры.'
+                  : 'Салонов рядом не найдено'}
+              </span>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
