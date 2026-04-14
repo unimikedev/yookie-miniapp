@@ -17,6 +17,10 @@ export type CategoryEnum =
   | 'fitness'
   | 'other';
 
+export type ProviderType = 'business' | 'individual';
+// 'business'   = салон/студия (несколько специалистов)
+// 'individual' = частный мастер (он сам = единственный специалист)
+
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
 
 export const CATEGORY_LABELS: Record<CategoryEnum, string> = {
@@ -37,6 +41,7 @@ export const CATEGORY_LABELS: Record<CategoryEnum, string> = {
 
 export interface Business {
   id: string;
+  provider_type: ProviderType;
   name: string;
   description: string;
   category: CategoryEnum;

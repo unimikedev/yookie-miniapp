@@ -1,0 +1,636 @@
+/* ══════════════════════════════════════════════════════════
+   ProviderDetailPage — Unified provider (business / individual)
+   Dark theme, modern minimalism — based on BusinessDetailPage styles
+   ══════════════════════════════════════════════════════════ */
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-bottom: calc(80px + var(--safe-area-bottom));
+}
+
+/* ── Page header (fixed, frosted glass) ──────────────────── */
+.pageHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(var(--safe-area-top), 8px) 16px 8px;
+  min-height: 56px;
+  background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.pageHeaderSpacer {
+  height: calc(56px + var(--safe-area-top));
+}
+
+.pageHeaderTitle {
+  flex: 1;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-body-lg-lh);
+  letter-spacing: var(--text-body-lg-ls);
+  color: var(--color-text);
+  text-align: center;
+  margin: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Hero cover / photo ──────────────────────────────────── */
+.coverWrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0 0 20px 20px;
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.coverFallback {
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-elevated) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-display-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-display-lh);
+  letter-spacing: var(--text-display-ls);
+  color: var(--color-text-muted);
+}
+
+.coverSkeleton {
+  width: 100%;
+  height: 240px;
+  background: var(--color-surface);
+}
+
+/* ── Info block ──────────────────────────────────────────── */
+.infoBlock {
+  padding: 16px 16px 12px;
+}
+
+.infoTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.infoTitleWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.infoTitle {
+  font-size: var(--text-h1-size);
+  font-weight: var(--text-h1-weight);
+  line-height: var(--text-h1-lh);
+  letter-spacing: var(--text-h1-ls);
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.infoCategory {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  line-height: var(--text-body-sm-lh);
+  letter-spacing: var(--text-body-sm-ls);
+  color: var(--color-text-secondary);
+}
+
+.infoRating {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.infoRatingValue {
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-body-lg-lh);
+  letter-spacing: var(--text-body-lg-ls);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.infoRatingCount {
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
+  line-height: var(--text-caption-xs-lh);
+  letter-spacing: var(--text-caption-xs-ls);
+  color: var(--color-text-secondary);
+}
+
+.infoAddress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-lh);
+  letter-spacing: var(--text-body-ls);
+  color: var(--color-text-secondary);
+}
+
+.masterBio {
+  font-size: var(--text-title-size);
+  font-weight: var(--text-body-weight);
+  line-height: 1.6;
+  letter-spacing: var(--text-title-ls);
+  color: var(--color-text-secondary);
+  margin: 12px 0 0;
+}
+
+/* ── Chip row ─────────────────────────────────────────────── */
+.chipRow {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chipRow::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Content ─────────────────────────────────────────────── */
+.content {
+  padding-bottom: 16px;
+}
+
+.section {
+  padding: 0 16px 20px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-lh);
+  letter-spacing: var(--text-h3-ls);
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* ── Service list ────────────────────────────────────────── */
+.serviceList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── About text ──────────────────────────────────────────── */
+.aboutText {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px;
+}
+
+.infoCardsRow {
+  display: flex;
+  gap: 10px;
+}
+
+/* ── Master chips row (horizontal scroll) ───────────────── */
+.masterChipRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 8px 0 4px;
+}
+
+.masterChipRow::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Date chips ─────────────────────────────────────────── */
+.dateRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+  margin-top: 8px;
+}
+
+.dateRow::-webkit-scrollbar {
+  display: none;
+}
+
+.dateChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 64px;
+  padding: 8px 12px;
+  background: var(--color-surface);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.dateChip:active {
+  transform: scale(0.95);
+}
+
+.dateChipDay {
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
+  line-height: var(--text-caption-xs-lh);
+  letter-spacing: var(--text-caption-xs-ls);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.dateChipNum {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-lh);
+  letter-spacing: var(--text-h3-ls);
+  color: var(--color-text);
+}
+
+.dateChipActive {
+  background: var(--color-accent);
+}
+
+.dateChipActive .dateChipDay,
+.dateChipActive .dateChipNum {
+  color: var(--color-bg);
+}
+
+/* ── Time slots grid ────────────────────────────────────── */
+.slotsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.slotBtn {
+  height: 40px;
+  padding: 0 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  line-height: var(--text-button-sm-lh);
+  letter-spacing: var(--text-button-sm-ls);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.slotBtn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.slotBtnActive {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.slotBtnOccupied {
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border);
+}
+
+.slotBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.slotsSkeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Specialists horizontal scroll ───────────────────────── */
+.specialistsScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+}
+
+.specialistsScroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Reviews ─────────────────────────────────────────────── */
+.reviewsSection {
+  margin-top: 24px;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.readAllBtn {
+  width: 100%;
+  height: 44px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  line-height: var(--text-button-sm-lh);
+  letter-spacing: var(--text-button-sm-ls);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.readAllBtn:active {
+  opacity: 0.8;
+}
+
+/* ── Skeletons ───────────────────────────────────────────── */
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Inline Confirmation ─────────────────────────────────── */
+.confirmationSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+  margin: 16px 0 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.confirmationTitle {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-lh);
+  letter-spacing: var(--text-h3-ls);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.confirmationSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-2xl);
+}
+
+.confirmationBusiness {
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  line-height: var(--text-title-lh);
+  letter-spacing: var(--text-title-ls);
+  color: var(--color-text);
+}
+
+.confirmationMaster {
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  line-height: var(--text-button-sm-lh);
+  letter-spacing: var(--text-button-sm-ls);
+  color: var(--color-accent);
+}
+
+.confirmationService {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  line-height: var(--text-body-sm-lh);
+  letter-spacing: var(--text-body-sm-ls);
+  color: var(--color-text-secondary);
+}
+
+.confirmationDetail {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  line-height: var(--text-body-sm-lh);
+  letter-spacing: var(--text-body-sm-ls);
+  color: var(--color-text-muted);
+}
+
+.confirmationDetail span:last-child {
+  color: var(--color-text);
+  font-weight: var(--text-body-weight);
+}
+
+.confirmationTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  line-height: var(--text-title-lh);
+  letter-spacing: var(--text-title-ls);
+  color: var(--color-text);
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+  margin-top: 4px;
+}
+
+.confirmationTotalPrice {
+  color: var(--color-accent);
+  font-weight: var(--text-h1-weight);
+}
+
+.confirmationForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirmationInput {
+  padding: 14px 16px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  color: var(--color-text);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  line-height: var(--text-title-lh);
+  letter-spacing: var(--text-title-ls);
+  font-family: var(--font-family);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.confirmationInput:focus {
+  border-color: var(--color-accent);
+}
+
+.confirmationInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.confirmationError {
+  padding: 12px;
+  background: rgba(248, 113, 113, 0.1);
+  border-radius: var(--radius-2xl);
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  line-height: var(--text-body-sm-lh);
+  letter-spacing: var(--text-body-sm-ls);
+  color: #F87171;
+  text-align: center;
+}
+
+.confirmationBtn {
+  padding: 16px;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-body-lg-lh);
+  letter-spacing: var(--text-body-lg-ls);
+  color: var(--color-bg);
+  transition: opacity 0.15s;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family);
+}
+
+.confirmationBtn:active:not(:disabled) {
+  opacity: 0.85;
+}
+
+.confirmationBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Error screen ───────────────────────────────────────── */
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 32px;
+  text-align: center;
+  min-height: 50vh;
+}
+
+.errorIcon {
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.errorTitle {
+  font-size: var(--text-h2-size);
+  font-weight: var(--text-h2-weight);
+  line-height: var(--text-h2-lh);
+  letter-spacing: var(--text-h2-ls);
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+
+.errorDescription {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-lh);
+  letter-spacing: var(--text-body-ls);
+  color: var(--color-text-secondary);
+  margin: 0 0 28px;
+}
+
+.errorActions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.errorPrimaryBtn {
+  flex: 1;
+  height: 48px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: var(--text-button-size);
+  font-weight: var(--text-button-weight);
+  line-height: var(--text-button-lh);
+  letter-spacing: var(--text-button-ls);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: opacity 0.15s;
+}
+
+.errorPrimaryBtn:active {
+  opacity: 0.85;
+}
+
+.errorSecondaryBtn {
+  flex: 1;
+  height: 48px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-title-lh);
+  letter-spacing: var(--text-title-ls);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: opacity 0.15s;
+}
+
+.errorSecondaryBtn:active {
+  opacity: 0.8;
+}

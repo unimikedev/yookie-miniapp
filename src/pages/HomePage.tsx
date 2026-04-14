@@ -199,8 +199,8 @@ export default function HomePage() {
       navigate(`/business/${item.businessId}`)
       return
     }
-    if (item.type === 'master' && item.businessId && item.masterId) {
-      navigate(`/business/${item.businessId}/master/${item.masterId}`)
+    if (item.type === 'master' && item.businessId) {
+      navigate(`/business/${item.businessId}`)
       return
     }
   }
@@ -475,8 +475,8 @@ export default function HomePage() {
                       <VisitedCard
                         key={v.id}
                         item={v}
-                        onClick={() => navigate(`/business/${v.businessId}/master/${v.masterId}`)}
-                        onBook={() => navigate(`/business/${v.businessId}/master/${v.masterId}`)}
+                        onClick={() => navigate(`/business/${v.businessId}`)}
+                        onBook={() => navigate(`/business/${v.businessId}`)}
                         compact
                       />
                     ))}
@@ -508,7 +508,7 @@ export default function HomePage() {
                 ) : (
                   <HScroll snap autoScroll>
                     {fd.popularMasters.map((m) => (
-                      <PopularMasterCardView key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}/master/${m.masterId}`)} />
+                      <PopularMasterCardView key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`)} />
                     ))}
                   </HScroll>
                 )}

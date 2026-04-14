@@ -108,6 +108,7 @@ function toVisited(b: Business): VisitedMasterCard {
 
   return {
     id: `visited-${b.id}`,
+    providerType: b.provider_type,
     masterName: master?.name ?? firstMasterName(b),
     businessName: b.name,
     specialization: master?.specialization ?? CATEGORY_LABELS[b.category] ?? '',
@@ -125,6 +126,7 @@ function toVisited(b: Business): VisitedMasterCard {
 function toNearby(b: Business): NearbyBusinessCard {
   return {
     id: `nearby-${b.id}`,
+    providerType: b.provider_type,
     name: b.name,
     category: b.category,
     categoryLabel: CATEGORY_LABELS[b.category],
@@ -146,6 +148,7 @@ function toPopularMaster(b: Business, idx: number): PopularMasterCard {
 
   return {
     id: `pm-${b.id}-${idx}`,
+    providerType: b.provider_type,
     name: master?.name ?? nthMasterName(idx),
     specialization: master?.specialization ?? masterSpecialization(b.category),
     distanceMeters: seedDistance(seed),
@@ -163,6 +166,7 @@ function toPopularStudio(b: Business): PopularStudioCard {
   const photos = [photoUrl, photoUrl, photoUrl].filter((p): p is string => Boolean(p));
   return {
     id: `ps-${b.id}`,
+    providerType: b.provider_type,
     name: b.name,
     category: b.category,
     categoryLabel: CATEGORY_LABELS[b.category],

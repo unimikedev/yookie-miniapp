@@ -6,10 +6,11 @@
  * Mapping from Business/Master into these shapes happens inside useHomeData.
  */
 
-import type { CategoryEnum } from './types';
+import type { CategoryEnum, ProviderType } from './types';
 
 export interface VisitedMasterCard {
   id: string;
+  providerType: ProviderType;
   masterName: string;
   businessName: string;
   specialization: string;
@@ -25,6 +26,7 @@ export interface VisitedMasterCard {
 
 export interface NearbyBusinessCard {
   id: string;
+  providerType: ProviderType;
   name: string;
   category: CategoryEnum;
   categoryLabel: string;
@@ -37,6 +39,7 @@ export interface NearbyBusinessCard {
 
 export interface PopularMasterCard {
   id: string;
+  providerType: ProviderType;
   name: string;
   specialization: string;
   distanceMeters: number;
@@ -49,6 +52,7 @@ export interface PopularMasterCard {
 
 export interface PopularStudioCard {
   id: string;
+  providerType: ProviderType;
   name: string;
   category: CategoryEnum;
   categoryLabel: string;

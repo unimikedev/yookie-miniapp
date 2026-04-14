@@ -221,7 +221,7 @@ export default function SearchPage() {
                   <div
                     key={m.id}
                     className={styles.masterSearchResult}
-                    onClick={() => navigate(`/business/${m.businessId}/master/${m.id}`)}
+                    onClick={() => navigate(`/business/${m.businessId}`)}
                   >
                     <div className={styles.masterSearchAvatar}>
                       <img src={getMockMasterImage(m.id)} alt={m.name} />
