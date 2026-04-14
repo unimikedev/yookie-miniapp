@@ -137,6 +137,51 @@
   color: var(--color-text-muted);
 }
 
+.searchPlaceholderWrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.searchPlaceholderStatic {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
+  line-height: var(--text-body-lg-lh);
+}
+
+.searchPlaceholderTyped {
+  position: relative;
+  display: inline-block;
+  min-width: 120px;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
+  line-height: var(--text-body-lg-lh);
+}
+
+.typingCursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: var(--color-accent);
+  margin-left: 2px;
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
 .searchIcon {
   display: flex;
   align-items: center;

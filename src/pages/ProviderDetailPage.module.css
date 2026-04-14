@@ -49,12 +49,55 @@
   text-overflow: ellipsis;
 }
 
+/* ── Header action buttons ─────────────────────────────── */
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+  transition: transform 0.1s;
+}
+
+.backBtn:active {
+  transform: scale(0.92);
+}
+
+.coverActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.coverActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.coverActionBtn:active {
+  transform: scale(0.92);
+}
+
 /* ── Hero cover / photo ──────────────────────────────────── */
 .coverWrap {
   position: relative;
   width: 100%;
+  aspect-ratio: 3 / 4;
+  max-height: 100vh;
   overflow: hidden;
-  border-radius: 0 0 20px 20px;
+  border-radius: 0;
 }
 
 .coverImage {
@@ -66,7 +109,8 @@
 
 .coverFallback {
   width: 100%;
-  height: 240px;
+  height: 100%;
+  min-height: 300px;
   background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-elevated) 100%);
   display: flex;
   align-items: center;
@@ -80,7 +124,8 @@
 
 .coverSkeleton {
   width: 100%;
-  height: 240px;
+  height: 100%;
+  min-height: 300px;
   background: var(--color-surface);
 }
 
@@ -426,7 +471,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px 16px;
+  padding: 16px;
   background: var(--color-surface-elevated);
   border-radius: var(--radius-2xl);
 }
@@ -449,12 +494,31 @@
 
 .confirmationService {
   display: flex;
-  justify-content: space-between;
-  font-size: var(--text-body-sm-size);
-  font-weight: var(--text-body-sm-weight);
-  line-height: var(--text-body-sm-lh);
-  letter-spacing: var(--text-body-sm-ls);
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.confirmationService:last-child {
+  border-bottom: none;
+}
+
+.confirmationServiceName {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text);
+}
+
+.confirmationServiceMaster {
+  font-size: var(--text-caption-xs-size);
   color: var(--color-text-secondary);
+}
+
+.confirmationServicePrice {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-muted);
 }
 
 .confirmationDetail {

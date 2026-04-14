@@ -9,11 +9,21 @@
   color: var(--color-muted);
 }
 
+.rootCompact {
+  padding: 2rem 1rem;
+  min-height: auto;
+}
+
 .icon {
   font-size: var(--text-display-size);
   margin-bottom: 1.25rem;
   display: block;
   line-height: var(--text-display-lh);
+}
+
+.rootCompact .icon {
+  font-size: var(--text-h2-size);
+  margin-bottom: 0.5rem;
 }
 
 .title {
@@ -23,12 +33,23 @@
   margin: 0 0 0.5rem;
 }
 
+.rootCompact .title {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  margin-bottom: 0.25rem;
+}
+
 .description {
   font-size: var(--text-body-lg-size);
   color: var(--color-muted);
   line-height: var(--text-body-lh);
   margin: 0 0 1.5rem;
   max-width: 18.75rem;
+}
+
+.rootCompact .description {
+  font-size: var(--text-caption-size);
+  margin-bottom: 0;
 }
 
 .action {

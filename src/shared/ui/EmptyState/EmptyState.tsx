@@ -10,6 +10,7 @@ export interface EmptyStateProps {
   title: string;
   description?: string;
   action?: ReactNode;
+  compact?: boolean;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -17,8 +18,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   action,
+  compact = false,
 }) => (
-  <div className={styles.root} role="status" aria-label={title}>
+  <div className={`${styles.root} ${compact ? styles.rootCompact : ''}`} role="status" aria-label={title}>
     <div className={styles.icon} aria-hidden="true">{icon}</div>
     <h2 className={styles.title}>{title}</h2>
     {description && <p className={styles.description}>{description}</p>}

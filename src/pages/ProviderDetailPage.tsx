@@ -30,10 +30,9 @@ import { createBooking } from '@/lib/api/bookings'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
-import { FavoriteButton, PhotoSwipe } from '@/components/features'
+import { PhotoSwipe } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
-import { TELEGRAM_BOT_URL } from '@/shared/constants'
 import { formatMasterName } from '@/lib/utils/name'
 import styles from './ProviderDetailPage.module.css'
 
@@ -390,21 +389,7 @@ export default function ProviderDetailPage() {
           {headerTitle}
         </span>
         <div className={styles.coverActions}>
-          <button
-            className={styles.coverActionBtn}
-            aria-label="Поделиться"
-            onClick={() => window.open(TELEGRAM_BOT_URL, '_blank')}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#F9FAFB" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="14" cy="3" r="2" />
-              <circle cx="4" cy="9" r="2" />
-              <circle cx="14" cy="15" r="2" />
-              <path d="M6 10L12 14M6 8L12 4" />
-            </svg>
-          </button>
-          {id && !isLoading && (
-            <FavoriteButton businessId={id} size="sm" />
-          )}
+          {/* Removed share and favorite buttons — clean header */}
         </div>
       </div>
 
@@ -524,7 +509,7 @@ export default function ProviderDetailPage() {
                   })}
                 </div>
               ) : (
-                <EmptyState title="Услуги не найдены" description="Услуги ещё не добавлены" />
+                <EmptyState title="Услуги не найдены" description="Услуги ещё не добавлены" compact />
               )}
             </section>
 
@@ -561,6 +546,7 @@ export default function ProviderDetailPage() {
                     <EmptyState
                       title="Выберите мастера"
                       description="Выберите специалиста для каждой услуги"
+                      compact
                     />
                   ) : slotsLoading ? (
                     <div className={styles.slotsSkeleton}>
@@ -589,7 +575,8 @@ export default function ProviderDetailPage() {
                   ) : (
                     <EmptyState
                       title="Нет времени"
-                      description="На эту дату нет свободного времени. Выберите другую дату."
+                      description="На эту дату нет свободного времени"
+                      compact
                     />
                   )}
                 </section>
@@ -619,32 +606,21 @@ export default function ProviderDetailPage() {
                   />
                 </div>
 
-                {/* Summary */}
+                {/* Summary — one block per service: service name + master + price */}
                 <div className={styles.confirmationSummary}>
                   <div className={styles.confirmationBusiness}>{business?.name}</div>
-                  {isIndividual && soloMaster && (
-                    <div className={styles.confirmationMaster}>{formatMasterName(soloMaster.name)}</div>
-                  )}
-                  {selectedServices.map((s) => (
-                    <div key={s.service.id} className={styles.confirmationService}>
-                      <span>{s.service.name}</span>
-                      <span>{s.service.price.toLocaleString('ru')} сўм</span>
-                    </div>
-                  ))}
-                  {/* Show per-service master when multiple services + business (not individual) */}
-                  {selectedServices.length > 1 && !isIndividual ? (
-                    selectedServices.map((s) => (
-                      <div key={`master-${s.service.id}`} className={styles.confirmationDetail}>
-                        <span>{s.service.name}:</span>
-                        <span>{formatMasterName(masters.find(m => m.id === s.masterId)?.name ?? '—')}</span>
+                  {selectedServices.map((s) => {
+                    const masterName = isIndividual && soloMaster
+                      ? formatMasterName(soloMaster.name)
+                      : formatMasterName(masters.find(m => m.id === s.masterId)?.name ?? '—')
+                    return (
+                      <div key={s.service.id} className={styles.confirmationService}>
+                        <div className={styles.confirmationServiceName}>{s.service.name}</div>
+                        <div className={styles.confirmationServiceMaster}>{masterName}</div>
+                        <div className={styles.confirmationServicePrice}>{s.service.price.toLocaleString('ru')} сўм</div>
                       </div>
-                    ))
-                  ) : !isIndividual ? (
-                    <div className={styles.confirmationDetail}>
-                      <span>Мастер:</span>
-                      <span>{formatMasterName(masters.find(m => m.id === activeMasterId)?.name ?? '—')}</span>
-                    </div>
-                  ) : null}
+                    )
+                  })}
                   <div className={styles.confirmationDetail}>
                     <span>Дата:</span>
                     <span>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
@@ -693,7 +669,7 @@ export default function ProviderDetailPage() {
                   }}>Читать все отзывы →</button>
                 </>
               ) : (
-                <EmptyState title="Отзывов пока нет" description="Будьте первым, кто оставит отзыв" />
+                <EmptyState title="Отзывов пока нет" description="Будьте первым, кто оставит отзыв" compact />
               )}
             </section>
 

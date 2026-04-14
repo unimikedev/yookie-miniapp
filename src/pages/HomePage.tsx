@@ -53,7 +53,8 @@ interface SearchResultItem {
   masterId?: string
 }
 
-const TYPING_PLACEHOLDER = 'Найти барбера, мастера, салон...'
+const TYPING_WORDS = ['барбера', 'мастера', 'стилиста', 'тату мастера', 'бровиста', 'маникюр', 'массаж']
+const TYPING_PLACEHOLDER = 'Найти '
 
 const FILTER_CHIPS: HomeFilterChip[] = [
   { key: 'sort', label: '', icon: 'arrows' },
@@ -88,6 +89,46 @@ const ChevronRight = () => (
     <path d="M1 1L5 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
+
+/**
+ * TypingPlaceholder — animated placeholder that types different service keywords
+ */
+function TypingPlaceholder() {
+  const [currentWordIndex, setCurrentWordIndex] = useState(0)
+  const [currentCharIndex, setCurrentCharIndex] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  useEffect(() => {
+    const currentWord = TYPING_WORDS[currentWordIndex]
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        if (currentCharIndex < currentWord.length) {
+          setCurrentCharIndex(currentCharIndex + 1)
+        } else {
+          setTimeout(() => setIsDeleting(true), 1500)
+        }
+      } else {
+        if (currentCharIndex > 0) {
+          setCurrentCharIndex(currentCharIndex - 1)
+        } else {
+          setIsDeleting(false)
+          setCurrentWordIndex((currentWordIndex + 1) % TYPING_WORDS.length)
+        }
+      }
+    }, isDeleting ? 80 : 120)
+    return () => clearTimeout(timeout)
+  }, [currentCharIndex, currentWordIndex, isDeleting])
+
+  const currentWord = TYPING_WORDS[currentWordIndex]
+  const typedText = currentWord.substring(0, currentCharIndex)
+
+  return (
+    <>
+      {typedText}
+      <span className={styles.typingCursor} />
+    </>
+  )
+}
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -334,16 +375,23 @@ export default function HomePage() {
           <div className={styles.searchBox}>
             <form className={styles.searchInputWrap} onSubmit={handleSearchSubmit}>
               <span className={styles.searchIcon}><SearchIcon /></span>
-              <input
-                ref={inputRef}
-                className={styles.searchInput}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-                placeholder={TYPING_PLACEHOLDER}
-                autoComplete="off"
-              />
+              {searchQuery ? (
+                <input
+                  ref={inputRef}
+                  className={styles.searchInput}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                  placeholder={TYPING_PLACEHOLDER}
+                  autoComplete="off"
+                />
+              ) : (
+                <div className={styles.searchPlaceholderWrap}>
+                  <span className={styles.searchPlaceholderStatic}>{TYPING_PLACEHOLDER}</span>
+                  <span className={styles.searchPlaceholderTyped}><TypingPlaceholder /></span>
+                </div>
+              )}
               <button
                 className={styles.cityBadgeInside}
                 type="button"
