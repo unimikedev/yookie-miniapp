@@ -149,27 +149,16 @@
   position: relative;
   z-index: 2;
   margin-top: -24px;
-  padding: 24px 16px 16px;
+  padding: 16px 16px 0 0;
   background: var(--color-bg);
   border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
 }
 
 .infoTop {
+  padding: 0 16px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.infoTitleWrap {
-  flex: 1;
-  min-width: 0;
-}
-
-.infoNameRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .infoTitle {
@@ -179,51 +168,56 @@
   letter-spacing: var(--text-h1-ls);
   color: var(--color-text);
   margin: 0;
-  flex: 1;
-  min-width: 0;
+}
+
+.infoRatingRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.infoRatingValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text);
+}
+
+.infoRatingCount {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text-secondary);
+}
+
+.infoDot {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+  margin: 0 4px;
 }
 
 .infoCategory {
   font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
+  font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
-  display: block;
-  margin-top: 4px;
 }
 
-.infoRating {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex-shrink: 0;
-  padding-top: 2px;
-}
-
-.infoRatingValue {
-  font-size: var(--text-title-size);
-  font-weight: var(--text-title-weight);
-  color: var(--color-text);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.infoRatingCount {
-  font-size: var(--text-caption-xs-size);
-  font-weight: var(--text-caption-xs-weight);
-  color: var(--color-text-muted);
+.infoActions {
+  padding: 8px 16px 0;
 }
 
 .infoAddress {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
-  font-size: var(--text-body-size);
-  font-weight: var(--text-body-weight);
-  line-height: var(--text-body-lh);
-  letter-spacing: var(--text-body-ls);
+  margin-top: 8px;
+  padding: 0 16px;
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  line-height: var(--text-body-sm-lh);
+  letter-spacing: var(--text-body-sm-ls);
   color: var(--color-text-secondary);
   flex-wrap: wrap;
 }

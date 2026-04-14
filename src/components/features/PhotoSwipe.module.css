@@ -7,6 +7,8 @@
   overflow: hidden;
   border-radius: 0;
   touch-action: pan-y;
+  padding-bottom: 64px;
+  box-sizing: border-box;
 }
 
 .photo {
@@ -16,10 +18,10 @@
   display: block;
 }
 
-/* Dots indicator */
+/* Dots indicator — centered, above thumbnails */
 .dots {
   position: absolute;
-  bottom: 60px;
+  bottom: 56px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -41,11 +43,13 @@
   border-radius: 3px;
 }
 
-/* Thumbnails */
+/* Thumbnails — centered horizontally */
 .thumbnails {
   position: absolute;
-  bottom: 10px;
-  right: 12px;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  right: auto;
   display: flex;
   gap: 4px;
   align-items: center;

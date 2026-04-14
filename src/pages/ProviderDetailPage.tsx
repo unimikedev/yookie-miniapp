@@ -423,17 +423,20 @@ export default function ProviderDetailPage() {
       {!isLoading && business && (
         <div className={styles.infoBlock}>
           <div className={styles.infoTop}>
-            <div className={styles.infoTitleWrap}>
-              <div className={styles.infoNameRow}>
-                <h1 className={styles.infoTitle}>
-                  {isIndividual && soloMaster
-                    ? formatMasterName(soloMaster.name)
-                    : business.name}
-                </h1>
-                {id && (
-                  <FavoriteButton businessId={id} size="md" />
-                )}
-              </div>
+            <h1 className={styles.infoTitle}>
+              {isIndividual && soloMaster
+                ? formatMasterName(soloMaster.name)
+                : business.name}
+            </h1>
+            <div className={styles.infoRatingRow}>
+              <span className={styles.infoRatingValue}>
+                {Number(business.rating).toFixed(1)}
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#6BCEFF" />
+                </svg>
+              </span>
+              <span className={styles.infoRatingCount}> · {(business as any).review_count ?? 0} отзывов</span>
+              <span className={styles.infoDot}> · </span>
               {!isIndividual && business.category && (
                 <span className={styles.infoCategory}>{CATEGORY_LABELS[business.category]}</span>
               )}
@@ -441,17 +444,9 @@ export default function ProviderDetailPage() {
                 <span className={styles.infoCategory}>{soloMaster.specialization}</span>
               )}
             </div>
-            {(business.rating != null || (business as any).review_count != null) && (
-              <div className={styles.infoRating}>
-                <span className={styles.infoRatingValue}>
-                  {Number(business.rating).toFixed(1)}
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#6BCEFF" />
-                  </svg>
-                </span>
-                <span className={styles.infoRatingCount}>{(business as any).review_count ?? 0} отзывов</span>
-              </div>
-            )}
+          </div>
+          <div className={styles.infoActions}>
+            {id && <FavoriteButton businessId={id} />}
           </div>
           {business.address && (
             <div className={styles.infoAddress}>
