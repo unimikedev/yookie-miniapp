@@ -11,6 +11,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
+  padding-top: 0;
   padding-bottom: calc(80px + var(--safe-area-bottom));
 }
 
@@ -149,13 +150,20 @@
   position: relative;
   z-index: 2;
   margin-top: -24px;
-  padding: 16px 16px 0 0;
+  padding-top: 0;
   background: var(--color-bg);
   border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
 }
 
-.infoTop {
-  padding: 0 16px;
+.infoContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 16px 0;
+}
+
+.infoTitleWrap {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -168,11 +176,13 @@
   letter-spacing: var(--text-h1-ls);
   color: var(--color-text);
   margin: 0;
+  text-align: center;
 }
 
 .infoRatingRow {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0;
   flex-wrap: wrap;
 }
@@ -204,15 +214,12 @@
   color: var(--color-text-secondary);
 }
 
-.infoActions {
-  padding: 8px 16px 0;
-}
-
 .infoAddress {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 12px;
   padding: 0 16px;
   font-size: var(--text-body-sm-size);
   font-weight: var(--text-body-sm-weight);

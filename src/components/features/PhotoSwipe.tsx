@@ -66,32 +66,34 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
     >
       <img src={photos[current]} alt={alt} className={styles.photo} />
 
-      {/* Swipe hint dots */}
-      <div className={styles.dots}>
-        {photos.map((_, i) => (
-          <span key={i} className={`${styles.dot} ${i === current ? styles.dotActive : ''}`} />
-        ))}
-      </div>
-
-      {showThumbnails && (
-        <div className={styles.thumbnails}>
-          {photos.slice(0, 3).map((photo, idx) => (
-            <img
-              key={idx}
-              className={`${styles.thumbnail} ${idx === current ? styles.thumbnailActive : ''}`}
-              src={photo}
-              alt=""
-              onClick={(e) => {
-                e.stopPropagation()
-                setCurrent(idx)
-              }}
-            />
+      {/* Bottom controls: dots + thumbnails */}
+      <div className={styles.bottomControls}>
+        <div className={styles.dots}>
+          {photos.map((_, i) => (
+            <span key={i} className={`${styles.dot} ${i === current ? styles.dotActive : ''}`} />
           ))}
-          {photos.length > 3 && (
-            <div className={styles.thumbnailMore}>+{photos.length - 3}</div>
-          )}
         </div>
-      )}
+
+        {showThumbnails && (
+          <div className={styles.thumbnails}>
+            {photos.slice(0, 3).map((photo, idx) => (
+              <img
+                key={idx}
+                className={`${styles.thumbnail} ${idx === current ? styles.thumbnailActive : ''}`}
+                src={photo}
+                alt=""
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setCurrent(idx)
+                }}
+              />
+            ))}
+            {photos.length > 3 && (
+              <div className={styles.thumbnailMore}>+{photos.length - 3}</div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

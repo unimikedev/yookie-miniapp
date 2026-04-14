@@ -7,8 +7,6 @@
   overflow: hidden;
   border-radius: 0;
   touch-action: pan-y;
-  padding-bottom: 64px;
-  box-sizing: border-box;
 }
 
 .photo {
@@ -18,15 +16,22 @@
   display: block;
 }
 
-/* Dots indicator — centered, above thumbnails */
-.dots {
+/* Bottom controls: dots + thumbnails */
+.bottomControls {
   position: absolute;
-  bottom: 56px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 32px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 2;
+}
+
+.dots {
   display: flex;
   gap: 6px;
-  z-index: 2;
 }
 
 .dot {
@@ -43,17 +48,10 @@
   border-radius: 3px;
 }
 
-/* Thumbnails — centered horizontally */
 .thumbnails {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  right: auto;
   display: flex;
   gap: 4px;
   align-items: center;
-  z-index: 2;
 }
 
 .thumbnail {
