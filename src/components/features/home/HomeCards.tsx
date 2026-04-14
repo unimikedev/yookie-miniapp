@@ -12,6 +12,7 @@ import type {
   PopularStudioCard,
   HomeFilterChip,
 } from '@/lib/api/home'
+import { formatMasterName } from '@/lib/utils/name'
 
 /* ── formatters ─────────────────────────────────────────── */
 const formatDistance = (m: number): string =>
@@ -125,11 +126,10 @@ export function VisitedCard({ item, onBook, onClick, compact }: VisitedCardProps
         </div>
       <div className={`${styles.visitedInfo} ${compact ? styles.visitedInfoCompact : ''}`}>
           <div className={styles.visitedTopRow}>
-            <span className={styles.visitedName}>{item.masterName}</span>
+            <span className={styles.visitedName}>{formatMasterName(item.masterName)}</span>
           </div>
-          <span className={styles.visitedBusinessSpecialization}>
-            {item.businessName} • {item.specialization}
-          </span>
+          <span className={styles.visitedBusiness}>{item.businessName}</span>
+          <span className={styles.visitedSpecialization}>{item.specialization}</span>
           <span className={styles.visitedLastVisit}>{item.lastVisitDate}</span>
         </div>
       </div>
@@ -137,14 +137,8 @@ export function VisitedCard({ item, onBook, onClick, compact }: VisitedCardProps
         <button
           className={styles.visitedCtaCompact}
           onClick={(e) => { e.stopPropagation(); onBook?.() }}
-          aria-label="Повторить"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 3v5h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M3 21v-5h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          Записаться
         </button>
       )}
       {!compact && (
@@ -217,7 +211,7 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
       </div>
       <div className={styles.pmBody}>
         <div className={styles.pmTop}>
-          <span className={styles.pmName}>{item.name}</span>
+          <span className={styles.pmName}>{formatMasterName(item.name)}</span>
           <span className={styles.pmRating}>
             <StarIcon />
             {item.rating.toFixed(1)}

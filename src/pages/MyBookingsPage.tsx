@@ -4,6 +4,7 @@ import { useBookings } from '@/hooks/useBookings'
 import { Skeleton, EmptyState } from '@/shared/ui'
 import { cancelBooking, rescheduleBooking } from '@/lib/api/bookings'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
+import { formatMasterName } from '@/lib/utils/name'
 import ReviewForm from '@/components/features/ReviewForm'
 import RescheduleBottomSheet from '@/components/features/RescheduleBottomSheet'
 import { useAuthStore } from '@/stores/authStore'
@@ -193,7 +194,7 @@ export default function MyBookingsPage() {
                   const first = group[0]
                   const st = STATUS_LABELS[first.status] ?? { label: first.status.toUpperCase(), className: 'statusPending' }
                   const businessName = (first.businesses as { name?: string } | null)?.name || 'Заведение'
-                  const masterName = (first.masters as { name?: string } | null)?.name || 'Мастер'
+                  const masterName = formatMasterName((first.masters as { name?: string } | null)?.name || 'Мастер')
                   const businessCategory = (first.businesses as { category?: string } | null)?.category
                   const bizLogo = businessCategory ? getMockBusinessImage(businessCategory, first.business_id) : null
                   const isCancelling = cancelLoading === first.id

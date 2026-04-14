@@ -8,6 +8,7 @@ import { fetchBusinesses } from '@/lib/api/businesses'
 import { useCityStore } from '@/stores/cityStore'
 import { CATEGORY_LABELS, CategoryEnum } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
+import { formatMasterName } from '@/lib/utils/name'
 import styles from './SearchPage.module.css'
 
 const SearchIcon = () => (
@@ -226,7 +227,7 @@ export default function SearchPage() {
                       <img src={getMockMasterImage(m.id)} alt={m.name} />
                     </div>
                     <div className={styles.masterSearchInfo}>
-                      <span className={styles.masterSearchName}>{m.name}</span>
+                      <span className={styles.masterSearchName}>{formatMasterName(m.name)}</span>
                       <span className={styles.masterSearchSpec}>{m.specialization}</span>
                     </div>
                     <svg width="6" height="11" viewBox="0 0 6 11" fill="none">

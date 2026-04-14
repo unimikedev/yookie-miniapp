@@ -106,10 +106,10 @@
 .visitedCardCompact {
   flex-direction: row;
   align-items: center;
-  width: 300px;
-  height: 90px;
-  padding: 10px;
-  gap: 10px;
+  width: 320px;
+  height: 104px;
+  padding: 12px;
+  gap: 12px;
   flex-shrink: 0;
   border-radius: 24px;
 }
@@ -150,7 +150,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .visitedTopRow {
@@ -171,10 +171,20 @@
   line-height: var(--text-title-lh);
 }
 
-.visitedBusinessSpecialization {
+.visitedBusiness {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: var(--text-body-lh);
+}
+
+.visitedSpecialization {
   font-size: var(--text-caption-size);
   font-weight: var(--text-caption-weight);
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -256,24 +266,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
   height: 32px;
-  padding: 0;
+  padding: 0 12px;
   background: var(--color-accent);
-  color: #10193a;
+  color: var(--color-bg);
   border-radius: var(--radius-full);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
   transition: opacity 0.15s;
   flex-shrink: 0;
   border: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .visitedCtaCompact:active {
   opacity: 0.8;
-}
-
-[data-theme='dark'] .visitedCtaCompact {
-  color: #fff;
 }
 
 /* ── Nearby horizontal card ──────────────────────────────── */
@@ -437,10 +445,10 @@
 }
 
 .pmName {
-  font-size: var(--text-title-sm-size);
-  font-weight: var(--text-title-sm-weight);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
   color: var(--color-text);
-  letter-spacing: var(--text-title-sm-ls);
+  letter-spacing: var(--text-title-ls);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

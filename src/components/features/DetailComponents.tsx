@@ -6,6 +6,7 @@
 import React from 'react'
 import type { Service, Master } from '@/lib/api/types'
 import { getMockMasterImage } from '@/lib/utils/mockImages'
+import { formatMasterName } from '@/lib/utils/name'
 import styles from './DetailComponents.module.css'
 
 /* ── Chip (active/inactive pill for tabs) ──────────────────── */
@@ -145,7 +146,7 @@ export function SpecialistCard({ name, role, rating, photoUrl, onClick }: Specia
       </div>
       <div className={styles.specialistInfo}>
         <div className={styles.specialistTop}>
-          <span className={styles.specialistName}>{name}</span>
+          <span className={styles.specialistName}>{formatMasterName(name)}</span>
           <div className={styles.specialistRating}>
             ★ {rating.toFixed(1)}
           </div>
@@ -181,7 +182,7 @@ export function MasterChip({ master, selected, onClick }: MasterChipProps) {
         )}
       </div>
       <div className={styles.masterChipInfo}>
-        <span className={styles.masterChipName}>{master.name}</span>
+        <span className={styles.masterChipName}>{formatMasterName(master.name)}</span>
         <div className={styles.masterChipRating}>
           <svg width="10" height="10" viewBox="0 0 14 14" fill="none">
             <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#FBBF24" />

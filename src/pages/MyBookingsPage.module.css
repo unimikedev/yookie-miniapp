@@ -54,7 +54,8 @@
 }
 
 .sectionLabel {
-  font: var(--text-body);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-muted);
   padding: 0 4px;
 }
@@ -68,8 +69,8 @@
 .bookingCard {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
+  gap: 16px;
+  padding: 16px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-3xl);
@@ -79,13 +80,13 @@
 .cardTop {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .businessLogo {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-3xl);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-2xl);
   background: var(--color-surface-elevated);
   flex-shrink: 0;
   object-fit: cover;
@@ -104,21 +105,32 @@
 }
 
 .businessName {
-  font: var(--text-title);
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-lh);
+  letter-spacing: var(--text-h3-ls);
   color: var(--color-text);
 }
 
 .serviceName {
-  font: var(--text-body);
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
   color: var(--color-text-secondary);
+}
+
+.serviceCountBadge {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 /* ── Services list ───────────────────────────────────── */
 .servicesList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 12px 14px;
   background: var(--color-surface-elevated);
   border-radius: var(--radius-2xl);
 }
@@ -130,16 +142,37 @@
   gap: 8px;
 }
 
+.serviceName {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .serviceDuration {
-  font: var(--text-body-sm);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
+.serviceMaster {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
 .statusBadge {
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
-  font: var(--text-micro);
+  font-size: var(--text-caption-xs-size);
+  font-weight: var(--text-caption-xs-weight);
+  letter-spacing: 0.05em;
   flex-shrink: 0;
 }
 
@@ -168,15 +201,16 @@
 .cardMeta {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .metaRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font: var(--text-body);
-  color: var(--color-text);
+  gap: 10px;
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  color: var(--color-text-secondary);
 }
 
 /* ── Total price ─────────────────────────────────────── */
@@ -184,18 +218,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--color-surface-elevated);
   border-radius: var(--radius-2xl);
 }
 
 .totalLabel {
-  font: var(--text-button-sm);
-  color: var(--color-text);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--text-micro-ls);
 }
 
 .totalValue {
-  font: var(--text-button);
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
   color: var(--color-accent);
 }
 
@@ -209,7 +247,8 @@
   padding: 12px;
   background: var(--color-surface-elevated);
   border-radius: var(--radius-3xl);
-  font: var(--text-body);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
   color: var(--color-text);
   text-align: center;
   transition: opacity 0.15s;
@@ -220,7 +259,8 @@
   padding: 12px;
   background: #F87171;
   border-radius: var(--radius-3xl);
-  font: var(--text-body);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
   color: #fff;
   text-align: center;
   transition: opacity 0.15s;
@@ -256,7 +296,7 @@
   gap: 12px;
   padding: 0 16px;
   height: 72px;
-  border-top: 1px solid var(--color-bg);
+  border-top: 1px solid var(--color-border);
 }
 
 .pastRow:first-child {
@@ -264,9 +304,9 @@
 }
 
 .pastLogo {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-2xl);
   background: var(--color-surface-elevated);
   flex-shrink: 0;
 }
@@ -280,20 +320,37 @@
 }
 
 .pastName {
-  font: var(--text-body);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
   color: var(--color-text);
 }
 
 .pastMeta {
-  font: var(--text-body-sm);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
+}
+
+.pastServices {
+  font-size: var(--text-caption-xs-size);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pastPrice {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-accent);
 }
 
 .repeatBtn {
   padding: 8px 16px;
   background: var(--color-accent);
   border-radius: var(--radius-3xl);
-  font: var(--text-body-sm);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
   color: var(--color-bg);
   flex-shrink: 0;
 }
@@ -302,7 +359,8 @@
   padding: 8px 16px;
   background: var(--color-accent);
   border-radius: var(--radius-3xl);
-  font: var(--text-caption);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
   color: var(--color-bg);
   flex-shrink: 0;
   transition: opacity 0.15s;
@@ -344,7 +402,8 @@
   padding: 12px 24px;
   background: var(--color-accent);
   border-radius: var(--radius-3xl);
-  font: var(--text-body);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
   color: var(--color-bg);
 }
 

@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useBusiness } from '@/hooks/useBusiness'
 import { useBookingStore } from '@/stores/bookingStore'
 import { Skeleton, EmptyState } from '@/shared/ui'
+import { formatMasterName } from '@/lib/utils/name'
 import styles from './ServiceMasterStep.module.css'
 
 export default function ServiceMasterStep() {
@@ -124,7 +125,7 @@ export default function ServiceMasterStep() {
                 >
                   <option value="" disabled>Мастер</option>
                   {serviceMasters.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
+                    <option key={m.id} value={m.id}>{formatMasterName(m.name)}</option>
                   ))}
                 </select>
               </div>
