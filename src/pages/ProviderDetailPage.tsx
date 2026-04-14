@@ -402,9 +402,6 @@ export default function ProviderDetailPage() {
         </div>
       </div>
 
-      {/* Spacer for fixed header */}
-      <div className={styles.pageHeaderSpacer} />
-
       {/* Hero: business cover OR individual master photo */}
       <div className={styles.coverWrap}>
         {isLoading ? (

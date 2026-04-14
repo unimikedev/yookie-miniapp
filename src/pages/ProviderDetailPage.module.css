@@ -14,10 +14,10 @@
   padding-bottom: calc(80px + var(--safe-area-bottom));
 }
 
-/* ── Page header (pill shaped, floating) ─────────────────── */
+/* ── Page header (pill shaped, floating over photo) ────── */
 .pageHeader {
   position: fixed;
-  top: 0;
+  top: calc(var(--safe-area-top) + 8px);
   left: 16px;
   right: 16px;
   z-index: 50;
@@ -25,17 +25,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  margin-top: calc(var(--safe-area-top) + 8px);
   min-height: 48px;
-  background: color-mix(in srgb, var(--color-surface-elevated) 75%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 60%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-3xl);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.pageHeaderSpacer {
-  height: calc(48px + var(--safe-area-top) + 16px);
 }
 
 .headerLeft {
@@ -109,9 +104,7 @@
 .coverWrap {
   position: relative;
   width: 100%;
-  height: 70vh;
-  min-height: 400px;
-  max-height: 800px;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 0;
 }
@@ -153,7 +146,7 @@
 
 /* ── Info block ──────────────────────────────────────────── */
 .infoBlock {
-  padding: 0 16px 12px;
+  padding: 24px 16px 12px;
 }
 
 .infoTop {

@@ -13,7 +13,7 @@ interface PhotoSwipeProps {
   height?: number
 }
 
-export default function PhotoSwipe({ photos, alt, className, height = 300 }: PhotoSwipeProps) {
+export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwipeProps) {
   const [current, setCurrent] = useState(0)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
