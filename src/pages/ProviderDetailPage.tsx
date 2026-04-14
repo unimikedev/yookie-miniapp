@@ -378,18 +378,28 @@ export default function ProviderDetailPage() {
   // ── Render ──────────────────────────────────────────────────────
   return (
     <div className={styles.page}>
-      {/* Navigation header (fixed, frosted glass) */}
+      {/* Navigation header (pill shaped, floating) */}
       <div className={styles.pageHeader}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M13 4L7 10L13 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <div className={styles.headerLeft}>
+          <button className={styles.shareBtn} aria-label="Поделиться" onClick={() => window.open(TELEGRAM_BOT_URL, '_blank')}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="14" cy="3" r="2" />
+              <circle cx="4" cy="9" r="2" />
+              <circle cx="14" cy="15" r="2" />
+              <path d="M6 10L12 14M6 8L12 4" />
+            </svg>
+          </button>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M13 4L7 10L13 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
         <span className={styles.pageHeaderTitle}>
           {headerTitle}
         </span>
         <div className={styles.coverActions}>
-          {/* Removed share and favorite buttons — clean header */}
+          {/* Right side — empty, reserved for future use */}
         </div>
       </div>
 
@@ -448,6 +458,16 @@ export default function ProviderDetailPage() {
                 <path d="M7 0C4.24 0 2 2.24 2 5C2 8.5 7 14 7 14S12 8.5 12 5C12 2.24 9.76 0 7 0ZM7 7C5.9 7 5 6.1 5 5C5 3.9 5.9 3 7 3C8.1 3 9 3.9 9 5C9 6.1 8.1 7 7 7Z" fill="#6B7280" />
               </svg>
               <span>{business.address}</span>
+              <button className={styles.showOnMapBtn} onClick={() => {
+                const lat = business.lat ?? 0
+                const lng = business.lng ?? 0
+                window.open(`https://yandex.com/maps/?pt=${lng},${lat}&z=16&l=map`, '_blank')
+              }}>
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 0C3.13 0 0 3.13 0 7C0 12.25 7 14 7 14S14 12.25 14 7C14 3.13 10.87 0 7 0ZM7 9.5C5.62 9.5 4.5 8.38 4.5 7C4.5 5.62 5.62 4.5 7 4.5C8.38 4.5 9.5 5.62 9.5 7C9.5 8.38 8.38 9.5 7 9.5Z" fill="currentColor"/>
+                </svg>
+                На карте
+              </button>
             </div>
           )}
           {isIndividual && soloMaster?.bio && (
@@ -588,7 +608,7 @@ export default function ProviderDetailPage() {
               <div ref={confirmationRef} className={styles.confirmationSection}>
                 <h2 className={styles.confirmationTitle}>Подтверждение записи</h2>
 
-                {/* Client info */}
+                {/* Client info — 16px side padding */}
                 <div className={styles.confirmationForm}>
                   <input
                     className={styles.confirmationInput}
@@ -606,7 +626,7 @@ export default function ProviderDetailPage() {
                   />
                 </div>
 
-                {/* Summary — one block per service: service name + master on left, price on right */}
+                {/* Summary — 16px side padding */}
                 <div className={styles.confirmationSummary}>
                   <div className={styles.confirmationBusiness}>{business?.name}</div>
                   {selectedServices.map((s) => {
@@ -623,13 +643,10 @@ export default function ProviderDetailPage() {
                       </div>
                     )
                   })}
-                  <div className={styles.confirmationDetail}>
-                    <span>Дата:</span>
-                    <span>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
-                  </div>
-                  <div className={styles.confirmationDetail}>
-                    <span>Время:</span>
-                    <span>{selectedSlot?.start}</span>
+                  <div className={styles.confirmationDateTime}>
+                    <span className={styles.confirmationDetailLabel}>
+                      {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} в {selectedSlot?.start}
+                    </span>
                   </div>
                   <div className={styles.confirmationTotal}>
                     <span>Итого:</span>
