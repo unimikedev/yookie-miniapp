@@ -91,25 +91,144 @@
   top: 0;
   z-index: 10;
   background: var(--color-bg);
-  padding: calc(5px + var(--safe-area-top)) 16px 5px;
+  padding: 4px 16px 4px;
 }
 
 .searchBox {
+  position: relative;
+}
+
+.searchInputWrap {
   position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   height: 56px;
   padding: 0 16px;
-  padding-right: calc(16px + 100px); /* space for city badge */
+  padding-right: calc(16px + 100px);
   background: var(--color-surface);
   border: 2px solid var(--color-accent);
   border-radius: var(--radius-3xl);
-  cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
   width: 100%;
   min-width: 0;
   box-shadow: 0 0 8px rgba(154, 210, 64, 0.15);
+}
+
+.searchInputWrap:focus-within {
+  background: var(--color-surface-elevated);
+  box-shadow: 0 0 12px rgba(154, 210, 64, 0.25);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-family);
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
+  color: var(--color-text);
+  line-height: var(--text-body-lg-lh);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.searchIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.searchDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.searchDropdownHeader {
+  padding: 10px 16px 6px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--text-micro-ls);
+}
+
+.searchResultItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.searchResultItem:active {
+  background: var(--color-surface);
+}
+
+.searchResultIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.searchResultInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.searchResultName {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchResultMeta {
+  font-size: var(--text-caption-xs-size);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchResultArrow {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.searchEmpty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: var(--text-body-sm-size);
+  color: var(--color-text-muted);
 }
 
 .cityBadgeInside {

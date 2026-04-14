@@ -2,7 +2,7 @@
  * HomePage — Figma "Главная" (node 184:6540).
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useHomeData } from '@/hooks/useHomeData'
 import { useVisitedMasters } from '@/hooks/useVisitedMasters'
@@ -25,9 +25,35 @@ import {
 import type { CategoryEnum } from '@/lib/api/types'
 import type { HomeFilterChip } from '@/lib/api/home'
 import { CATEGORIES } from '@/shared/constants'
+import { fetchBusinesses } from '@/lib/api/businesses'
 import styles from './HomePage.module.css'
 
-const TYPING_WORDS = ['барбера', 'мастера', 'салон', 'маникюр', 'стрижку', 'массаж']
+const CATEGORY_EMOJI_MAP: Record<string, string> = {
+  barber: '💈',
+  beauty_salon: '💅',
+  nail_studio: '💅',
+  hair_salon: '💇',
+  spa: '🧖',
+  massage: '💆',
+  lash_brow: '👁️',
+  tattoo: '🎨',
+  cosmetology: '🧴',
+  medical_clinic: '🏥',
+  fitness: '🏋️',
+  barbershop: '💈',
+}
+
+interface SearchResultItem {
+  type: 'business' | 'master' | 'category'
+  id: string
+  name: string
+  meta: string
+  emoji?: string
+  businessId?: string
+  masterId?: string
+}
+
+const TYPING_PLACEHOLDER = 'Найти барбера, мастера, салон...'
 
 const FILTER_CHIPS: HomeFilterChip[] = [
   { key: 'sort', label: '', icon: 'arrows' },
@@ -39,15 +65,6 @@ const FILTER_CHIPS: HomeFilterChip[] = [
 
 /* ── SVG Icons ──────────────────────────────────────────── */
 
-const LocationIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
-    <path
-      d="M11 1C6.58 1 3 4.58 3 9C3 14.25 11 21 11 21S19 14.25 19 9C19 4.58 15.42 1 11 1ZM11 12C9.34 12 8 10.66 8 9C8 7.34 9.34 6 11 6C12.66 6 14 7.34 14 9C14 10.66 12.66 12 11 12Z"
-      fill="currentColor"
-    />
-  </svg>
-)
-
 const HeartIconLarge = () => (
   <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
     <path
@@ -57,55 +74,20 @@ const HeartIconLarge = () => (
   </svg>
 )
 
+/* ── SVG Icons ──────────────────────────────────────────── */
+
 const SearchIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="11" cy="11" r="7" stroke="#6B7280" strokeWidth="2" />
-    <path d="M21 21L16.5 16.5" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" />
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <circle cx="9" cy="9" r="6" stroke="#6B7280" strokeWidth="2" />
+    <path d="M13.5 13.5L18 18" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" />
   </svg>
 )
 
-/**
- * TypingPlaceholder — animated placeholder that types different words
- */
-function TypingPlaceholder() {
-  const [currentWordIndex, setCurrentWordIndex] = useState(0)
-  const [currentCharIndex, setCurrentCharIndex] = useState(0)
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  useEffect(() => {
-    const currentWord = TYPING_WORDS[currentWordIndex]
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        if (currentCharIndex < currentWord.length) {
-          setCurrentCharIndex(currentCharIndex + 1)
-        } else {
-          setTimeout(() => setIsDeleting(true), 1500)
-        }
-      } else {
-        if (currentCharIndex > 0) {
-          setCurrentCharIndex(currentCharIndex - 1)
-        } else {
-          setIsDeleting(false)
-          setCurrentWordIndex((currentWordIndex + 1) % TYPING_WORDS.length)
-        }
-      }
-    }, isDeleting ? 80 : 120)
-    return () => clearTimeout(timeout)
-  }, [currentCharIndex, currentWordIndex, isDeleting])
-
-  const currentWord = TYPING_WORDS[currentWordIndex]
-  const typedText = currentWord.substring(0, currentCharIndex)
-
-  return (
-    <>
-      <span className={styles.searchPlaceholderStatic}>Найти </span>
-      <span className={styles.searchPlaceholderTyped}>
-        {typedText}
-        <span className={styles.typingCursor} />
-      </span>
-    </>
-  )
-}
+const ChevronRight = () => (
+  <svg width="6" height="12" viewBox="0 0 6 12" fill="none">
+    <path d="M1 1L5 6L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -118,6 +100,120 @@ export default function HomePage() {
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
+
+  // ── Inline search ──
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Debounced search
+  const performSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      return
+    }
+    setSearchLoading(true)
+    const q = query.toLowerCase().trim()
+    const results: SearchResultItem[] = []
+
+    try {
+      // 1. Search businesses
+      const bizRes = await fetchBusinesses({ city: city.id, search: query, limit: 8 })
+      for (const b of (bizRes.data ?? [])) {
+        if (
+          b.name.toLowerCase().includes(q) ||
+          (b.description ?? '').toLowerCase().includes(q) ||
+          (b.category ?? '').toLowerCase().includes(q)
+        ) {
+          results.push({
+            type: 'business',
+            id: b.id,
+            name: b.name,
+            meta: b.category_label || b.category || '',
+            emoji: CATEGORY_EMOJI_MAP[b.category] ?? '🏢',
+            businessId: b.id,
+          })
+        }
+      }
+    } catch { /* ignore */ }
+
+    // 2. Search masters from home data
+    const masters = data?.popularMasters ?? []
+    for (const m of masters) {
+      if (
+        m.name.toLowerCase().includes(q) ||
+        m.specialization.toLowerCase().includes(q)
+      ) {
+        results.push({
+          type: 'master',
+          id: `master-${m.masterId}`,
+          name: m.name,
+          meta: m.specialization,
+          emoji: '👤',
+          businessId: m.businessId,
+          masterId: m.masterId,
+        })
+      }
+    }
+
+    // 3. Search categories by label
+    for (const cat of CATEGORIES) {
+      if (cat.label.toLowerCase().includes(q)) {
+        results.unshift({
+          type: 'category',
+          id: `cat-${cat.key}`,
+          name: cat.label,
+          meta: 'Категория',
+          emoji: cat.emoji,
+        })
+      }
+    }
+
+    setSearchResults(results.slice(0, 10))
+    setSearchLoading(false)
+  }, [city.id, data])
+
+  // Debounce: search 300ms after last keystroke
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+    const timer = setTimeout(() => {
+      performSearch(searchQuery)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery, performSearch])
+
+  const handleSearchSelect = (item: SearchResultItem) => {
+    if (item.type === 'category') {
+      setSelectedCategory(item.id.replace('cat-', '') as CategoryEnum)
+      setSearchQuery('')
+      setSearchResults([])
+      inputRef.current?.blur()
+      return
+    }
+    if (item.type === 'business') {
+      navigate(`/business/${item.businessId}`)
+      return
+    }
+    if (item.type === 'master' && item.businessId && item.masterId) {
+      navigate(`/business/${item.businessId}/master/${item.masterId}`)
+      return
+    }
+  }
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
+    }
+  }
+
+  // Close dropdown on outside click
+  const showDropdown = searchFocused && searchQuery.trim().length > 0
 
   // Map API visited data to VisitedMasterCard shape
   const visitedCards = apiVisited.length > 0
@@ -233,17 +329,61 @@ export default function HomePage() {
           </button>
         </header>
 
-        {/* Search — sticky */}
+        {/* Search — inline with dropdown */}
         <div className={styles.searchWrap}>
-          <div className={styles.searchBox} onClick={() => navigate('/search')} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && navigate('/search')}>
-            <span className={styles.searchIcon}><SearchIcon /></span>
-            <span className={styles.searchPlaceholder}><TypingPlaceholder /></span>
-            <button className={styles.cityBadgeInside} onClick={(e) => { e.stopPropagation(); setCitySelectorOpen(true); }} aria-label="Смена города">
-              <span>{city.name}</span>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+          <div className={styles.searchBox}>
+            <form className={styles.searchInputWrap} onSubmit={handleSearchSubmit}>
+              <span className={styles.searchIcon}><SearchIcon /></span>
+              <input
+                ref={inputRef}
+                className={styles.searchInput}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                placeholder={TYPING_PLACEHOLDER}
+                autoComplete="off"
+              />
+              <button
+                className={styles.cityBadgeInside}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setCitySelectorOpen(true); }}
+                aria-label="Смена города"
+              >
+                <span>{city.name}</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </form>
+
+            {/* Search dropdown */}
+            {showDropdown && (
+              <div className={styles.searchDropdown}>
+                {searchLoading ? (
+                  <div className={styles.searchEmpty}>
+                    <Skeleton variant="rect" height={48} />
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  searchResults.map((item) => (
+                    <button
+                      key={item.id}
+                      className={styles.searchResultItem}
+                      onMouseDown={(e) => { e.preventDefault(); handleSearchSelect(item); }}
+                    >
+                      <span className={styles.searchResultIcon}>{item.emoji}</span>
+                      <div className={styles.searchResultInfo}>
+                        <span className={styles.searchResultName}>{item.name}</span>
+                        <span className={styles.searchResultMeta}>{item.meta}</span>
+                      </div>
+                      <span className={styles.searchResultArrow}><ChevronRight /></span>
+                    </button>
+                  ))
+                ) : (
+                  <div className={styles.searchEmpty}>Ничего не найдено</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
