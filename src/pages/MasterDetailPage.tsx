@@ -359,7 +359,7 @@ export default function MasterDetailPage() {
               <span className={styles.masterRatingValue}>
                 {Number(currentMaster.rating).toFixed(1)}
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#9AD240" />
+                  <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#6BCEFF" />
                 </svg>
               </span>
               <span className={styles.masterRatingCount}>{currentMaster.review_count ?? 0} отзывов</span>

@@ -38,6 +38,18 @@
   height: calc(48px + var(--safe-area-top) + 16px);
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .pageHeaderTitle {
   flex: 1;
   font-size: var(--text-body-lg-size);
@@ -87,12 +99,6 @@
   opacity: 0.6;
 }
 
-.coverActions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
 .headerLeft {
   display: flex;
   align-items: center;
@@ -103,11 +109,17 @@
 .coverWrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 4;
-  max-height: 100vh;
+  height: 70vh;
+  min-height: 400px;
+  max-height: 800px;
   overflow: hidden;
   border-radius: 0;
-  margin-top: 0;
+}
+
+.coverWrap > * {
+  display: block;
+  width: 100%;
+  height: 100% !important;
 }
 
 .coverImage {
@@ -141,7 +153,7 @@
 
 /* ── Info block ──────────────────────────────────────────── */
 .infoBlock {
-  padding: 8px 16px 12px;
+  padding: 0 16px 12px;
 }
 
 .infoTop {

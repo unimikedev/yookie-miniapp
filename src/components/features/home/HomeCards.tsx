@@ -22,7 +22,7 @@ const formatPriceFrom = (price: number): string =>
   `от ${Math.round(price / 1000)} тыс.`
 
 /* ── icons ──────────────────────────────────────────────── */
-const StarIcon = ({ color = '#9AD240' }: { color?: string }) => (
+const StarIcon = ({ color = '#6BCEFF' }: { color?: string }) => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
     <path
       d="M6 0.5L7.545 3.63L11 4.135L8.5 6.57L9.09 10.01L6 8.385L2.91 10.01L3.5 6.57L1 4.135L4.455 3.63L6 0.5Z"
@@ -35,7 +35,7 @@ const HeartIcon = ({ filled = false, size = 18 }: { filled?: boolean; size?: num
   <svg width={size} height={size} viewBox="0 0 20 18" fill="none">
     <path
       d="M10 17.5C9.7 17.5 9.4 17.4 9.14 17.2L1.5 10.5C0.53 9.58 0 8.33 0 7C0 4.24 2.24 2 5 2C6.9 2 8.57 3.11 9.4 4.7C9.54 4.88 9.76 5 10 5C10.24 5 10.46 4.88 10.6 4.7C11.43 3.11 13.1 2 15 2C17.76 2 20 4.24 20 7C20 8.33 19.47 9.58 18.5 10.5L10.86 17.2C10.6 17.4 10.3 17.5 10 17.5Z"
-      fill={filled ? '#9AD240' : '#F9FAFB'}
+      fill={filled ? '#6BCEFF' : '#F9FAFB'}
     />
   </svg>
 )

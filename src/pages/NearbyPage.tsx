@@ -349,7 +349,7 @@ export default function NearbyPage() {
     const userDotLayout = window.ymaps.templateLayoutFactory.createClass(
       `<div style="position:relative;width:16px;height:16px;">
         <div style="position:absolute;width:40px;height:40px;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(154,210,64,0.2);border-radius:50%;pointer-events:none;animation:pulse 2s infinite;"></div>
-        <div style="width:16px;height:16px;background:#9AD240;border:2px solid #18191B;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);position:relative;z-index:1;"></div>
+        <div style="width:16px;height:16px;background:#6BCEFF;border:2px solid #18191B;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);position:relative;z-index:1;"></div>
       </div>`
     )
 
@@ -388,7 +388,7 @@ export default function NearbyPage() {
           route.polyline,
           {},
           {
-            strokeColor: '#9AD240',
+            strokeColor: '#6BCEFF',
             strokeWidth: 4,
             strokeOpacity: 0.8,
           }

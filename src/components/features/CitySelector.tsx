@@ -100,7 +100,7 @@ export default function CitySelector({ open, onClose }: CitySelectorProps) {
                 <span className={styles.cityName}>{c.name}</span>
                 {c.id === city.id && (
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M4 9L7.5 12.5L14 5.5" stroke="#9AD240" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M4 9L7.5 12.5L14 5.5" stroke="#6BCEFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </button>

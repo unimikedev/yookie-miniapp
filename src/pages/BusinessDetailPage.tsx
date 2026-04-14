@@ -408,7 +408,7 @@ export default function BusinessDetailPage() {
                 <span className={styles.infoRatingValue}>
                   {Number(business.rating).toFixed(1)}
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#9AD240" />
+                    <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#6BCEFF" />
                   </svg>
                 </span>
                 <span className={styles.infoRatingCount}>{(business as any).review_count ?? 0} отзывов</span>
@@ -671,13 +671,13 @@ export default function BusinessDetailPage() {
             <div className={styles.infoCardsRow}>
               {todayHours && (
                 <InfoCard
-                  icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#9AD240" strokeWidth="1.5" /><path d="M10 5V10L13 13" stroke="#9AD240" strokeWidth="1.5" strokeLinecap="round" /></svg>}
+                  icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M10 5V10L13 13" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" /></svg>}
                   label="Работает до"
                   value={todayHours.split('-')[1]?.trim()}
                 />
               )}
               <InfoCard
-                icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#9AD240" strokeWidth="1.5" /><path d="M7 10L9 12L13 8" stroke="#9AD240" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M7 10L9 12L13 8" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                 label="Занятость"
                 value="Есть слоты"
               />

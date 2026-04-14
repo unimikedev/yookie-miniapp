@@ -76,7 +76,7 @@ export class ErrorBoundary extends Component<Props, State> {
               style={{
                 flex: 1,
                 height: 48,
-                background: 'var(--color-accent, #9AD240)',
+                background: 'var(--color-accent, #6BCEFF)',
                 color: 'var(--color-bg, #0F1115)',
                 fontSize: 15,
                 fontWeight: 700,

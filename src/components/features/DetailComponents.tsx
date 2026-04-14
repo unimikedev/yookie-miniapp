@@ -75,7 +75,7 @@ export function ServiceCard({ service, selected, onSelect }: ServiceCardProps) {
       <div className={styles.serviceAction}>
         {selected ? (
           <div className={styles.serviceCheck}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9AD240" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#6BCEFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 8L7 12L13 4" />
             </svg>
           </div>
@@ -192,7 +192,7 @@ export function MasterChip({ master, selected, onClick }: MasterChipProps) {
       </div>
       {selected && (
         <div className={styles.masterChipCheck}>
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#9AD240" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#6BCEFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 8L7 12L13 4" />
           </svg>
         </div>
