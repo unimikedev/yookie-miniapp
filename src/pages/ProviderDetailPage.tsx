@@ -382,7 +382,7 @@ export default function ProviderDetailPage() {
       <div className={styles.pageHeader}>
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M13 4L7 10L13 16" stroke="#F9FAFB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M13 4L7 10L13 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
         <span className={styles.pageHeaderTitle}>
@@ -491,8 +491,8 @@ export default function ProviderDetailPage() {
                           onSelect={handleServiceToggle}
                         />
                         {/* Master chips below selected service:
-                            HIDDEN if provider_type === 'individual' && masters.length === 1 */}
-                        {isSelected && masters.length > 0 && !isIndividual && (
+                            HIDDEN if only 1 master (auto-assigned) */}
+                        {isSelected && masters.length > 1 && (
                           <div className={styles.masterChipRow}>
                             {masters.map((master) => (
                               <MasterChip
@@ -606,7 +606,7 @@ export default function ProviderDetailPage() {
                   />
                 </div>
 
-                {/* Summary — one block per service: service name + master + price */}
+                {/* Summary — one block per service: service name + master on left, price on right */}
                 <div className={styles.confirmationSummary}>
                   <div className={styles.confirmationBusiness}>{business?.name}</div>
                   {selectedServices.map((s) => {
@@ -615,8 +615,10 @@ export default function ProviderDetailPage() {
                       : formatMasterName(masters.find(m => m.id === s.masterId)?.name ?? '—')
                     return (
                       <div key={s.service.id} className={styles.confirmationService}>
-                        <div className={styles.confirmationServiceName}>{s.service.name}</div>
-                        <div className={styles.confirmationServiceMaster}>{masterName}</div>
+                        <div className={styles.confirmationServiceLeft}>
+                          <div className={styles.confirmationServiceName}>{s.service.name}</div>
+                          <div className={styles.confirmationServiceMaster}>{masterName}</div>
+                        </div>
                         <div className={styles.confirmationServicePrice}>{s.service.price.toLocaleString('ru')} сўм</div>
                       </div>
                     )
