@@ -30,7 +30,7 @@ import { createBooking } from '@/lib/api/bookings'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
-import { PhotoSwipe } from '@/components/features'
+import { PhotoSwipe, FavoriteButton } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
@@ -424,11 +424,16 @@ export default function ProviderDetailPage() {
         <div className={styles.infoBlock}>
           <div className={styles.infoTop}>
             <div className={styles.infoTitleWrap}>
-              <h1 className={styles.infoTitle}>
-                {isIndividual && soloMaster
-                  ? formatMasterName(soloMaster.name)
-                  : business.name}
-              </h1>
+              <div className={styles.infoNameRow}>
+                <h1 className={styles.infoTitle}>
+                  {isIndividual && soloMaster
+                    ? formatMasterName(soloMaster.name)
+                    : business.name}
+                </h1>
+                {id && (
+                  <FavoriteButton businessId={id} size="md" />
+                )}
+              </div>
               {!isIndividual && business.category && (
                 <span className={styles.infoCategory}>{CATEGORY_LABELS[business.category]}</span>
               )}

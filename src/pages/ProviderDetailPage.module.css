@@ -26,7 +26,7 @@
   justify-content: space-between;
   padding: 8px 16px;
   min-height: 48px;
-  background: color-mix(in srgb, var(--color-bg) 60%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 50%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-3xl);
@@ -104,7 +104,7 @@
 .coverWrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 0;
 }
@@ -144,9 +144,14 @@
   background: var(--color-surface);
 }
 
-/* ── Info block ──────────────────────────────────────────── */
+/* ── Info block (overlaps photo) ───────────────────────── */
 .infoBlock {
-  padding: 24px 16px 12px;
+  position: relative;
+  z-index: 2;
+  margin-top: -24px;
+  padding: 24px 16px 16px;
+  background: var(--color-bg);
+  border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
 }
 
 .infoTop {
@@ -161,21 +166,29 @@
   min-width: 0;
 }
 
+.infoNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .infoTitle {
   font-size: var(--text-h1-size);
   font-weight: var(--text-h1-weight);
   line-height: var(--text-h1-lh);
   letter-spacing: var(--text-h1-ls);
   color: var(--color-text);
-  margin: 0 0 4px;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .infoCategory {
-  font-size: var(--text-body-sm-size);
-  font-weight: var(--text-body-sm-weight);
-  line-height: var(--text-body-sm-lh);
-  letter-spacing: var(--text-body-sm-ls);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
+  display: block;
+  margin-top: 4px;
 }
 
 .infoRating {
@@ -184,13 +197,12 @@
   align-items: flex-end;
   gap: 2px;
   flex-shrink: 0;
+  padding-top: 2px;
 }
 
 .infoRatingValue {
-  font-size: var(--text-body-lg-size);
-  font-weight: var(--text-h3-weight);
-  line-height: var(--text-body-lg-lh);
-  letter-spacing: var(--text-body-lg-ls);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
   color: var(--color-text);
   display: inline-flex;
   align-items: center;
@@ -200,9 +212,7 @@
 .infoRatingCount {
   font-size: var(--text-caption-xs-size);
   font-weight: var(--text-caption-xs-weight);
-  line-height: var(--text-caption-xs-lh);
-  letter-spacing: var(--text-caption-xs-ls);
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
 .infoAddress {
