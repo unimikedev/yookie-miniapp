@@ -23,6 +23,9 @@ export type { AvatarProps } from './Avatar/Avatar';
 export { Badge } from './Badge/Badge';
 export type { BadgeProps } from './Badge/Badge';
 
+export { Card, CardHeader, CardBody, CardFooter, CardTitle, CardDescription } from './Card/Card';
+export type { CardProps, CardHeaderProps, CardBodyProps, CardFooterProps, CardTitleProps, CardDescriptionProps } from './Card/Card';
+
 export { Rating } from './Rating/Rating';
 export type { RatingProps } from './Rating/Rating';
 

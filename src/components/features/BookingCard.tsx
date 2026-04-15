@@ -1,6 +1,6 @@
 import React from 'react';
 import { Booking } from '@/lib/api/types';
-import { Badge, Button } from '@/components/ui';
+import { Badge, Button } from '@/shared/ui';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './BookingCard.module.css';
