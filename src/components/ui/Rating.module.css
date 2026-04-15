@@ -3,7 +3,7 @@
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .sm {
@@ -29,7 +29,7 @@
 }
 
 .count {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: 0.9em;
   font-weight: 400;
   margin-left: 2px;
@@ -37,9 +37,9 @@
 
 /* Dark mode */
 [data-theme='dark'] .rating {
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 [data-theme='dark'] .count {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }

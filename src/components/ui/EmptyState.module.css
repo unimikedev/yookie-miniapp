@@ -6,7 +6,7 @@
   padding: 60px 20px;
   text-align: center;
   min-height: 400px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .icon {
@@ -19,14 +19,14 @@
 .title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
   margin-bottom: 8px;
   margin: 0 0 8px 0;
 }
 
 .description {
   font-size: 16px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   line-height: 1.5;
   margin-bottom: 24px;
   margin: 0 0 24px 0;
@@ -42,13 +42,13 @@
 
 /* Dark mode */
 [data-theme='dark'] .container {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 [data-theme='dark'] .title {
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 [data-theme='dark'] .description {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }

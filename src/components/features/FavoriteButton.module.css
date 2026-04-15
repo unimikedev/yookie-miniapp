@@ -66,5 +66,5 @@
 
 /* Dark mode */
 [data-theme='dark'] .button {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }

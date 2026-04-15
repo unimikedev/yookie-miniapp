@@ -50,35 +50,35 @@
 }
 
 .secondary {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
 .secondary:hover:not(:disabled) {
-  background-color: var(--bg-tertiary);
-  border-color: var(--accent);
+  background-color: var(--color-surface-elevated);
+  border-color: var(--color-accent);
   transform: translateY(-1px);
 }
 
 .secondary:active:not(:disabled) {
   transform: translateY(0);
-  background-color: var(--border);
+  background-color: var(--color-border);
 }
 
 .ghost {
   background-color: transparent;
-  color: var(--text-primary);
+  color: var(--color-text);
   border: 1px solid transparent;
 }
 
 .ghost:hover:not(:disabled) {
-  background-color: var(--bg-secondary);
-  border-color: var(--border);
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
 }
 
 .ghost:active:not(:disabled) {
-  background-color: var(--bg-tertiary);
+  background-color: var(--color-surface-elevated);
 }
 
 .danger {
@@ -152,24 +152,24 @@
 
 /* Dark mode adjustments */
 [data-theme='dark'] .secondary {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
 }
 
 [data-theme='dark'] .ghost {
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 [data-theme='dark'] .secondary:hover:not(:disabled) {
-  background-color: var(--bg-tertiary);
-  border-color: var(--accent);
+  background-color: var(--color-surface-elevated);
+  border-color: var(--color-accent);
 }
 
 [data-theme='dark'] .ghost:hover:not(:disabled) {
-  background-color: var(--bg-secondary);
+  background-color: var(--color-surface);
 }
 
 [data-theme='dark'] .ghost:active:not(:disabled) {
-  background-color: var(--bg-tertiary);
+  background-color: var(--color-surface-elevated);
 }
