@@ -2,10 +2,10 @@
   display: flex;
   gap: 0;
   overflow-x: auto;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
-  background-color: var(--bg-primary);
+  background-color: var(--color-bg);
 }
 
 .tabsContainer::-webkit-scrollbar {
@@ -25,7 +25,7 @@
   padding: 12px 20px;
   font-size: 15px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -36,13 +36,13 @@
 }
 
 .tab:hover {
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .tab.active {
-  color: var(--text-primary);
+  color: var(--color-text);
   font-weight: 600;
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--color-accent);
 }
 
 .tab.active::after {
@@ -52,24 +52,24 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: var(--accent);
+  background-color: var(--color-accent);
 }
 
 /* Dark mode */
 [data-theme='dark'] .tabsContainer {
-  border-bottom-color: var(--border);
-  background-color: var(--bg-primary);
+  border-bottom-color: var(--color-border);
+  background-color: var(--color-bg);
 }
 
 [data-theme='dark'] .tab {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 [data-theme='dark'] .tab:hover {
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 [data-theme='dark'] .tab.active {
-  color: var(--text-primary);
-  border-bottom-color: var(--accent);
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent);
 }

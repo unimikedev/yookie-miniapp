@@ -58,6 +58,7 @@
   --color-text: #FFFFFF;
   --color-text-secondary: #A0A6B1;
   --color-text-muted: #6B7280;
+  --color-text-hint: #6B7280;
   --color-accent: #6BCEFF;
   --color-accent-light: #8FD8FF;
   --color-nav-bg: rgba(26, 29, 34, 0.85);
@@ -228,6 +229,7 @@
   --color-text: #111827;
   --color-text-secondary: #6B7280;
   --color-text-muted: #9CA3AF;
+  --color-text-hint: #9CA3AF;
   --color-accent: #6BCEFF;
   --color-accent-light: #8FD8FF;
   --color-nav-bg: rgba(249, 250, 251, 0.85);
