@@ -4,7 +4,7 @@
   justify-content: center;
   border-radius: 50%;
   overflow: hidden;
-  background-color: var(--accent);
+  background-color: var(--color-accent);
   flex-shrink: 0;
   font-weight: 600;
   color: #ffffff;
@@ -52,5 +52,5 @@
 
 /* Dark mode - accent color handles itself via CSS variables */
 [data-theme='dark'] .avatar {
-  background-color: var(--accent);
+  background-color: var(--color-accent);
 }

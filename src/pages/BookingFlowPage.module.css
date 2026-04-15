@@ -2,13 +2,13 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--bg-primary);
+  background-color: var(--color-bg);
 }
 
 .header {
   padding: 12px 16px;
-  background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 12px;
   align-items: center;
@@ -19,7 +19,7 @@
   height: 36px;
   border-radius: var(--radius-md);
   border: none;
-  background-color: var(--bg-primary);
+  background-color: var(--color-bg);
   cursor: pointer;
   font-size: 20px;
   display: flex;
@@ -30,7 +30,7 @@
 }
 
 .backButton:active:not(:disabled) {
-  background-color: var(--bg-tertiary);
+  background-color: var(--color-surface-elevated);
 }
 
 .backButton:disabled {
@@ -41,7 +41,7 @@
 .title {
   font-size: var(--text-body-lg-size);
   font-weight: var(--text-body-lg-weight);
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .content {
@@ -59,13 +59,13 @@
   font-size: var(--text-body-lg-size);
   font-weight: var(--text-body-lg-weight);
   margin-bottom: 12px;
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .summaryCard {
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(124, 58, 237, 0.05) 100%);
+  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(124, 58, 237, 0.05) 100%);
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -82,13 +82,13 @@
 .businessName {
   font-size: var(--text-title-size);
   font-weight: var(--text-title-weight);
-  color: var(--text-primary);
+  color: var(--color-text);
   margin-bottom: 4px;
 }
 
 .serviceName {
   font-size: var(--text-caption-xs-size);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -107,7 +107,7 @@
 .priceTag {
   font-size: var(--text-h3-size);
   font-weight: var(--text-h3-weight);
-  color: var(--accent);
+  color: var(--color-accent);
   white-space: nowrap;
 }
 
@@ -122,13 +122,13 @@
   flex-direction: column;
   gap: 4px;
   padding: 8px;
-  background-color: var(--bg-primary);
+  background-color: var(--color-bg);
   border-radius: var(--radius-sm);
 }
 
 .detailLabel {
   font-size: var(--text-caption-xs-size);
-  color: var(--text-hint);
+  color: var(--color-text-hint);
   font-weight: var(--text-caption-xs-weight);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -137,7 +137,7 @@
 .detailValue {
   font-size: var(--text-body-size);
   font-weight: var(--text-body-weight);
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .formGroup {
@@ -148,17 +148,17 @@
   display: block;
   font-size: var(--text-caption-xs-size);
   font-weight: var(--text-caption-xs-weight);
-  color: var(--text-primary);
+  color: var(--color-text);
   margin-bottom: 6px;
 }
 
 .input {
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   font-size: var(--text-body-size);
   outline: none;
   transition: border-color 200ms ease;
@@ -166,7 +166,7 @@
 }
 
 .input:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .input:disabled {
@@ -175,16 +175,16 @@
 }
 
 .input::placeholder {
-  color: var(--text-hint);
+  color: var(--color-text-hint);
 }
 
 .textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   font-family: inherit;
   font-size: var(--text-body-size);
   resize: none;
@@ -194,7 +194,7 @@
 }
 
 .textarea:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .textarea:disabled {
@@ -203,7 +203,7 @@
 }
 
 .textarea::placeholder {
-  color: var(--text-hint);
+  color: var(--color-text-hint);
 }
 
 .infoBox {
@@ -212,7 +212,7 @@
   border: 1px solid var(--accent-light);
   padding: 14px;
   font-size: var(--text-caption-xs-size);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   line-height: var(--text-body-lh);
 }
 
@@ -226,7 +226,7 @@
 
 .infoBox strong {
   font-weight: var(--text-h3-weight);
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .errorBox {
@@ -280,32 +280,32 @@
 .successTitle {
   font-size: var(--text-h3-size);
   font-weight: var(--text-h3-weight);
-  color: var(--text-primary);
+  color: var(--color-text);
   margin-bottom: 8px;
 }
 
 .successMessage {
   font-size: var(--text-body-size);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin-bottom: 4px;
 }
 
 .successSubtext {
   font-size: var(--text-caption-size);
-  color: var(--text-hint);
+  color: var(--color-text-hint);
   margin: 0;
 }
 
 .footer {
   padding: 12px 16px;
-  border-top: 1px solid var(--border);
-  background-color: var(--bg-primary);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg);
 }
 
 .confirmButton {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #6d28d9 100%);
   color: white;
   border: none;
   border-radius: var(--radius-md);
