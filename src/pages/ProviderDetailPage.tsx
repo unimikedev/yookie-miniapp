@@ -34,6 +34,8 @@ import { PhotoSwipe, FavoriteButton } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
+import { toLocalYMD } from '@/lib/utils/date'
+import { TELEGRAM_BOT_URL } from '@/shared/constants'
 import styles from './ProviderDetailPage.module.css'
 
 const TABS_ALL = ['Услуги', 'О нас', 'Специалисты']
@@ -113,7 +115,14 @@ export default function ProviderDetailPage() {
   const activeMasterId = selectedServices.find(s => s.masterId !== null)?.masterId ?? undefined
   // Pass first selected service's ID so backend uses correct service duration for slot generation
   const activeServiceId = selectedServices.length > 0 ? selectedServices[0].service.id : undefined
-  const { slots, isLoading: slotsLoading } = useSlots(id, activeMasterId, selectedDate ?? undefined, activeServiceId)
+  const totalDuration = selectedServices.reduce((sum, s) => sum + (s.service.duration_min || 30), 0) || undefined
+  const { slots, isLoading: slotsLoading, refetch: refetchSlots } = useSlots(
+    id,
+    activeMasterId,
+    selectedDate ?? undefined,
+    activeServiceId,
+    totalDuration,
+  )
 
   useEffect(() => {
     if (business) setBusiness(business)
@@ -144,20 +153,10 @@ export default function ProviderDetailPage() {
     }
   }, [selectedServices.length])
 
-  // Auto-select nearest date with available slots
-  useEffect(() => {
-    if (!activeMasterId || !selectedDate || slotsLoading) return
-    if (slots.some(s => s.is_available)) return
-
-    for (let i = 1; i <= 14; i++) {
-      const d = new Date()
-      d.setDate(d.getDate() + i)
-      const nextDateStr = d.toISOString().split('T')[0]
-      setSelectedDate(nextDateStr)
-      setSelectedSlot(null)
-      break
-    }
-  }, [slots, activeMasterId])
+  // Intentionally no auto-advance of selected date. The previous implementation
+  // jumped the user forward whenever a day had no slots, which made many dates
+  // effectively unselectable. We now show a clear empty state and leave the
+  // choice to the user.
 
   // ── CTA flow states ─────────────────────────────────────────────
   const hasServices = selectedServices.length > 0
@@ -248,7 +247,12 @@ export default function ProviderDetailPage() {
 
       navigate('/my-bookings')
     } catch (err) {
-      setBookingError(err instanceof Error ? err.message : 'Ошибка при создании записи')
+      const message = err instanceof Error ? err.message : 'Ошибка при создании записи'
+      setBookingError(message)
+      if (/занято|Conflict|409/i.test(message)) {
+        setSelectedSlot(null)
+        refetchSlots()
+      }
       setTimeout(() => {
         confirmationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 100)
@@ -406,7 +410,7 @@ export default function ProviderDetailPage() {
       <div className={styles.coverWrap}>
         {isLoading ? (
           <div className={styles.coverSkeleton} />
-        ) : isIndividual && soloMasterPhotos.length > 0 ? (
+        ) : isIndividual && soloMaster && soloMasterPhotos.length > 0 ? (
           <PhotoSwipe photos={soloMasterPhotos} alt={soloMaster.name} />
         ) : coverPhotos.length > 0 ? (
           <PhotoSwipe photos={coverPhotos} alt={business?.name ?? ''} />
@@ -538,7 +542,7 @@ export default function ProviderDetailPage() {
                     {Array.from({ length: 7 }).map((_, i) => {
                       const d = new Date()
                       d.setDate(d.getDate() + i)
-                      const dateStr = d.toISOString().split('T')[0]
+                      const dateStr = toLocalYMD(d)
                       const dayNum = d.getDate()
                       const dayName = d.toLocaleDateString('ru-RU', { weekday: 'short' })
                       const isSel = dateStr === selectedDate

@@ -30,6 +30,7 @@ import type { Master, TimeSlot } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
 import { FavoriteButton, PhotoSwipe } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
+import { toLocalYMD } from '@/lib/utils/date'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { TELEGRAM_BOT_URL } from '@/shared/constants'
 import styles from './BusinessDetailPage.module.css'
@@ -102,7 +103,16 @@ export default function BusinessDetailPage() {
   const activeMasterId = selectedServices.find(s => s.masterId !== null)?.masterId ?? undefined
   // Pass first selected service's ID so backend uses correct service duration for slot generation
   const activeServiceId = selectedServices.length > 0 ? selectedServices[0].service.id : undefined
-  const { slots, isLoading: slotsLoading } = useSlots(id, activeMasterId, selectedDate ?? undefined, activeServiceId)
+  // Sum durations across all selected services for multi-service bookings.
+  // Backend uses this so slots leave enough room for the whole booking.
+  const totalDuration = selectedServices.reduce((sum, s) => sum + (s.service.duration_min || 30), 0) || undefined
+  const { slots, isLoading: slotsLoading, refetch: refetchSlots } = useSlots(
+    id,
+    activeMasterId,
+    selectedDate ?? undefined,
+    activeServiceId,
+    totalDuration,
+  )
 
   useEffect(() => {
     if (business) setBusiness(business)
@@ -124,23 +134,10 @@ export default function BusinessDetailPage() {
     }
   }, [selectedServices.length])
 
-  // Auto-select nearest date with available slots
-  useEffect(() => {
-    if (!activeMasterId || !selectedDate || slotsLoading) return
-    if (slots.some(s => s.is_available)) return // current date has slots
-
-    // Find nearest date with available slots
-    for (let i = 1; i <= 14; i++) {
-      const d = new Date()
-      d.setDate(d.getDate() + i)
-      // We can't check slots for future dates synchronously, but we can skip today if no slots
-      // Just pick next day as fallback
-      const nextDateStr = d.toISOString().split('T')[0]
-      setSelectedDate(nextDateStr)
-      setSelectedSlot(null)
-      break
-    }
-  }, [slots, activeMasterId])
+  // NOTE: we intentionally do NOT auto-advance the selected date when a day
+  // has no slots. The previous implementation hijacked the user's choice and
+  // made some dates impossible to select. The empty state now explains the
+  // situation and lets the user pick another date themselves.
 
   // CTA flow states
   const hasServices = selectedServices.length > 0
@@ -232,7 +229,13 @@ export default function BusinessDetailPage() {
 
       navigate('/my-bookings')
     } catch (err) {
-      setBookingError(err instanceof Error ? err.message : 'Ошибка при создании записи')
+      const message = err instanceof Error ? err.message : 'Ошибка при создании записи'
+      setBookingError(message)
+      // Conflict / slot taken: drop selection and refetch so user sees current state.
+      if (/занято|Conflict|409/i.test(message)) {
+        setSelectedSlot(null)
+        refetchSlots()
+      }
       setTimeout(() => {
         confirmationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 100)
@@ -491,7 +494,7 @@ export default function BusinessDetailPage() {
                     {Array.from({ length: 7 }).map((_, i) => {
                       const d = new Date()
                       d.setDate(d.getDate() + i)
-                      const dateStr = d.toISOString().split('T')[0]
+                      const dateStr = toLocalYMD(d)
                       const dayNum = d.getDate()
                       const dayName = d.toLocaleDateString('ru-RU', { weekday: 'short' })
                       const isSel = dateStr === selectedDate

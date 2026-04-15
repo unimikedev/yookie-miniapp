@@ -19,6 +19,7 @@ import { FavoriteButton } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { TELEGRAM_BOT_URL } from '@/shared/constants'
+import { toLocalYMD } from '@/lib/utils/date'
 import styles from './MasterDetailPage.module.css'
 
 interface ReviewItem {
@@ -85,7 +86,14 @@ export default function MasterDetailPage() {
 
   // Pass first selected service's ID so backend uses correct service duration
   const activeServiceId = selectedServices.length > 0 ? selectedServices[0].service.id : undefined
-  const { slots, isLoading: slotsLoading, error: slotsError } = useSlots(id, masterId, selectedDate ?? undefined, activeServiceId)
+  const totalDurationForSlots = selectedServices.reduce((sum, s) => sum + (s.service.duration_min || 30), 0) || undefined
+  const { slots, isLoading: slotsLoading, error: slotsError, refetch: refetchSlots } = useSlots(
+    id,
+    masterId,
+    selectedDate ?? undefined,
+    activeServiceId,
+    totalDurationForSlots,
+  )
 
   const currentMaster = useMemo(
     () => masters.find((m) => m.id === masterId),
@@ -214,7 +222,12 @@ export default function MasterDetailPage() {
 
       navigate('/my-bookings')
     } catch (err) {
-      setBookingError(err instanceof Error ? err.message : 'Ошибка при создании записи')
+      const message = err instanceof Error ? err.message : 'Ошибка при создании записи'
+      setBookingError(message)
+      if (/занято|Conflict|409/i.test(message)) {
+        setSlot(null)
+        refetchSlots()
+      }
       setTimeout(() => {
         confirmationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 100)
@@ -398,7 +411,7 @@ export default function MasterDetailPage() {
             {Array.from({ length: 7 }).map((_, i) => {
               const d = new Date()
               d.setDate(d.getDate() + i)
-              const dateStr = d.toISOString().split('T')[0]
+              const dateStr = toLocalYMD(d)
               const dayNum = d.getDate()
               const dayName = d.toLocaleDateString('ru-RU', { weekday: 'short' })
               const isSelected = dateStr === selectedDate

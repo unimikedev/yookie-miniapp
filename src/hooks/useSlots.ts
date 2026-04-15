@@ -49,7 +49,8 @@ export function useSlots(
   businessId: string | undefined,
   masterId: string | undefined,
   date: string | undefined,
-  serviceId?: string | undefined
+  serviceId?: string | undefined,
+  totalDuration?: number | undefined
 ): UseSlotsResult {
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,17 +70,14 @@ export function useSlots(
       setError(null);
 
       try {
-        const slotsData = await fetchSlots(businessId, masterId, date, serviceId);
+        const slotsData = await fetchSlots(businessId, masterId, date, serviceId, totalDuration);
 
         if (!controller.signal.aborted) {
-          // Use API data when available; fall back to mock slots if empty (DEV only)
-          if (slotsData.length > 0) {
-            setSlots(slotsData);
-          } else if (import.meta.env.DEV) {
-            setSlots(generateMockSlots(masterId, date));
-          } else {
-            setSlots([]);
-          }
+          // Trust the API response. An empty array is a legitimate signal
+          // ("day off", "fully booked", "master has no services today") — we
+          // do NOT want to paper over it with mock slots, which previously
+          // caused users to click a slot and then hit 404/409 on booking.
+          setSlots(slotsData);
         }
       } catch (_err) {
         // On any API error, degrade gracefully to mock slots (DEV only)
@@ -103,7 +101,7 @@ export function useSlots(
     return () => {
       controller.abort();
     };
-  }, [businessId, masterId, date, serviceId]);
+  }, [businessId, masterId, date, serviceId, totalDuration]);
 
   const refetch = async () => {
     if (!businessId || !masterId || !date) {
@@ -114,14 +112,8 @@ export function useSlots(
     setError(null);
 
     try {
-      const slotsData = await fetchSlots(businessId, masterId, date, serviceId);
-      if (slotsData.length > 0) {
-        setSlots(slotsData);
-      } else if (import.meta.env.DEV) {
-        setSlots(generateMockSlots(masterId, date));
-      } else {
-        setSlots([]);
-      }
+      const slotsData = await fetchSlots(businessId, masterId, date, serviceId, totalDuration);
+      setSlots(slotsData);
     } catch (_err) {
       if (import.meta.env.DEV) {
         setSlots(generateMockSlots(masterId, date));

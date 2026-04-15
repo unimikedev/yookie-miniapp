@@ -37,11 +37,13 @@ interface BackendSlotResult {
 export async function fetchSlots(
   businessId: string,
   masterId: string,
-  date: string, // YYYY-MM-DD format
-  serviceId?: string
+  date: string, // YYYY-MM-DD format (local calendar date)
+  serviceId?: string,
+  totalDuration?: number // sum of service durations in minutes, for multi-service bookings
 ): Promise<TimeSlot[]> {
   const params: Record<string, string> = { date, masterId }
   if (serviceId) params.serviceId = serviceId
+  if (totalDuration && totalDuration > 0) params.totalDuration = String(totalDuration)
 
   const response = await api.get<{ data: BackendSlotResult[] }>(
     `/businesses/${businessId}/slots`,
