@@ -1,19 +1,24 @@
 .card {
-  background: var(--bg-primary);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: 16px;
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
 .card:active {
   transform: scale(0.98);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .avatar {
@@ -29,12 +34,12 @@
 }
 
 .name {
-  font-size: var(--text-body-lg-size);
-  font-weight: var(--text-body-lg-weight);
-  color: var(--text-primary);
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  color: var(--color-text);
   margin: 0;
-  line-height: var(--text-body-lg-lh);
-  letter-spacing: var(--text-body-lg-ls);
+  line-height: var(--text-h3-lh);
+  letter-spacing: var(--text-h3-ls);
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -43,7 +48,7 @@
 
 .specialization {
   font-size: var(--text-body-sm-size);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: var(--text-body-sm-lh);
   letter-spacing: var(--text-body-sm-ls);
@@ -60,10 +65,4 @@
 
 .status {
   margin-top: 4px;
-}
-
-/* Dark mode */
-[data-theme='dark'] .card {
-  background: var(--bg-secondary);
-  border-color: var(--border);
 }

@@ -11,9 +11,9 @@
 }
 
 .sectionTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-secondary);
   margin: 0;
   text-transform: capitalize;
 }
@@ -25,63 +25,54 @@
 }
 
 .slot {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 12px 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
   font-family: 'Courier New', monospace;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.slot:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background-color: var(--color-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .slot:active:not(:disabled) {
   transform: scale(0.95);
-  background: var(--accent);
+  background-color: var(--color-accent);
   color: white;
-}
-
-.slot:hover:not(:disabled) {
-  border-color: var(--accent);
-  background: var(--bg-tertiary);
+  border-color: var(--color-accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .slot.selected {
-  background: var(--accent);
+  background-color: var(--color-accent);
   color: white;
-  border-color: var(--accent);
-  font-weight: 600;
+  border-color: var(--color-accent);
+  font-weight: var(--text-caption-weight);
+  box-shadow: 0 2px 6px rgba(107, 206, 255, 0.3);
 }
 
-.slot.disabled {
+.slot:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: var(--bg-tertiary);
+  background-color: var(--color-surface);
+  box-shadow: none;
 }
 
 .empty {
   text-align: center;
   padding: 24px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-/* Dark mode */
-[data-theme='dark'] .slot {
-  background: var(--bg-tertiary);
-  border-color: var(--border);
-  color: var(--text-primary);
-}
-
-[data-theme='dark'] .slot:hover:not(:disabled) {
-  background: var(--bg-primary);
-  border-color: var(--accent);
-}
-
-[data-theme='dark'] .slot.disabled {
-  background: var(--bg-secondary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm-size);
 }
