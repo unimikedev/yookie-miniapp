@@ -10,6 +10,7 @@ import AccountPage from '@/pages/AccountPage'
 import AuthPage from '@/pages/AuthPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import ProfileEditPage from '@/pages/ProfileEditPage'
+import { ProRouter } from '@/pro/ProRouter'
 
 export function Router() {
   return (
@@ -25,6 +26,8 @@ export function Router() {
       <Route path="/account" element={<AccountPage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/profile/edit" element={<ProfileEditPage />} />
+      {/* Yookie Pro (B2B) — self-contained sub-router */}
+      <Route path="/pro/*" element={<ProRouter />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )

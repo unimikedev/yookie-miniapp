@@ -5,7 +5,7 @@ import { useOverlayStore } from '@/stores/overlayStore'
 import { BottomNav } from '@/shared/ui'
 import styles from './Layout.module.css'
 
-const PAGES_WITH_NAV = ['/', '/search', '/nearby', '/my-bookings', '/favorites', '/account', '/profile/edit']
+const PAGES_WITH_NAV = ['/', '/search', '/nearby', '/my-bookings', '/favorites']
 
 interface LayoutProps {
   children: React.ReactNode
@@ -16,7 +16,9 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const { isOpen: isOverlayOpen } = useOverlayStore()
 
-  const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
+  // Hide B2C nav when in Pro (B2B) surfaces — Pro has its own nav
+  const isProRoute = location.pathname.startsWith('/pro')
+  const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen && !isProRoute
 
   // Telegram platform already sets --viewport-height, --viewport-stable-height,
   // and --safe-area-* CSS vars during init. No need for window resize listener.

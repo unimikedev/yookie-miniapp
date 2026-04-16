@@ -15,6 +15,15 @@ const ChevronRight = ({ color = '#303235' }: { color?: string }) => (
 
 const menuItems = [
   {
+    id: 'pro',
+    label: 'Yookie Pro',
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7V17L12 22L22 17V7L12 2ZM12 4.18L19.39 8L12 11.82L4.61 8L12 4.18ZM4 9.57L11 13.18V19.43L4 15.82V9.57ZM13 19.43V13.18L20 9.57V15.82L13 19.43Z" fill="#6BCEFF"/></svg>
+    ),
+    path: '/pro',
+    danger: false,
+  },
+  {
     id: 'edit',
     label: 'Редактировать профиль',
     icon: (

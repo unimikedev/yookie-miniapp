@@ -1,0 +1,131 @@
+.search {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+  margin-bottom: 16px;
+}
+
+.search::placeholder {
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--text-body-lg-size);
+  flex-shrink: 0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--text-body-size);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.phone {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+}
+
+.badge {
+  font-size: var(--text-caption-xs-size);
+  font-weight: 700;
+  color: var(--color-accent);
+  background: var(--color-status-bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.chev {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.history {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.histEmpty {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+}
+
+.histRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.histDate {
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 56px;
+}
+
+.histService {
+  flex: 1;
+  font-size: var(--text-caption-size);
+  color: var(--color-text);
+}
+
+.histStatus {
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.st-confirmed { color: var(--color-accent); }
+.st-completed { color: var(--color-verified); }
+.st-cancelled { color: var(--color-error); }
+.st-pending { color: #FBBF24; }

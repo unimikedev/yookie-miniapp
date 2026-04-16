@@ -1,0 +1,234 @@
+.dateNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dateArrow {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.dateLabel {
+  font-size: var(--text-body-lg-size);
+  font-weight: 600;
+  color: var(--color-text);
+  min-width: 120px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.viewToggle {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.viewBtn {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.viewBtnActive {
+  background: var(--color-surface-elevated);
+  color: var(--color-accent);
+}
+
+/* ── Timeline ───────────────────────────────────────────────────── */
+.timeline {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.staffHeader {
+  display: grid;
+  gap: 1px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--color-bg);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.staffName {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 6px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  gap: 1px;
+  margin-top: 4px;
+}
+
+.hourRow {
+  display: contents;
+}
+
+.hourLabel {
+  font-size: var(--text-caption-xs-size);
+  color: var(--color-text-muted);
+  padding: 4px 0;
+  text-align: right;
+  padding-right: 8px;
+  min-height: 60px;
+}
+
+.cell {
+  position: relative;
+  min-height: 60px;
+  background: var(--color-surface);
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding: 2px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.cell:hover {
+  border-color: var(--color-border);
+}
+
+.cellDrop {
+  border-color: var(--color-accent);
+  border-style: dashed;
+}
+
+/* ── Booking Card ────────────────────────────────────────────── */
+.bookingCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+  border-left: 3px solid var(--color-accent);
+  cursor: grab;
+  user-select: none;
+}
+
+.bookingCard:active {
+  cursor: grabbing;
+  opacity: 0.85;
+}
+
+.status-pending {
+  border-left-color: #FBBF24;
+}
+
+.status-confirmed {
+  border-left-color: var(--color-accent);
+}
+
+.status-completed {
+  border-left-color: var(--color-verified);
+}
+
+.status-cancelled {
+  border-left-color: var(--color-error);
+  opacity: 0.6;
+}
+
+.status-no_show {
+  border-left-color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.cardTime {
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.cardClient {
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardService {
+  font-size: var(--text-caption-xs-size);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── List ─────────────────────────────────────────────────────── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.listItem {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border-radius: 12px;
+}
+
+.listTime {
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.listClient {
+  font-size: var(--text-body-sm-size);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.listService {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-text-secondary);
+}
+
+.listStaff {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+}
+
+.listStatus {
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 40px 0;
+  font-size: var(--text-body-size);
+}
