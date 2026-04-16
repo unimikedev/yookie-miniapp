@@ -13,6 +13,12 @@ export { Button } from './Button/Button';
 export type { ButtonProps } from './Button/Button';
 
 // ─── Form ──────────────────────────────────────────────────────────────────────
+export { Input } from './Input/Input';
+export type { InputProps } from './Input/Input';
+
+export { TextArea } from './TextArea/TextArea';
+export type { TextAreaProps } from './TextArea/TextArea';
+
 export { SearchField } from './SearchField/SearchField';
 export type { SearchFieldProps } from './SearchField/SearchField';
 

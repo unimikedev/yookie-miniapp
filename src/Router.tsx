@@ -10,7 +10,12 @@ import AccountPage from '@/pages/AccountPage'
 import AuthPage from '@/pages/AuthPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import ProfileEditPage from '@/pages/ProfileEditPage'
+<<<<<<< HEAD
 import { ProRouter } from '@/pro/ProRouter'
+=======
+import { MerchantRegisterPage } from '@/pages/merchant/MerchantRegisterPage'
+import { MerchantDashboard } from '@/pages/merchant/MerchantDashboard'
+>>>>>>> 9be9021 (Add Yookie Pro B2B merchant system with unified business store)
 
 export function Router() {
   return (
@@ -26,8 +31,16 @@ export function Router() {
       <Route path="/account" element={<AccountPage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/profile/edit" element={<ProfileEditPage />} />
+<<<<<<< HEAD
       {/* Yookie Pro (B2B) — self-contained sub-router */}
       <Route path="/pro/*" element={<ProRouter />} />
+=======
+      
+      {/* Yookie Pro (B2B) Routes */}
+      <Route path="/merchant/register" element={<MerchantRegisterPage />} />
+      <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
+      
+>>>>>>> 9be9021 (Add Yookie Pro B2B merchant system with unified business store)
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )

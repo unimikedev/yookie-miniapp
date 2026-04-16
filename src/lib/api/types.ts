@@ -235,3 +235,99 @@ export interface RouteResult {
   polyline: [number, number][] | null;
   source: 'yandex' | 'estimate';
 }
+
+/**
+ * B2B Merchant Types
+ */
+export interface Merchant {
+  id: string;
+  business_name: string;
+  business_type: 'salon' | 'individual';
+  category: CategoryEnum;
+  address: string;
+  city: string;
+  phone: string;
+  description: string;
+  instagram?: string;
+  telegram_username?: string;
+  logo_url?: string;
+  cover_photo_url?: string;
+  photo_urls?: string[];
+  is_active: boolean;
+  is_verified: boolean;
+  rating: number;
+  review_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MerchantStaff {
+  id: string;
+  merchant_id: string;
+  name: string;
+  specialization: string;
+  phone?: string;
+  photo_url?: string;
+  is_active: boolean;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MerchantService {
+  id: string;
+  merchant_id: string;
+  name: string;
+  description?: string;
+  price: number;
+  duration_min: number;
+  category: string;
+  is_active: boolean;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MerchantAvailability {
+  id: string;
+  merchant_id: string;
+  day_of_week: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  open_time: string; // HH:mm
+  close_time: string; // HH:mm
+  is_open: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MerchantBooking {
+  id: string;
+  merchant_id: string;
+  staff_id?: string;
+  service_id: string;
+  client_id: string;
+  client_name: string;
+  client_phone: string;
+  starts_at: string;
+  ends_at: string;
+  status: BookingStatus;
+  price: number;
+  notes?: string;
+  source: 'online' | 'offline' | 'manual';
+  created_at: string;
+  updated_at: string;
+  // Populated relations
+  staff?: MerchantStaff;
+  service?: MerchantService;
+}
+
+export interface MerchantClient {
+  id: string;
+  merchant_id: string;
+  name: string;
+  phone: string;
+  telegram_id?: bigint;
+  total_bookings: number;
+  last_visit?: string;
+  created_at: string;
+  updated_at: string;
+}
