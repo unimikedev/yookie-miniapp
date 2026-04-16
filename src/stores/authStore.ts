@@ -4,12 +4,14 @@
  */
 
 import { create } from 'zustand';
-import { verifyOtp } from '../lib/api/auth';
+import { verifyOtp, loginWithGoogle } from '../lib/api/auth';
 
 export interface AuthUser {
   id: string;
-  phone: string;
+  phone: string | null;
+  email?: string | null;
   name: string;
+  avatarUrl?: string | null;
   telegram_id?: bigint;
   /** Business ID if user is a merchant (B2B). Comes from backend JWT. */
   businessId?: string | null;
@@ -29,6 +31,7 @@ interface AuthState {
 
 interface AuthActions {
   login: (phone: string, code: string) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
   devLogin: () => void;
   logout: () => void;
   setPhone: (phone: string) => void;
@@ -75,6 +78,42 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
+      set({ error: message, isLoading: false });
+      throw error;
+    }
+  },
+
+  googleLogin: async (credential: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await loginWithGoogle(credential);
+      const { token, user } = response;
+
+      try {
+        localStorage.setItem(STORAGE_KEY, token);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      } catch {
+        // Storage unavailable
+      }
+
+      set({
+        token,
+        user: {
+          id: user.id,
+          phone: user.phone ?? '',
+          email: user.email,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+          businessId: user.businessId,
+          role: user.role,
+        } as AuthUser,
+        phone: user.phone,
+        name: user.name,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Google login failed';
       set({ error: message, isLoading: false });
       throw error;
     }

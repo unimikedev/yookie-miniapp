@@ -160,6 +160,36 @@
   opacity: 0.4;
 }
 
+/* ─── Divider ────────────────────────────────────────────────────────────── */
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.dividerText {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+}
+
+/* ─── Google button ──────────────────────────────────────────────────────── */
+
+.googleBtn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
 /* ─── Agreement ──────────────────────────────────────────────────────────── */
 
 .agreement {

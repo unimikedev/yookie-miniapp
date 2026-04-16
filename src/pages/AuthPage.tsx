@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { requestOtp } from '@/lib/api/auth'
 import styles from './AuthPage.module.css'
+
+const GOOGLE_CLIENT_ID = '133260309518-kqgcacogqjrcmjbb8lh5k36el9mgth0a.apps.googleusercontent.com'
 
 type Screen = 'phone' | 'otp'
 
@@ -29,11 +31,65 @@ export default function AuthPage() {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
   ]
+  const googleBtnRef = useRef<HTMLDivElement>(null)
 
   // Redirect if already authenticated
   useEffect(() => {
     if (authStore.isAuthenticated) navigate(returnTo, { replace: true })
   }, [authStore.isAuthenticated])
+
+  // Google Sign-In callback
+  const handleGoogleCallback = useCallback(async (response: { credential: string }) => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      await authStore.googleLogin(response.credential)
+      navigate(returnTo, { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка входа через Google')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [returnTo])
+
+  // Initialize Google Sign-In
+  useEffect(() => {
+    if (screen !== 'phone' || !googleBtnRef.current) return
+
+    const initGoogle = () => {
+      const google = (window as any).google
+      if (!google?.accounts?.id) return
+
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCallback,
+        auto_select: false,
+      })
+
+      google.accounts.id.renderButton(googleBtnRef.current!, {
+        type: 'standard',
+        theme: 'filled_black',
+        size: 'large',
+        width: googleBtnRef.current!.offsetWidth,
+        text: 'continue_with',
+        shape: 'pill',
+        logo_alignment: 'center',
+      })
+    }
+
+    // GSI may already be loaded or still loading
+    if ((window as any).google?.accounts?.id) {
+      initGoogle()
+    } else {
+      const timer = setInterval(() => {
+        if ((window as any).google?.accounts?.id) {
+          clearInterval(timer)
+          initGoogle()
+        }
+      }, 100)
+      return () => clearInterval(timer)
+    }
+  }, [screen, handleGoogleCallback])
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -212,6 +268,14 @@ export default function AuthPage() {
           >
             {isLoading ? 'Отправка...' : 'Получить код →'}
           </button>
+
+          <div className={styles.divider}>
+            <span className={styles.dividerLine} />
+            <span className={styles.dividerText}>или</span>
+            <span className={styles.dividerLine} />
+          </div>
+
+          <div ref={googleBtnRef} className={styles.googleBtn} />
 
           <p className={styles.agreement}>
             Продолжая, вы соглашаетесь с{' '}

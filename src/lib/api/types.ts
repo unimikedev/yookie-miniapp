@@ -197,6 +197,20 @@ export interface VerifyOtpResponse {
   };
 }
 
+export interface GoogleAuthResponse {
+  token: string;
+  isNewUser?: boolean;
+  user: {
+    id: string;
+    phone: string | null;
+    email: string;
+    name: string;
+    businessId?: string | null;
+    role?: string;
+    avatarUrl?: string | null;
+  };
+}
+
 export interface CreateBookingPayload {
   businessId: string;
   masterId: string;
