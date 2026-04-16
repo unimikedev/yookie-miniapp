@@ -75,6 +75,10 @@ htmlcov/
 # Gradle
 .gradle/
 
+# Railway/Nixpacks config
+nixpacks.toml
+railway.json
+
 # Compiled files
 *.class
 *.o
