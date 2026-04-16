@@ -107,7 +107,7 @@
 .priceTag {
   font-size: var(--text-h3-size);
   font-weight: var(--text-h3-weight);
-  color: var(--accent);
+  color: var(--color-accent);
   white-space: nowrap;
 }
 
@@ -166,7 +166,7 @@
 }
 
 .input:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .input:disabled {
@@ -194,7 +194,7 @@
 }
 
 .textarea:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .textarea:disabled {
@@ -305,7 +305,7 @@
 .confirmButton {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #6d28d9 100%);
   color: white;
   border: none;
   border-radius: var(--radius-md);

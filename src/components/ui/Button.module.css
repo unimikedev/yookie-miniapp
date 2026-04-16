@@ -32,13 +32,13 @@
 
 /* Variants */
 .primary {
-  background-color: var(--accent);
+  background-color: var(--color-accent);
   color: #ffffff;
   box-shadow: var(--shadow-sm);
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--accent);
+  background-color: var(--color-accent);
   opacity: 0.9;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
@@ -136,7 +136,7 @@
 .secondary .spinner,
 .ghost .spinner {
   border: 2px solid rgba(0, 0, 0, 0.1);
-  border-top-color: var(--accent);
+  border-top-color: var(--color-accent);
 }
 
 @keyframes spin {
