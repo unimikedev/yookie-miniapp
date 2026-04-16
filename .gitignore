@@ -2,43 +2,32 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
+# Build outputs
 dist/
 build/
-target/
+*.js
+*.ts
+*.tsx
+*.css
 
 # Environment variables
 .env
 .env.local
-.env.*
+*.env.*
 
 # IDE specific
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Logs
 *.log
 
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-.ENV
-
 # Temporary files
 *.tmp
-*.temp
-*.swp
-*~
-.DS_Store
-Thumbs.db
 
-# Coverage reports
+# Coverage
 coverage/
 htmlcov/
 .coverage
