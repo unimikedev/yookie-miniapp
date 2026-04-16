@@ -375,7 +375,7 @@ export default function HomePage() {
           <div className={styles.searchBox}>
             <form className={styles.searchInputWrap} onSubmit={handleSearchSubmit}>
               <span className={styles.searchIcon}><SearchIcon /></span>
-              {searchQuery ? (
+              <div className={styles.searchInputContainer}>
                 <input
                   ref={inputRef}
                   className={styles.searchInput}
@@ -383,15 +383,16 @@ export default function HomePage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
-                  placeholder={TYPING_PLACEHOLDER}
+                  placeholder=""
                   autoComplete="off"
                 />
-              ) : (
-                <div className={styles.searchPlaceholderWrap}>
-                  <span className={styles.searchPlaceholderStatic}>{TYPING_PLACEHOLDER}</span>
-                  <span className={styles.searchPlaceholderTyped}><TypingPlaceholder /></span>
-                </div>
-              )}
+                {!searchQuery && !searchFocused && (
+                  <div className={styles.searchPlaceholderOverlay}>
+                    <span className={styles.searchPlaceholderStatic}>{TYPING_PLACEHOLDER}</span>
+                    <span className={styles.searchPlaceholderTyped}><TypingPlaceholder /></span>
+                  </div>
+                )}
+              </div>
               <button
                 className={styles.cityBadgeInside}
                 type="button"

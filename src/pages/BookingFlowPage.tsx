@@ -20,6 +20,7 @@ export default function BookingFlowPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successState, setSuccessState] = useState(false)
+  const [bookedCount, setBookedCount] = useState(0)
 
   // Check if we have valid booking data
   const hasValidData = () => {
@@ -139,9 +140,6 @@ export default function BookingFlowPage() {
   if (!hasValidData()) {
     return null
   }
-
-  // Store the count before reset (for success message)
-  const [bookedCount, setBookedCount] = useState(0)
 
   if (successState) {
     const multiCount = bookedCount || 1;

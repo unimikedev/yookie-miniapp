@@ -107,7 +107,11 @@ export default function FavoritesPage() {
                         <div className={styles.ratingRow}>
                           <StarIcon />
                           <span className={styles.ratingNum}>{business.rating?.toFixed(1) ?? '—'}</span>
-                          <span className={styles.reviewCount}>(отзывы)</span>
+                          <span className={styles.reviewCount}>
+                            {((business as any).review_count ?? 0) > 0
+                              ? `(${(business as any).review_count} отзывов)`
+                              : '(нет отзывов)'}
+                          </span>
                         </div>
                       </div>
                       <div className={styles.categoryBadge}><span>{formatCategory(business.category)}</span></div>

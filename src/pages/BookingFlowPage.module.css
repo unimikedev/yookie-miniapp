@@ -17,7 +17,7 @@
 .backButton {
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: none;
   background-color: var(--color-bg);
   cursor: pointer;
@@ -63,8 +63,8 @@
 }
 
 .summaryCard {
-  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(124, 58, 237, 0.05) 100%);
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(107, 206, 255, 0.05) 100%);
+  border-radius: var(--radius-2xl);
   border: 1px solid var(--color-border);
   padding: 16px;
   display: flex;
@@ -94,7 +94,7 @@
 
 .serviceCount {
   font-size: var(--text-caption-size);
-  color: var(--color-accent);
+  color: var(--color-text-secondary);
   font-weight: var(--text-caption-weight);
   margin: 4px 0 2px;
 }
@@ -123,12 +123,12 @@
   gap: 4px;
   padding: 8px;
   background-color: var(--color-bg);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
 }
 
 .detailLabel {
   font-size: var(--text-caption-xs-size);
-  color: var(--color-text-hint);
+  color: var(--color-text-muted);
   font-weight: var(--text-caption-xs-weight);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -156,7 +156,7 @@
   width: 100%;
   padding: 12px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background-color: var(--color-bg);
   color: var(--color-text);
   font-size: var(--text-body-size);
@@ -175,14 +175,14 @@
 }
 
 .input::placeholder {
-  color: var(--color-text-hint);
+  color: var(--color-text-muted);
 }
 
 .textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: inherit;
@@ -203,13 +203,13 @@
 }
 
 .textarea::placeholder {
-  color: var(--color-text-hint);
+  color: var(--color-text-muted);
 }
 
 .infoBox {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--accent-light);
+  background: linear-gradient(135deg, rgba(107, 206, 255, 0.1) 0%, rgba(107, 206, 255, 0.05) 100%);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-accent-light);
   padding: 14px;
   font-size: var(--text-caption-xs-size);
   color: var(--color-text-secondary);
@@ -225,16 +225,16 @@
 }
 
 .infoBox strong {
-  font-weight: var(--text-h3-weight);
+  font-weight: var(--text-body-lg-weight);
   color: var(--color-text);
 }
 
 .errorBox {
-  background-color: rgba(255, 59, 48, 0.1);
-  border: 1px solid var(--danger);
-  border-radius: var(--radius-md);
+  background-color: rgba(248, 113, 113, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-2xl);
   padding: 12px;
-  color: var(--danger);
+  color: var(--color-error);
   font-size: var(--text-caption-xs-size);
   margin-bottom: 12px;
 }
@@ -253,7 +253,7 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: var(--success);
+  background-color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,7 +292,7 @@
 
 .successSubtext {
   font-size: var(--text-caption-size);
-  color: var(--color-text-hint);
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -305,10 +305,10 @@
 .confirmButton {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, var(--color-accent) 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #4a9ece 100%);
   color: white;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-2xl);
   font-size: var(--text-body-lg-size);
   font-weight: var(--text-body-lg-weight);
   cursor: pointer;
