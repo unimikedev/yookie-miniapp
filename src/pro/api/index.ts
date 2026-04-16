@@ -1,15 +1,26 @@
 /**
  * Pro (B2B) API layer.
  *
- * Thin wrapper around the shared `@/lib/api` module. B2B operates on the
- * SAME entities as B2C (Bookings, Services, Masters/Staff, Clients), so
- * endpoints are prefixed under `/merchants/:merchantId/...` on the backend
- * but return the canonical shared types.
+ * Maps to REAL backend endpoints under `/businesses/:businessId/...`.
+ * The frontend uses "merchantId" terminology but it maps 1:1 to businessId
+ * in the backend. This is intentional — when Pro moves to a separate client,
+ * only this file needs updating.
  *
- * Backend endpoints listed here are the target contract. Where the backend
- * is not yet implemented, the calls will fail and callers fall back to a
- * mock layer (see `proMocks.ts`). This mirrors the approach used in
- * `@/lib/api/bookings.ts`.
+ * Backend contract (Fastify):
+ *   GET    /businesses/:id/bookings?date=&masterId=&status=
+ *   PATCH  /bookings/:id/status         { status, cancelReason? }
+ *   POST   /bookings/:id/reschedule     { startsAt, masterId? }
+ *   GET    /businesses/:id/services
+ *   POST   /businesses/:id/services     { name, price, duration_min, ... }
+ *   PATCH  /businesses/:id/services/:sid
+ *   DELETE /businesses/:id/services/:sid
+ *   GET    /businesses/:id/masters
+ *   POST   /businesses/:id/masters      { name, specialization, ... }
+ *   PATCH  /businesses/:id/masters/:mid
+ *   DELETE /businesses/:id/masters/:mid
+ *   GET    /businesses/:id/analytics?from=&to=
+ *
+ * When backend is unavailable (DEV), falls back to in-memory mocks.
  */
 
 import { api } from '@/lib/api/client';
@@ -29,97 +40,214 @@ import {
   mockDashboardSummary,
 } from './proMocks';
 
+const DEV = import.meta.env.DEV;
+
+function shouldFallback(err: unknown): boolean {
+  if (!DEV) return false;
+  if (err instanceof Error) {
+    return (
+      err.message.includes('NETWORK_ERROR') ||
+      err.message.includes('Нет связи') ||
+      err.message.includes('Failed to fetch') ||
+      err.message.includes('Load failed') ||
+      err.message.includes('Not Found')
+    );
+  }
+  return false;
+}
+
 // ─── Reads ────────────────────────────────────────────────────────────────────
+
+/**
+ * List bookings for a business.
+ * Backend: GET /businesses/:id/bookings?date=YYYY-MM-DD
+ */
 export async function listBookings(
   merchantId: string,
   params: { from: string; to: string }
 ): Promise<Booking[]> {
   try {
+    // Backend accepts `date` (single day), not from/to range.
+    // Extract date from `from` param (YYYY-MM-DDT00:00:00 → YYYY-MM-DD)
+    const date = params.from.slice(0, 10);
     const res = await api.get<{ data: Booking[] }>(
-      `/merchants/${merchantId}/bookings`,
-      params
+      `/businesses/${merchantId}/bookings`,
+      { date }
     );
     return res.data ?? [];
-  } catch {
-    return mockListMerchantBookings(merchantId, params);
+  } catch (err) {
+    if (shouldFallback(err)) return mockListMerchantBookings(merchantId, params);
+    throw err;
   }
 }
 
+/**
+ * List services for a business.
+ * Backend: GET /businesses/:id/services
+ */
 export async function listServices(merchantId: string): Promise<Service[]> {
   try {
-    const res = await api.get<{ data: Service[] }>(`/merchants/${merchantId}/services`);
+    const res = await api.get<{ data: Service[] }>(
+      `/businesses/${merchantId}/services`
+    );
     return res.data ?? [];
-  } catch {
-    return mockListMerchantServices(merchantId);
+  } catch (err) {
+    if (shouldFallback(err)) return mockListMerchantServices(merchantId);
+    throw err;
   }
 }
 
+/**
+ * List staff (masters) for a business.
+ * Backend: GET /businesses/:id/masters
+ */
 export async function listStaff(merchantId: string): Promise<Master[]> {
   try {
-    const res = await api.get<{ data: Master[] }>(`/merchants/${merchantId}/staff`);
+    const res = await api.get<{ data: Master[] }>(
+      `/businesses/${merchantId}/masters`
+    );
     return res.data ?? [];
-  } catch {
-    return mockListMerchantStaff(merchantId);
+  } catch (err) {
+    if (shouldFallback(err)) return mockListMerchantStaff(merchantId);
+    throw err;
   }
 }
 
+/**
+ * List clients who have bookings with this business.
+ * Backend has no direct endpoint for this — we derive clients from bookings.
+ * TODO: Add GET /businesses/:id/clients on backend.
+ */
 export async function listClients(merchantId: string): Promise<Client[]> {
   try {
-    const res = await api.get<{ data: Client[] }>(`/merchants/${merchantId}/clients`);
-    return res.data ?? [];
-  } catch {
-    return mockListMerchantClients(merchantId);
+    // Fetch recent bookings and extract unique clients
+    const res = await api.get<{ data: Booking[] }>(
+      `/businesses/${merchantId}/bookings`,
+      {}
+    );
+    const bookings = res.data ?? [];
+    const clientMap = new Map<string, Client>();
+    for (const b of bookings) {
+      if (b.clients && b.client_id && !clientMap.has(b.client_id)) {
+        clientMap.set(b.client_id, {
+          id: b.client_id,
+          telegram_id: BigInt(b.clients.telegram_id ?? 0),
+          phone: b.clients.phone,
+          name: b.clients.name,
+        });
+      }
+    }
+    return Array.from(clientMap.values());
+  } catch (err) {
+    if (shouldFallback(err)) return mockListMerchantClients(merchantId);
+    throw err;
   }
 }
 
-export async function dashboardSummary(merchantId: string, date: string) {
+/**
+ * Dashboard summary. Maps to analytics endpoint + today's bookings.
+ * Backend: GET /businesses/:id/analytics?from=&to=
+ */
+export interface DashboardSummary {
+  bookingsCount: number;
+  revenuePlaceholder: number;
+  loadPercent: number;
+  emptySlots: number;
+  cancellations: number;
+}
+
+export async function dashboardSummary(
+  merchantId: string,
+  date: string
+): Promise<DashboardSummary> {
   try {
-    return await api.get<{
-      data: {
-        bookingsCount: number;
-        revenuePlaceholder: number;
-        loadPercent: number;
-        emptySlots: number;
-        cancellations: number;
-      };
-    }>(`/merchants/${merchantId}/dashboard`, { date }).then((r) => r.data);
-  } catch {
-    return mockDashboardSummary(merchantId, date);
+    // Use analytics endpoint for the day
+    const dayStart = `${date}T00:00:00`;
+    const dayEnd = `${date}T23:59:59`;
+    const [analytics, bookings, staff] = await Promise.all([
+      api.get<{
+        data: {
+          bookings: { total: number; completed: number; cancelled: number };
+          revenue: { total: number };
+        };
+      }>(`/businesses/${merchantId}/analytics`, { from: dayStart, to: dayEnd }),
+      api.get<{ data: Booking[] }>(`/businesses/${merchantId}/bookings`, { date }),
+      api.get<{ data: Master[] }>(`/businesses/${merchantId}/masters`),
+    ]);
+
+    const bData = analytics.data?.bookings ?? { total: 0, completed: 0, cancelled: 0 };
+    const todayBookings = bookings.data ?? [];
+    const staffCount = (staff.data ?? []).filter((s) => s.is_active).length;
+
+    // Crude load: booked minutes / (active staff * 10h)
+    const minutesBooked = todayBookings.reduce((sum, b) => {
+      if (b.status === 'cancelled' || b.status === 'no_show') return sum;
+      const dur = (new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60000;
+      return sum + dur;
+    }, 0);
+    const capacity = Math.max(1, staffCount) * 10 * 60;
+    const loadPercent = Math.min(100, Math.round((minutesBooked / capacity) * 100));
+    const emptySlots = Math.max(0, staffCount * 8 - todayBookings.length);
+
+    return {
+      bookingsCount: bData.total,
+      revenuePlaceholder: analytics.data?.revenue?.total ?? 0,
+      loadPercent,
+      emptySlots,
+      cancellations: bData.cancelled,
+    };
+  } catch (err) {
+    if (shouldFallback(err)) return mockDashboardSummary(merchantId, date);
+    throw err;
   }
 }
 
 // ─── Writes ───────────────────────────────────────────────────────────────────
+
+/**
+ * Update booking status.
+ * Backend: PATCH /bookings/:id/status  { status }
+ * Note: endpoint is NOT scoped to business — bookingId is globally unique.
+ */
 export async function updateBookingStatus(
-  merchantId: string,
+  _merchantId: string,
   bookingId: string,
   status: BookingStatus
 ): Promise<Booking> {
   try {
-    const res = await api.post<{ data: Booking }>(
-      `/merchants/${merchantId}/bookings/${bookingId}/status`,
+    const res = await api.patch<{ data: Booking }>(
+      `/bookings/${bookingId}/status`,
       { status }
     );
     return res.data;
-  } catch {
-    return mockUpdateBookingStatus(merchantId, bookingId, status);
+  } catch (err) {
+    if (shouldFallback(err)) return mockUpdateBookingStatus(_merchantId, bookingId, status);
+    throw err;
   }
 }
 
+/**
+ * Reschedule a booking.
+ * Backend: POST /bookings/:id/reschedule  { startsAt, masterId? }
+ */
 export async function rescheduleBooking(
-  merchantId: string,
+  _merchantId: string,
   bookingId: string,
   patch: { startsAt?: string; endsAt?: string; masterId?: string }
 ): Promise<Booking> {
   try {
     const res = await api.post<{ data: Booking }>(
-      `/merchants/${merchantId}/bookings/${bookingId}/reschedule`,
-      patch
+      `/bookings/${bookingId}/reschedule`,
+      { startsAt: patch.startsAt, masterId: patch.masterId }
     );
     return res.data;
-  } catch {
-    return mockRescheduleBooking(merchantId, bookingId, patch);
+  } catch (err) {
+    if (shouldFallback(err)) return mockRescheduleBooking(_merchantId, bookingId, patch);
+    throw err;
   }
 }
+
+// ─── Services CRUD ────────────────────────────────────────────────────────────
 
 export type ServiceInput = Partial<Service> & {
   name: string;
@@ -127,67 +255,103 @@ export type ServiceInput = Partial<Service> & {
   duration_min: number;
 };
 
+/**
+ * Create or update a service.
+ * Backend: POST /businesses/:id/services (create)
+ *          PATCH /businesses/:id/services/:sid (update)
+ */
 export async function upsertService(
   merchantId: string,
   input: ServiceInput
 ): Promise<Service> {
   try {
     if (input.id) {
-      const res = await api.post<{ data: Service }>(
-        `/merchants/${merchantId}/services/${input.id}`,
-        input
+      const res = await api.patch<{ data: Service }>(
+        `/businesses/${merchantId}/services/${input.id}`,
+        { name: input.name, price: input.price, duration_min: input.duration_min, description: input.description, category: input.category }
       );
       return res.data;
     }
     const res = await api.post<{ data: Service }>(
-      `/merchants/${merchantId}/services`,
-      input
+      `/businesses/${merchantId}/services`,
+      { name: input.name, price: input.price, duration_min: input.duration_min, description: input.description, category: input.category }
     );
     return res.data;
-  } catch {
-    return mockUpsertService(merchantId, input);
+  } catch (err) {
+    if (shouldFallback(err)) return mockUpsertService(merchantId, input);
+    throw err;
   }
 }
 
+/**
+ * Delete (soft) a service.
+ * Backend: DELETE /businesses/:id/services/:sid
+ */
 export async function deleteService(merchantId: string, serviceId: string): Promise<void> {
   try {
-    await api.post<unknown>(`/merchants/${merchantId}/services/${serviceId}/delete`, {});
-  } catch {
-    await mockDeleteService(merchantId, serviceId);
+    await api.delete<unknown>(`/businesses/${merchantId}/services/${serviceId}`);
+  } catch (err) {
+    if (shouldFallback(err)) { await mockDeleteService(merchantId, serviceId); return; }
+    throw err;
   }
 }
+
+// ─── Staff (Masters) CRUD ─────────────────────────────────────────────────────
 
 export type StaffInput = Partial<Master> & { name: string; specialization: string };
 
+/**
+ * Create or update a staff member (master).
+ * Backend: POST /businesses/:id/masters (create)
+ *          PATCH /businesses/:id/masters/:mid (update)
+ */
 export async function upsertStaff(
   merchantId: string,
   input: StaffInput
 ): Promise<Master> {
   try {
+    const body = {
+      name: input.name,
+      specialization: input.specialization,
+      bio: input.bio,
+      photo_url: input.photo_url,
+      working_days: input.working_days,
+      breaks: input.breaks,
+    };
     if (input.id) {
-      const res = await api.post<{ data: Master }>(
-        `/merchants/${merchantId}/staff/${input.id}`,
-        input
+      const res = await api.patch<{ data: Master }>(
+        `/businesses/${merchantId}/masters/${input.id}`,
+        body
       );
       return res.data;
     }
     const res = await api.post<{ data: Master }>(
-      `/merchants/${merchantId}/staff`,
-      input
+      `/businesses/${merchantId}/masters`,
+      body
     );
     return res.data;
-  } catch {
-    return mockUpsertStaff(merchantId, input);
+  } catch (err) {
+    if (shouldFallback(err)) return mockUpsertStaff(merchantId, input);
+    throw err;
   }
 }
 
+/**
+ * Delete (soft) a staff member.
+ * Backend: DELETE /businesses/:id/masters/:mid
+ */
 export async function deleteStaff(merchantId: string, staffId: string): Promise<void> {
   try {
-    await api.post<unknown>(`/merchants/${merchantId}/staff/${staffId}/delete`, {});
-  } catch {
-    await mockDeleteStaff(merchantId, staffId);
+    await api.delete<unknown>(`/businesses/${merchantId}/masters/${staffId}`);
+  } catch (err) {
+    if (shouldFallback(err)) { await mockDeleteStaff(merchantId, staffId); return; }
+    throw err;
   }
 }
+
+// ─── Availability ─────────────────────────────────────────────────────────────
+// Backend stores availability as `working_days` (Record<day, bool>) + `breaks`
+// on the master record. We update via PATCH /businesses/:id/masters/:mid.
 
 export interface AvailabilityDay {
   weekday: number; // 0 = Sun ... 6 = Sat
@@ -196,18 +360,31 @@ export interface AvailabilityDay {
   enabled: boolean;
 }
 
+const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+/**
+ * Update staff availability by patching the master's working_days + breaks.
+ * Converts AvailabilityDay[] → { working_days, breaks } for backend.
+ */
 export async function updateAvailability(
   merchantId: string,
   staffId: string,
   days: AvailabilityDay[]
 ): Promise<AvailabilityDay[]> {
   try {
-    const res = await api.post<{ data: AvailabilityDay[] }>(
-      `/merchants/${merchantId}/staff/${staffId}/availability`,
-      { days }
+    const working_days: Record<string, boolean> = {};
+    for (const d of days) {
+      working_days[WEEKDAY_KEYS[d.weekday]] = d.enabled;
+    }
+    // Store open/close as business working_hours format on the master
+    // For now we just toggle days on/off via working_days field
+    await api.patch<{ data: Master }>(
+      `/businesses/${merchantId}/masters/${staffId}`,
+      { working_days }
     );
-    return res.data;
-  } catch {
-    return mockUpdateAvailability(merchantId, staffId, days);
+    return days;
+  } catch (err) {
+    if (shouldFallback(err)) return mockUpdateAvailability(merchantId, staffId, days);
+    throw err;
   }
 }

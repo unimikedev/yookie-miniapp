@@ -89,7 +89,7 @@ export default function SearchPage() {
         }))
 
         // Collect all services from nearby and popular studios
-        const services: typeof searchResults['services'] = []
+        const services: Array<{ id: string; name: string; businessId: string; businessName: string; type: 'service' }> = []
 
         // Filter results
         const q = query.toLowerCase()
@@ -199,6 +199,7 @@ export default function SearchPage() {
                     photoUrl: getMockBusinessImage(biz.category, biz.id),
                     photos: [] as string[],
                     businessId: biz.id,
+                    providerType: 'business' as const,
                   }
                   return (
                     <PopularStudioCardView

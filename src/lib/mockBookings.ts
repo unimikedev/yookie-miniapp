@@ -155,11 +155,7 @@ export function createMockBooking(payload: {
     ends_at: endsAtDate.toISOString(),
     status: 'confirmed',
     price: mockServicePrice,
-    notes: null,
-    lead_source: 'direct',
-    utm_source: null,
-    cancelled_by: null,
-    cancel_reason: null,
+    notes: undefined,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     businesses: {
@@ -172,7 +168,7 @@ export function createMockBooking(payload: {
     masters: {
       id: payload.masterId,
       name: masterName,
-      photo_url: null,
+      photo_url: undefined,
     },
     services: {
       id: payload.serviceId,
@@ -287,7 +283,7 @@ export function mockCancelBooking(id: string, _phone: string): Promise<void> {
         reject(new Error('Эту запись нельзя отменить'));
         return;
       }
-      all[idx] = { ...all[idx], status: 'cancelled', cancelled_by: 'client' };
+      all[idx] = { ...all[idx], status: 'cancelled' };
       saveMockBookings(all);
       resolve();
     }, 200);

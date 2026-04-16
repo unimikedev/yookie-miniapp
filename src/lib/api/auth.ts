@@ -10,7 +10,7 @@ import { RequestOtpPayload, VerifyOtpPayload, VerifyOtpResponse } from './types'
  */
 export async function requestOtp(phone: string): Promise<void> {
   const payload: RequestOtpPayload = { phone };
-  await api.post('/auth/otp/request', payload);
+  await api.post('/auth/otp/send', payload);
 }
 
 /**

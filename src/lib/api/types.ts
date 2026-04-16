@@ -187,7 +187,14 @@ export interface VerifyOtpPayload {
 
 export interface VerifyOtpResponse {
   token: string;
-  user: Client;
+  isNewUser?: boolean;
+  user: {
+    id: string;
+    phone: string;
+    name: string;
+    businessId?: string | null;
+    role?: string;
+  };
 }
 
 export interface CreateBookingPayload {

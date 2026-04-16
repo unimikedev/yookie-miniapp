@@ -172,7 +172,7 @@ export default function HomePage() {
             type: 'business',
             id: b.id,
             name: b.name,
-            meta: b.category_label || b.category || '',
+            meta: b.category || '',
             emoji: CATEGORY_EMOJI_MAP[b.category] ?? '🏢',
             businessId: b.id,
           })
@@ -271,6 +271,7 @@ export default function HomePage() {
           hasSlotsToday: true,
           businessId: vb.businessId,
           masterId: m.id,
+          providerType: 'business' as const,
           lastVisitDate: vb.lastVisitAt
             ? new Date(vb.lastVisitAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })
             : '',
@@ -489,6 +490,7 @@ export default function HomePage() {
                           name: nb.name,
                           category: nb.category,
                           categoryLabel: nb.categoryLabel,
+                          providerType: nb.providerType ?? 'business',
                           rating: nb.rating,
                           reviewCount: 0,
                           photoUrl: nb.photoUrl,

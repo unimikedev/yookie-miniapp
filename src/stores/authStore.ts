@@ -11,6 +11,10 @@ export interface AuthUser {
   phone: string;
   name: string;
   telegram_id?: bigint;
+  /** Business ID if user is a merchant (B2B). Comes from backend JWT. */
+  businessId?: string | null;
+  /** User role: owner, admin, master */
+  role?: string;
 }
 
 interface AuthState {

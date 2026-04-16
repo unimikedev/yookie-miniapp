@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { requestOtp } from '@/lib/api/auth'
 import styles from './AuthPage.module.css'
@@ -10,11 +10,13 @@ const OTP_RESEND_SECONDS = 60
 
 export default function AuthPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const authStore = useAuthStore()
+  const returnTo = searchParams.get('return') || '/account'
 
   const [screen, setScreen] = useState<Screen>('phone')
   const [phone, setPhone] = useState('+998')
-  const [otp, setOtp] = useState(['', '', '', ''])
+  const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [countdown, setCountdown] = useState(OTP_RESEND_SECONDS)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,11 +26,13 @@ export default function AuthPage() {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
   ]
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (authStore.isAuthenticated) navigate('/account', { replace: true })
+    if (authStore.isAuthenticated) navigate(returnTo, { replace: true })
   }, [authStore.isAuthenticated])
 
   // Countdown timer for OTP resend
@@ -53,7 +57,7 @@ export default function AuthPage() {
       const isDevPhone = phone.trim().toLowerCase() === 'admin' || digits === '998000000000'
       if (isDevPhone) {
         authStore.devLogin()
-        navigate('/account', { replace: true })
+        navigate(returnTo, { replace: true })
         return
       }
     }
@@ -77,12 +81,12 @@ export default function AuthPage() {
     setOtp(next)
     setError(null)
 
-    if (digit && idx < 3) {
+    if (digit && idx < 5) {
       otpRefs[idx + 1].current?.focus()
     }
 
-    // Auto-submit when all 4 digits entered
-    if (digit && idx === 3 && next.every(d => d !== '')) {
+    // Auto-submit when all 6 digits entered
+    if (digit && idx === 5 && next.every(d => d !== '')) {
       submitOtp(next.join(''))
     }
   }
@@ -94,24 +98,24 @@ export default function AuthPage() {
   }
 
   const submitOtp = async (code: string) => {
-    if (code.length < 4) {
-      setError('Введите 4-значный код')
+    if (code.length < 6) {
+      setError('Введите 6-значный код')
       return
     }
-    // Dev shortcut: 0000 → instant test login — only in dev builds
-    if (import.meta.env.DEV && code === '0000') {
+    // Dev shortcut: 000000 → instant test login — only in dev builds
+    if (import.meta.env.DEV && code === '000000') {
       authStore.devLogin()
-      navigate('/account', { replace: true })
+      navigate(returnTo, { replace: true })
       return
     }
     setIsLoading(true)
     setError(null)
     try {
       await authStore.login(phone, code)
-      navigate('/account', { replace: true })
+      navigate(returnTo, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Неверный код')
-      setOtp(['', '', '', ''])
+      setOtp(['', '', '', '', '', ''])
       otpRefs[0].current?.focus()
     } finally {
       setIsLoading(false)
@@ -129,7 +133,7 @@ export default function AuthPage() {
     // Find last filled slot
     const idx = [...otp].reverse().findIndex(d => d !== '')
     if (idx === -1) return
-    const realIdx = 3 - idx
+    const realIdx = 5 - idx
     const next = [...otp]
     next[realIdx] = ''
     setOtp(next)
@@ -140,7 +144,7 @@ export default function AuthPage() {
     if (countdown > 0) return
     setIsLoading(true)
     setError(null)
-    setOtp(['', '', '', ''])
+    setOtp(['', '', '', '', '', ''])
     try {
       await requestOtp(phone)
       setCountdown(OTP_RESEND_SECONDS)
@@ -157,7 +161,7 @@ export default function AuthPage() {
       <button
         className={styles.backBtn}
         onClick={() => {
-          if (screen === 'otp') { setScreen('phone'); setOtp(['', '', '', '']); setError(null) }
+          if (screen === 'otp') { setScreen('phone'); setOtp(['', '', '', '', '', '']); setError(null) }
           else navigate(-1)
         }}
         aria-label="Назад"
@@ -219,7 +223,7 @@ export default function AuthPage() {
         <div className={styles.content}>
           <h1 className={styles.title}>Введите код</h1>
           <p className={styles.subtitle}>
-            Мы отправили 4-значный код на{' '}
+            Мы отправили 6-значный код на{' '}
             <strong>{phone}</strong>
           </p>
 

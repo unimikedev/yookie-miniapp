@@ -11,8 +11,6 @@ import AuthPage from '@/pages/AuthPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import ProfileEditPage from '@/pages/ProfileEditPage'
 import { ProRouter } from '@/pro/ProRouter'
-import { MerchantRegisterPage } from '@/pages/merchant/MerchantRegisterPage'
-import { MerchantDashboard } from '@/pages/merchant/MerchantDashboard'
 
 export function Router() {
   return (
@@ -31,10 +29,6 @@ export function Router() {
       
       {/* Yookie Pro (B2B) — self-contained sub-router */}
       <Route path="/pro/*" element={<ProRouter />} />
-      
-      {/* Yookie Pro (B2B) Routes */}
-      <Route path="/merchant/register" element={<MerchantRegisterPage />} />
-      <Route path="/merchant/dashboard" element={<MerchantDashboard />} />
       
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

@@ -7,6 +7,7 @@ import { Business, Master, Service } from './api/types'
 
 export const MOCK_BUSINESSES: Business[] = [
   {
+    provider_type: 'business' as const,
     id: 'a1111111-1111-4111-b111-111111111111',
     name: 'Glam Studio',
     description: 'Современный салон красоты в самом центре Ташкента. Причёски, макияж, уход за кожей.',
@@ -30,6 +31,7 @@ export const MOCK_BUSINESSES: Business[] = [
     lng: 69.2401,
   },
   {
+    provider_type: 'business' as const,
     id: 'a2222222-2222-4222-b222-222222222222',
     name: 'Blade & Fade',
     description: 'Барбершоп с европейским подходом. Стрижки, бритьё и уход за бородой.',
@@ -54,6 +56,7 @@ export const MOCK_BUSINESSES: Business[] = [
     lng: 69.2799,
   },
   {
+    provider_type: 'business' as const,
     id: 'a3333333-3333-4333-b333-333333333333',
     name: 'Nail Lab',
     description: 'Маникюр и педикюр нового поколения. Гелевые покрытия, наращивание, дизайн.',
@@ -77,6 +80,7 @@ export const MOCK_BUSINESSES: Business[] = [
     lng: 69.2567,
   },
   {
+    provider_type: 'business' as const,
     id: 'a4444444-4444-4444-b444-444444444444',
     name: 'Zen Spa',
     description: 'Спа-центр для полного расслабления. Массаж, обёртывания, хаммам.',
@@ -101,6 +105,7 @@ export const MOCK_BUSINESSES: Business[] = [
     lng: 69.2700,
   },
   {
+    provider_type: 'business' as const,
     id: 'a5555555-5555-4555-b555-555555555555',
     name: 'Brow House',
     description: 'Студия бровей и ресниц. Коррекция, окрашивание, ламинирование.',
@@ -124,6 +129,7 @@ export const MOCK_BUSINESSES: Business[] = [
     lng: 69.2650,
   },
   {
+    provider_type: 'business' as const,
     id: 'a6666666-6666-4666-b666-666666666666',
     name: 'Derma Clinic',
     description: 'Косметологическая клиника. Чистки, пилинги, мезотерапия и инъекции красоты.',
@@ -147,6 +153,7 @@ export const MOCK_BUSINESSES: Business[] = [
     lng: 69.2820,
   },
   {
+    provider_type: 'business' as const,
     id: 'a7777777-7777-4777-b777-777777777777',
     name: 'Iron Gym',
     description: 'Современный фитнес-клуб с профессиональными тренерами. Персональные тренировки.',
@@ -171,6 +178,7 @@ export const MOCK_BUSINESSES: Business[] = [
     lng: 69.2750,
   },
   {
+    provider_type: 'business' as const,
     id: 'a8888888-8888-4888-b888-888888888888',
     name: 'Ink Masters',
     description: 'Тату-студия для смелых. Хэндпоук, реализм, акварель — любые стили.',

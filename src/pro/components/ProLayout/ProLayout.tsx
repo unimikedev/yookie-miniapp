@@ -12,28 +12,78 @@ interface ProLayoutProps {
   actions?: React.ReactNode;
   /** Hide bottom nav for full-screen flows (e.g. booking edit sheet). */
   hideNav?: boolean;
+  /** Skip onboarding gate — used by settings page during business creation. */
+  allowWithoutBusiness?: boolean;
 }
 
 /**
- * Shell for all Pro screens. Keeps layout concerns (header, nav, safe areas)
- * out of individual pages and allows the Pro surface to be swapped for a
- * standalone client without touching page code.
+ * Shell for all Pro screens. Enforces authentication + merchant context.
+ * If user is not authenticated → redirect to auth.
+ * If user has no businessId → show onboarding prompt.
  */
-export function ProLayout({ children, title, actions, hideNav }: ProLayoutProps) {
+export function ProLayout({ children, title, actions, hideNav, allowWithoutBusiness }: ProLayoutProps) {
   const navigate = useNavigate();
   const auth = useAuthStore();
   const merchant = useMerchantStore();
 
-  // Dev convenience: auto-activate a demo merchant when authenticated
   useEffect(() => {
-    merchant.loadFromStorage();
-    if (!merchant.merchantId && auth.isAuthenticated) {
-      merchant.setMerchantId('demo-merchant');
+    // Not authenticated → redirect to auth with return path
+    if (!auth.isAuthenticated) {
+      navigate('/auth?return=/pro', { replace: true });
+      return;
     }
+
+    // Try to load merchantId from JWT token (businessId field)
+    merchant.loadFromToken();
+    // Fallback: try localStorage
+    if (!merchant.merchantId) {
+      merchant.loadFromStorage();
+    }
+
     merchant.enterProMode();
     return () => merchant.exitProMode();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.isAuthenticated]);
+
+  // Not authenticated — will redirect, show nothing
+  if (!auth.isAuthenticated) {
+    return null;
+  }
+
+  // No business assigned — onboarding needed (skip for settings page during creation)
+  if (!merchant.merchantId && !allowWithoutBusiness) {
+    return (
+      <div className={styles.layout}>
+        <header className={styles.header}>
+          <button
+            className={styles.backBtn}
+            onClick={() => navigate('/account')}
+            aria-label="Назад"
+          >
+            ←
+          </button>
+          <div className={styles.titleBlock}>
+            <span className={styles.brand}>Yookie Pro</span>
+          </div>
+          <div className={styles.actions} />
+        </header>
+        <main className={styles.main}>
+          <div className={styles.onboarding}>
+            <h2 className={styles.onboardingTitle}>Добро пожаловать в Yookie Pro</h2>
+            <p className={styles.onboardingText}>
+              Чтобы начать принимать записи, создайте свой бизнес-профиль.
+            </p>
+            <button
+              className={styles.onboardingBtn}
+              onClick={() => navigate('/pro/settings')}
+            >
+              Создать бизнес
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.layout}>

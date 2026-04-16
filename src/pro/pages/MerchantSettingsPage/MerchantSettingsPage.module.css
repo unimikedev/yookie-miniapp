@@ -58,3 +58,10 @@
   opacity: 0.5;
   cursor: default;
 }
+
+.error {
+  color: var(--color-error);
+  font-size: var(--text-caption-size);
+  margin-bottom: 12px;
+  text-align: center;
+}
