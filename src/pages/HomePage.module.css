@@ -7,8 +7,8 @@
   min-height: 100dvh;
   background: var(--color-bg);
   /* Use Telegram safe area directly without extra hardcoded padding */
-  padding-top: var(--safe-area-top);
-  padding-bottom: calc(var(--safe-area-bottom) + 16px);
+  padding-top: var(--safe-area-top-half);
+  padding-bottom: calc(var(--safe-area-bottom-half) + 16px);
 }
 
 /* ── Green gradient — fixed behind header, covers system bar ── */
@@ -18,7 +18,7 @@
   left: 0;
   right: 0;
   /* Telegram header + system bar */
-  height: calc(var(--safe-area-top) + 64px);
+  height: calc(var(--safe-area-top-half) + 64px);
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
@@ -88,7 +88,7 @@
 /* ── Search — sticky, pins to top of viewport ──────────── */
 .searchWrap {
   position: sticky;
-  top: calc(var(--safe-area-top) + 12px + 15px);
+  top: calc(var(--safe-area-top-half) + 12px + 15px);
   z-index: 10;
   background: var(--color-bg);
   backdrop-filter: blur(8px);

@@ -11,13 +11,13 @@
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
-  padding-bottom: calc(80px + var(--safe-area-bottom));
+  padding-bottom: calc(80px + var(--safe-area-bottom-half));
 }
 
 /* ── Page header (fixed, frosted glass) ──────────────────── */
 .pageHeader {
   position: fixed;
-  top: var(--safe-area-top);
+  top: var(--safe-area-top-half);
   left: 0;
   right: 0;
   z-index: 50;
@@ -32,7 +32,7 @@
 }
 
 .pageHeaderSpacer {
-  height: calc(56px + var(--safe-area-top));
+  height: calc(56px + var(--safe-area-top-half));
 }
 
 .pageHeaderTitle {
