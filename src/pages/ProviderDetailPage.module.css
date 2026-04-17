@@ -12,13 +12,13 @@
   overflow-y: auto;
   scrollbar-gutter: stable;
   padding-top: 0;
-  padding-bottom: calc(80px + var(--safe-area-bottom));
+  padding-bottom: calc(80px + var(--safe-area-bottom-half));
 }
 
 /* ── Page header (pill shaped, floating over photo) ────── */
 .pageHeader {
   position: fixed;
-  top: calc(var(--safe-area-top) + 8px + 30px);
+  top: calc(var(--safe-area-top-half) + 8px + 30px);
   left: 16px;
   right: 16px;
   z-index: 50;

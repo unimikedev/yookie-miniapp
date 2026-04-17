@@ -8,7 +8,7 @@
   left: 0;
   right: 0;
   /* Device home indicator + Telegram bottom bar + 12px breathing room */
-  bottom: calc(var(--safe-area-bottom, 0px) + 12px);
+  bottom: calc(var(--safe-area-bottom-half, 0px) + 12px);
   z-index: 100;
   display: flex;
   justify-content: center;
