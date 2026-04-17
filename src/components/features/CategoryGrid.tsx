@@ -1,5 +1,6 @@
 import React from 'react';
 import { CategoryEnum, CATEGORY_LABELS } from '@/lib/api/types';
+import { CATEGORY_ICONS } from '@/shared/constants';
 import styles from './CategoryGrid.module.css';
 
 interface CategoryGridProps {
@@ -21,25 +22,6 @@ const FEATURED_CATEGORIES: CategoryEnum[] = [
   'fitness',
 ];
 
-const getCategoryEmoji = (category: string): string => {
-  const emojiMap: Record<string, string> = {
-    hair: '💇‍♀️',
-    nail: '💅',
-    brow_lash: '👁️',
-    makeup: '💄',
-    spa_massage: '🧖',
-    epilation: '🪒',
-    cosmetology: '✨',
-    barber: '✂️',
-    tattoo: '🖊️',
-    piercing: '👂',
-    yoga: '🧘',
-    fitness: '🏋️‍♂️',
-    other: '🏪',
-  };
-  return emojiMap[category] || '🏪';
-};
-
 export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelect }) => {
   const handleSelect = (category: CategoryEnum) => {
     onSelect(category);
@@ -48,7 +30,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelect }) => {
   return (
     <div className={styles.grid}>
       {FEATURED_CATEGORIES.map((category) => {
-        const emoji = getCategoryEmoji(category);
+        const iconSrc = CATEGORY_ICONS[category] || CATEGORY_ICONS['other'];
         const label = CATEGORY_LABELS[category];
 
         return (
@@ -58,7 +40,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelect }) => {
             onClick={() => handleSelect(category)}
             aria-label={label}
           >
-            <div className={styles.emoji}>{emoji}</div>
+            <img src={iconSrc} alt="" className={styles.icon} />
             <div className={styles.label}>{label}</div>
           </button>
         );
