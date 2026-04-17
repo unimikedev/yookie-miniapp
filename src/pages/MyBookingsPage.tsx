@@ -190,17 +190,6 @@ export default function MyBookingsPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        {!isInTelegram && (
-          <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Назад">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M12 4L6 10L12 16" />
-            </svg>
-          </button>
-        )}
-        <span className={styles.headerTitle}>Мои записи</span>
-      </header>
-
       <div className={styles.content}>
         <div className={styles.tabs}>
           <button className={`${styles.tabBtn} ${tab === 'active' ? styles.tabActive : ''}`} onClick={() => setTab('active')}>

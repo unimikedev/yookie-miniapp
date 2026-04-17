@@ -6,6 +6,7 @@ import { fetchBusiness } from '@/lib/api/businesses'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import { MOCK_BUSINESSES } from '@/lib/mockBusinesses'
 import { FavoriteButton } from '@/components/features'
+import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import styles from './FavoritesPage.module.css'
 
 const StarIcon = () => (
@@ -21,6 +22,9 @@ export default function FavoritesPage() {
   const { favoriteIds } = useFavoritesStore()
   const [businesses, setBusinesses] = useState<Business[]>([])
   const [isLoading, setIsLoading] = useState(false)
+
+  // Telegram native BackButton (replaces inline back arrow)
+  useTelegramBackButton(true)
 
   const ids = Array.from(favoriteIds)
 
@@ -64,18 +68,6 @@ export default function FavoritesPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.83 9L9.43 14.6L8 16L0 8L8 0L9.43 1.4L3.83 7H16V9H3.83Z" fill="currentColor"/></svg>
-          </button>
-          <div className={styles.headerTitleRow}>
-            <svg width="22" height="20" viewBox="0 0 22 20" fill="none"><path d="M2.89 1.11C5.88-0.72 8.55 0 10.17 1.22C10.43 1.42 10.61 1.55 10.75 1.65C10.89 1.55 11.07 1.42 11.33 1.22C12.95 0 15.62-0.72 18.6 1.11C20.67 2.37 21.83 5.01 21.42 8.05C21.01 11.09 19.04 14.54 14.86 17.64C13.4 18.71 12.34 19.5 10.75 19.5C9.16 19.5 8.09 18.71 6.64 17.64C2.46 14.54 0.49 11.09 0.08 8.05C-0.33 5.01 0.83 2.37 2.89 1.11Z" fill="currentColor"/></svg>
-            <span className={styles.headerTitle}>Избранные</span>
-          </div>
-        </div>
-      </header>
-
       <div className={styles.content}>
         <section className={styles.section}>
           <div className={styles.sectionHead}>
