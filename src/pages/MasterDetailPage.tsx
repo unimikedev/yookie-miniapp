@@ -496,12 +496,8 @@ export default function MasterDetailPage() {
                 </div>
               ))}
               <div className={styles.confirmationDetail}>
-                <span>Дата:</span>
-                <span>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
-              </div>
-              <div className={styles.confirmationDetail}>
-                <span>Время:</span>
-                <span>{selectedSlot?.start}</span>
+                <span>Дата и время:</span>
+                <span>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}, {selectedSlot?.start}</span>
               </div>
               <div className={styles.confirmationTotal}>
                 <span>Итого:</span>

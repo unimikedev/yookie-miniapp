@@ -18,7 +18,7 @@
 /* ── Page header (pill shaped, floating over photo) ────── */
 .pageHeader {
   position: fixed;
-  top: calc(var(--safe-area-top) + 8px);
+  top: calc(var(--safe-area-top) + 8px + 30px);
   left: 16px;
   right: 16px;
   z-index: 50;

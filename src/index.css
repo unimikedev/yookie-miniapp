@@ -70,9 +70,9 @@ body, #root {
   --radius-md: var(--radius-3xl);
 }
 
-/* Telegram Mini App sticky safe space (60px) — stacks before other sticky elements */
+/* Telegram Mini App sticky safe space (30px) — stacks before other sticky elements */
 :root {
-  --tg-sticky-safe-space: 60px;
+  --tg-sticky-safe-space: 30px;
 }
 
 button {

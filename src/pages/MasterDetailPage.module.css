@@ -17,14 +17,14 @@
 /* ── Page header (fixed, frosted glass) ──────────────────── */
 .pageHeader {
   position: fixed;
-  top: 0;
+  top: var(--safe-area-top);
   left: 0;
   right: 0;
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: max(var(--safe-area-top), 8px) 16px 8px;
+  padding: 8px 16px 8px;
   min-height: 56px;
   background: color-mix(in srgb, var(--color-bg) 80%, transparent);
   backdrop-filter: blur(16px);
@@ -90,6 +90,7 @@
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+  margin-right: 16px;
 }
 
 .coverActionBtn {
@@ -159,6 +160,7 @@
 .masterTextInfo {
   flex: 1;
   min-width: 0;
+  text-align: left;
 }
 
 .masterName {
@@ -449,9 +451,16 @@
   color: var(--color-text-muted);
 }
 
+.confirmationDetail span:first-child {
+  flex-shrink: 0;
+}
+
 .confirmationDetail span:last-child {
   color: var(--color-text);
   font-weight: var(--text-body-weight);
+  text-align: right;
+  margin-left: auto;
+  padding-left: 16px;
 }
 
 .confirmationTotal {
