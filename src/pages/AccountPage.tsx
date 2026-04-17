@@ -68,13 +68,19 @@ export default function AccountPage() {
   const authStore = useAuthStore()
   const user = platform.user
 
+  // Check authentication - redirect to auth if not authenticated
+  useEffect(() => {
+    if (!authStore.isAuthenticated) {
+      navigate('/auth?return=/account', { replace: true })
+      return
+    }
+  }, [authStore.isAuthenticated, navigate])
+
   // Telegram native BackButton (replaces inline back arrow)
   useTelegramBackButton(true)
 
-  const [stats, setStats] = useState<{ joinDays: number; totalBookings: number; loyaltyPoints: number }>({
+  const [stats, setStats] = useState<{ joinDays: number }>({
     joinDays: 0,
-    totalBookings: 0,
-    loyaltyPoints: 0,
   })
 
   useEffect(() => {
@@ -94,8 +100,6 @@ export default function AccountPage() {
         const joinDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
         setStats({
           joinDays,
-          totalBookings: data.totalBookings,
-          loyaltyPoints: data.loyaltyPoints,
         })
       })
       .catch(() => { /* stats are non-critical */ })
@@ -114,6 +118,11 @@ export default function AccountPage() {
       return
     }
     if (item.path) navigate(item.path)
+  }
+
+  // If not authenticated, don't render the page (will redirect)
+  if (!authStore.isAuthenticated) {
+    return null
   }
 
   return (
@@ -137,17 +146,6 @@ export default function AccountPage() {
           </div>
           <h1 className={styles.userName}>{user?.firstName ?? ''} {user?.lastName ?? ''}</h1>
           <p className={styles.userSub}>Спасибо, что с нами уже {stats.joinDays || '—'} дней</p>
-        </div>
-
-        <div className={styles.statsRow}>
-          <div className={styles.statCard}>
-            <span className={styles.statLabel}>БРОНИРОВАНИЯ</span>
-            <span className={styles.statValue}>{stats.totalBookings || '—'}</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statLabel}>БАЛЛЫ</span>
-            <span className={styles.statValue}>{stats.loyaltyPoints || 0}</span>
-          </div>
         </div>
 
         {/* Theme toggle */}

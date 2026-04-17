@@ -7,6 +7,8 @@
   z-index: 50;
   display: flex;
   justify-content: center;
+  /* Stack above Telegram Mini App safe space (60px) */
+  padding-bottom: var(--tg-sticky-safe-space, 60px);
 }
 
 .nav {

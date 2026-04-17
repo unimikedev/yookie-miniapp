@@ -70,6 +70,11 @@ body, #root {
   --radius-md: var(--radius-3xl);
 }
 
+/* Telegram Mini App sticky safe space (60px) — stacks before other sticky elements */
+:root {
+  --tg-sticky-safe-space: 60px;
+}
+
 button {
   cursor: pointer;
   border: none;
