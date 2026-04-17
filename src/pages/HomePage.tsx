@@ -24,31 +24,16 @@ import {
 } from '@/components/features/home'
 import type { CategoryEnum } from '@/lib/api/types'
 import type { HomeFilterChip } from '@/lib/api/home'
-import { CATEGORIES } from '@/shared/constants'
+import { CATEGORIES, CATEGORY_ICONS } from '@/shared/constants'
 import { fetchBusinesses } from '@/lib/api/businesses'
 import styles from './HomePage.module.css'
-
-const CATEGORY_EMOJI_MAP: Record<string, string> = {
-  barber: '💈',
-  beauty_salon: '💅',
-  nail_studio: '💅',
-  hair_salon: '💇',
-  spa: '🧖',
-  massage: '💆',
-  lash_brow: '👁️',
-  tattoo: '🎨',
-  cosmetology: '🧴',
-  medical_clinic: '🏥',
-  fitness: '🏋️',
-  barbershop: '💈',
-}
 
 interface SearchResultItem {
   type: 'business' | 'master' | 'category'
   id: string
   name: string
   meta: string
-  emoji?: string
+  iconSrc?: string
   businessId?: string
   masterId?: string
 }
@@ -173,7 +158,7 @@ export default function HomePage() {
             id: b.id,
             name: b.name,
             meta: b.category || '',
-            emoji: CATEGORY_EMOJI_MAP[b.category] ?? '🏢',
+            iconSrc: CATEGORY_ICONS[b.category as keyof typeof CATEGORY_ICONS] || '/categories/cosmetology.png',
             businessId: b.id,
           })
         }
@@ -192,7 +177,7 @@ export default function HomePage() {
           id: `master-${m.masterId}`,
           name: m.name,
           meta: m.specialization,
-          emoji: '👤',
+          iconSrc: '/categories/cosmetology.png',
           businessId: m.businessId,
           masterId: m.masterId,
         })
@@ -207,7 +192,7 @@ export default function HomePage() {
           id: `cat-${cat.key}`,
           name: cat.label,
           meta: 'Категория',
-          emoji: cat.emoji,
+          iconSrc: cat.icon,
         })
       }
     }
@@ -421,7 +406,9 @@ export default function HomePage() {
                       className={styles.searchResultItem}
                       onMouseDown={(e) => { e.preventDefault(); handleSearchSelect(item); }}
                     >
-                      <span className={styles.searchResultIcon}>{item.emoji}</span>
+                      <span className={styles.searchResultIcon}>
+                        <img src={item.iconSrc} alt="" className={styles.searchResultImage} />
+                      </span>
                       <div className={styles.searchResultInfo}>
                         <span className={styles.searchResultName}>{item.name}</span>
                         <span className={styles.searchResultMeta}>{item.meta}</span>
@@ -440,7 +427,7 @@ export default function HomePage() {
         {/* Category chips */}
         <div className={styles.catRow}>
           {CATEGORIES.map((cat) => (
-            <HomeCategoryChip key={cat.key} label={cat.label} emoji={cat.emoji} onClick={() => handleCategoryClick(cat.key)} active={selectedCategory === cat.key} />
+            <HomeCategoryChip key={cat.key} label={cat.label} iconSrc={cat.icon} onClick={() => handleCategoryClick(cat.key)} active={selectedCategory === cat.key} />
           ))}
         </div>
 

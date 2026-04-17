@@ -91,16 +91,18 @@ export function SectionHeader({
 /* ── HomeCategoryChip ───────────────────────────────────── */
 export interface HomeCategoryChipProps {
   label: string
-  emoji: string
+  iconSrc: string
   onClick?: () => void
   active?: boolean
 }
 
-export function HomeCategoryChip({ label, emoji, onClick, active = false }: HomeCategoryChipProps) {
+export function HomeCategoryChip({ label, iconSrc, onClick, active = false }: HomeCategoryChipProps) {
   return (
     <div className={`${styles.catChip} ${active ? styles.catChipActive : ''}`}>
       <button className={styles.catChipBtn} onClick={onClick} aria-label={label} data-active={active}>
-        <span className={styles.catChipIcon}>{emoji}</span>
+        <span className={styles.catChipIcon}>
+          <img src={iconSrc} alt="" className={styles.catChipImage} />
+        </span>
       </button>
       <span className={styles.catChipLabel}>{label}</span>
     </div>

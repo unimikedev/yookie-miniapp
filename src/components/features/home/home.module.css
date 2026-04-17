@@ -62,8 +62,15 @@
 }
 
 .catChipIcon {
-  font-size: var(--text-h1-size);
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catChipImage {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .catChipLabel {

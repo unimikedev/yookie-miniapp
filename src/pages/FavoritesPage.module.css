@@ -6,7 +6,7 @@
 
 .header {
   position: sticky;
-  top: 0;
+  top: 60px;
   z-index: 40;
   height: var(--header-height);
   display: flex;

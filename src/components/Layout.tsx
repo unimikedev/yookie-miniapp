@@ -5,7 +5,7 @@ import { useOverlayStore } from '@/stores/overlayStore'
 import { BottomNav } from '@/shared/ui'
 import styles from './Layout.module.css'
 
-const PAGES_WITH_NAV = ['/', '/search', '/nearby', '/my-bookings', '/favorites']
+const PAGES_WITH_NAV = ['/', '/search', '/nearby', '/my-bookings', '/favorites', '/account']
 
 interface LayoutProps {
   children: React.ReactNode
