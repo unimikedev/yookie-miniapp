@@ -3,7 +3,7 @@
   min-height: 100dvh;
   background: var(--color-bg);
   padding-top: calc(var(--safe-area-top) / 2);
-  padding-bottom: calc(var(--safe-area-bottom) + 108px);
+  padding-bottom: calc(var(--safe-area-bottom) + 80px);
 }
 
 .header {

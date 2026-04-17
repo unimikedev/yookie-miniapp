@@ -427,7 +427,6 @@ export default function ProviderDetailPage() {
       {!isLoading && business && (
         <div className={styles.infoBlock}>
           <div className={styles.infoHeader}>
-            {id && <FavoriteButton businessId={id} />}
             <div className={styles.infoTitleWrap}>
               <h1 className={styles.infoTitle}>
                 {isIndividual && soloMaster
@@ -451,6 +450,7 @@ export default function ProviderDetailPage() {
                 )}
               </div>
             </div>
+            {id && <FavoriteButton businessId={id} />}
           </div>
           {business.address && (
             <div className={styles.infoAddress}>
