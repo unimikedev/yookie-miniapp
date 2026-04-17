@@ -48,12 +48,8 @@
 
 .searchRow {
   pointer-events: auto;
-  /* Slight background tint so search bar is legible before map loads */
   background: rgba(24, 25, 27, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  /* safe-area-top keeps content below Telegram's header / status bar */
-  padding: calc(10px + var(--safe-area-top-half)) 16px 10px 16px;
+  padding: calc(10px + var(--safe-area-top-quarter)) 16px 10px 16px;
 }
 
 .searchBox {
@@ -395,7 +391,7 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  padding: 12px 16px;
+  padding: 12px 16px 12px calc(16px + 16px);
   pointer-events: auto;
 }
 
