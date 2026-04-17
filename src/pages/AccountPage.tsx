@@ -127,10 +127,6 @@ export default function AccountPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <span className={styles.headerTitle}>Меню</span>
-      </header>
-
       <div className={styles.content}>
         <div className={styles.profileSection}>
           <div className={styles.avatarWrap}>
