@@ -88,11 +88,9 @@
 /* ── Search — sticky, pins to top of viewport ──────────── */
 .searchWrap {
   position: sticky;
-  top: calc(var(--safe-area-top-half) + 12px + 15px);
+  top: calc(var(--safe-area-top-half) + 12px);
   z-index: 10;
-  background: var(--color-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: transparent;
   padding: 4px 16px 4px;
 }
 
