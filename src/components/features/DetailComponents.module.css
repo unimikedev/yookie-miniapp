@@ -471,10 +471,10 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 12px 16px;
-  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+  padding: 8px 16px;
+  padding-bottom: max(env(safe-area-inset-bottom), 12px);
   /* Stack above Telegram Mini App safe space (60px) */
-  padding-bottom: calc(max(env(safe-area-inset-bottom), 16px) + var(--tg-sticky-safe-space, 60px));
+  padding-bottom: calc(max(env(safe-area-inset-bottom), 12px) + var(--tg-sticky-safe-space, 60px));
   background: var(--color-bg);
   display: flex;
   gap: 8px;

@@ -244,21 +244,21 @@ export default function BusinessDetailPage() {
     }
   }
 
-  // CTA click handler — context-aware
+  // CTA click handler — context-aware (services → date → time → book)
   const handleCTAClick = () => {
     if (canBook) {
       // All set — submit booking
       handleConfirmBooking()
       return
     }
+    if (hasServices && allAssigned && selectedDate && !hasTime) {
+      // Services + master + date selected, no time — scroll to time slots
+      timeSlotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
     if (hasServices && allAssigned && !selectedDate) {
       // Services + master selected, no date — scroll to date picker
       dateRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      return
-    }
-    if (hasServices && allAssigned && !hasTime) {
-      // Services + master + date selected, no time — scroll to time slots
-      timeSlotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
     if (hasServices && !allAssigned) {
