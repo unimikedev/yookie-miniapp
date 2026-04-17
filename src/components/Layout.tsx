@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useOverlayStore } from '@/stores/overlayStore'
+import { useTelegramSafeArea } from '@/hooks/useTelegramSafeArea'
 import { BottomNav } from '@/shared/ui'
 import styles from './Layout.module.css'
 
@@ -16,12 +17,12 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const { isOpen: isOverlayOpen } = useOverlayStore()
 
-  // Hide B2C nav when in Pro (B2B) surfaces — Pro has its own nav
+  // Apply Telegram safe area insets to CSS vars — runs once, listens for mode changes
+  useTelegramSafeArea()
+
   const isProRoute = location.pathname.startsWith('/pro')
   const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen && !isProRoute
 
-  // Telegram platform already sets --viewport-height, --viewport-stable-height,
-  // and --safe-area-* CSS vars during init. No need for window resize listener.
   useEffect(() => {
     const isDark = platform.theme === 'dark'
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
