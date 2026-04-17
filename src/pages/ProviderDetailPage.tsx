@@ -35,7 +35,6 @@ import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
 import { toLocalYMD } from '@/lib/utils/date'
-import { TELEGRAM_BOT_URL } from '@/shared/constants'
 import styles from './ProviderDetailPage.module.css'
 
 const TABS_ALL = ['Услуги', 'О нас', 'Специалисты']
@@ -337,8 +336,10 @@ export default function ProviderDetailPage() {
   }
 
   // ── Hero image ──────────────────────────────────────────────────
-  // For individual: show master photo; for business: show business cover
-  const coverImage = business ? getMockBusinessImage(business.category, business.id) : null
+  // For individual: show master photo; for business: use uploaded photo_url, fall back to mock
+  const coverImage = business
+    ? (business.photo_url ?? getMockBusinessImage(business.category, business.id))
+    : null
   const coverPhotos = coverImage ? [coverImage, coverImage, coverImage] : []
   const soloMasterPhoto = soloMaster
     ? (soloMaster.photo_url ?? getMockMasterImage(soloMaster.id))
@@ -372,40 +373,9 @@ export default function ProviderDetailPage() {
     )
   }
 
-  // ── Determine page header title ─────────────────────────────────
-  const headerTitle = isLoading
-    ? <Skeleton width="60%" height="18px" />
-    : isIndividual && soloMaster
-      ? formatMasterName(soloMaster.name)
-      : business?.name
-
   // ── Render ──────────────────────────────────────────────────────
   return (
     <div className={styles.page}>
-      {/* Navigation header (pill shaped, floating) */}
-      <div className={styles.pageHeader}>
-        <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M13 4L7 10L13 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-        <span className={styles.pageHeaderTitle}>
-          {headerTitle}
-        </span>
-        <div className={styles.headerRight}>
-          <button className={styles.shareBtn} aria-label="Поделиться" onClick={() => window.open(TELEGRAM_BOT_URL, '_blank')}>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="14" cy="3" r="2" />
-              <circle cx="4" cy="9" r="2" />
-              <circle cx="14" cy="15" r="2" />
-              <path d="M6 10L12 14M6 8L12 4" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
       {/* Hero: business cover OR individual master photo */}
       <div className={styles.coverWrap}>
         {isLoading ? (
@@ -775,6 +745,8 @@ export default function ProviderDetailPage() {
         }
         onClick={handleCTAClick}
         disabled={bookingLoading}
+        secondaryLabel="←"
+        onSecondaryClick={() => navigate(-1)}
       />
     </div>
   )
