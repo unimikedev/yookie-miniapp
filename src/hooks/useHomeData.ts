@@ -133,7 +133,7 @@ function toNearby(b: Business): NearbyBusinessCard {
     distanceMeters: seedDistance(b.id + 'n'),
     priceFrom: seedPrice(b.id + 'n'),
     rating: b.rating ?? seedRating(b.id),
-    photoUrl: getMockBusinessImage(b.category, b.id),
+    photoUrl: b.photo_url ?? getMockBusinessImage(b.category, b.id),
     businessId: b.id,
   };
 }
@@ -161,8 +161,7 @@ function toPopularMaster(b: Business, idx: number): PopularMasterCard {
 }
 
 function toPopularStudio(b: Business): PopularStudioCard {
-  const photoUrl = getMockBusinessImage(b.category, b.id);
-  // Generate 2-3 extra photos for swipe demo (reuse the same photo for now)
+  const photoUrl = b.photo_url ?? getMockBusinessImage(b.category, b.id);
   const photos = [photoUrl, photoUrl, photoUrl].filter((p): p is string => Boolean(p));
   return {
     id: `ps-${b.id}`,
@@ -242,7 +241,7 @@ export function useHomeData(): UseHomeDataResult {
 
       let businesses: Business[] = [];
       try {
-        const res = await fetchBusinesses({ city: city.id, limit: 12 });
+        const res = await fetchBusinesses({ city: city.id, limit: 50 });
         businesses = res.data ?? [];
       } catch {
         /* fall through to mock */

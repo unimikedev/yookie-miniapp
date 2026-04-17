@@ -1,3 +1,65 @@
+/* ── Photo upload ──────────────────────────────── */
+.photoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.photoPreview {
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  background: var(--color-surface);
+  background-size: cover;
+  background-position: center;
+  border: 2px dashed var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.photoPreview:hover {
+  border-color: var(--color-accent);
+}
+
+.photoPlaceholder {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.photoOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-caption-size);
+  color: #fff;
+  font-weight: 600;
+}
+
+.fileInput {
+  display: none;
+}
+
+.photoRemoveBtn {
+  font-size: var(--text-caption-size);
+  color: var(--color-error);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+/* ─────────────────────────────────────────────── */
 .form {
   display: flex;
   flex-direction: column;

@@ -16,14 +16,14 @@ const STAR_SVG = (
 )
 
 export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick }) => {
-  const mockImage = getMockBusinessImage(business.category, business.id)
+  const image = business.photo_url ?? getMockBusinessImage(business.category, business.id)
   const categoryLabel = CATEGORY_LABELS[business.category] ?? business.category
 
   return (
     <div className={styles.card} onClick={() => onClick?.(business)}>
       <div className={styles.imageWrap}>
-        {mockImage ? (
-          <img src={mockImage} alt={business.name} className={styles.image} loading="lazy" />
+        {image ? (
+          <img src={image} alt={business.name} className={styles.image} loading="lazy" />
         ) : (
           <div className={styles.imageFallback} />
         )}

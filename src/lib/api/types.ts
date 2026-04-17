@@ -54,6 +54,7 @@ export interface Business {
   slot_duration_min: number;
   booking_link?: string;
   is_active: boolean;
+  photo_url?: string | null;
   rating?: number;
   lat?: number;
   lng?: number;

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
+import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/lib/api/client';
+import { UZBEKISTAN_CITIES } from '@/stores/cityStore';
 import type { Business, CategoryEnum } from '@/lib/api/types';
 import styles from './MerchantSettingsPage.module.css';
 
@@ -22,6 +24,8 @@ const CATEGORIES: { value: CategoryEnum; label: string }[] = [
   { value: 'other', label: 'Другое' },
 ];
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+
 export default function MerchantSettingsPage() {
   const navigate = useNavigate();
   const { merchantId, setMerchantId } = useMerchantStore();
@@ -30,13 +34,15 @@ export default function MerchantSettingsPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState('Tashkent');
   const [phone, setPhone] = useState('');
   const [category, setCategory] = useState<CategoryEnum>('other');
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load existing business data
   useEffect(() => {
     if (!merchantId) return;
     api.get<{ data: Business }>(`/businesses/${merchantId}`)
@@ -46,13 +52,46 @@ export default function MerchantSettingsPage() {
           setName(b.name || '');
           setDescription(b.description || '');
           setAddress(b.address || '');
-          setCity(b.city || '');
+          // Normalize city: if stored value matches a known city id, use it; else default
+          const matched = UZBEKISTAN_CITIES.find(c => c.id === b.city || c.name === b.city);
+          setCity(matched?.id ?? 'Tashkent');
           setPhone(b.phone || '');
           setCategory(b.category || 'other');
+          setPhotoUrl(b.photo_url ?? null);
         }
       })
       .catch(() => { /* ignore — new business */ });
   }, [merchantId]);
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const token = localStorage.getItem('yookie_auth_token');
+      const res = await fetch(`${API_BASE}/businesses/upload-image`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as { message?: string }).message || 'Ошибка загрузки');
+      }
+      const json = await res.json() as { url: string };
+      setPhotoUrl(json.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки фото');
+    } finally {
+      setUploading(false);
+      // Reset so same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -62,29 +101,38 @@ export default function MerchantSettingsPage() {
     setSaving(true);
     setError(null);
     try {
+      const body = {
+        name: name.trim(),
+        category,
+        description: description.trim() || undefined,
+        address: address.trim() || undefined,
+        city,
+        phone: phone.trim() || undefined,
+        photo_url: photoUrl || undefined,
+      };
+
       if (isNew) {
-        // Create new business
-        const res = await api.post<{ data: Business }>('/businesses', {
-          name: name.trim(),
-          category,
-          description: description.trim() || undefined,
-          address: address.trim() || undefined,
-          city: city.trim() || undefined,
-          phone: phone.trim() || undefined,
-        });
+        const res = await api.post<{ data: Business; token?: string }>('/businesses', body);
         const newBiz = res.data;
+
+        // Store refreshed JWT so PATCH /businesses/:id works immediately
+        if (res.token) {
+          try {
+            localStorage.setItem('yookie_auth_token', res.token);
+            // Sync auth store user's businessId
+            const authState = useAuthStore.getState();
+            if (authState.user) {
+              const updatedUser = { ...authState.user, businessId: newBiz.id };
+              localStorage.setItem('yookie_auth_user', JSON.stringify(updatedUser));
+              useAuthStore.setState({ user: updatedUser, token: res.token });
+            }
+          } catch { /* storage unavailable */ }
+        }
+
         setMerchantId(newBiz.id);
         navigate('/pro');
       } else {
-        // Update existing
-        await api.patch<{ data: Business }>(`/businesses/${merchantId}`, {
-          name: name.trim(),
-          category,
-          description: description.trim() || undefined,
-          address: address.trim() || undefined,
-          city: city.trim() || undefined,
-          phone: phone.trim() || undefined,
-        });
+        await api.patch<{ data: Business }>(`/businesses/${merchantId}`, body);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка сохранения');
@@ -93,11 +141,40 @@ export default function MerchantSettingsPage() {
     }
   };
 
-  // When creating (no merchantId), render without ProLayout's auth guard wrapper
-  // since ProLayout shows onboarding when merchantId is null.
-  // The settings page is linked from the onboarding screen.
-  const content = (
-    <>
+  return (
+    <ProLayout title={isNew ? 'Новый бизнес' : 'Профиль'} allowWithoutBusiness={isNew}>
+      {/* Photo upload */}
+      <div className={styles.photoSection}>
+        <div
+          className={styles.photoPreview}
+          onClick={() => fileInputRef.current?.click()}
+          style={photoUrl ? { backgroundImage: `url(${photoUrl})` } : undefined}
+        >
+          {!photoUrl && (
+            <span className={styles.photoPlaceholder}>
+              {uploading ? 'Загрузка…' : '+ Фото'}
+            </span>
+          )}
+          {uploading && <div className={styles.photoOverlay}>Загрузка…</div>}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className={styles.fileInput}
+          onChange={handlePhotoSelect}
+        />
+        {photoUrl && (
+          <button
+            className={styles.photoRemoveBtn}
+            type="button"
+            onClick={() => setPhotoUrl(null)}
+          >
+            Удалить фото
+          </button>
+        )}
+      </div>
+
       <div className={styles.form}>
         <label className={styles.label}>
           <span className={styles.labelText}>Название *</span>
@@ -135,12 +212,15 @@ export default function MerchantSettingsPage() {
 
         <label className={styles.label}>
           <span className={styles.labelText}>Город</span>
-          <input
+          <select
             className={styles.input}
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="Ташкент"
-          />
+          >
+            {UZBEKISTAN_CITIES.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </label>
 
         <label className={styles.label}>
@@ -167,15 +247,9 @@ export default function MerchantSettingsPage() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+      <button className={styles.saveBtn} onClick={handleSave} disabled={saving || uploading}>
         {saving ? 'Сохранение…' : isNew ? 'Создать бизнес' : 'Сохранить'}
       </button>
-    </>
-  );
-
-  return (
-    <ProLayout title={isNew ? 'Новый бизнес' : 'Профиль'} allowWithoutBusiness={isNew}>
-      {content}
     </ProLayout>
   );
 }
