@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { listBookings, listStaff, listServices, createBooking } from '@/pro/api';
+import { listBookings, listStaff, listServices, createBooking, updateBookingStatus } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, Master, Service } from '@/lib/api/types';
 import { BottomSheet } from '@/components/ui/BottomSheet';
@@ -46,6 +46,9 @@ export default function BookingsBoardPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const dateStr = useMemo(() => isoDate(date), [date]);
 
@@ -139,6 +142,21 @@ export default function BookingsBoardPage() {
     }
   };
 
+  const handleBookingAction = async (status: 'confirmed' | 'cancelled') => {
+    if (!selectedBooking || !merchantId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      await updateBookingStatus(merchantId, selectedBooking.id, status);
+      setSelectedBooking(null);
+      load();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Ошибка');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const actions = (
     <div className={styles.viewToggle}>
       <button
@@ -174,9 +192,10 @@ export default function BookingsBoardPage() {
           onDragStart={handleDragStart}
           onDrop={handleDrop}
           onSlotClick={handleSlotClick}
+          onBookingClick={setSelectedBooking}
         />
       ) : (
-        <ListView bookings={bookings} staff={staff} />
+        <ListView bookings={bookings} staff={staff} onBookingClick={setSelectedBooking} />
       )}
 
       <BottomSheet
@@ -238,6 +257,64 @@ export default function BookingsBoardPage() {
           </div>
         )}
       </BottomSheet>
+      <BottomSheet
+        open={selectedBooking !== null}
+        onClose={() => { setSelectedBooking(null); setActionError(null); }}
+        title="Запись"
+      >
+        {selectedBooking && (
+          <div className={styles.bookingForm}>
+            <p className={styles.bookingFormMeta}>
+              {fmt(selectedBooking.starts_at)} — {fmt(selectedBooking.ends_at)}
+            </p>
+            <div className={styles.bookingDetailRow}>
+              <span className={styles.bookingDetailLabel}>Клиент</span>
+              <span>{selectedBooking.clients?.name ?? '—'}</span>
+            </div>
+            <div className={styles.bookingDetailRow}>
+              <span className={styles.bookingDetailLabel}>Телефон</span>
+              <span>{selectedBooking.clients?.phone ?? '—'}</span>
+            </div>
+            <div className={styles.bookingDetailRow}>
+              <span className={styles.bookingDetailLabel}>Услуга</span>
+              <span>{selectedBooking.services?.name ?? '—'}</span>
+            </div>
+            <div className={styles.bookingDetailRow}>
+              <span className={styles.bookingDetailLabel}>Статус</span>
+              <span>{selectedBooking.status}</span>
+            </div>
+            {selectedBooking.notes && (
+              <div className={styles.bookingDetailRow}>
+                <span className={styles.bookingDetailLabel}>Заметки</span>
+                <span>{selectedBooking.notes}</span>
+              </div>
+            )}
+
+            {actionError && <p className={styles.formError}>{actionError}</p>}
+
+            <div className={styles.actionRow}>
+              {selectedBooking.status === 'pending' && (
+                <Button
+                  fullWidth
+                  loading={actionLoading}
+                  onClick={() => handleBookingAction('confirmed')}
+                >
+                  Подтвердить
+                </Button>
+              )}
+              {(selectedBooking.status === 'pending' || selectedBooking.status === 'confirmed') && (
+                <button
+                  className={styles.cancelActionBtn}
+                  disabled={actionLoading}
+                  onClick={() => handleBookingAction('cancelled')}
+                >
+                  Отменить запись
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </BottomSheet>
     </ProLayout>
   );
 }
@@ -251,9 +328,10 @@ interface TimelineProps {
   onDragStart: (id: string) => void;
   onDrop: (staffId: string, hour: number) => void;
   onSlotClick: (staffId: string, staffName: string, hour: number) => void;
+  onBookingClick: (booking: Booking) => void;
 }
 
-function TimelineView({ hours, staff, bookings, dragging, onDragStart, onDrop, onSlotClick }: TimelineProps) {
+function TimelineView({ hours, staff, bookings, dragging, onDragStart, onDrop, onSlotClick, onBookingClick }: TimelineProps) {
   const colCount = staff.length || 1;
 
   return (
@@ -288,6 +366,7 @@ function TimelineView({ hours, staff, bookings, dragging, onDragStart, onDrop, o
                       key={b.id}
                       booking={b}
                       onDragStart={() => onDragStart(b.id)}
+                      onClick={() => onBookingClick(b)}
                     />
                   ))}
                 </div>
@@ -301,7 +380,7 @@ function TimelineView({ hours, staff, bookings, dragging, onDragStart, onDrop, o
 }
 
 /* ── Booking Card ────────────────────────────────────────────────────────── */
-function BookingCard({ booking, onDragStart }: { booking: Booking; onDragStart: () => void }) {
+function BookingCard({ booking, onDragStart, onClick }: { booking: Booking; onDragStart: () => void; onClick: () => void }) {
   const statusClass = styles[`status-${booking.status}`] ?? '';
 
   return (
@@ -309,6 +388,7 @@ function BookingCard({ booking, onDragStart }: { booking: Booking; onDragStart: 
       className={`${styles.bookingCard} ${statusClass}`}
       draggable
       onDragStart={onDragStart}
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
     >
       <span className={styles.cardTime}>{fmt(booking.starts_at)}</span>
       <span className={styles.cardClient}>{booking.clients?.name ?? '—'}</span>
@@ -318,7 +398,7 @@ function BookingCard({ booking, onDragStart }: { booking: Booking; onDragStart: 
 }
 
 /* ── List fallback ───────────────────────────────────────────────────────── */
-function ListView({ bookings, staff }: { bookings: Booking[]; staff: Master[] }) {
+function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; staff: Master[]; onBookingClick: (b: Booking) => void }) {
   const sorted = [...bookings].sort(
     (a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
   );
@@ -330,7 +410,7 @@ function ListView({ bookings, staff }: { bookings: Booking[]; staff: Master[] })
         <p className={styles.empty}>Нет записей на этот день</p>
       )}
       {sorted.map((b) => (
-        <div key={b.id} className={styles.listItem}>
+        <div key={b.id} className={styles.listItem} onClick={() => onBookingClick(b)} style={{ cursor: 'pointer' }}>
           <span className={styles.listTime}>{fmt(b.starts_at)} — {fmt(b.ends_at)}</span>
           <span className={styles.listClient}>{b.clients?.name ?? '—'}</span>
           <span className={styles.listService}>{b.services?.name ?? '—'}</span>

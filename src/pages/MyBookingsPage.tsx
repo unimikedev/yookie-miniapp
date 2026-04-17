@@ -155,11 +155,32 @@ export default function MyBookingsPage() {
   }
 
   const handleDetails = (bookingId: string) => {
-    // Navigate to business detail page
     const booking = bookings.find(b => b.id === bookingId)
     if (booking?.business_id) {
       navigate(`/business/${booking.business_id}`)
     }
+  }
+
+  const buildGoogleCalendarUrl = (group: typeof bookings) => {
+    const first = group[0]
+    const businessName = (first.businesses as { name?: string } | null)?.name ?? 'Запись'
+    const address = (first.businesses as { address?: string } | null)?.address ?? ''
+    const serviceNames = group.map(b => (b.services as { name?: string } | null)?.name ?? '').filter(Boolean).join(', ')
+
+    const start = new Date(first.starts_at)
+    const end = first.ends_at ? new Date(first.ends_at) : new Date(start.getTime() + 60 * 60000)
+
+    const fmt = (d: Date) =>
+      d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: `${serviceNames} — ${businessName}`,
+      dates: `${fmt(start)}/${fmt(end)}`,
+      details: serviceNames,
+      location: address,
+    })
+    return `https://calendar.google.com/calendar/render?${params.toString()}`
   }
 
   // Find the booking being rescheduled
@@ -301,6 +322,14 @@ export default function MyBookingsPage() {
                         >
                           Перенести
                         </button>
+                        <a
+                          className={styles.btnCalendar}
+                          href={buildGoogleCalendarUrl(group)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          + Календарь
+                        </a>
                       </div>
                     </div>
                   )

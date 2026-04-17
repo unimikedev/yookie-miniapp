@@ -15,38 +15,6 @@
   padding-bottom: calc(80px + var(--safe-area-bottom));
 }
 
-/* ── Page header (fixed, frosted glass) ──────────────────── */
-.pageHeader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: max(var(--safe-area-top), 8px) 16px 8px;
-  min-height: 56px;
-  background: color-mix(in srgb, var(--color-bg) 80%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.pageHeaderSpacer {
-  height: calc(56px + var(--safe-area-top));
-}
-
-.pageHeaderTitle {
-  flex: 1;
-  font: var(--text-body-lg);
-  font-weight: 600;
-  color: var(--color-text);
-  text-align: center;
-  margin: 0 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 /* ── Hero cover ──────────────────────────────────────────── */
 .coverWrap {

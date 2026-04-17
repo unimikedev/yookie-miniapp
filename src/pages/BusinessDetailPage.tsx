@@ -28,11 +28,10 @@ import { createBooking } from '@/lib/api/bookings'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
-import { FavoriteButton, PhotoSwipe } from '@/components/features'
+import { PhotoSwipe } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { toLocalYMD } from '@/lib/utils/date'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
-import { TELEGRAM_BOT_URL } from '@/shared/constants'
 import styles from './BusinessDetailPage.module.css'
 
 const TABS = ['Услуги', 'О нас', 'Специалисты']
@@ -353,37 +352,6 @@ export default function BusinessDetailPage() {
 
   return (
     <div className={styles.page}>
-      {/* Navigation header (fixed, above content) */}
-      <div className={styles.pageHeader}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M13 4L7 10L13 16" stroke="#F9FAFB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <span className={styles.pageHeaderTitle}>
-          {isLoading ? <Skeleton width="60%" height="18px" /> : business?.name}
-        </span>
-        <div className={styles.coverActions}>
-          <button
-            className={styles.coverActionBtn}
-            aria-label="Поделиться"
-            onClick={() => window.open(TELEGRAM_BOT_URL, '_blank')}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#F9FAFB" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="14" cy="3" r="2" />
-              <circle cx="4" cy="9" r="2" />
-              <circle cx="14" cy="15" r="2" />
-              <path d="M6 10L12 14M6 8L12 4" />
-            </svg>
-          </button>
-          {id && !isLoading && (
-            <FavoriteButton businessId={id} size="sm" />
-          )}
-        </div>
-      </div>
-
-      {/* Spacer for fixed header */}
-      <div className={styles.pageHeaderSpacer} />
 
       {/* Hero cover */}
       <div className={styles.coverWrap}>
@@ -736,6 +704,8 @@ export default function BusinessDetailPage() {
         }
         onClick={handleCTAClick}
         disabled={bookingLoading}
+        secondaryLabel="←"
+        onSecondaryClick={() => navigate(-1)}
       />
     </div>
   )

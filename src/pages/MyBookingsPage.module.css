@@ -194,9 +194,9 @@
 }
 
 .statusPending {
-  background: var(--color-accent);
-  color: var(--color-status-text);
-  border: 1px solid var(--color-status-bg);
+  background: #FBBF24;
+  color: #0F1115;
+  border: 1px solid #F59E0B;
 }
 
 .statusConfirmed {
@@ -288,6 +288,26 @@
 }
 
 .btnSecondary:active {
+  opacity: 0.7;
+}
+
+.btnCalendar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.btnCalendar:active {
   opacity: 0.7;
 }
 

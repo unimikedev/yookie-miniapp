@@ -6,10 +6,11 @@ import { api } from './client';
 import { RequestOtpPayload, VerifyOtpPayload, VerifyOtpResponse, GoogleAuthResponse } from './types';
 
 /**
- * Request OTP code for phone number
+ * Request OTP code for phone number.
+ * If telegramId provided, code is sent via Telegram bot DM instead of SMS.
  */
-export async function requestOtp(phone: string): Promise<void> {
-  const payload: RequestOtpPayload = { phone };
+export async function requestOtp(phone: string, telegramId?: number): Promise<void> {
+  const payload: RequestOtpPayload & { telegramId?: number } = { phone, telegramId };
   await api.post('/auth/otp/send', payload);
 }
 

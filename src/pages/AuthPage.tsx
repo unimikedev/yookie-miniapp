@@ -101,6 +101,17 @@ export default function AuthPage() {
     return () => clearInterval(interval)
   }, [screen])
 
+  const getTelegramUserId = (): number | undefined => {
+    try {
+      const tg = (window as any).Telegram?.WebApp
+      return tg?.initDataUnsafe?.user?.id ?? undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  const [otpViaTelegram, setOtpViaTelegram] = useState(false)
+
   const handleRequestOtp = async () => {
     const digits = phone.replace(/\D/g, '')
     if (digits.length < 12) {
@@ -120,8 +131,10 @@ export default function AuthPage() {
 
     setIsLoading(true)
     setError(null)
+    const telegramId = getTelegramUserId()
+    setOtpViaTelegram(!!telegramId)
     try {
-      await requestOtp(phone)
+      await requestOtp(phone, telegramId)
       setScreen('otp')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка при отправке кода')
@@ -201,8 +214,10 @@ export default function AuthPage() {
     setIsLoading(true)
     setError(null)
     setOtp(['', '', '', '', '', ''])
+    const telegramId = getTelegramUserId()
+    setOtpViaTelegram(!!telegramId)
     try {
-      await requestOtp(phone)
+      await requestOtp(phone, telegramId)
       setCountdown(OTP_RESEND_SECONDS)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка при отправке кода')
@@ -287,8 +302,10 @@ export default function AuthPage() {
         <div className={styles.content}>
           <h1 className={styles.title}>Введите код</h1>
           <p className={styles.subtitle}>
-            Мы отправили 6-значный код на{' '}
-            <strong>{phone}</strong>
+            {otpViaTelegram
+              ? <>Код отправлен в <strong>Telegram</strong> на номер <strong>{phone}</strong></>
+              : <>Мы отправили 6-значный код на <strong>{phone}</strong></>
+            }
           </p>
 
           {/* OTP dots */}
