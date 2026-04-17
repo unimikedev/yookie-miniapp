@@ -127,3 +127,22 @@
   margin-bottom: 12px;
   text-align: center;
 }
+
+.deleteBtn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border: 1px solid var(--color-error);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--color-error);
+  font-family: var(--font-family);
+  font-size: var(--text-button-size);
+  font-weight: var(--text-button-weight);
+  cursor: pointer;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

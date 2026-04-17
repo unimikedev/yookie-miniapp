@@ -93,6 +93,29 @@ export default function MerchantSettingsPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!merchantId) return;
+    if (!window.confirm('Удалить заведение? Все данные (услуги, мастера) останутся в системе, но бизнес исчезнет из каталога.')) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await api.delete<{ success: boolean }>(`/businesses/${merchantId}`);
+      setMerchantId(null);
+      // Clear stale JWT businessId
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('yookie_auth_user') || '{}');
+        storedUser.businessId = null;
+        localStorage.setItem('yookie_auth_user', JSON.stringify(storedUser));
+        useAuthStore.setState((s) => ({ user: s.user ? { ...s.user, businessId: null } : null }));
+      } catch { /* noop */ }
+      navigate('/pro');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка удаления');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!name.trim()) {
       setError('Введите название');
@@ -250,6 +273,12 @@ export default function MerchantSettingsPage() {
       <button className={styles.saveBtn} onClick={handleSave} disabled={saving || uploading}>
         {saving ? 'Сохранение…' : isNew ? 'Создать бизнес' : 'Сохранить'}
       </button>
+
+      {!isNew && (
+        <button className={styles.deleteBtn} onClick={handleDelete} disabled={saving}>
+          Удалить заведение
+        </button>
+      )}
     </ProLayout>
   );
 }
