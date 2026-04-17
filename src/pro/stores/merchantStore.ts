@@ -96,3 +96,14 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
     }
   },
 }));
+
+// Auto-initialize on first module load:
+// 1. Try localStorage (fastest, works across reloads)
+// 2. Fall back to JWT decode (covers first session after login)
+if (typeof window !== 'undefined') {
+  const state = useMerchantStore.getState();
+  state.loadFromStorage();
+  if (!useMerchantStore.getState().merchantId) {
+    state.loadFromToken();
+  }
+}

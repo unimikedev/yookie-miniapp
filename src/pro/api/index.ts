@@ -204,6 +204,27 @@ export async function dashboardSummary(
 
 // ─── Writes ───────────────────────────────────────────────────────────────────
 
+export interface CreateBookingInput {
+  businessId: string;
+  masterId: string;
+  serviceId: string;
+  startsAt: string; // ISO datetime
+  client: { phone: string; name: string };
+  notes?: string;
+}
+
+/**
+ * Create a new booking.
+ * Backend: POST /bookings
+ */
+export async function createBooking(input: CreateBookingInput): Promise<Booking> {
+  const res = await api.post<{ data: Booking }>('/bookings', {
+    ...input,
+    leadSource: 'direct',
+  });
+  return res.data;
+}
+
 /**
  * Update booking status.
  * Backend: PATCH /bookings/:id/status  { status }

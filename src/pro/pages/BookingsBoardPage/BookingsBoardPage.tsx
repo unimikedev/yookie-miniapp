@@ -1,9 +1,11 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { listBookings, listStaff } from '@/pro/api';
+import { listBookings, listStaff, listServices, createBooking } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
-import type { Booking, Master } from '@/lib/api/types';
+import type { Booking, Master, Service } from '@/lib/api/types';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Button } from '@/components/ui/Button';
 import styles from './BookingsBoardPage.module.css';
 
 type ViewMode = 'timeline' | 'list';
@@ -24,13 +26,26 @@ function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+interface SlotTarget {
+  staffId: string;
+  staffName: string;
+  hour: number;
+}
+
+const EMPTY_FORM = { clientName: '', clientPhone: '', serviceId: '', notes: '' };
+
 export default function BookingsBoardPage() {
   const { merchantId } = useMerchantStore();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [staff, setStaff] = useState<Master[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [date, setDate] = useState(() => new Date());
   const [view, setView] = useState<ViewMode>('timeline');
   const [dragging, setDragging] = useState<string | null>(null);
+  const [slotTarget, setSlotTarget] = useState<SlotTarget | null>(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const dateStr = useMemo(() => isoDate(date), [date]);
 
@@ -41,6 +56,11 @@ export default function BookingsBoardPage() {
     listBookings(merchantId, { from, to }).then(setBookings).catch(() => {});
     listStaff(merchantId).then(setStaff).catch(() => {});
   }, [merchantId, dateStr]);
+
+  useEffect(() => {
+    if (!merchantId) return;
+    listServices(merchantId).then(setServices).catch(() => {});
+  }, [merchantId]);
 
   useEffect(() => {
     load();
@@ -84,9 +104,39 @@ export default function BookingsBoardPage() {
     setDragging(null);
   };
 
-  const handleSlotClick = (staffId: string, hour: number) => {
-    // Navigate to new-booking bottom sheet (future)
-    console.log('[Pro] create booking', { staffId, hour, date: dateStr });
+  const handleSlotClick = (staffId: string, staffName: string, hour: number) => {
+    setSlotTarget({ staffId, staffName, hour });
+    setForm({ ...EMPTY_FORM, serviceId: services[0]?.id ?? '' });
+    setSaveError(null);
+  };
+
+  const handleCreateBooking = async () => {
+    if (!merchantId || !slotTarget) return;
+    const { clientName, clientPhone, serviceId } = form;
+    if (!clientName.trim() || !clientPhone.trim() || !serviceId) return;
+
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const startsAt = new Date(date);
+      startsAt.setHours(slotTarget.hour, 0, 0, 0);
+
+      await createBooking({
+        businessId: merchantId,
+        masterId: slotTarget.staffId,
+        serviceId,
+        startsAt: startsAt.toISOString(),
+        client: { name: clientName.trim(), phone: clientPhone.trim() },
+        notes: form.notes.trim() || undefined,
+      });
+
+      setSlotTarget(null);
+      load();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Ошибка создания записи');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const actions = (
@@ -128,6 +178,66 @@ export default function BookingsBoardPage() {
       ) : (
         <ListView bookings={bookings} staff={staff} />
       )}
+
+      <BottomSheet
+        open={slotTarget !== null}
+        onClose={() => setSlotTarget(null)}
+        title="Новая запись"
+      >
+        {slotTarget && (
+          <div className={styles.bookingForm}>
+            <p className={styles.bookingFormMeta}>
+              {String(slotTarget.hour).padStart(2, '0')}:00 · {slotTarget.staffName}
+            </p>
+
+            <input
+              className={styles.formInput}
+              placeholder="Имя клиента"
+              value={form.clientName}
+              onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))}
+            />
+            <input
+              className={styles.formInput}
+              type="tel"
+              placeholder="+998 90 000 00 00"
+              value={form.clientPhone}
+              onChange={(e) => setForm((f) => ({ ...f, clientPhone: e.target.value }))}
+            />
+            <select
+              className={styles.formInput}
+              value={form.serviceId}
+              onChange={(e) => setForm((f) => ({ ...f, serviceId: e.target.value }))}
+            >
+              {services.length === 0 && (
+                <option value="">Нет услуг — добавьте услугу</option>
+              )}
+              {services.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} · {s.duration_min} мин
+                </option>
+              ))}
+            </select>
+            <textarea
+              className={styles.formInput}
+              placeholder="Заметки (необязательно)"
+              rows={2}
+              value={form.notes}
+              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+            />
+
+            {saveError && <p className={styles.formError}>{saveError}</p>}
+
+            <Button
+              fullWidth
+              loading={saving}
+              disabled={!form.clientName.trim() || !form.clientPhone.trim() || !form.serviceId}
+              onClick={handleCreateBooking}
+            >
+              Записать
+            </Button>
+          </div>
+        )}
+      </BottomSheet>
     </ProLayout>
   );
 }
@@ -140,7 +250,7 @@ interface TimelineProps {
   dragging: string | null;
   onDragStart: (id: string) => void;
   onDrop: (staffId: string, hour: number) => void;
-  onSlotClick: (staffId: string, hour: number) => void;
+  onSlotClick: (staffId: string, staffName: string, hour: number) => void;
 }
 
 function TimelineView({ hours, staff, bookings, dragging, onDragStart, onDrop, onSlotClick }: TimelineProps) {
@@ -169,7 +279,7 @@ function TimelineView({ hours, staff, bookings, dragging, onDragStart, onDrop, o
                 <div
                   key={s.id}
                   className={`${styles.cell} ${dragging ? styles.cellDrop : ''}`}
-                  onClick={() => slotBookings.length === 0 && onSlotClick(s.id, h)}
+                  onClick={() => slotBookings.length === 0 && onSlotClick(s.id, s.name, h)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => onDrop(s.id, h)}
                 >

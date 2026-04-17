@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { verifyOtp, loginWithGoogle } from '../lib/api/auth';
+import { useMerchantStore } from '@/pro/stores/merchantStore';
 
 export interface AuthUser {
   id: string;
@@ -76,6 +77,11 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      // Propagate businessId to merchant store so Pro section has a valid merchantId
+      if ((user as AuthUser).businessId) {
+        useMerchantStore.getState().setMerchantId((user as AuthUser).businessId!);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       set({ error: message, isLoading: false });
@@ -112,6 +118,10 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      if (user.businessId) {
+        useMerchantStore.getState().setMerchantId(user.businessId);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Google login failed';
       set({ error: message, isLoading: false });
@@ -190,6 +200,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
           name: user.name,
           isAuthenticated: true,
         });
+        if (user.businessId) {
+          useMerchantStore.getState().setMerchantId(user.businessId);
+        }
       }
     } catch {
       // Storage read failed or invalid data
