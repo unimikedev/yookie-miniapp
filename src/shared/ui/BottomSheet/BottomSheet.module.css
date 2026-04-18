@@ -24,7 +24,7 @@
   left: 0;
   right: 0;
   /* Account for Telegram bottom bar + device home indicator */
-  max-height: calc(100dvh - var(--safe-area-bottom, 0px));
+  max-height: calc(100dvh - var(--safe-area-bottom-half, 0px));
   background-color: var(--color-bg);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: var(--shadow-lg);

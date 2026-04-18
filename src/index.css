@@ -39,6 +39,18 @@ body, #root {
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left:   env(safe-area-inset-left,   0px);
   --safe-area-right:  env(safe-area-inset-right,  0px);
+  
+  /* Halved safe areas for custom interpretation */
+  --safe-area-top-half:    calc(var(--safe-area-top) / 2);
+  --safe-area-bottom-half: calc(var(--safe-area-bottom) / 2);
+  --safe-area-left-half:   calc(var(--safe-area-left) / 2);
+  --safe-area-right-half:  calc(var(--safe-area-right) / 2);
+  
+  /* Quarter safe areas - even smaller for minimal spacing */
+  --safe-area-top-quarter:    calc(var(--safe-area-top) / 4);
+  --safe-area-bottom-quarter: calc(var(--safe-area-bottom) / 4);
+  --safe-area-left-quarter:   calc(var(--safe-area-left) / 4);
+  --safe-area-right-quarter:  calc(var(--safe-area-right) / 4);
 }
 
 /* Bridge for old CSS vars */

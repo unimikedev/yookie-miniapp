@@ -12,13 +12,13 @@
   overflow-y: auto;
   scrollbar-gutter: stable;
   padding-top: 0;
-  padding-bottom: calc(80px + var(--safe-area-bottom));
+  padding-bottom: calc(80px + var(--safe-area-bottom-half));
 }
 
 /* ── Page header (pill shaped, floating over photo) ────── */
 .pageHeader {
   position: fixed;
-  top: calc(var(--safe-area-top) + 8px + 30px);
+  top: calc(var(--safe-area-top-half) + 8px + 30px);
   left: 16px;
   right: 16px;
   z-index: 50;
@@ -499,27 +499,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px 0;
-  margin: 16px 0 0;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border-subtle);
-}
-
-.confirmationTitle {
-  font-size: var(--text-h3-size);
-  font-weight: var(--text-h3-weight);
-  line-height: var(--text-h3-lh);
-  letter-spacing: var(--text-h3-ls);
-  color: var(--color-text);
-  margin: 0;
-}
-
-.confirmationSection {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   padding: 16px;
-  margin: 16px 0 0;
+  margin: 0 0 16px;
   background: var(--color-surface);
   border-top: 1px solid var(--color-border-subtle);
 }
