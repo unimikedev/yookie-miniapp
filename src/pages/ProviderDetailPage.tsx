@@ -25,7 +25,6 @@ import { useBusiness } from '@/hooks/useBusiness'
 import { useSlots } from '@/hooks/useSlots'
 import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { createBooking } from '@/lib/api/bookings'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
@@ -60,9 +59,6 @@ function formatDate(dateStr: string): string {
 export default function ProviderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-
-  // Telegram native BackButton
-  useTelegramBackButton(true)
 
   const [activeTab, setActiveTab] = useState(0)
   const [reviews, setReviews] = useState<ReviewItem[]>([])
@@ -340,11 +336,11 @@ export default function ProviderDetailPage() {
   const coverImage = business
     ? (business.photo_url ?? getMockBusinessImage(business.category, business.id))
     : null
-  const coverPhotos = coverImage ? [coverImage, coverImage, coverImage] : []
+  const coverPhotos = coverImage ? [coverImage] : []
   const soloMasterPhoto = soloMaster
     ? (soloMaster.photo_url ?? getMockMasterImage(soloMaster.id))
     : null
-  const soloMasterPhotos = soloMasterPhoto ? [soloMasterPhoto, soloMasterPhoto, soloMasterPhoto] : []
+  const soloMasterPhotos = soloMasterPhoto ? [soloMasterPhoto] : []
 
   // Tabs: hide "Специалисты" for individual providers
   const tabs = isIndividual ? TABS_NO_SPECIALISTS : TABS_ALL

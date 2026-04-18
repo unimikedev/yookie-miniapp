@@ -626,7 +626,7 @@ export default function NearbyPage() {
         <div className={styles.carousel} ref={carouselRef}>
           {businesses.map((biz, index) => {
             const isActive = index === activeCardIndex
-            const photoUrl = getMockBusinessImage(biz.category, biz.id)
+            const photoUrl = (biz as any).photo_url || getMockBusinessImage(biz.category, biz.id)
             return (
               <div
                 key={biz.id}
