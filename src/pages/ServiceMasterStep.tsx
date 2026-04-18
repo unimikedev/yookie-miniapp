@@ -65,13 +65,7 @@ export default function ServiceMasterStep() {
     return (
       <div className={styles.page}>
         <header className={styles.header}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M13 4L7 10L13 16" stroke="#F9FAFB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
           <span className={styles.headerTitle}>Выберите мастера</span>
-          <div style={{ width: 36 }} />
         </header>
         <div className={styles.content}>
           {[1, 2, 3].map((i) => (
@@ -89,13 +83,7 @@ export default function ServiceMasterStep() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M13 4L7 10L13 16" stroke="#F9FAFB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
         <span className={styles.headerTitle}>Выберите мастера</span>
-        <div style={{ width: 36 }} />
       </header>
 
       <div className={styles.content}>

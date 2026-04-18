@@ -172,9 +172,6 @@ export default function BookingFlowPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)} disabled={isLoading}>
-          ←
-        </button>
         <h1 className={styles.title}>Подтверждение записи</h1>
       </div>
 

@@ -55,13 +55,6 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
     return (
       <div className={styles.layout}>
         <header className={styles.header}>
-          <button
-            className={styles.backBtn}
-            onClick={() => navigate('/account')}
-            aria-label="Назад"
-          >
-            ←
-          </button>
           <div className={styles.titleBlock}>
             <span className={styles.brand}>Yookie Pro</span>
           </div>
@@ -88,13 +81,6 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
   return (
     <div className={styles.layout}>
       <header className={styles.header}>
-        <button
-          className={styles.backBtn}
-          onClick={() => navigate('/account')}
-          aria-label="Выйти из Pro"
-        >
-          ←
-        </button>
         <div className={styles.titleBlock}>
           <span className={styles.brand}>Yookie Pro</span>
           {title && <span className={styles.pageTitle}>{title}</span>}

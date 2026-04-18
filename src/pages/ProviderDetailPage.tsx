@@ -741,8 +741,6 @@ export default function ProviderDetailPage() {
         }
         onClick={handleCTAClick}
         disabled={bookingLoading}
-        secondaryLabel="←"
-        onSecondaryClick={() => navigate(-1)}
       />
     </div>
   )

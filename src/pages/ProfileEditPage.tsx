@@ -64,16 +64,6 @@ export default function ProfileEditPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M3.83 9L9.43 14.6L8 16L0 8L8 0L9.43 1.4L3.83 7H16V9H3.83Z" fill="currentColor" />
-          </svg>
-        </button>
-        <h1 className={styles.headerTitle}>Редактировать профиль</h1>
-        <div style={{ width: 40 }} />
-      </header>
-
       <div className={styles.content}>
         {/* Name */}
         <div className={styles.field}>

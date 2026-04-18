@@ -6,7 +6,6 @@ import { fetchBusiness } from '@/lib/api/businesses'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import { MOCK_BUSINESSES } from '@/lib/mockBusinesses'
 import { FavoriteButton } from '@/components/features'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import styles from './FavoritesPage.module.css'
 
 const StarIcon = () => (
@@ -22,9 +21,6 @@ export default function FavoritesPage() {
   const { favoriteIds } = useFavoritesStore()
   const [businesses, setBusinesses] = useState<Business[]>([])
   const [isLoading, setIsLoading] = useState(false)
-
-  // Telegram native BackButton (replaces inline back arrow)
-  useTelegramBackButton(true)
 
   const ids = Array.from(favoriteIds)
 

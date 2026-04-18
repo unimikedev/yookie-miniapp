@@ -11,7 +11,6 @@ import { useSlots } from '@/hooks/useSlots'
 import { useBusiness } from '@/hooks/useBusiness'
 import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
-import { useTelegramBackButton } from '@/hooks/useTelegramBackButton'
 import { createBooking } from '@/lib/api/bookings'
 import { TimeSlot } from '@/lib/api/types'
 import { getMockMasterImage } from '@/lib/utils/mockImages'
@@ -42,9 +41,6 @@ function formatDate(dateStr: string): string {
 export default function MasterDetailPage() {
   const { id, masterId } = useParams<{ id: string; masterId: string }>()
   const navigate = useNavigate()
-
-  // Telegram native BackButton
-  useTelegramBackButton(true)
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [reviews, setReviews] = useState<ReviewItem[]>([])
@@ -261,15 +257,6 @@ export default function MasterDetailPage() {
   if (businessLoading) {
     return (
       <div className={styles.page}>
-        <div className={styles.coverHeader}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M13 4L7 10L13 16" stroke="#F9FAFB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <span className={styles.coverTitle}>Специалист</span>
-          <div style={{ width: 36 }} />
-        </div>
         <div className={styles.content}>
           <Skeleton variant="rect" height={300} />
         </div>
@@ -280,16 +267,6 @@ export default function MasterDetailPage() {
   if (!currentMaster) {
     return (
       <div className={styles.page}>
-        <div className={styles.pageHeader}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M13 4L7 10L13 16" stroke="#F9FAFB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <span className={styles.pageHeaderTitle}>Специалист</span>
-          <div style={{ width: 36 }} />
-        </div>
-        <div className={styles.pageHeaderSpacer} />
         <div className={styles.errorContent}>
           <div className={styles.errorIcon}>
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -302,7 +279,6 @@ export default function MasterDetailPage() {
           <p className={styles.errorDescription}>Информация о мастере недоступна. Попробуйте позже.</p>
           <div className={styles.errorActions}>
             <button className={styles.errorPrimaryBtn} onClick={() => navigate('/')}>На главную</button>
-            <button className={styles.errorSecondaryBtn} onClick={() => navigate(-1)}>Назад</button>
           </div>
         </div>
       </div>
@@ -310,17 +286,12 @@ export default function MasterDetailPage() {
   }
 
   const photoUrl = currentMaster.photo_url ?? getMockMasterImage(currentMaster.id)
-  const masterPhotos = photoUrl ? [photoUrl, photoUrl, photoUrl] : []
+  const masterPhotos = photoUrl ? [photoUrl] : []
 
   return (
     <div className={styles.page}>
       {/* Navigation header (fixed, above content) */}
       <div className={styles.pageHeader}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M13 4L7 10L13 16" stroke="#F9FAFB" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
         <span className={styles.pageHeaderTitle}>
           {currentMaster.name}
         </span>

@@ -6,7 +6,8 @@ import { useTelegramSafeArea } from '@/hooks/useTelegramSafeArea'
 import { BottomNav } from '@/shared/ui'
 import styles from './Layout.module.css'
 
-const PAGES_WITH_NAV = ['/', '/search', '/nearby', '/my-bookings', '/favorites', '/account']
+// The 4 root tab pages — everywhere else gets Telegram back button + no bottom nav
+const PAGES_WITH_NAV = ['/', '/nearby', '/my-bookings', '/account']
 
 interface LayoutProps {
   children: React.ReactNode
@@ -23,8 +24,8 @@ export default function Layout({ children }: LayoutProps) {
   useTelegramSafeArea()
 
   const isProRoute = location.pathname.startsWith('/pro')
-  const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen && !isProRoute
-  const showTgBack = !PAGES_WITH_NAV.includes(location.pathname) && !isProRoute
+  const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
+  const showTgBack = !PAGES_WITH_NAV.includes(location.pathname)
 
   useEffect(() => {
     const isDark = platform.theme === 'dark'
