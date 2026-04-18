@@ -244,30 +244,40 @@ export function PopularStudioCardView({
 }: PopularStudioCardViewProps) {
   const allPhotos = [item.photoUrl, ...(item.photos || [])].filter(Boolean) as string[]
   const [currentPhoto, setCurrentPhoto] = useState(0)
+  const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
+  const touchStartY = useRef(0)
+  const touchEndY = useRef(0)
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+    touchEndX.current = e.touches[0].clientX
+    touchEndY.current = e.touches[0].clientY
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
     touchEndX.current = e.touches[0].clientX
+    touchEndY.current = e.touches[0].clientY
   }
 
   const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current
-    const threshold = 50
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0 && currentPhoto < allPhotos.length - 1) {
+    const diffX = touchStartX.current - touchEndX.current
+    const diffY = Math.abs(touchStartY.current - touchEndY.current)
+    if (Math.abs(diffX) > 50 && Math.abs(diffX) > diffY * 1.5) {
+      if (diffX > 0 && currentPhoto < allPhotos.length - 1) {
+        setSlideDir('right')
         setCurrentPhoto(p => p + 1)
-      } else if (diff < 0 && currentPhoto > 0) {
+      } else if (diffX < 0 && currentPhoto > 0) {
+        setSlideDir('left')
         setCurrentPhoto(p => p - 1)
       }
     }
   }
 
   const showThumbnails = allPhotos.length > 1
+  const slideClass = slideDir === 'right' ? styles.slideRight : slideDir === 'left' ? styles.slideLeft : ''
 
   return (
     <div
@@ -283,7 +293,7 @@ export function PopularStudioCardView({
         onTouchEnd={handleTouchEnd}
       >
         {allPhotos[currentPhoto] && (
-          <img className={styles.psCover} src={allPhotos[currentPhoto]} alt={item.name} />
+          <img key={currentPhoto} className={`${styles.psCover} ${slideClass}`} src={allPhotos[currentPhoto]} alt={item.name} />
         )}
         <button
           className={styles.psFav}
@@ -305,6 +315,7 @@ export function PopularStudioCardView({
                 alt=""
                 onClick={(e) => {
                   e.stopPropagation()
+                  setSlideDir(idx > currentPhoto ? 'right' : 'left')
                   setCurrentPhoto(idx)
                 }}
               />

@@ -1,6 +1,6 @@
 /**
- * PhotoSwipe — swipeable photo carousel with thumbnail indicators.
- * Used on BusinessDetailPage and MasterDetailPage hero sections.
+ * PhotoSwipe — swipeable photo carousel with thumbnail indicators and slide animation.
+ * Used on ProviderDetailPage and MasterDetailPage hero sections.
  */
 
 import { useState, useRef, useCallback } from 'react'
@@ -15,6 +15,7 @@ interface PhotoSwipeProps {
 
 export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwipeProps) {
   const [current, setCurrent] = useState(0)
+  const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
   const touchStartY = useRef(0)
@@ -35,11 +36,12 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
   const handleTouchEnd = useCallback(() => {
     const diffX = touchStartX.current - touchEndX.current
     const diffY = Math.abs(touchStartY.current - touchEndY.current)
-    // Only handle horizontal swipes (ignore vertical scrolls)
     if (Math.abs(diffX) > 50 && Math.abs(diffX) > diffY * 1.5) {
       if (diffX > 0 && current < photos.length - 1) {
+        setSlideDir('right')
         setCurrent(p => p + 1)
       } else if (diffX < 0 && current > 0) {
+        setSlideDir('left')
         setCurrent(p => p - 1)
       }
     }
@@ -55,6 +57,7 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
   }
 
   const showThumbnails = photos.length > 1
+  const slideClass = slideDir === 'right' ? styles.slideRight : slideDir === 'left' ? styles.slideLeft : ''
 
   return (
     <div
@@ -64,7 +67,7 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <img src={photos[current]} alt={alt} className={styles.photo} />
+      <img key={current} src={photos[current]} alt={alt} className={`${styles.photo} ${slideClass}`} />
 
       {/* Dots pager — centered */}
       <div className={styles.dots}>
@@ -84,6 +87,7 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
               alt=""
               onClick={(e) => {
                 e.stopPropagation()
+                setSlideDir(idx > current ? 'right' : 'left')
                 setCurrent(idx)
               }}
             />

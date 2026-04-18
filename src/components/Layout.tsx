@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { usePlatform } from '@/hooks/usePlatform'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { useTelegramSafeArea } from '@/hooks/useTelegramSafeArea'
 import { BottomNav } from '@/shared/ui'
@@ -14,7 +13,6 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const platform = usePlatform()
   const location = useLocation()
   const navigate = useNavigate()
   const { isOpen: isOverlayOpen } = useOverlayStore()
@@ -26,11 +24,6 @@ export default function Layout({ children }: LayoutProps) {
   const isProRoute = location.pathname.startsWith('/pro')
   const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
   const showTgBack = !PAGES_WITH_NAV.includes(location.pathname)
-
-  useEffect(() => {
-    const isDark = platform.theme === 'dark'
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
-  }, [platform.theme])
 
   // Global Telegram BackButton — shows on detail/nested pages, hides on root tabs and pro routes
   useEffect(() => {

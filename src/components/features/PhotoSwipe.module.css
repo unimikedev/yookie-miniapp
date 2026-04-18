@@ -16,6 +16,24 @@
   display: block;
 }
 
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.slideRight {
+  animation: slideInFromRight 0.22s ease-out;
+}
+
+.slideLeft {
+  animation: slideInFromLeft 0.22s ease-out;
+}
+
 /* Dots — exactly centered horizontally, 32px from bottom */
 .dots {
   position: absolute;

@@ -500,6 +500,25 @@
   width: 100%;
   aspect-ratio: 358 / 166;
   background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+
+@keyframes psSlideInFromRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes psSlideInFromLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.slideRight {
+  animation: psSlideInFromRight 0.22s ease-out;
+}
+
+.slideLeft {
+  animation: psSlideInFromLeft 0.22s ease-out;
 }
 
 .psCover {

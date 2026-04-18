@@ -69,6 +69,7 @@ export default function ProviderDetailPage() {
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
   const [bookingLoading, setBookingLoading] = useState(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
+  const servicesRef = useRef<HTMLDivElement>(null)
   const timeSlotsRef = useRef<HTMLDivElement>(null)
   const dateRef = useRef<HTMLDivElement>(null)
   const confirmationRef = useRef<HTMLDivElement>(null)
@@ -256,9 +257,10 @@ export default function ProviderDetailPage() {
     }
   }
 
-  // CTA click handler — context-aware
+  // CTA click handler — each state anchors to the relevant section
   const handleCTAClick = () => {
     if (canBook) {
+      confirmationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       handleConfirmBooking()
       return
     }
@@ -275,10 +277,7 @@ export default function ProviderDetailPage() {
       firstService?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return
     }
-    const servicesSection = document.querySelector('.serviceList')
-    if (servicesSection) {
-      servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    servicesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const handleDateSelect = (date: string) => {
@@ -455,7 +454,7 @@ export default function ProviderDetailPage() {
         {activeTab === 0 && (
           <>
             {/* Services list */}
-            <section className={styles.section}>
+            <section className={styles.section} ref={servicesRef}>
               <div className={styles.sectionHead}>
                 <h2 className={styles.sectionTitle}>Услуги</h2>
               </div>
