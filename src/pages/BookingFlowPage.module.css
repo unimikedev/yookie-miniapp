@@ -330,3 +330,110 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ── Modal for Alternative Slots ────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 300ms ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalTitle {
+  font-size: var(--text-heading-md-size);
+  font-weight: var(--text-heading-md-weight);
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.modalDescription {
+  font-size: var(--text-body-md-size);
+  color: var(--text-secondary);
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.loadingAlternatives {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+}
+
+.noAlternatives {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.slotsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.slotButton {
+  padding: 16px 20px;
+  background: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: var(--text-body-lg-size);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-align: center;
+}
+
+.slotButton:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.closeModalButton {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 1px solid var(--border-secondary);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: var(--text-body-md-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.closeModalButton:active {
+  background: var(--bg-secondary);
+}
