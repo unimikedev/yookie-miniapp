@@ -109,14 +109,20 @@ export function HomeCategoryChip({ label, iconSrc, onClick, active = false }: Ho
   )
 }
 
-/* ── VisitedCard — unified master card (visited & popular) ─────────────────────────── */
-export interface VisitedCardProps {
-  item: VisitedMasterCard
-  onBook?: () => void
+/* ── MasterCard — unified master card (visited & popular) ─────────────────────────── */
+export interface MasterCardProps {
+  item: VisitedMasterCard | PopularMasterCard
   onClick?: () => void
+  showLastVisit?: boolean
 }
 
-export function VisitedCard({ item, onBook, onClick }: VisitedCardProps) {
+export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardProps) {
+  const isVisitedItem = 'masterName' in item
+  const name = isVisitedItem ? formatMasterName((item as VisitedMasterCard).masterName) : (item as PopularMasterCard).name
+  const specialization = isVisitedItem 
+    ? (item as VisitedMasterCard).specialization 
+    : `${(item as PopularMasterCard).specialization} · ${(item as PopularMasterCard).businessName || ''}`
+  
   return (
     <div className={styles.masterCard} onClick={onClick} role="button" tabIndex={0}>
       <div className={styles.masterPhotoWrap} aria-hidden="true">
@@ -126,15 +132,18 @@ export function VisitedCard({ item, onBook, onClick }: VisitedCardProps) {
       </div>
       <div className={styles.masterBody}>
         <div className={styles.masterTop}>
-          <span className={styles.masterName}>{formatMasterName(item.masterName)}</span>
+          <span className={styles.masterName}>{name}</span>
           <span className={styles.masterRating}>
             <StarIcon />
             {item.rating.toFixed(1)}
           </span>
         </div>
         <span className={styles.masterMeta}>
-          {item.specialization} · {item.businessName}
+          {specialization}
         </span>
+        {!isVisitedItem && (item as PopularMasterCard).priceFrom && (
+          <span className={styles.masterPrice}>от {Math.round((item as PopularMasterCard).priceFrom / 1000)} тыс.</span>
+        )}
       </div>
     </div>
   )
@@ -223,7 +232,7 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
           </span>
         </div>
         <span className={styles.masterMeta}>
-          {item.specialization} · {formatDistance(item.distanceMeters)}
+          {item.specialization} · {item.businessName || ''}
         </span>
         <span className={styles.masterPrice}>от {Math.round(item.priceFrom / 1000)} тыс.</span>
       </div>
@@ -332,12 +341,14 @@ export function PopularStudioCardView({
       <div className={styles.psBody}>
         <div className={styles.psTopRow}>
           <div className={styles.psInfo}>
-            <span className={styles.psName}>{item.name}</span>
-            <span className={styles.psRatingRow}>
-              <StarIcon />
-              {item.rating.toFixed(1)}
-              <span className={styles.psReviewCount}>({item.reviewCount} отзывов)</span>
-            </span>
+            <div className={styles.psNameRatingWrap}>
+              <span className={styles.psName}>{item.name}</span>
+              <span className={styles.psRatingRow}>
+                <StarIcon />
+                {item.rating.toFixed(1)}
+                <span className={styles.psReviewCount}>({item.reviewCount} отзывов)</span>
+              </span>
+            </div>
           </div>
           {item.priceFrom && (
             <div className={styles.psPrice}>
@@ -345,8 +356,8 @@ export function PopularStudioCardView({
               <span className={styles.psPriceValue}>{Math.round(item.priceFrom / 1000)} тыс.</span>
             </div>
           )}
+          <span className={styles.psBadge}>{item.categoryLabel}</span>
         </div>
-        <span className={styles.psBadge}>{item.categoryLabel}</span>
       </div>
     </div>
   )

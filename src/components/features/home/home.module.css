@@ -136,7 +136,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .masterTop {
@@ -192,7 +192,7 @@
   gap: 12px;
   width: calc(75vw - 24px); /* ~75% screen width minus margins */
   max-width: 300px;
-  height: 104px;
+  height: 96px;
   padding: 12px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -204,7 +204,7 @@
   width: calc(75vw - 24px);
   max-width: 280px;
   height: 96px;
-  padding: 10px;
+  padding: 12px;
 }
 
 .nearbyThumb {
@@ -420,7 +420,7 @@
 
 .psTopRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
@@ -431,6 +431,13 @@
   gap: 4px;
   min-width: 0;
   flex: 1;
+}
+
+.psNameRatingWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .psName {
@@ -486,8 +493,7 @@
   font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
   white-space: nowrap;
-  align-self: flex-start;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* ── Map preview card ────────────────────────────────────── */

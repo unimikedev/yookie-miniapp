@@ -1,9 +1,8 @@
 export {
   SectionHeader,
   HomeCategoryChip,
-  VisitedCard,
+  MasterCard,
   NearbyCard,
-  PopularMasterCardView,
   PopularStudioCardView,
   MapPreviewCardView,
   HomeFilterChipsRow,
