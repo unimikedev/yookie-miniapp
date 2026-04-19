@@ -4,6 +4,8 @@ export { BottomNav } from './BottomNav';
 export { BottomSheet } from './BottomSheet';
 export { Button } from './Button';
 export { EmptyState } from './EmptyState';
+export { LoadingState } from './LoadingState';
+export type { LoadingStateProps, LoadingVariant } from './LoadingState';
 export { Rating } from './Rating';
 export { SearchInput } from './SearchInput';
 export { Skeleton } from './Skeleton';
