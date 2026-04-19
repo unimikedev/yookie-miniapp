@@ -185,6 +185,30 @@
   white-space: nowrap;
 }
 
+.masterPriceRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-caption-size);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.masterRatingSmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.masterPriceSeparator {
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
 /* ── Nearby horizontal card ──────────────────────────────── */
 .nearbyCard {
   display: flex;

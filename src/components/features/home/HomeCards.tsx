@@ -142,7 +142,14 @@ export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardP
           {specialization}
         </span>
         {!isVisitedItem && (item as PopularMasterCard).priceFrom && (
-          <span className={styles.masterPrice}>от {Math.round((item as PopularMasterCard).priceFrom / 1000)} тыс.</span>
+          <span className={styles.masterPriceRow}>
+            <span className={styles.masterRatingSmall}>
+              <StarIcon />
+              {item.rating.toFixed(1)}
+            </span>
+            <span className={styles.masterPriceSeparator}>•</span>
+            <span className={styles.masterPrice}>от {Math.round((item as PopularMasterCard).priceFrom / 1000)} тыс.</span>
+          </span>
         )}
       </div>
     </div>
@@ -182,7 +189,7 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
         {compact ? (
           <>
             <span className={styles.nearbyMeta}>
-              {item.formatLabel ?? item.categoryLabel} · открыто до {item.openUntil ?? '00:00'}
+              {item.formatLabel ?? item.categoryLabel} · до {item.openUntil ?? '00:00'}
             </span>
             <div className={styles.nearbyRatingRow}>
               <StarIcon />
