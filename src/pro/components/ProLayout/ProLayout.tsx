@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useAuthStore } from '@/stores/authStore';
 import { ProBottomNav } from '@/pro/components/ProBottomNav/ProBottomNav';
@@ -23,8 +23,12 @@ interface ProLayoutProps {
  */
 export function ProLayout({ children, title, actions, hideNav, allowWithoutBusiness }: ProLayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const auth = useAuthStore();
   const merchant = useMerchantStore();
+
+  // Show back button on any Pro sub-page (not the dashboard root)
+  const isSubPage = location.pathname !== '/pro';
 
   useEffect(() => {
     // Not authenticated → redirect to auth with return path
@@ -81,6 +85,17 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
   return (
     <div className={styles.layout}>
       <header className={styles.header}>
+        {isSubPage ? (
+          <button
+            className={styles.backBtn}
+            onClick={() => navigate('/pro', { replace: true })}
+            aria-label="Назад"
+          >
+            ‹
+          </button>
+        ) : (
+          <div />
+        )}
         <div className={styles.titleBlock}>
           <span className={styles.brand}>Yookie Pro</span>
           {title && <span className={styles.pageTitle}>{title}</span>}

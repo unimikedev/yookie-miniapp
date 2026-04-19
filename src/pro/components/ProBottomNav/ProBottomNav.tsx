@@ -34,7 +34,7 @@ export function ProBottomNav() {
             <button
               key={tab.key}
               className={`${styles.tab} ${active ? styles.tabActive : ''}`}
-              onClick={() => navigate(tab.path)}
+              onClick={() => navigate(tab.path, { replace: true })}
               aria-label={tab.label}
             >
               <span className={styles.icon}>{tab.icon}</span>

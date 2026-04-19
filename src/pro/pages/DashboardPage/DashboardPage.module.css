@@ -1,3 +1,130 @@
+/* ── Pending confirmations ──────────────────── */
+.pendingSection {
+  margin-bottom: 24px;
+}
+
+.pendingTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-body-size);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.pendingBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: #F87171;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pendingCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1.5px solid rgba(248, 113, 113, 0.35);
+  border-radius: 16px;
+  margin-bottom: 10px;
+}
+
+.pendingMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pendingTime {
+  font-size: var(--text-caption-size);
+  font-weight: 700;
+  color: var(--color-accent);
+  letter-spacing: 0.01em;
+}
+
+.pendingMaster {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+}
+
+.pendingClient {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pendingClientName {
+  font-size: var(--text-body-lg-size);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.pendingClientPhone {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-secondary);
+}
+
+.pendingService {
+  font-size: var(--text-body-size);
+  color: var(--color-text-secondary);
+}
+
+.pendingNotes {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.pendingActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.confirmBtn {
+  flex: 1;
+  padding: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-family);
+  font-size: var(--text-button-size);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirmBtn:disabled {
+  opacity: 0.5;
+}
+
+.declineBtn {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: transparent;
+  color: #F87171;
+  font-family: var(--font-family);
+  font-size: var(--text-button-size);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.declineBtn:disabled {
+  opacity: 0.5;
+}
+
+/* ── KPIs ───────────────────────────────────── */
 .kpis {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
