@@ -213,7 +213,7 @@ export default function MyBookingsPage() {
           emptyDescription={tab === 'active' ? 'Запишитесь к мастеру прямо сейчас' : 'Ваши завершенные записи появятся здесь'}
           emptyAction={<button className={styles.actionBtn} onClick={() => navigate('/')}>Найти мастера</button>}
         >
-          {tab === 'active' ? (
+          {tab === 'active' && activeGroups.length > 0 ? (
             <>
                 <p className={styles.sectionLabel}>Активные ({activeGroups.length})</p>
                 {activeGroups.map((group, gi) => {
@@ -332,13 +332,11 @@ export default function MyBookingsPage() {
             )}
           </div>
         ) : (
-          <div className={styles.list}>
-              <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
-            ) : (
-              <>
-                <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
-                <div className={styles.pastList}>
-                  {pastGroups.map((group, gi) => {
+          <div className={styles.section}>
+            <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
+            {pastGroups.length > 0 ? (
+              <div className={styles.pastList}>
+                {pastGroups.map((group, gi) => {
                     const first = group[0]
                     const st = STATUS_LABELS[first.status] ?? { label: first.status.toUpperCase(), className: 'statusCancelled' }
                     const businessName = (first.businesses as { name?: string } | null)?.name || 'Заведение'
@@ -364,13 +362,15 @@ export default function MyBookingsPage() {
                           </button>
                         ) : (
                           <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.label}</span>
-                        )}
-                      </div>
-                    )
-                  })}
+              ) : (
+                <div className={styles.emptyState}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <p>Нет прошедших записей</p>
                 </div>
-              </>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
