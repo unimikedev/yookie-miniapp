@@ -10,6 +10,9 @@ import { useFavoritesStore } from '@/stores/favoritesStore'
 import { useCityStore } from '@/stores/cityStore'
 import { useAuthStore } from '@/stores/authStore'
 import { Skeleton } from '@/shared/ui'
+import { LoadingState } from '@/components/LoadingState'
+import { useOfflineMode } from '@/hooks/useOfflineMode'
+import { useImageOptimizer } from '@/hooks/useImageOptimizer'
 import CitySelector from '@/components/features/CitySelector'
 import {
   SectionHeader,
@@ -116,11 +119,35 @@ function TypingPlaceholder() {
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { data, isLoading } = useHomeData()
+  const { data, isLoading, error } = useHomeData()
   const { visited: apiVisited, isLoading: visitedLoading } = useVisitedMasters()
   const { toggle, isFavorite } = useFavoritesStore()
   const { city } = useCityStore()
   const authStore = useAuthStore()
+  const { isOffline } = useOfflineMode()
+  const { optimizeUrl } = useImageOptimizer()
+  
+  // Handle loading state
+  if (isLoading) {
+    return <LoadingState type="skeleton" />
+  }
+  
+  // Handle error state
+  if (error) {
+    return <LoadingState type="error" message="Не удалось загрузить данные" onRetry={() => window.location.reload()} />
+  }
+  
+  // Handle offline state
+  if (isOffline && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+        <div className="mb-4 text-4xl">📡</div>
+        <h3 className="text-lg font-bold mb-2">Нет соединения</h3>
+        <p className="text-sm text-gray-500">Показываем сохраненные данные. Некоторые функции могут быть недоступны.</p>
+      </div>
+    )
+  }
+  
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)

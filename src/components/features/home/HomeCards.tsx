@@ -13,6 +13,7 @@ import type {
   HomeFilterChip,
 } from '@/lib/api/home'
 import { formatMasterName } from '@/lib/utils/name'
+import { useImageOptimizer } from '@/hooks/useImageOptimizer'
 
 /* ── formatters ─────────────────────────────────────────── */
 const formatDistance = (m: number): string =>
@@ -118,12 +119,14 @@ export interface VisitedCardProps {
 }
 
 export function VisitedCard({ item, onBook, onClick, compact }: VisitedCardProps) {
+  const { optimizeUrl } = useImageOptimizer()
+  
   return (
     <div className={`${styles.visitedCard} ${compact ? styles.visitedCardCompact : ''}`} onClick={onClick} role="button" tabIndex={0}>
       <div className={`${styles.visitedHead} ${compact ? styles.visitedHeadCompact : ''}`}>
         <div className={styles.visitedAvatarWrap} aria-hidden="true">
           {item.photoUrl && (
-            <img className={styles.visitedAvatar} src={item.photoUrl} alt="" />
+            <img className={styles.visitedAvatar} src={optimizeUrl(item.photoUrl)} alt="" />
           )}
         </div>
       <div className={`${styles.visitedInfo} ${compact ? styles.visitedInfoCompact : ''}`}>
@@ -163,6 +166,8 @@ export interface NearbyCardProps {
 }
 
 export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
+  const { optimizeUrl } = useImageOptimizer()
+  
   return (
     <div
       className={`${styles.nearbyCard} ${compact ? styles.nearbyCardCompact : ''}`}
@@ -172,7 +177,7 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
     >
       <div className={styles.nearbyThumb} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.nearbyThumbImg} src={item.photoUrl} alt="" />
+          <img className={styles.nearbyThumbImg} src={optimizeUrl(item.photoUrl)} alt="" />
         )}
       </div>
       <div className={styles.nearbyInfo}>
@@ -199,6 +204,8 @@ export interface PopularMasterCardViewProps {
 }
 
 export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewProps) {
+  const { optimizeUrl } = useImageOptimizer()
+  
   return (
     <div
       className={styles.pmCard}
@@ -208,7 +215,7 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
     >
       <div className={styles.pmPhotoWrap} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.pmPhoto} src={item.photoUrl} alt="" />
+          <img className={styles.pmPhoto} src={optimizeUrl(item.photoUrl)} alt="" />
         )}
       </div>
       <div className={styles.pmBody}>
@@ -242,7 +249,8 @@ export function PopularStudioCardView({
   onToggleFavorite,
   isFavorite = false,
 }: PopularStudioCardViewProps) {
-  const allPhotos = [item.photoUrl, ...(item.photos || [])].filter(Boolean) as string[]
+  const { optimizeUrl } = useImageOptimizer()
+  const allPhotos = [item.photoUrl, ...(item.photos || [])].filter(Boolean).map(optimizeUrl) as string[]
   const [currentPhoto, setCurrentPhoto] = useState(0)
   const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null)
   const touchStartX = useRef(0)

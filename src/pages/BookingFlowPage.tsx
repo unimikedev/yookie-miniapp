@@ -4,7 +4,8 @@ import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useBusiness } from '@/hooks/useBusiness'
 import { createBooking } from '@/lib/api/bookings'
-import { ApiError } from '@/lib/api/types'
+import { syncBookingToMerchant } from '@/lib/syncBookingToMerchant'
+import { getErrorFromApiError } from '@/lib/errorMapper'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import styles from './BookingFlowPage.module.css'
 
@@ -122,6 +123,13 @@ export default function BookingFlowPage() {
         throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей');
       }
 
+      // Sync each successful booking to merchant store
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          syncBookingToMerchant(result.value);
+        }
+      });
+
       setBookedCount(services.length)
       setSuccessState(true)
       bookingStore.reset()
@@ -130,8 +138,8 @@ export default function BookingFlowPage() {
         navigate('/my-bookings')
       }, 2000)
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Ошибка при создании записи'
-      setError(message)
+      const errorMapping = getErrorFromApiError(err);
+      setError(errorMapping.message);
     } finally {
       setIsLoading(false)
     }
