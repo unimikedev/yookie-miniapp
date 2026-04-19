@@ -1,0 +1,270 @@
+.preview {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.closeBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.closeBtn:hover {
+  background: var(--bg-tertiary);
+}
+
+.previewTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.placeholder {
+  width: 40px;
+}
+
+.coverPhoto {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+}
+
+.coverPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoPager {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pagerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagerDot.active {
+  background: white;
+  transform: scale(1.2);
+}
+
+.businessInfo {
+  padding: 20px 16px;
+  background: var(--bg-primary);
+}
+
+.businessName {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.categoryBadge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+  margin-bottom: 12px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.star {
+  font-size: 18px;
+}
+
+.ratingValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.reviewCount {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.address {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.icon {
+  font-size: 16px;
+}
+
+.description {
+  margin-bottom: 20px;
+}
+
+.description h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.description p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.contacts {
+  margin-bottom: 24px;
+}
+
+.contacts h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.contactLink {
+  display: block;
+  font-size: 14px;
+  color: var(--accent-color);
+  text-decoration: none;
+  padding: 8px 0;
+  transition: opacity 0.2s;
+}
+
+.contactLink:hover {
+  opacity: 0.8;
+}
+
+.warningBanner {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: #FFF3CD;
+  border: 1px solid #FFC107;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.warningIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.warningText {
+  flex: 1;
+}
+
+.warningText strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #856404;
+  margin-bottom: 4px;
+}
+
+.warningText p {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #856404;
+  margin: 0;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  position: sticky;
+  bottom: 0;
+}
+
+.editBtn,
+.publishBtn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.editBtn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.editBtn:hover {
+  background: var(--border-color);
+}
+
+.publishBtn {
+  background: var(--accent-color);
+  color: white;
+}
+
+.publishBtn:hover {
+  opacity: 0.9;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .warningBanner {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: rgba(255, 193, 7, 0.3);
+  }
+
+  .warningText strong,
+  .warningText p {
+    color: #FFD54F;
+  }
+}

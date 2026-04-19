@@ -7,6 +7,7 @@ import { upsertStaff } from '@/pro/api';
 import { api } from '@/lib/api/client';
 import { UZBEKISTAN_CITIES } from '@/stores/cityStore';
 import { formatPhoneMask } from '@/lib/utils/phone';
+import { useMerchantProfileValidation, getOnboardingSteps, type OnboardingStep } from '@/hooks/useMerchantProfileValidation';
 import type { Business, CategoryEnum } from '@/lib/api/types';
 import styles from './MerchantSettingsPage.module.css';
 
@@ -108,6 +109,11 @@ function BusinessWizard() {
 
   const TOTAL_STEPS = 3;
   const [step, setStep] = useState(1);
+  const [createdBusinessId, setCreatedBusinessId] = useState<string | null>(null);
+
+  // Use validation hook after business is created
+  const { isValidated, validationErrors, completionPercentage, isReadyForB2C } = useMerchantProfileValidation(createdBusinessId);
+  const onboardingSteps = getOnboardingSteps(createdBusinessId);
 
   // Step 1 — basic info
   const [name, setName] = useState('');
@@ -558,6 +564,19 @@ function BusinessWizard() {
 
       {/* Error */}
       {error && <p className={styles.wizardError}>{error}</p>}
+
+      {/* Preview button on last step */}
+      {step === TOTAL_STEPS && (
+        <div className={styles.wizardPreviewBtnWrapper}>
+          <button
+            className={styles.wizardPreviewBtn}
+            onClick={() => navigate('/pro/preview')}
+            type="button"
+          >
+            👁️ Как видят клиенты
+          </button>
+        </div>
+      )}
 
       {/* Sticky CTA */}
       <div className={styles.wizardFooter}>

@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listClients, listBookings } from '@/pro/api';
+import { useMerchantSearch, searchPresets } from '@/pro/hooks/useMerchantSearch';
+import { ExportButton } from './ExportButton';
 import type { Client, Booking } from '@/lib/api/types';
 import styles from './ClientsPage.module.css';
 
@@ -9,7 +11,6 @@ export default function ClientsPage() {
   const { merchantId } = useMerchantStore();
   const [clients, setClients] = useState<Client[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,12 +27,19 @@ export default function ClientsPage() {
     }).then(setBookings).catch(() => {});
   }, [merchantId]);
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    return clients.filter(
-      (c) => c.name.toLowerCase().includes(q) || c.phone.includes(q)
-    );
-  }, [clients, search]);
+  // Use the new search hook for consistent UX
+  const {
+    query: search,
+    setQuery: setSearch,
+    filteredItems: filtered,
+    hasResults,
+    resultsCount,
+    totalItems,
+  } = useMerchantSearch<Client>(
+    clients,
+    ['name', 'phone'],
+    searchPresets.clients.placeholder
+  );
 
   const bookingsFor = (clientId: string) =>
     bookings
@@ -40,15 +48,35 @@ export default function ClientsPage() {
 
   return (
     <ProLayout title="Клиенты">
-      <input
-        className={styles.search}
-        placeholder="Поиск по имени или телефону"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className={styles.pageHeader}>
+        <input
+          className={styles.search}
+          placeholder={searchPresets.clients.placeholder}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <ExportButton type="clients" />
+      </div>
+
+      {totalItems > 0 && (
+        <div className={styles.resultsInfo}>
+          {hasResults 
+            ? `Найдено ${resultsCount} из ${totalItems}` 
+            : 'Ничего не найдено'}
+        </div>
+      )}
 
       <div className={styles.list}>
-        {filtered.map((c) => {
+        {filtered.length === 0 && totalItems > 0 ? (
+          <div className={styles.emptyState}>
+            Нет клиентов по вашему запросу
+          </div>
+        ) : filtered.length === 0 && totalItems === 0 ? (
+          <div className={styles.emptyState}>
+            Клиенты появятся после первых записей
+          </div>
+        ) : (
+          filtered.map((c) => {
           const hist = bookingsFor(c.id);
           const isOpen = expanded === c.id;
           return (
@@ -88,7 +116,8 @@ export default function ClientsPage() {
               )}
             </div>
           );
-        })}
+        })
+      )}
       </div>
     </ProLayout>
   );

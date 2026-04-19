@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBookings } from '@/hooks/useBookings'
-import { Skeleton, EmptyState } from '@/shared/ui'
+import { LoadingState } from '@/components/ui'
 import { cancelBooking, rescheduleBooking } from '@/lib/api/bookings'
+import { syncBookingCancellationToMerchant, syncBookingRescheduleToMerchant } from '@/lib/syncBookingToMerchant'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import { formatMasterName } from '@/lib/utils/name'
 import ReviewForm from '@/components/features/ReviewForm'
@@ -41,7 +42,7 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
 export default function MyBookingsPage() {
   const navigate = useNavigate()
   const [tab, setTab] = useState<'active' | 'completed'>('active')
-  const { bookings, isLoading, refetch } = useBookings()
+  const { bookings, isLoading, error, refetch } = useBookings()
 
   // Refetch on mount to get latest bookings (e.g., after creating one on another page)
   useEffect(() => {
@@ -98,11 +99,14 @@ export default function MyBookingsPage() {
   const handleCancelGroup = async (group: typeof bookings) => {
     if (!phone) return
     const firstId = group[0].id
+    const merchantId = group[0].business_id
     setCancelLoading(firstId)
     setCancelError(null)
     try {
       // Cancel all bookings in the group in parallel
       await Promise.all(group.map(b => cancelBooking(b.id, phone)))
+      // Sync cancellation to merchant store
+      group.forEach(b => syncBookingCancellationToMerchant(b.id, merchantId))
       refetch()
     } catch {
       setCancelError('Не удалось отменить запись. Попробуйте позже.')
@@ -122,6 +126,9 @@ export default function MyBookingsPage() {
 
   const handleRescheduleConfirm = async (newStartsAt: string, newMasterId: string) => {
     if (!rescheduleBookingId || !phone) return
+    const merchantId = rescheduleGroupIds.length > 0 
+      ? bookings.find(b => b.id === rescheduleGroupIds[0])?.business_id || ''
+      : ''
     setRescheduleLoading(true)
     setRescheduleError(null)
     try {
@@ -134,6 +141,10 @@ export default function MyBookingsPage() {
             masterId: newMasterId,
           })
         )
+      )
+      // Sync reschedule to merchant store
+      rescheduleGroupIds.forEach(id => 
+        syncBookingRescheduleToMerchant(id, merchantId, newStartsAt, newMasterId)
       )
       setRescheduleBookingId(null)
       setRescheduleGroupIds([])
@@ -192,16 +203,18 @@ export default function MyBookingsPage() {
           </button>
         </div>
 
-        {isLoading ? (
-          <div className={styles.list}>
-            {[1, 2].map(i => <div key={i} className={styles.skeletonCard}><Skeleton variant="rect" height={180} /></div>)}
-          </div>
-        ) : tab === 'active' ? (
-          <div className={styles.list}>
-            {active.length === 0 ? (
-              <EmptyState title="Нет активных записей" description="Запишитесь к мастеру прямо сейчас" action={<button className={styles.actionBtn} onClick={() => navigate('/')}>Найти мастера</button>} />
-            ) : (
-              <>
+        <LoadingState
+          isLoading={isLoading}
+          error={error}
+          hasData={bookings.length > 0}
+          skeletonType="list"
+          count={3}
+          emptyTitle={tab === 'active' ? 'Нет активных записей' : 'Нет завершенных записей'}
+          emptyDescription={tab === 'active' ? 'Запишитесь к мастеру прямо сейчас' : 'Ваши завершенные записи появятся здесь'}
+          emptyAction={<button className={styles.actionBtn} onClick={() => navigate('/')}>Найти мастера</button>}
+        >
+          {tab === 'active' ? (
+            <>
                 <p className={styles.sectionLabel}>Активные ({activeGroups.length})</p>
                 {activeGroups.map((group, gi) => {
                   const first = group[0]
@@ -320,8 +333,7 @@ export default function MyBookingsPage() {
           </div>
         ) : (
           <div className={styles.list}>
-            {past.length === 0 ? (
-              <EmptyState title="Нет завершенных записей" description="Здесь будет история ваших посещений" />
+              <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
             ) : (
               <>
                 <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>

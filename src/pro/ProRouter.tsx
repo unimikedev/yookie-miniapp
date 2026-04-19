@@ -6,6 +6,7 @@ import ServicesPage from '@/pro/pages/ServicesPage/ServicesPage';
 import StaffPage from '@/pro/pages/StaffPage/StaffPage';
 import ClientsPage from '@/pro/pages/ClientsPage/ClientsPage';
 import MerchantSettingsPage from '@/pro/pages/MerchantSettingsPage/MerchantSettingsPage';
+import MerchantPreviewPage from '@/pro/pages/MerchantPreviewPage/MerchantPreviewPage';
 import MorePage from '@/pro/pages/MorePage/MorePage';
 
 export function ProRouter() {
@@ -18,6 +19,7 @@ export function ProRouter() {
       <Route path="staff" element={<StaffPage />} />
       <Route path="clients" element={<ClientsPage />} />
       <Route path="settings" element={<MerchantSettingsPage />} />
+      <Route path="preview" element={<MerchantPreviewPage />} />
       <Route path="more" element={<MorePage />} />
       <Route path="*" element={<Navigate to="/pro" replace />} />
     </Routes>

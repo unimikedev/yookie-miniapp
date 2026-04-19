@@ -4,7 +4,9 @@ import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useBusiness } from '@/hooks/useBusiness'
 import { createBooking } from '@/lib/api/bookings'
-import { ApiError } from '@/lib/api/types'
+import { syncBookingToMerchant } from '@/lib/syncBookingToMerchant'
+import { getErrorFromApiError } from '@/lib/errorMapper'
+import { useAlternativeSlots } from '@/hooks/useAlternativeSlots'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import styles from './BookingFlowPage.module.css'
 
@@ -21,6 +23,15 @@ export default function BookingFlowPage() {
   const [error, setError] = useState<string | null>(null)
   const [successState, setSuccessState] = useState(false)
   const [bookedCount, setBookedCount] = useState(0)
+  const [showAlternativeSlots, setShowAlternativeSlots] = useState(false)
+  const [conflictSlotInfo, setConflictSlotInfo] = useState<{ serviceId: string; masterId: string; dateTime: string } | null>(null)
+
+  // Hook для альтернативных слотов (используется при конфликте)
+  const { slots: alternativeSlots, isLoading: isLoadingAlternatives } = useAlternativeSlots(
+    conflictSlotInfo?.serviceId || '',
+    conflictSlotInfo?.masterId || '',
+    conflictSlotInfo?.dateTime || ''
+  )
 
   // Check if we have valid booking data
   const hasValidData = () => {
@@ -122,6 +133,13 @@ export default function BookingFlowPage() {
         throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей');
       }
 
+      // Sync each successful booking to merchant store
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          syncBookingToMerchant(result.value);
+        }
+      });
+
       setBookedCount(services.length)
       setSuccessState(true)
       bookingStore.reset()
@@ -129,9 +147,26 @@ export default function BookingFlowPage() {
       setTimeout(() => {
         navigate('/my-bookings')
       }, 2000)
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Ошибка при создании записи'
-      setError(message)
+    } catch (err: any) {
+      // Проверяем на конфликт слотов (409)
+      const isConflictError = err?.status === 409 || 
+                              err?.message?.includes('BOOKING_CONFLICT') || 
+                              err?.message?.includes('SLOT_UNAVAILABLE');
+      
+      if (isConflictError && services.length > 0) {
+        // Показываем модалку с альтернативными слотами для первого сервиса
+        const firstService = services[0];
+        setConflictSlotInfo({
+          serviceId: firstService.service.id,
+          masterId: firstService.masterId!,
+          dateTime: startsAt
+        });
+        setShowAlternativeSlots(true);
+        setError('Выбранное время только что заняли. Пожалуйста, выберите другое время.');
+      } else {
+        const errorMapping = getErrorFromApiError(err);
+        setError(errorMapping.message);
+      }
     } finally {
       setIsLoading(false)
     }
@@ -278,6 +313,48 @@ export default function BookingFlowPage() {
 
         {error && <div className={styles.errorBox}>{error}</div>}
       </div>
+
+      {/* Модалка с альтернативными слотами */}
+      {showAlternativeSlots && (
+        <div className={styles.modalOverlay} onClick={() => setShowAlternativeSlots(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Выбранное время занято</h3>
+            <p className={styles.modalDescription}>Попробуйте одно из этих времен:</p>
+            
+            {isLoadingAlternatives ? (
+              <div className={styles.loadingAlternatives}>Загрузка вариантов...</div>
+            ) : alternativeSlots.length > 0 ? (
+              <div className={styles.slotsList}>
+                {alternativeSlots.map((slot, index) => {
+                  const startTime = new Date(slot.starts_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                  return (
+                    <button
+                      key={index}
+                      className={styles.slotButton}
+                      onClick={() => {
+                        // TODO: Обновить выбранный слот в bookingStore и закрыть модалку
+                        setShowAlternativeSlots(false);
+                        setError(null);
+                      }}
+                    >
+                      {startTime}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className={styles.noAlternatives}>К сожалению, нет доступных альтернатив на сегодня.</div>
+            )}
+            
+            <button
+              className={styles.closeModalButton}
+              onClick={() => setShowAlternativeSlots(false)}
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={styles.footer}>
         <button

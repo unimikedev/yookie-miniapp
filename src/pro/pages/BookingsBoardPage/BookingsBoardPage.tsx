@@ -6,6 +6,7 @@ import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, Master, Service } from '@/lib/api/types';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
+import { ExportButton } from './ExportButton';
 import styles from './BookingsBoardPage.module.css';
 
 type ViewMode = 'timeline' | 'list';
