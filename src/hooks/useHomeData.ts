@@ -252,18 +252,17 @@ export function useHomeData(): UseHomeDataResult {
 
       if (cancelled) return;
 
-      // For real API data, only show businesses that are active and have at least 1 active master
+      // For real API data, hide only explicitly deactivated businesses.
+      // Masters are not embedded in the list response, so we can't check them here.
       const readyBusinesses = isRealData
-        ? (businesses as ApiBusiness[]).filter(
-            (b) => b.is_active && (b.masters ?? []).some((m) => m.is_active)
-          )
+        ? businesses.filter((b) => b.is_active !== false)
         : businesses;
 
       const visited = readyBusinesses.slice(0, 4).map(toVisited);
       const nearby = readyBusinesses.slice(0, 6).map(toNearby);
       const popularMasters = readyBusinesses
         .slice(0, 6)
-        .map((b, i) => toPopularMaster(b as ApiBusiness, i));
+        .map((b, i) => toPopularMaster(b as unknown as ApiBusiness, i));
       const popularStudios = readyBusinesses.slice(0, 6).map(toPopularStudio);
 
       setData({

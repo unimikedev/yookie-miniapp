@@ -239,6 +239,7 @@ function BusinessWizard() {
         instagram: instagram.trim() ? instagram.replace(/^@/, '') : undefined,
         telegram_username: telegramUsername.trim() ? telegramUsername.replace(/^@/, '') : undefined,
         photo_url: photoUrls[0] || undefined,
+        is_active: true,
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };
 
@@ -731,6 +732,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
         instagram: instagram.trim() ? instagram.replace(/^@/, '') : null,
         telegram_username: telegramUsername.trim() ? telegramUsername.replace(/^@/, '') : null,
         photo_url: photoUrls[0] || null,
+        is_active: true,
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };
       await api.patch<{ data: Business }>(`/businesses/${merchantId}`, body);
