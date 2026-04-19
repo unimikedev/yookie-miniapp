@@ -44,6 +44,16 @@
   min-height: 64px;
 }
 
+.logoBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  gap: 2px;
+  margin-left: 16px;
+}
+
 .headerBtn {
   display: flex;
   align-items: center;
@@ -56,19 +66,11 @@
   border: 1px solid var(--color-border);
   flex-shrink: 0;
   transition: opacity 0.15s;
+  margin-right: 16px;
 }
 
 .headerBtn:active {
   opacity: 0.75;
-}
-
-.logoBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  min-width: 0;
-  gap: 2px;
 }
 
 .logoImage {
