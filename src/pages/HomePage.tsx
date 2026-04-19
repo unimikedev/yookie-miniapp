@@ -15,9 +15,8 @@ import CitySelector from '@/components/features/CitySelector'
 import {
   SectionHeader,
   HomeCategoryChip,
-  VisitedCard,
+  MasterCard,
   NearbyCard,
-  PopularMasterCardView,
   PopularStudioCardView,
   HomeFilterChipsRow,
   HScroll,
@@ -356,18 +355,13 @@ export default function HomePage() {
       <div className={styles.mainContent}>
         {/* Header */}
         <header className={styles.header}>
-          <div className={styles.headerLeft}>
-            <button className={styles.headerBtn} onClick={() => navigate('/favorites')} aria-label="Избранное">
-              <HeartIconLarge />
-            </button>
-            <div className={styles.logoBlock}>
-              <img src="/logo.svg" alt="Yookie" className={styles.logoImage} />
-              <span className={styles.logoSub}>Маркетплейс оффлайн услуг</span>
-            </div>
+          <div className={styles.logoBlock}>
+            <img src="/logo.svg" alt="Yookie" className={styles.logoImage} />
+            <span className={styles.logoSub}>Маркетплейс оффлайн услуг</span>
           </div>
-          <div className={styles.headerRight}>
-            {/* Placeholder for future right-side actions */}
-          </div>
+          <button className={styles.headerBtn} onClick={() => navigate('/favorites')} aria-label="Избранное">
+            <HeartIconLarge />
+          </button>
         </header>
 
         {/* Search — inline with dropdown */}
@@ -517,26 +511,24 @@ export default function HomePage() {
             /* Default home view */
             <>
               {/* Вы посещали — horizontal carousel */}
-              <section className={styles.sectionInner}>
-                <SectionHeader title="Вы посещали" onMoreClick={() => navigate('/my-bookings')} />
-                {effectiveVisitedLoading ? (
-                  <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>
-                ) : hasVisitedData ? (
-                  <HScroll snap>
-                    {effectiveVisited.map((v) => (
-                      <VisitedCard
-                        key={v.id}
-                        item={v}
-                        onClick={() => navigate(`/business/${v.businessId}`)}
-                        onBook={() => navigate(`/business/${v.businessId}`)}
-                        compact
-                      />
-                    ))}
-                  </HScroll>
-                ) : (
-                  <p className={styles.emptySection}>Вы ещё не посещали мастеров</p>
-                )}
-              </section>
+              {hasVisitedData && (
+                <section className={styles.sectionInner}>
+                  <SectionHeader title="Вы посещали" onMoreClick={() => navigate('/my-bookings')} />
+                  {effectiveVisitedLoading ? (
+                    <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>
+                  ) : (
+                    <HScroll snap>
+                      {effectiveVisited.map((v) => (
+                        <MasterCard
+                          key={v.id}
+                          item={v}
+                          onClick={() => navigate(`/business/${v.businessId}`)}
+                        />
+                      ))}
+                    </HScroll>
+                  )}
+                </section>
+              )}
 
               {/* Рядом с вами */}
               <section className={styles.sectionInner}>
@@ -552,15 +544,15 @@ export default function HomePage() {
                 )}
               </section>
 
-              {/* Доступные специалисты */}
+              {/* Доступные специалисты — uses unified MasterCard */}
               <section className={styles.sectionInner}>
                 <SectionHeader title="Доступные специалисты" onMoreClick={() => navigate('/search')} />
                 {isLoading || !data ? (
-                  <div className={styles.skeleton}><Skeleton variant="rect" height={204} /></div>
+                  <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>
                 ) : (
                   <HScroll snap autoScroll>
                     {fd.popularMasters.map((m) => (
-                      <PopularMasterCardView key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`)} />
+                      <MasterCard key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`)} />
                     ))}
                   </HScroll>
                 )}

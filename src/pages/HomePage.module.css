@@ -44,21 +44,6 @@
   min-height: 64px;
 }
 
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
 .headerBtn {
   display: flex;
   align-items: center;
