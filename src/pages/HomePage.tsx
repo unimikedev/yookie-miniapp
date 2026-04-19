@@ -1,5 +1,6 @@
 /**
  * HomePage — Figma "Главная" (node 184:6540).
+ * Updated: unified card designs, header spacing, real business hours
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
