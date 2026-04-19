@@ -8,7 +8,7 @@
  *   services → auto-select the only master (UI hidden) → date → time → confirm
  */
 
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { Skeleton, EmptyState, Badge, Rating } from '@/shared/ui'
 import {
@@ -92,7 +92,34 @@ export default function ProviderDetailPage() {
     ? getCleanPhone(authStore.phone)
     : getCleanPhone(clientPhone)
 
+  const location = useLocation();
   const { business, masters, services, isLoading, error } = useBusiness(id)
+  
+  // Обработка deep link параметров (highlight service/master)
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.fromDeepLink && state.highlightService) {
+      // Авто-выбор услуги из deep link
+      const serviceToHighlight = services?.find(s => s.id === state.highlightService);
+      if (serviceToHighlight && !selectedServices.find(s => s.service.id === serviceToHighlight.id)) {
+        toggleService(serviceToHighlight);
+        // Если мастер один или индивидуальный - авто-выбираем
+        if (soloMaster) {
+          assignMasterToService(serviceToHighlight.id, soloMaster.id);
+        } else if (masters.length === 1) {
+          assignMasterToService(serviceToHighlight.id, masters[0].id);
+        }
+      }
+    }
+    if (state?.fromDeepLink && state.highlightMaster) {
+      // Можно добавить логику выделения мастера (скролл к секции)
+      const masterSection = document.getElementById('masters-section');
+      if (masterSection) {
+        masterSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [location.state, services, masters, soloMaster]);
+
   const selectedServices = useBookingStore((s) => s.selectedServices)
   const toggleService = useBookingStore((s) => s.toggleService)
   const assignMasterToService = useBookingStore((s) => s.assignMasterToService)
@@ -630,7 +657,7 @@ export default function ProviderDetailPage() {
 
         {/* ── Мастера tab (index 1 for ALL, hidden for individual) ─ */}
         {activeTab === 1 && !isIndividual && (
-          <section className={styles.section}>
+          <section id="masters-section" className={styles.section}>
             <div className={styles.sectionHead}>
               <h2 className={styles.sectionTitle}>Мастера</h2>
             </div>

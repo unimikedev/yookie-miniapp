@@ -564,6 +564,34 @@
   cursor: default;
 }
 
+.wizardPreviewBtnWrapper {
+  padding: 0 20px 12px;
+}
+
+.wizardPreviewBtn {
+  width: 100%;
+  padding: 14px;
+  border: 2px dashed var(--color-border-subtle);
+  border-radius: 16px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wizardPreviewBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(0, 0, 0, 0.02);
+}
+
 /* ── Map picker overlay ───────────────────────────────────────── */
 
 .mapPickerOverlay {

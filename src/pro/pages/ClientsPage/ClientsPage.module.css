@@ -1,5 +1,11 @@
+.pageHeader {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
 .search {
-  width: 100%;
+  flex: 1;
   padding: 10px 14px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -7,7 +13,6 @@
   color: var(--color-text);
   font-family: var(--font-family);
   font-size: var(--text-body-size);
-  margin-bottom: 16px;
 }
 
 .search::placeholder {

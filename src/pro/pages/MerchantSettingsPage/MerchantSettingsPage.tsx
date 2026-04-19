@@ -565,6 +565,19 @@ function BusinessWizard() {
       {/* Error */}
       {error && <p className={styles.wizardError}>{error}</p>}
 
+      {/* Preview button on last step */}
+      {step === TOTAL_STEPS && (
+        <div className={styles.wizardPreviewBtnWrapper}>
+          <button
+            className={styles.wizardPreviewBtn}
+            onClick={() => navigate('/pro/preview')}
+            type="button"
+          >
+            👁️ Как видят клиенты
+          </button>
+        </div>
+      )}
+
       {/* Sticky CTA */}
       <div className={styles.wizardFooter}>
         <button
