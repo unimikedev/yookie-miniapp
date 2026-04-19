@@ -1,9 +1,5 @@
 import React from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useBusinesses } from '../../api/useBusinesses';
-import { useServices } from '../../api/useServices';
-import { useStaff } from '../../api/useStaff';
-import { Button } from '../../components/ui/Button';
 import styles from './DeepLinkHandler.module.css';
 
 /**

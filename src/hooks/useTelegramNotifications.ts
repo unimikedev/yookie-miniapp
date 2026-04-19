@@ -35,15 +35,8 @@ export const useTelegramNotifications = () => {
     tg.onEvent('message_received', handleBotMessage);
 
     // Для тестирования также слушаем mainButtonPressed (можно триггерить вручную)
-    tg.onEvent('mainButtonClicked', () => {
-      console.log('[useTelegramNotifications] Main button clicked - checking for updates');
-      // Принудительная проверка обновлений
-    });
-
     return () => {
-      // Отписываемся при размонтировании
       tg.offEvent('message_received', handleBotMessage);
-      tg.offEvent('mainButtonClicked', () => {});
     };
   }, []);
 

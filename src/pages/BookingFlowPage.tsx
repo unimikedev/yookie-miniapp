@@ -97,17 +97,18 @@ export default function BookingFlowPage() {
     setIsLoading(true)
     setError(null)
 
+    let startsAt = ''
+    let services = bookingStore.selectedServices
+
     try {
       if (!bookingStore.selectedBusiness || !bookingStore.selectedDate || !bookingStore.selectedSlot) {
         throw new Error('Missing booking data')
       }
 
-      const startsAt = bookingStore.selectedSlot.id
+      startsAt = bookingStore.selectedSlot.id
         ?? `${bookingStore.selectedDate}T${bookingStore.selectedSlot.start}:00`
 
-      // Create a separate booking for each selected service
-      // All services start at the same time (different masters work in parallel)
-      const services = bookingStore.selectedServices
+      services = bookingStore.selectedServices
       if (services.length === 0) {
         throw new Error('No services selected')
       }

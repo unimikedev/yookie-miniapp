@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { getBookings, getClients } from '@/pro/api';
+import { listBookings, listClients } from '@/pro/api';
 import styles from './ExportButton.module.css';
 
 interface ExportData {
@@ -43,7 +43,7 @@ export function ExportButton({ type }: { type: 'clients' | 'bookings' }) {
       let exportData: ExportData;
 
       if (type === 'clients') {
-        const clients = await getClients(merchantId);
+        const clients = await listClients(merchantId);
         const headers = ['ID', 'Имя', 'Телефон', 'Telegram', 'Последний визит', 'Всего записей'];
         const rows = clients.map(c => [
           c.id,
@@ -58,7 +58,7 @@ export function ExportButton({ type }: { type: 'clients' | 'bookings' }) {
           data: [headers, ...rows]
         };
       } else {
-        const bookings = await getBookings(merchantId);
+        const bookings = await listBookings(merchantId);
         const headers = ['ID', 'Клиент', 'Телефон', 'Услуга', 'Мастер', 'Дата', 'Время', 'Статус', 'Создано'];
         const rows = bookings.map(b => [
           b.id,

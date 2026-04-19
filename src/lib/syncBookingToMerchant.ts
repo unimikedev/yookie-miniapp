@@ -38,8 +38,8 @@ export function syncBookingToMerchant(booking: Booking): void {
   const merchantBooking: Omit<MerchantBooking, 'id' | 'created_at' | 'updated_at'> = {
     merchant_id: merchantId,
     client_id: booking.client_id || `client-${Date.now()}`,
-    client_name: booking.client_name,
-    client_phone: booking.client_phone,
+    client_name: (booking as any).client_name ?? '',
+    client_phone: (booking as any).client_phone ?? '',
     service_id: booking.service_id,
     master_id: booking.master_id,
     starts_at: booking.starts_at,

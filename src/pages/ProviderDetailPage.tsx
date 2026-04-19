@@ -94,31 +94,6 @@ export default function ProviderDetailPage() {
 
   const location = useLocation();
   const { business, masters, services, isLoading, error } = useBusiness(id)
-  
-  // Обработка deep link параметров (highlight service/master)
-  useEffect(() => {
-    const state = location.state as any;
-    if (state?.fromDeepLink && state.highlightService) {
-      // Авто-выбор услуги из deep link
-      const serviceToHighlight = services?.find(s => s.id === state.highlightService);
-      if (serviceToHighlight && !selectedServices.find(s => s.service.id === serviceToHighlight.id)) {
-        toggleService(serviceToHighlight);
-        // Если мастер один или индивидуальный - авто-выбираем
-        if (soloMaster) {
-          assignMasterToService(serviceToHighlight.id, soloMaster.id);
-        } else if (masters.length === 1) {
-          assignMasterToService(serviceToHighlight.id, masters[0].id);
-        }
-      }
-    }
-    if (state?.fromDeepLink && state.highlightMaster) {
-      // Можно добавить логику выделения мастера (скролл к секции)
-      const masterSection = document.getElementById('masters-section');
-      if (masterSection) {
-        masterSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-  }, [location.state, services, masters, soloMaster]);
 
   const selectedServices = useBookingStore((s) => s.selectedServices)
   const toggleService = useBookingStore((s) => s.toggleService)
@@ -128,11 +103,32 @@ export default function ProviderDetailPage() {
 
   // ── Provider type flag ──────────────────────────────────────────
   const isIndividual = business?.provider_type === 'individual'
-  // Auto-select the single master for individual providers
   const soloMaster = useMemo(
     () => (isIndividual && masters.length === 1 ? masters[0] : null),
     [isIndividual, masters]
   )
+
+  // Обработка deep link параметров (highlight service/master)
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.fromDeepLink && state.highlightService) {
+      const serviceToHighlight = services?.find(s => s.id === state.highlightService);
+      if (serviceToHighlight && !selectedServices.find(s => s.service.id === serviceToHighlight.id)) {
+        toggleService(serviceToHighlight);
+        if (soloMaster) {
+          assignMasterToService(serviceToHighlight.id, soloMaster.id);
+        } else if (masters.length === 1) {
+          assignMasterToService(serviceToHighlight.id, masters[0].id);
+        }
+      }
+    }
+    if (state?.fromDeepLink && state.highlightMaster) {
+      const masterSection = document.getElementById('masters-section');
+      if (masterSection) {
+        masterSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [location.state, services, masters, soloMaster]);
 
   // Compute activeMasterId BEFORE useSlots call
   const activeMasterId = selectedServices.find(s => s.masterId !== null)?.masterId ?? undefined
