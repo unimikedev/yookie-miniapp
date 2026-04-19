@@ -331,11 +331,10 @@ export default function MyBookingsPage() {
               </>
             )}
           </div>
-        ) : (
-          <div className={styles.section}>
+        )        ) : tab === 'completed' && pastGroups.length > 0 ? (
+          <>
             <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
-            {pastGroups.length > 0 ? (
-              <div className={styles.pastList}>
+            <div className={styles.pastList}>
                 {pastGroups.map((group, gi) => {
                     const first = group[0]
                     const st = STATUS_LABELS[first.status] ?? { label: first.status.toUpperCase(), className: 'statusCancelled' }
