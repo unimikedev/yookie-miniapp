@@ -109,60 +109,33 @@ export function HomeCategoryChip({ label, iconSrc, onClick, active = false }: Ho
   )
 }
 
-/* ── VisitedCard ────────────────────────────────────────── */
+/* ── VisitedCard — unified master card (visited & popular) ─────────────────────────── */
 export interface VisitedCardProps {
   item: VisitedMasterCard
   onBook?: () => void
   onClick?: () => void
-  compact?: boolean
 }
 
-export function VisitedCard({ item, onBook, onClick, compact }: VisitedCardProps) {
+export function VisitedCard({ item, onBook, onClick }: VisitedCardProps) {
   return (
-    <div className={`${styles.visitedCard} ${compact ? styles.visitedCardCompact : ''}`} onClick={onClick} role="button" tabIndex={0}>
-      <div className={`${styles.visitedHead} ${compact ? styles.visitedHeadCompact : ''}`}>
-        <div className={styles.visitedAvatarWrap} aria-hidden="true">
-          {item.photoUrl && (
-            <img className={styles.visitedAvatar} src={item.photoUrl} alt="" />
-          )}
-        </div>
-      <div className={`${styles.visitedInfo} ${compact ? styles.visitedInfoCompact : ''}`}>
-          <div className={styles.visitedTopRow}>
-            <span className={styles.visitedName}>{formatMasterName(item.masterName)}</span>
-          </div>
-          <span className={styles.visitedBusiness}>{item.specialization} · {item.businessName}</span>
-          {compact && (
-            <div className={styles.visitedRatingRow}>
-              <StarIcon />
-              <span>{item.rating.toFixed(1)}</span>
-              <span> · </span>
-              <span className={styles.visitedDistance}>{formatDistance(item.distanceMeters)}</span>
-            </div>
-          )}
-          {!compact && (
-            <>
-              <span className={styles.visitedSpecialization}>{item.specialization}</span>
-              <span className={styles.visitedLastVisit}>{item.lastVisitDate}</span>
-            </>
-          )}
-        </div>
+    <div className={styles.masterCard} onClick={onClick} role="button" tabIndex={0}>
+      <div className={styles.masterPhotoWrap} aria-hidden="true">
+        {item.photoUrl && (
+          <img className={styles.masterPhoto} src={item.photoUrl} alt="" />
+        )}
       </div>
-      {compact && onBook && (
-        <button
-          className={styles.visitedCtaCompact}
-          onClick={(e) => { e.stopPropagation(); onBook?.() }}
-        >
-          Записаться
-        </button>
-      )}
-      {!compact && (
-        <button
-          className={styles.visitedCta}
-          onClick={(e) => { e.stopPropagation(); onBook?.() }}
-        >
-          Записаться
-        </button>
-      )}
+      <div className={styles.masterBody}>
+        <div className={styles.masterTop}>
+          <span className={styles.masterName}>{formatMasterName(item.masterName)}</span>
+          <span className={styles.masterRating}>
+            <StarIcon />
+            {item.rating.toFixed(1)}
+          </span>
+        </div>
+        <span className={styles.masterMeta}>
+          {item.specialization} · {item.businessName}
+        </span>
+      </div>
     </div>
   )
 }
@@ -222,7 +195,7 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
   )
 }
 
-/* ── PopularMasterCardView ──────────────────────────────── */
+/* ── PopularMasterCardView — uses unified master card styles ─────────────────────────── */
 export interface PopularMasterCardViewProps {
   item: PopularMasterCard
   onClick?: () => void
@@ -231,28 +204,28 @@ export interface PopularMasterCardViewProps {
 export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewProps) {
   return (
     <div
-      className={styles.pmCard}
+      className={styles.masterCard}
       onClick={onClick}
       role="button"
       tabIndex={0}
     >
-      <div className={styles.pmPhotoWrap} aria-hidden="true">
+      <div className={styles.masterPhotoWrap} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.pmPhoto} src={item.photoUrl} alt="" />
+          <img className={styles.masterPhoto} src={item.photoUrl} alt="" />
         )}
       </div>
-      <div className={styles.pmBody}>
-        <div className={styles.pmTop}>
-          <span className={styles.pmName}>{formatMasterName(item.name)}</span>
-          <span className={styles.pmRating}>
+      <div className={styles.masterBody}>
+        <div className={styles.masterTop}>
+          <span className={styles.masterName}>{formatMasterName(item.name)}</span>
+          <span className={styles.masterRating}>
             <StarIcon />
             {item.rating.toFixed(1)}
           </span>
         </div>
-        <span className={styles.pmMeta}>
+        <span className={styles.masterMeta}>
           {item.specialization} · {formatDistance(item.distanceMeters)}
         </span>
-        <span className={styles.pmPrice}>от {Math.round(item.priceFrom / 1000)} тыс.</span>
+        <span className={styles.masterPrice}>от {Math.round(item.priceFrom / 1000)} тыс.</span>
       </div>
     </div>
   )
