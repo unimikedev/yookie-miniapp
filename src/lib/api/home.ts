@@ -35,6 +35,10 @@ export interface NearbyBusinessCard {
   rating: number;
   photoUrl: string | null;
   businessId: string;
+  /** Format label for display, e.g. "Барбершоп" */
+  formatLabel?: string;
+  /** Open until time in HH:mm format, e.g. "00:00" */
+  openUntil?: string;
 }
 
 export interface PopularMasterCard {
