@@ -327,13 +327,21 @@ export function PopularStudioCardView({
         )}
       </div>
       <div className={styles.psBody}>
-        <div className={styles.psInfo}>
-          <span className={styles.psName}>{item.name}</span>
-          <span className={styles.psRatingRow}>
-            <StarIcon />
-            {item.rating.toFixed(1)}
-            <span className={styles.psReviewCount}>({item.reviewCount} отзывов)</span>
-          </span>
+        <div className={styles.psTopRow}>
+          <div className={styles.psInfo}>
+            <span className={styles.psName}>{item.name}</span>
+            <span className={styles.psRatingRow}>
+              <StarIcon />
+              {item.rating.toFixed(1)}
+              <span className={styles.psReviewCount}>({item.reviewCount} отзывов)</span>
+            </span>
+          </div>
+          {item.priceFrom && (
+            <div className={styles.psPrice}>
+              <span className={styles.psPriceFrom}>от</span>
+              <span className={styles.psPriceValue}>{Math.round(item.priceFrom / 1000)} тыс.</span>
+            </div>
+          )}
         </div>
         <span className={styles.psBadge}>{item.categoryLabel}</span>
       </div>

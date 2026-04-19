@@ -62,6 +62,7 @@ export interface PopularStudioCard {
   /** Additional photos for the swipe carousel */
   photos?: string[];
   businessId: string;
+  priceFrom?: number;
 }
 
 export interface MapPreviewCard {
