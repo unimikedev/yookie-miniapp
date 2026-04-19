@@ -276,9 +276,9 @@ export default function HomePage() {
       )
     : null
 
-  // Use API visited data when available, fall back to useHomeData mock
-  const effectiveVisited = visitedCards ?? data?.visited
-  const effectiveVisitedLoading = (visitedCards === null && visitedLoading) || (!data && isLoading)
+  // Only show real booking history — never fall back to mock/seeded businesses
+  const effectiveVisited = visitedCards
+  const effectiveVisitedLoading = visitedLoading
 
   const handleFilterClick = (key: string) => {
     setActiveFilters(prev => {

@@ -261,9 +261,17 @@ function BusinessWizard() {
 
       // Create pending staff
       if (pendingStaff.length > 0) {
-        await Promise.allSettled(
+        const staffResults = await Promise.allSettled(
           pendingStaff.map(s => upsertStaff(newBiz.id, { name: s.name, specialization: s.specialization, photo_url: s.photo_url }))
         );
+        const staffFailed = staffResults.filter(r => r.status === 'rejected').length;
+        if (staffFailed > 0) {
+          setError(`Заведение создано, но ${staffFailed} сотр. не сохранились. Добавьте их в настройках.`);
+          setSaving(false);
+          setMerchantId(newBiz.id);
+          navigate('/pro');
+          return;
+        }
       }
 
       navigate('/pro');

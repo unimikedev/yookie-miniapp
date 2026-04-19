@@ -247,16 +247,24 @@ export function useHomeData(): UseHomeDataResult {
         /* fall through to mock */
       }
 
-      if (businesses.length === 0) businesses = MOCK_BUSINESSES;
+      const isRealData = businesses.length > 0;
+      if (!isRealData) businesses = MOCK_BUSINESSES;
 
       if (cancelled) return;
 
-      const visited = businesses.slice(0, 4).map(toVisited);
-      const nearby = businesses.slice(0, 6).map(toNearby);
-      const popularMasters = businesses
+      // For real API data, only show businesses that are active and have at least 1 active master
+      const readyBusinesses = isRealData
+        ? (businesses as ApiBusiness[]).filter(
+            (b) => b.is_active && (b.masters ?? []).some((m) => m.is_active)
+          )
+        : businesses;
+
+      const visited = readyBusinesses.slice(0, 4).map(toVisited);
+      const nearby = readyBusinesses.slice(0, 6).map(toNearby);
+      const popularMasters = readyBusinesses
         .slice(0, 6)
-        .map((b, i) => toPopularMaster(b, i));
-      const popularStudios = businesses.slice(0, 6).map(toPopularStudio);
+        .map((b, i) => toPopularMaster(b as ApiBusiness, i));
+      const popularStudios = readyBusinesses.slice(0, 6).map(toPopularStudio);
 
       setData({
         visited,
