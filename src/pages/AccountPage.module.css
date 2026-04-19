@@ -87,11 +87,17 @@
   text-align: center;
 }
 
+.userPhone {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
 .userSub {
   font-size: var(--text-body-size);
   font-weight: var(--text-body-weight);
-  color: var(--color-text-secondary);
-  letter-spacing: var(--text-caption-ls);
+  color: var(--color-accent);
   text-align: center;
 }
 
@@ -191,40 +197,52 @@
 .menuList {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
+/* Design spec: individual card per item, border-radius 14px */
 .menuItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 8px;
-  background: var(--color-bg);
+  padding: 14px 12px;
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
   width: 100%;
   text-align: left;
   transition: opacity 0.15s;
+  cursor: pointer;
 }
 
 .menuItem:active {
   opacity: 0.7;
 }
 
-.menuItemBorder {
-  border-top: 1px solid var(--color-border-mid);
+.menuItemDisabled {
+  cursor: default;
 }
 
 .menuItemLeft {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
+.menuItemRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Design spec: 36×36, radius 10, #20242A background */
 .menuIconWrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-3xl);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: var(--color-surface-elevated);
   flex-shrink: 0;
 }
@@ -237,4 +255,10 @@
 
 .menuLabelDanger {
   color: var(--color-error);
+}
+
+.menuHint {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text-muted);
 }

@@ -36,8 +36,8 @@ import { formatMasterName } from '@/lib/utils/name'
 import { toLocalYMD } from '@/lib/utils/date'
 import styles from './ProviderDetailPage.module.css'
 
-const TABS_ALL = ['Услуги', 'О нас', 'Специалисты']
-const TABS_NO_SPECIALISTS = ['Услуги', 'О нас']
+const TABS_ALL = ['Услуги', 'Мастера', 'Отзывы', 'О нас']
+const TABS_NO_SPECIALISTS = ['Услуги', 'Отзывы', 'О нас']
 
 interface ReviewItem {
   id: string
@@ -625,79 +625,14 @@ export default function ProviderDetailPage() {
               </div>
             )}
 
-            {/* Reviews */}
-            <section className={`${styles.section} ${styles.reviewsSection}`}>
-              <div className={styles.sectionHead}>
-                <h2 className={styles.sectionTitle}>Отзывы</h2>
-              </div>
-              {reviewsLoading ? (
-                <div className={styles.skeletonList}>
-                  {[1, 2].map(i => <Skeleton key={i} variant="rect" height={100} />)}
-                </div>
-              ) : reviews.length > 0 ? (
-                <>
-                  <div className={styles.reviewsList}>
-                    {reviews.map((review) => (
-                      <ReviewCard
-                        key={review.id}
-                        name={review.name}
-                        rating={review.rating}
-                        date={review.date}
-                        comment={review.comment}
-                      />
-                    ))}
-                  </div>
-                  <button className={styles.readAllBtn} onClick={() => {
-                    const el = document.querySelector('.reviewsSection')
-                    el?.scrollIntoView({ behavior: 'smooth' })
-                  }}>Читать все отзывы →</button>
-                </>
-              ) : (
-                <EmptyState title="Отзывов пока нет" description="Будьте первым, кто оставит отзыв" compact />
-              )}
-            </section>
-
-            {/* Contact Info */}
-            <section className={styles.section}>
-              <ContactInfo
-                phone={business?.phone}
-                instagram={business?.instagram}
-                telegramUsername={business?.telegram_username}
-              />
-            </section>
           </>
         )}
 
-        {/* ── About tab ─────────────────────────────────────────── */}
-        {activeTab === 1 && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Испытайте совершенство</h2>
-            <p className={styles.aboutText}>
-              {business?.description ?? 'Мы предлагаем широкий спектр beauty-услуг высочайшего качества. Наши мастера — профессионалы с многолетним опытом. Приходите и убедитесь сами!'}
-            </p>
-
-            <div className={styles.infoCardsRow}>
-              {todayHours && (
-                <InfoCard
-                  icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M10 5V10L13 13" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" /></svg>}
-                  label="Работает до"
-                  value={todayHours.split('-')[1]?.trim()}
-                />
-              )}
-              <InfoCard
-                icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M7 10L9 12L13 8" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                label="Занятость"
-                value="Есть слоты"
-              />
-            </div>
-          </section>
-        )}
-
-        {/* ── Specialists tab (business only) ───────────────────── */}
-        {activeTab === 2 && !isIndividual && (
+        {/* ── Мастера tab (index 1 for ALL, hidden for individual) ─ */}
+        {activeTab === 1 && !isIndividual && (
           <section className={styles.section}>
             <div className={styles.sectionHead}>
-              <h2 className={styles.sectionTitle}>Специалисты</h2>
+              <h2 className={styles.sectionTitle}>Мастера</h2>
             </div>
             {isLoading ? (
               <div className={styles.skeletonList}>
@@ -719,6 +654,69 @@ export default function ProviderDetailPage() {
             ) : (
               <EmptyState title="Мастера не найдены" description="Мастера ещё не добавлены" />
             )}
+          </section>
+        )}
+
+        {/* ── Отзывы tab ────────────────────────────────────────────
+            index 2 for TABS_ALL (business), index 1 for TABS_NO_SPECIALISTS */}
+        {((activeTab === 2 && !isIndividual) || (activeTab === 1 && isIndividual)) && (
+          <section className={`${styles.section} ${styles.reviewsSection}`}>
+            <div className={styles.sectionHead}>
+              <h2 className={styles.sectionTitle}>Отзывы</h2>
+            </div>
+            {reviewsLoading ? (
+              <div className={styles.skeletonList}>
+                {[1, 2].map(i => <Skeleton key={i} variant="rect" height={100} />)}
+              </div>
+            ) : reviews.length > 0 ? (
+              <div className={styles.reviewsList}>
+                {reviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    name={review.name}
+                    rating={review.rating}
+                    date={review.date}
+                    comment={review.comment}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="Отзывов пока нет" description="Будьте первым, кто оставит отзыв" compact />
+            )}
+          </section>
+        )}
+
+        {/* ── О нас tab ─────────────────────────────────────────────
+            index 3 for TABS_ALL (business), index 2 for TABS_NO_SPECIALISTS */}
+        {((activeTab === 3 && !isIndividual) || (activeTab === 2 && isIndividual)) && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>О нас</h2>
+            <p className={styles.aboutText}>
+              {business?.description ?? 'Мы предлагаем широкий спектр beauty-услуг высочайшего качества. Наши мастера — профессионалы с многолетним опытом. Приходите и убедитесь сами!'}
+            </p>
+
+            <div className={styles.infoCardsRow}>
+              {todayHours && (
+                <InfoCard
+                  icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M10 5V10L13 13" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" /></svg>}
+                  label="Работает до"
+                  value={todayHours.split('-')[1]?.trim()}
+                />
+              )}
+              <InfoCard
+                icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M7 10L9 12L13 8" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                label="Занятость"
+                value="Есть слоты"
+              />
+            </div>
+
+            <div className={styles.section}>
+              <ContactInfo
+                phone={business?.phone}
+                instagram={business?.instagram}
+                telegramUsername={business?.telegram_username}
+              />
+            </div>
           </section>
         )}
       </div>

@@ -16,38 +16,23 @@ interface ThemeState {
 
 const STORAGE_KEY = 'yookie_theme';
 
-export const useThemeStore = create<ThemeState>((set, get) => ({
-  theme: 'dark',
+function readStoredTheme(): ThemeMode | null {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    return s === 'light' || s === 'dark' ? s : null;
+  } catch {
+    return null;
+  }
+}
 
-  toggle: () => {
-    set((state) => {
-      const next = state.theme === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-      return { theme: next };
-    });
-  },
-
-  setTheme: (theme: ThemeMode) => {
-    applyTheme(theme);
-    set({ theme });
-  },
-
-  loadFromStorage: () => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'light' || stored === 'dark') {
-        applyTheme(stored);
-        set({ theme: stored });
-      } else {
-        // Default to dark if nothing stored
-        applyTheme('dark');
-      }
-    } catch {
-      // Storage read failed — default to dark
-      applyTheme('dark');
-    }
-  },
-}));
+function getInitialTheme(): ThemeMode {
+  if (typeof window === 'undefined') return 'dark';
+  const stored = readStoredTheme();
+  if (stored) return stored;
+  // Fall back to Telegram's color scheme if available, else dark
+  const tgScheme = window.Telegram?.WebApp?.colorScheme;
+  return tgScheme === 'light' || tgScheme === 'dark' ? tgScheme : 'dark';
+}
 
 function applyTheme(theme: ThemeMode) {
   const root = document.documentElement;
@@ -63,9 +48,30 @@ function applyTheme(theme: ThemeMode) {
   }
 }
 
-// Auto-load from storage on first access
-let initialized = false;
-if (typeof window !== 'undefined' && !initialized) {
-  initialized = true;
-  useThemeStore.getState().loadFromStorage();
+// Apply correct theme to DOM immediately at module load (before React renders)
+if (typeof window !== 'undefined') {
+  applyTheme(getInitialTheme());
 }
+
+export const useThemeStore = create<ThemeState>((set) => ({
+  theme: getInitialTheme(),
+
+  toggle: () => {
+    set((state) => {
+      const next = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      return { theme: next };
+    });
+  },
+
+  setTheme: (theme: ThemeMode) => {
+    applyTheme(theme);
+    set({ theme });
+  },
+
+  loadFromStorage: () => {
+    const theme = getInitialTheme();
+    applyTheme(theme);
+    set({ theme });
+  },
+}));

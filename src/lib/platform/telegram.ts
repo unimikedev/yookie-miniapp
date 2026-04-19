@@ -1,4 +1,5 @@
 import { PlatformProvider, PlatformContext, PlatformUser, ColorScheme } from './types'
+import { useThemeStore } from '@/stores/themeStore'
 
 interface TelegramWebApp {
   initData: string
@@ -137,8 +138,9 @@ export class TelegramPlatform implements PlatformProvider {
     // Apply Telegram theme colors as CSS custom properties
     this.applyThemeColors()
 
-    // Set data-theme on html for CSS targeting
-    document.documentElement.setAttribute('data-theme', this.webApp.colorScheme)
+    // Sync theme: respect user's stored preference; only apply Telegram's
+    // colorScheme if the user has never explicitly chosen a theme.
+    this.syncTheme()
 
     // Set CSS custom properties for viewport
     document.documentElement.style.setProperty('--viewport-height', `${this.webApp.viewportHeight}px`)
@@ -303,11 +305,32 @@ export class TelegramPlatform implements PlatformProvider {
     }
   }
 
+  private syncTheme(): void {
+    try {
+      const stored = localStorage.getItem('yookie_theme')
+      const hasPreference = stored === 'light' || stored === 'dark'
+      if (!hasPreference) {
+        // No stored preference — adopt Telegram's color scheme
+        useThemeStore.getState().setTheme(this.webApp.colorScheme)
+      }
+      // If stored preference exists, themeStore already applied it at module init.
+    } catch {
+      // localStorage unavailable — leave themeStore as-is
+    }
+  }
+
   private setupThemeListener(): void {
     this.webApp.onEvent('themeChanged', () => {
-      // Update CSS variables and data-theme on theme change
-      document.documentElement.setAttribute('data-theme', this.webApp.colorScheme)
       this.applyThemeColors()
+      // Only follow Telegram's system theme if user has no stored preference
+      try {
+        const stored = localStorage.getItem('yookie_theme')
+        if (stored !== 'light' && stored !== 'dark') {
+          useThemeStore.getState().setTheme(this.webApp.colorScheme)
+        }
+      } catch {
+        // localStorage unavailable
+      }
       // Notify React context
       this.themeChangeCallbacks.forEach((callback) => callback())
     })

@@ -112,12 +112,12 @@
   transition: background 0.15s, box-shadow 0.15s;
   width: 100%;
   min-width: 0;
-  box-shadow: 0 0 8px rgba(154, 210, 64, 0.15);
+  box-shadow: 0 0 8px rgba(107, 206, 255, 0.15);
 }
 
 .searchInputWrap:focus-within {
   background: var(--color-surface-elevated);
-  box-shadow: 0 0 12px rgba(154, 210, 64, 0.25);
+  box-shadow: 0 0 12px rgba(107, 206, 255, 0.25);
 }
 
 .searchInputContainer {
@@ -394,7 +394,7 @@
 .sections {
   display: flex;
   flex-direction: column;
-  gap: 28px; /* more gap between sections */
+  gap: 24px;
   padding-top: 20px; /* increased from 10px — more air after categories */
   padding-bottom: 120px; /* space for floating pill nav */
 }
