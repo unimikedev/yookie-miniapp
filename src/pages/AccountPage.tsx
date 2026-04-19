@@ -228,19 +228,6 @@ export default function AccountPage() {
             </div>
           </button>
 
-          {/* Theme toggle */}
-          <button className={styles.menuItem} onClick={themeStore.toggle}>
-            <div className={styles.menuItemLeft}>
-              <div className={styles.menuIconWrap}>
-                <span style={{ fontSize: 18 }}>{themeStore.theme === 'dark' ? '🌙' : '☀️'}</span>
-              </div>
-              <span className={styles.menuLabel}>Тема</span>
-            </div>
-            <div className={styles.menuItemRight}>
-              <span className={styles.menuHint}>{themeStore.theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
-            </div>
-          </button>
-
           {/* Logout */}
           <button className={styles.menuItem} onClick={() => { authStore.logout(); navigate('/') }}>
             <div className={styles.menuItemLeft}>

@@ -8,7 +8,6 @@ import { useHomeData } from '@/hooks/useHomeData'
 import { useVisitedMasters } from '@/hooks/useVisitedMasters'
 import { useFavoritesStore } from '@/stores/favoritesStore'
 import { useCityStore } from '@/stores/cityStore'
-import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { Skeleton } from '@/shared/ui'
 import CitySelector from '@/components/features/CitySelector'
@@ -121,7 +120,6 @@ export default function HomePage() {
   const { visited: apiVisited, isLoading: visitedLoading } = useVisitedMasters()
   const { toggle, isFavorite } = useFavoritesStore()
   const { city } = useCityStore()
-  const { theme, toggle: toggleTheme } = useThemeStore()
   const authStore = useAuthStore()
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
@@ -344,16 +342,18 @@ export default function HomePage() {
       <div className={styles.mainContent}>
         {/* Header */}
         <header className={styles.header}>
-          <button className={styles.headerBtn} onClick={() => navigate('/favorites')} aria-label="Избранное">
-            <HeartIconLarge />
-          </button>
-          <div className={styles.logoBlock}>
-            <img src="/logo.svg" alt="Yookie" className={styles.logoImage} />
-            <span className={styles.logoSub}>Маркетплейс оффлайн услуг</span>
+          <div className={styles.headerLeft}>
+            <button className={styles.headerBtn} onClick={() => navigate('/favorites')} aria-label="Избранное">
+              <HeartIconLarge />
+            </button>
+            <div className={styles.logoBlock}>
+              <img src="/logo.svg" alt="Yookie" className={styles.logoImage} />
+              <span className={styles.logoSub}>Маркетплейс оффлайн услуг</span>
+            </div>
           </div>
-          <button className={styles.headerBtn} onClick={toggleTheme} aria-label={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}>
-            {theme === 'dark' ? '🌙' : '☀️'}
-          </button>
+          <div className={styles.headerRight}>
+            {/* Placeholder for future right-side actions */}
+          </div>
         </header>
 
         {/* Search — inline with dropdown */}

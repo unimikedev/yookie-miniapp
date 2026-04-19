@@ -15,7 +15,7 @@
 
 .main {
   flex: 1;
-  padding-top: var(--safe-area-top-half);
+  padding-top: calc(var(--safe-area-top-half) - 4px);
   padding-bottom: var(--safe-area-bottom-half);
 }
 
