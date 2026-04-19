@@ -329,12 +329,10 @@ export default function MyBookingsPage() {
                   )
                 })}
               </>
-            )}
-          </div>
-        )        ) : tab === 'completed' && pastGroups.length > 0 ? (
-          <>
-            <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
-            <div className={styles.pastList}>
+          ) : tab === 'completed' && pastGroups.length > 0 ? (
+            <>
+              <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
+              <div className={styles.pastList}>
                 {pastGroups.map((group, gi) => {
                     const first = group[0]
                     const st = STATUS_LABELS[first.status] ?? { label: first.status.toUpperCase(), className: 'statusCancelled' }
@@ -361,17 +359,14 @@ export default function MyBookingsPage() {
                           </button>
                         ) : (
                           <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.label}</span>
-              ) : (
-                <div className={styles.emptyState}>
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2">
-                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <p>Нет прошедших записей</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                        )}
+                      </div>
+                    )
+                })}
+              </div>
+            </>
+          ) : null}
+        </LoadingState>
       </div>
 
       {reviewBooking && (

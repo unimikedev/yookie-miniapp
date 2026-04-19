@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useBusiness } from '@/hooks/useBusiness';
-import { LoadingState } from '@/components/LoadingState';
+import { LoadingState } from '@/components/ui/LoadingState';
 import styles from './MerchantPreviewPage.module.css';
 
 /**
  * #18 Preview Mode - Как видят клиенты профиль мерчанта
  * Позволяет мерчанту увидеть свой профиль глазами клиента перед публикацией
  */
-export function MerchantPreviewPage() {
+export default function MerchantPreviewPage() {
   const navigate = useNavigate();
   const { merchantId } = useMerchantStore();
   const { business, loading, error } = useBusiness(merchantId!);

@@ -3,7 +3,6 @@ import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listClients, listBookings } from '@/pro/api';
 import { useMerchantSearch, searchPresets } from '@/pro/hooks/useMerchantSearch';
-import { ExportButton } from './ExportButton';
 import type { Client, Booking } from '@/lib/api/types';
 import styles from './ClientsPage.module.css';
 
@@ -55,7 +54,6 @@ export default function ClientsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <ExportButton type="clients" />
       </div>
 
       {totalItems > 0 && (

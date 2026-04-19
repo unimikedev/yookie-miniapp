@@ -10,9 +10,7 @@ import { useFavoritesStore } from '@/stores/favoritesStore'
 import { useCityStore } from '@/stores/cityStore'
 import { useAuthStore } from '@/stores/authStore'
 import { Skeleton } from '@/shared/ui'
-import { LoadingState } from '@/components/LoadingState'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
-import { useImageOptimizer } from '@/hooks/useImageOptimizer'
 import CitySelector from '@/components/features/CitySelector'
 import {
   SectionHeader,
@@ -124,21 +122,10 @@ export default function HomePage() {
   const { toggle, isFavorite } = useFavoritesStore()
   const { city } = useCityStore()
   const authStore = useAuthStore()
-  const { isOffline } = useOfflineMode()
-  const { optimizeUrl } = useImageOptimizer()
-  
-  // Handle loading state
-  if (isLoading) {
-    return <LoadingState type="skeleton" />
-  }
-  
-  // Handle error state
-  if (error) {
-    return <LoadingState type="error" message="Не удалось загрузить данные" onRetry={() => window.location.reload()} />
-  }
-  
+  const { isOnline } = useOfflineMode()
+
   // Handle offline state
-  if (isOffline && !data) {
+  if (!isOnline && !data) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
         <div className="mb-4 text-4xl">📡</div>
