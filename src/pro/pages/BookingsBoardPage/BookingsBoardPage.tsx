@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { listBookings, listStaff, listServices, createBooking, updateBookingStatus } from '@/pro/api';
+import { listBookings, listStaff, listServices, createBooking, updateBookingStatus, rescheduleBooking } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, Master, Service } from '@/lib/api/types';
 import { BottomSheet } from '@/components/ui/BottomSheet';
@@ -10,6 +10,14 @@ import { ExportButton } from './ExportButton';
 import styles from './BookingsBoardPage.module.css';
 
 type ViewMode = 'timeline' | 'list';
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Ожидает подтверждения',
+  confirmed: 'Подтверждена',
+  cancelled: 'Отменена',
+  completed: 'Завершена',
+  no_show: 'Не явился',
+};
 
 const HOURS = Array.from({ length: 13 }, (_, i) => i + 8); // 08:00 — 20:00
 const SLOT_HEIGHT = 60; // px per hour
@@ -87,7 +95,7 @@ export default function BookingsBoardPage() {
     setDragging(bookingId);
   };
 
-  const handleDrop = (staffId: string, hour: number) => {
+  const handleDrop = async (staffId: string, hour: number) => {
     if (!dragging || !merchantId) return;
     const booking = bookings.find((b) => b.id === dragging);
     if (!booking) return;
@@ -97,7 +105,7 @@ export default function BookingsBoardPage() {
     newStart.setHours(hour, 0, 0, 0);
     const newEnd = new Date(newStart.getTime() + duration);
 
-    // Optimistic update
+    const prevBookings = bookings;
     setBookings((prev) =>
       prev.map((b) =>
         b.id === dragging
@@ -106,6 +114,15 @@ export default function BookingsBoardPage() {
       )
     );
     setDragging(null);
+
+    try {
+      await rescheduleBooking(merchantId, dragging, {
+        startsAt: newStart.toISOString(),
+        masterId: staffId !== booking.master_id ? staffId : undefined,
+      });
+    } catch {
+      setBookings(prevBookings);
+    }
   };
 
   const handleSlotClick = (staffId: string, staffName: string, hour: number) => {
@@ -282,7 +299,7 @@ export default function BookingsBoardPage() {
             </div>
             <div className={styles.bookingDetailRow}>
               <span className={styles.bookingDetailLabel}>Статус</span>
-              <span>{selectedBooking.status}</span>
+              <span>{STATUS_LABELS[selectedBooking.status] ?? selectedBooking.status}</span>
             </div>
             {selectedBooking.notes && (
               <div className={styles.bookingDetailRow}>
@@ -417,7 +434,7 @@ function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; st
           <span className={styles.listService}>{b.services?.name ?? '—'}</span>
           <span className={styles.listStaff}>{staffMap.get(b.master_id) ?? '—'}</span>
           <span className={`${styles.listStatus} ${styles[`status-${b.status}`] ?? ''}`}>
-            {b.status}
+            {STATUS_LABELS[b.status] ?? b.status}
           </span>
         </div>
       ))}

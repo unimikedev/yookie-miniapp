@@ -9,6 +9,7 @@ export default function MorePage() {
     { label: 'Сотрудники', path: '/pro/staff' },
     { label: 'Клиенты', path: '/pro/clients' },
     { label: 'Профиль заведения', path: '/pro/settings' },
+    { label: 'Предпросмотр страницы', path: '/pro/preview' },
   ];
 
   return (
