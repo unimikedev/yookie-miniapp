@@ -116,7 +116,8 @@
 .visitedCardCompact {
   flex-direction: row;
   align-items: center;
-  width: 320px;
+  width: calc(75vw - 24px); /* ~75% screen width minus margins */
+  max-width: 320px;
   height: 104px;
   padding: 12px;
   gap: 12px;
@@ -137,12 +138,13 @@
 
 .visitedInfoCompact {
   min-width: 0;
+  flex: 1;
 }
 
 .visitedAvatarWrap {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
   background: var(--color-surface-elevated);
   flex-shrink: 0;
   overflow: hidden;
@@ -206,6 +208,25 @@
   font-weight: var(--text-caption-xs-weight);
   color: var(--color-text-muted);
   line-height: var(--text-caption-xs-lh);
+}
+
+.visitedRatingRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.visitedDistance {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .visitedPriceRow {
@@ -299,34 +320,36 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 300px; /* wider — content fits in one line */
+  width: calc(75vw - 24px); /* ~75% screen width minus margins */
+  max-width: 300px;
   height: 104px;
   padding: 12px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-3xl); /* 24px */
+  border-radius: 24px;
   flex-shrink: 0;
 }
 
 .nearbyCardCompact {
-  width: 280px;
+  width: calc(75vw - 24px);
+  max-width: 280px;
   height: 96px;
   padding: 10px;
 }
 
 .nearbyThumb {
-  width: 80px;
-  height: 80px;
-  border-radius: 12px; /* card radius(24px) - padding(12px) = 12px */
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
   background: var(--color-surface-elevated);
   flex-shrink: 0;
   overflow: hidden;
 }
 
 .nearbyCardCompact .nearbyThumb {
-  width: 76px;
-  height: 76px;
-  border-radius: 10px; /* card radius(24px) - padding(10px) = 14px → visual balance */
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
 }
 
 .nearbyThumbImg {
@@ -347,6 +370,7 @@
 .nearbyTop {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
@@ -369,6 +393,7 @@
   font-size: var(--text-caption-size);
   font-weight: var(--text-caption-weight);
   color: var(--color-text);
+  flex-shrink: 0;
 }
 
 .nearbyMeta {
@@ -379,6 +404,25 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: var(--text-caption-lh);
+}
+
+.nearbyDistance {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearbyRatingRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text);
+  white-space: nowrap;
 }
 
 .nearbyPrice {
@@ -392,23 +436,27 @@
   flex-shrink: 0;
 }
 
-/* ── Popular master vertical card 164×204 ────────────────── */
+/* ── Popular master horizontal card (pill-shaped) ────────────────── */
 .pmCard {
   display: flex;
-  flex-direction: column;
-  width: 164px;
+  align-items: center;
+  gap: 12px;
+  width: calc(75vw - 24px);
+  max-width: 300px;
+  height: 96px;
+  padding: 12px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-3xl);
-  overflow: hidden;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
 }
 
 .pmPhotoWrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 164 / 140;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
   background: var(--color-surface-elevated);
+  flex-shrink: 0;
   overflow: hidden;
 }
 
@@ -419,43 +467,23 @@
   display: block;
 }
 
-.pmFavBtn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: rgba(24, 25, 27, 0.6);
-  backdrop-filter: blur(4px);
-  border-radius: var(--radius-full);
-  transition: transform 0.15s, background 0.15s;
-  z-index: 2;
-}
-
-.pmFavBtn:active {
-  transform: scale(0.9);
-  background: rgba(24, 25, 27, 0.8);
-}
-
 .pmBody {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 10px 12px 12px;
 }
 
 .pmTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
 }
 
 .pmName {
+  flex: 1;
   font-size: var(--text-title-size);
   font-weight: var(--text-title-weight);
   color: var(--color-text);
@@ -463,6 +491,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: var(--text-title-lh);
 }
 
 .pmRating {
@@ -472,18 +501,24 @@
   font-size: var(--text-caption-size);
   font-weight: var(--text-caption-weight);
   color: var(--color-text);
+  flex-shrink: 0;
 }
 
 .pmMeta {
   font-size: var(--text-caption-size);
   font-weight: var(--text-body-weight);
   color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: var(--text-caption-lh);
 }
 
 .pmPrice {
-  font-size: 13px;
+  font-size: var(--text-caption-size);
   font-weight: 700;
   color: var(--color-text);
+  white-space: nowrap;
 }
 
 /* ── Popular studio large card 358×246 ───────────────────── */

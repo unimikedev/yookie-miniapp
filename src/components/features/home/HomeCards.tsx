@@ -130,9 +130,21 @@ export function VisitedCard({ item, onBook, onClick, compact }: VisitedCardProps
           <div className={styles.visitedTopRow}>
             <span className={styles.visitedName}>{formatMasterName(item.masterName)}</span>
           </div>
-          <span className={styles.visitedBusiness}>{item.businessName}</span>
-          <span className={styles.visitedSpecialization}>{item.specialization}</span>
-          <span className={styles.visitedLastVisit}>{item.lastVisitDate}</span>
+          <span className={styles.visitedBusiness}>{item.specialization} · {item.businessName}</span>
+          {compact && (
+            <div className={styles.visitedRatingRow}>
+              <StarIcon />
+              <span>{item.rating.toFixed(1)}</span>
+              <span> · </span>
+              <span className={styles.visitedDistance}>{formatDistance(item.distanceMeters)}</span>
+            </div>
+          )}
+          {!compact && (
+            <>
+              <span className={styles.visitedSpecialization}>{item.specialization}</span>
+              <span className={styles.visitedLastVisit}>{item.lastVisitDate}</span>
+            </>
+          )}
         </div>
       </div>
       {compact && onBook && (
@@ -178,15 +190,33 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
       <div className={styles.nearbyInfo}>
         <div className={styles.nearbyTop}>
           <span className={styles.nearbyName}>{item.name}</span>
-          <span className={styles.nearbyRating}>
-            <StarIcon />
-            {item.rating.toFixed(1)}
-          </span>
+          {!compact && (
+            <span className={styles.nearbyRating}>
+              <StarIcon />
+              {item.rating.toFixed(1)}
+            </span>
+          )}
         </div>
-        <span className={styles.nearbyMeta}>
-          {item.categoryLabel} • {formatDistance(item.distanceMeters)}
-        </span>
-        <span className={styles.nearbyPrice}>{formatPriceFrom(item.priceFrom)}</span>
+        {compact ? (
+          <>
+            <span className={styles.nearbyMeta}>
+              {item.formatLabel ?? item.categoryLabel} · открыто до {item.openUntil ?? '00:00'}
+            </span>
+            <div className={styles.nearbyRatingRow}>
+              <StarIcon />
+              <span>{item.rating.toFixed(1)}</span>
+              <span> · </span>
+              <span className={styles.nearbyDistance}>{formatDistance(item.distanceMeters)}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className={styles.nearbyMeta}>
+              {item.categoryLabel} • {formatDistance(item.distanceMeters)}
+            </span>
+            <span className={styles.nearbyPrice}>{formatPriceFrom(item.priceFrom)}</span>
+          </>
+        )}
       </div>
     </div>
   )
@@ -220,9 +250,9 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
           </span>
         </div>
         <span className={styles.pmMeta}>
-          {item.specialization} • {formatDistance(item.distanceMeters)}
+          {item.specialization} · {formatDistance(item.distanceMeters)}
         </span>
-        <span className={styles.pmPrice}>{formatPriceFrom(item.priceFrom)}</span>
+        <span className={styles.pmPrice}>от {Math.round(item.priceFrom / 1000)} тыс.</span>
       </div>
     </div>
   )
