@@ -665,6 +665,7 @@
   color: var(--color-text-secondary);
   white-space: nowrap;
   align-self: flex-start;
+  margin-left: auto;
 }
 
 /* ── Map preview card ────────────────────────────────────── */

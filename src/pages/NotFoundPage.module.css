@@ -5,6 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
+  padding-top: var(--safe-area-top-half);
 }
 
 .content {

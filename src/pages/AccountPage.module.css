@@ -2,7 +2,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--color-bg);
-  padding-top: var(--safe-area-top);
+  padding-top: var(--safe-area-top-half);
   padding-bottom: calc(var(--safe-area-bottom) + 80px);
 }
 
