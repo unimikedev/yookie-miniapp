@@ -333,9 +333,27 @@ export default function BookingFlowPage() {
                       key={index}
                       className={styles.slotButton}
                       onClick={() => {
-                        // TODO: Обновить выбранный слот в bookingStore и закрыть модалку
+                        // Update selected slot in bookingStore with the alternative slot
+                        const selectedDate = bookingStore.selectedDate;
+                        if (selectedDate) {
+                          // Parse the starts_at to get time
+                          const startDate = new Date(slot.starts_at);
+                          const hours = startDate.getHours().toString().padStart(2, '0');
+                          const minutes = startDate.getMinutes().toString().padStart(2, '0');
+                          
+                          // Create a new slot object matching the expected format
+                          const newSlot = {
+                            id: slot.starts_at,
+                            start: `${hours}:${minutes}`,
+                            end: slot.ends_at ? new Date(slot.ends_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '',
+                            available: true,
+                          };
+                          
+                          bookingStore.setSlot(newSlot);
+                        }
                         setShowAlternativeSlots(false);
                         setError(null);
+                        setConflictSlotInfo(null);
                       }}
                     >
                       {startTime}
