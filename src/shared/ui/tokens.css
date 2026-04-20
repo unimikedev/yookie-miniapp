@@ -81,6 +81,15 @@
   --color-verified: #99E271;
   --color-status-bg: #18263A;
   --color-status-text: #1F2937;
+  
+  /* Skeleton colors — dark theme */
+  --color-skeleton-base: #1F2937;
+  --color-skeleton-highlight: #374151;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
 
   /* Typography */
   --font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -237,12 +246,12 @@
   --color-border-subtle: #F3F4F6;
   --color-border-mid: #E5E7EB;
   --color-text: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #6B7280;
   --color-text-hint: #9CA3AF;
-  --color-accent: #6BCEFF;
-  --color-accent-light: #8FD8FF;
-  --color-nav-bg: rgba(249, 250, 251, 0.85);
+  --color-accent: #0EA5E9;
+  --color-accent-light: #38BDF8;
+  --color-nav-bg: rgba(255, 255, 255, 0.85);
   --color-nav-border: rgba(0, 0, 0, 0.08);
   --color-nav-shadow: rgba(0, 0, 0, 0.1);
   --color-nav-item-active: rgba(0, 0, 0, 0.05);
@@ -260,6 +269,10 @@
   --color-verified: #22C55E;
   --color-status-bg: #E8F5E9;
   --color-status-text: #1F2937;
+  
+  /* Skeleton colors — light theme */
+  --color-skeleton-base: #E5E7EB;
+  --color-skeleton-highlight: #F3F4F6;
 }
 
 /* ─── Typography Utility Classes ─────────────────────────────────────────────

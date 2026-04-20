@@ -427,3 +427,8 @@
   overflow: hidden;
   margin: 0 16px;
 }
+
+.skeletonItem {
+  flex-shrink: 0;
+  width: fit-content;
+}
