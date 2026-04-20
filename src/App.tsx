@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import Layout from '@/components/Layout'
 import { Router } from '@/Router'
 import { useTelegramNotifications } from '@/hooks/useTelegramNotifications'
+import PageTransitionWrapper from '@/components/PageTransitionWrapper'
 import '@/shared/ui/tokens.css'
 import '@/index.css'
 
@@ -16,7 +17,9 @@ export default function App() {
       <PlatformContextProvider>
         <BrowserRouter>
           <Layout>
-            <Router />
+            <PageTransitionWrapper>
+              <Router />
+            </PageTransitionWrapper>
           </Layout>
         </BrowserRouter>
       </PlatformContextProvider>
