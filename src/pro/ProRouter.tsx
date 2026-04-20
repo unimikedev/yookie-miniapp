@@ -28,6 +28,8 @@ export function ProRouter() {
       <Route path="settings" element={<MerchantSettingsPage />} />
       <Route path="preview" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
       <Route path="more" element={<RequireMerchant><MorePage /></RequireMerchant>} />
+      {/* Staff: own profile page (reuses MerchantPreviewPage for MVP) */}
+      <Route path="my-profile" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
       <Route path="*" element={<Navigate to="/pro" replace />} />
     </Routes>
   );

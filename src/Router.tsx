@@ -10,6 +10,7 @@ import AccountPage from '@/pages/AccountPage'
 import AuthPage from '@/pages/AuthPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import ProfileEditPage from '@/pages/ProfileEditPage'
+import InviteAcceptPage from '@/pages/InviteAcceptPage'
 import { DeepLinkHandler } from '@/pages/DeepLinkHandler'
 import { ProRouter } from '@/pro/ProRouter'
 
@@ -33,6 +34,9 @@ export function Router() {
       <Route path="/link/business/:businessId/service/:serviceId" element={<DeepLinkHandler />} />
       <Route path="/link/business/:businessId/master/:masterId" element={<DeepLinkHandler />} />
       
+      {/* Invite accept page */}
+      <Route path="/invite/:token" element={<InviteAcceptPage />} />
+
       {/* Yookie Pro (B2B) — self-contained sub-router */}
       <Route path="/pro/*" element={<ProRouter />} />
       

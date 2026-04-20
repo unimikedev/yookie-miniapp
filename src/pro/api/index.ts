@@ -387,6 +387,93 @@ export async function deleteStaff(merchantId: string, staffId: string): Promise<
   }
 }
 
+// ─── Invites ──────────────────────────────────────────────────────────────────
+
+const INVITE_API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+
+function authHeaders(): HeadersInit {
+  const token = localStorage.getItem('yookie_auth_token');
+  return token
+    ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+    : { 'Content-Type': 'application/json' };
+}
+
+export interface Invite {
+  id: string;
+  token: string;
+  role: string;
+  master_id: string | null;
+  master_name?: string | null;
+  created_at: string;
+  used_at: string | null;
+  expires_at: string;
+  is_used: boolean;
+  link: string;
+}
+
+export async function createInvite(masterId?: string): Promise<{ token: string; link: string; expires_at: string }> {
+  const res = await fetch(`${INVITE_API_BASE}/invites`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ masterId }),
+  });
+  if (!res.ok) throw new Error('Failed to create invite');
+  return res.json() as Promise<{ token: string; link: string; expires_at: string }>;
+}
+
+export async function listInvites(): Promise<Invite[]> {
+  const res = await fetch(`${INVITE_API_BASE}/invites`, { headers: authHeaders() });
+  if (!res.ok) return [];
+  const data = await res.json() as { data?: Invite[] };
+  return data.data ?? [];
+}
+
+export async function deleteInvite(id: string): Promise<void> {
+  await fetch(`${INVITE_API_BASE}/invites/${id}`, { method: 'DELETE', headers: authHeaders() });
+}
+
+export async function getInviteInfo(token: string): Promise<{
+  valid: boolean;
+  businessId?: string;
+  businessName?: string;
+  role?: string;
+  masterId?: string | null;
+  reason?: string;
+}> {
+  const res = await fetch(`${INVITE_API_BASE}/invites/${token}`);
+  return res.json() as Promise<{
+    valid: boolean;
+    businessId?: string;
+    businessName?: string;
+    role?: string;
+    masterId?: string | null;
+    reason?: string;
+  }>;
+}
+
+export async function acceptInvite(token: string): Promise<{
+  token: string;
+  businessId: string;
+  masterId: string | null;
+  role: string;
+}> {
+  const authToken = localStorage.getItem('yookie_auth_token');
+  const res = await fetch(`${INVITE_API_BASE}/invites/${token}/accept`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) throw new Error('Failed to accept invite');
+  return res.json() as Promise<{
+    token: string;
+    businessId: string;
+    masterId: string | null;
+    role: string;
+  }>;
+}
+
 // ─── Availability ─────────────────────────────────────────────────────────────
 // Backend stores availability as `working_days` (Record<day, bool>) + `breaks`
 // on the master record. We update via PATCH /businesses/:id/masters/:mid.

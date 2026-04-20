@@ -18,10 +18,16 @@ interface MerchantState {
   merchantId: string | null;
   /** Whether the user is currently viewing Pro surfaces. */
   mode: ProMode;
+  /** Role of the current user in the business context. */
+  role: 'owner' | 'staff' | null;
+  /** Linked master profile id (populated for staff role). */
+  masterId: string | null;
 }
 
 interface MerchantActions {
   setMerchantId: (id: string | null) => void;
+  setRole: (role: 'owner' | 'staff' | null) => void;
+  setMasterId: (masterId: string | null) => void;
   enterProMode: () => void;
   exitProMode: () => void;
   toggleMode: () => void;
@@ -50,6 +56,8 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 export const useMerchantStore = create<MerchantState & MerchantActions>((set, get) => ({
   merchantId: null,
   mode: 'off',
+  role: null,
+  masterId: null,
 
   setMerchantId: (id) => {
     try {
@@ -61,13 +69,16 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
     set({ merchantId: id });
   },
 
+  setRole: (role) => set({ role }),
+  setMasterId: (masterId) => set({ masterId }),
+
   enterProMode: () => set({ mode: 'on' }),
   exitProMode: () => set({ mode: 'off' }),
   toggleMode: () => set({ mode: get().mode === 'on' ? 'off' : 'on' }),
 
   /**
-   * Extract businessId from the JWT stored by authStore.
-   * JWT payload shape: { sub, phone, businessId, role }
+   * Extract businessId, role, and masterId from the JWT stored by authStore.
+   * JWT payload shape: { sub, phone, businessId, role, masterId }
    */
   loadFromToken: () => {
     try {
@@ -78,10 +89,21 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
       if (!payload) return;
 
       const businessId = payload.businessId as string | null;
+      const jwtRole = payload.role as string | null;
+      const jwtMasterId = payload.masterId as string | null | undefined;
+
       if (businessId) {
         localStorage.setItem(STORAGE_KEY, businessId);
         set({ merchantId: businessId });
       }
+
+      if (jwtRole === 'owner' || jwtRole === 'staff') {
+        set({ role: jwtRole });
+      } else {
+        set({ role: null });
+      }
+
+      set({ masterId: jwtMasterId ?? null });
     } catch {
       /* noop */
     }
@@ -96,6 +118,16 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
     }
   },
 }));
+
+/** Returns true if the current user is an owner. */
+export function isOwner(): boolean {
+  return useMerchantStore.getState().role === 'owner';
+}
+
+/** Returns true if the current user is staff. */
+export function isStaff(): boolean {
+  return useMerchantStore.getState().role === 'staff';
+}
 
 // Auto-initialize on first module load:
 // 1. Try localStorage (fastest, works across reloads)

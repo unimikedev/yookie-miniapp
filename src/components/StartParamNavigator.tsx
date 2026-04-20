@@ -17,7 +17,10 @@ export function StartParamNavigator() {
 
     handled.current = true
 
-    if (startParam.startsWith('b_')) {
+    if (startParam.startsWith('inv_')) {
+      const token = startParam.slice(4)
+      navigate(`/invite/${token}`, { replace: true })
+    } else if (startParam.startsWith('b_')) {
       const businessId = startParam.slice(2)
       navigate(`/business/${businessId}`, { replace: true })
     }
