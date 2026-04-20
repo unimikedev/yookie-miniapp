@@ -59,6 +59,19 @@ const IconSettings = () => (
   </svg>
 )
 
+const IconSun = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
+    <path d="M12 2V4M12 20V22M4 12H2M22 12H20M19.07 4.93L17.66 6.34M6.34 17.66L4.93 19.07M19.07 19.07L17.66 17.66M6.34 6.34L4.93 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+)
+
+const IconMoon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+)
+
 const IconPro = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <path d="M12 2L2 7V17L12 22L22 17V7L12 2ZM12 4.18L19.39 8L12 11.82L4.61 8L12 4.18ZM4 9.57L11 13.18V19.43L4 15.82V9.57ZM13 19.43V13.18L20 9.57V15.82L13 19.43Z" fill="#6BCEFF"/>
@@ -224,6 +237,20 @@ export default function AccountPage() {
               <span className={styles.menuLabel}>Yookie Pro</span>
             </div>
             <div className={styles.menuItemRight}>
+              <ChevronRight />
+            </div>
+          </button>
+
+          {/* Theme Toggle */}
+          <button className={styles.menuItem} onClick={() => themeStore.toggle()}>
+            <div className={styles.menuItemLeft}>
+              <div className={styles.menuIconWrap}>
+                {themeStore.theme === 'light' ? <IconSun /> : <IconMoon />}
+              </div>
+              <span className={styles.menuLabel}>Тема</span>
+            </div>
+            <div className={styles.menuItemRight}>
+              <span className={styles.menuHint}>{themeStore.theme === 'light' ? 'Светлая' : 'Тёмная'}</span>
               <ChevronRight />
             </div>
           </button>

@@ -85,3 +85,54 @@ img {
   max-width: 100%;
   display: block;
 }
+
+/* ─── Page Transition Animations ────────────────────────────── */
+.page-transition {
+  animation: fadeIn 0.25s ease forwards;
+}
+
+/* Forward navigation (deeper level) - slide in from right */
+.page-transition.forward {
+  animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Back navigation (higher level) - slide in from left */
+.page-transition.back {
+  animation: slideInFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(20%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
