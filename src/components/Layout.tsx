@@ -7,9 +7,18 @@ import styles from './Layout.module.css'
 
 // The 4 root tab pages — everywhere else gets Telegram back button + no bottom nav
 const PAGES_WITH_NAV = ['/', '/nearby', '/my-bookings', '/account']
+const TAB_PATHS = new Set(PAGES_WITH_NAV)
 
 interface LayoutProps {
   children: React.ReactNode
+}
+
+function getSlideClass(prevPath: string, currPath: string): string {
+  const prevIsTab = TAB_PATHS.has(prevPath)
+  const currIsTab = TAB_PATHS.has(currPath)
+  if (prevIsTab && currIsTab) return styles.pageFade   // tab ↔ tab — subtle fade
+  if (!prevIsTab && currIsTab) return styles.pageBack  // detail → tab — slide from left
+  return styles.pageFwd                                 // anything → detail — slide from right
 }
 
 export default function Layout({ children }: LayoutProps) {
@@ -17,6 +26,7 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate()
   const { isOpen: isOverlayOpen } = useOverlayStore()
   const tgBackHandlerRef = useRef<(() => void) | null>(null)
+  const prevPathRef = useRef<string>(location.pathname)
 
   // Apply Telegram safe area insets to CSS vars — runs once, listens for mode changes
   useTelegramSafeArea()
@@ -24,6 +34,16 @@ export default function Layout({ children }: LayoutProps) {
   const isProRoute = location.pathname.startsWith('/pro')
   const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
   const showTgBack = !PAGES_WITH_NAV.includes(location.pathname)
+
+  // Compute slide direction before updating the ref (prev path is still the old one during render)
+  const slideClass = prevPathRef.current !== location.pathname
+    ? getSlideClass(prevPathRef.current, location.pathname)
+    : styles.pageFade
+
+  // Update prev path after render
+  useEffect(() => {
+    prevPathRef.current = location.pathname
+  }, [location.pathname])
 
   // Global Telegram BackButton — shows on detail/nested pages, hides on root tabs and pro routes
   useEffect(() => {
@@ -55,7 +75,9 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className={styles.layout}>
       <main className={`${styles.main} ${showNav ? styles.withNav : ''}`}>
-        {children}
+        <div key={location.key} className={`${styles.pageTransition} ${slideClass}`}>
+          {children}
+        </div>
       </main>
       {showNav && <BottomNav />}
     </div>

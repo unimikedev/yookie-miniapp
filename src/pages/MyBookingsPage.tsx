@@ -243,7 +243,12 @@ export default function MyBookingsPage() {
                         <div className={styles.cardInfo}>
                           <div className={styles.cardNameRow}>
                             <span className={styles.businessName}>{businessName}</span>
-                            <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.label}</span>
+                            <div className={styles.badgeRow}>
+                              {first.rescheduled && (
+                                <span className={`${styles.statusBadge} ${styles.statusRescheduled}`}>Перезапись</span>
+                              )}
+                              <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.label}</span>
+                            </div>
                           </div>
                           {group.length > 1 && (
                             <span className={styles.serviceCountBadge}>{group.length} услуги</span>

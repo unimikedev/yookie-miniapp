@@ -103,6 +103,9 @@ export default function DashboardPage() {
                   <span className={styles.pendingMaster}>{staffMap.get(b.master_id)}</span>
                 )}
               </div>
+              {b.rescheduled && (
+                <span className={styles.rescheduledBadge}>↻ Перезапись</span>
+              )}
               <div className={styles.pendingClient}>
                 <span className={styles.pendingClientName}>{b.clients?.name ?? '—'}</span>
                 {b.clients?.phone && (

@@ -111,6 +111,18 @@
   gap: 8px;
 }
 
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusRescheduled {
+  background: #60A5FA;
+  color: #fff;
+  border: 1px solid #3B82F6;
+}
+
 .businessName {
   font-size: var(--text-h3-size);
   font-weight: var(--text-h3-weight);

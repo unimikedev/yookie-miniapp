@@ -65,6 +65,16 @@
   --color-nav-border: rgba(255, 255, 255, 0.08);
   --color-nav-shadow: rgba(0, 0, 0, 0.4);
   --color-nav-item-active: rgba(255, 255, 255, 0.05);
+
+  /* Component aliases — used by shared/ui components */
+  --color-default: var(--color-surface-elevated);
+  --color-default-hover: var(--color-border);
+  --color-default-foreground: var(--color-text);
+  --color-surface-secondary: var(--color-border);
+  --color-segment: var(--color-surface-elevated);
+  --color-segment-foreground: var(--color-text);
+  --radius: var(--radius-lg);
+  --shadow-surface: 0 1px 4px rgba(0, 0, 0, 0.25);
   --color-error: #F87171;
   --color-star-gold: #FBBF24;
   --color-star-blue: #8AAECF;
@@ -236,6 +246,14 @@
   --color-nav-border: rgba(0, 0, 0, 0.08);
   --color-nav-shadow: rgba(0, 0, 0, 0.1);
   --color-nav-item-active: rgba(0, 0, 0, 0.05);
+  --color-default: var(--color-surface-elevated);
+  --color-default-hover: var(--color-border);
+  --color-default-foreground: var(--color-text);
+  --color-surface-secondary: var(--color-border);
+  --color-segment: var(--color-surface-elevated);
+  --color-segment-foreground: var(--color-text);
+  --radius: var(--radius-lg);
+  --shadow-surface: 0 1px 4px rgba(0, 0, 0, 0.08);
   --color-error: #EF4444;
   --color-star-gold: #FBBF24;
   --color-star-blue: #3B82F6;

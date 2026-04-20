@@ -8,32 +8,32 @@
   display: block;
   width: var(--sk-w, 100%);
   height: var(--sk-h, 1rem);
-  border-radius: var(--radius);
-  background-color: var(--color-default);
-  background-size: 200% 100%;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  background-size: 300% 100%;
   background-image: linear-gradient(
     90deg,
-    var(--color-default) 0%,
-    var(--color-surface-secondary) 50%,
-    var(--color-default) 100%
+    var(--color-surface) 0%,
+    var(--color-surface-elevated) 50%,
+    var(--color-surface) 100%
   );
-  animation: shimmer 1.5s linear infinite;
+  animation: shimmer 1.6s linear infinite;
 }
 
 .circle {
   border-radius: 50%;
-  width: var(--sk-h, 2.5rem); /* square: width = height */
+  width: var(--sk-h, 2.5rem);
 }
 
 .text {
-  border-radius: calc(var(--radius) * 0.5);
+  border-radius: var(--radius-md);
 }
 
 .rect {
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
 }
 
 @keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }

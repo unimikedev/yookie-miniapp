@@ -84,6 +84,19 @@
   font-style: italic;
 }
 
+.rescheduledBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-caption-xs-size);
+  font-weight: 700;
+  color: #fff;
+  background: #60A5FA;
+  margin-bottom: 6px;
+}
+
 .pendingActions {
   display: flex;
   gap: 10px;

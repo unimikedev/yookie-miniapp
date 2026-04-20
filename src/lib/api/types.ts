@@ -124,6 +124,7 @@ export interface Booking {
   status: BookingStatus;
   price: number;
   notes?: string;
+  rescheduled?: boolean; // true если запись была перенесена
   created_at?: string;
   updated_at?: string;
   // Populated when fetched with ?include=relations

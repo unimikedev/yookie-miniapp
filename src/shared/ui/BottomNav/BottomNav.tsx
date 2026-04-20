@@ -71,7 +71,7 @@ export function BottomNav({ className }: BottomNavProps) {
               aria-label={tab.label}
             >
               <span className={styles.icon}>{tab.icon(active)}</span>
-              {active && <span className={styles.label}>{tab.label}</span>}
+              <span className={`${styles.label} ${active ? styles.labelVisible : ''}`}>{tab.label}</span>
             </button>
           )
         })}
