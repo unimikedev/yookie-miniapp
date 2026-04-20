@@ -82,6 +82,23 @@ export async function listBookings(
 }
 
 /**
+ * Fetch all pending bookings (no date filter) — for dashboard confirmation block.
+ * Backend: GET /businesses/:id/bookings?status=pending
+ */
+export async function listPendingBookings(merchantId: string): Promise<Booking[]> {
+  try {
+    const res = await api.get<{ data: Booking[] }>(
+      `/businesses/${merchantId}/bookings`,
+      { status: 'pending' }
+    );
+    return res.data ?? [];
+  } catch (err) {
+    if (shouldFallback(err)) return [];
+    throw err;
+  }
+}
+
+/**
  * List services for a business.
  * Backend: GET /businesses/:id/services
  */

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { dashboardSummary, listBookings, listStaff, updateBookingStatus } from '@/pro/api';
+import { dashboardSummary, listBookings, listPendingBookings, listStaff, updateBookingStatus } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, Master } from '@/lib/api/types';
 import styles from './DashboardPage.module.css';
@@ -35,10 +35,10 @@ export default function DashboardPage() {
 
   const loadPending = useCallback(() => {
     if (!merchantId) return;
-    listBookings(merchantId, { from: `${today}T00:00:00`, to: `${today}T23:59:59` })
-      .then((all) => setPending(all.filter((b) => b.status === 'pending')))
+    listPendingBookings(merchantId)
+      .then(setPending)
       .catch(() => {});
-  }, [merchantId, today]);
+  }, [merchantId]);
 
   useEffect(() => {
     if (!merchantId) return;
