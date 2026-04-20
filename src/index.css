@@ -85,3 +85,54 @@ img {
   max-width: 100%;
   display: block;
 }
+
+/* Smooth scroll behavior for anchor navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Page transition animations */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+/* Backward navigation (going to higher level) */
+.page-transition-backward-enter {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+.page-transition-backward-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.page-transition-backward-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.page-transition-backward-exit-active {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
