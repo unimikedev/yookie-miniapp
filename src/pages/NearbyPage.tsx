@@ -19,6 +19,7 @@ import { fetchNearbyBusinesses, fetchRoute } from '@/lib/api/businesses'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { NearbyBusinessResult, CategoryEnum, RouteResult } from '@/lib/api/types'
 import { useThemeStore } from '@/stores/themeStore'
+import { Skeleton } from '@/shared/ui'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import styles from './NearbyPage.module.css'
 
@@ -611,6 +612,19 @@ export default function NearbyPage() {
         <div className={styles.loadingIndicator}>
           <div className={styles.loadingDot} />
           <span>{geoLoading ? 'Определяем местоположение...' : 'Загрузка...'}</span>
+        </div>
+      )}
+
+      {/* Skeleton cards while loading */}
+      {dataLoading && (
+        <div className={styles.carouselLayer}>
+          <div className={styles.carousel}>
+            {[1, 2, 3].map(i => (
+              <div key={i} className={styles.mapCard}>
+                <Skeleton variant="rect" height={120} />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

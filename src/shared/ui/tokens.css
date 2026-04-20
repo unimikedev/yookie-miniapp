@@ -71,6 +71,10 @@
   --color-verified: #99E271;
   --color-status-bg: #18263A;
   --color-status-text: #1F2937;
+  
+  /* Skeleton colors — dark theme */
+  --color-skeleton-base: #1F2937;
+  --color-skeleton-highlight: #374151;
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -247,6 +251,10 @@
   --color-verified: #22C55E;
   --color-status-bg: #E8F5E9;
   --color-status-text: #1F2937;
+  
+  /* Skeleton colors — light theme */
+  --color-skeleton-base: #E5E7EB;
+  --color-skeleton-highlight: #F3F4F6;
 }
 
 /* ─── Typography Utility Classes ─────────────────────────────────────────────
