@@ -12,19 +12,19 @@ import styles from './MerchantPreviewPage.module.css';
 export default function MerchantPreviewPage() {
   const navigate = useNavigate();
   const { merchantId } = useMerchantStore();
-  const { business, loading, error } = useBusiness(merchantId!);
+  const { business, isLoading, error } = useBusiness(merchantId!);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   if (!merchantId) {
-    return <LoadingState variant="empty" title="Бизнес не найден" message="Сначала создайте бизнес" />;
+    return <LoadingState emptyTitle="Бизнес не найден" emptyDescription="Сначала создайте бизнес" hasData={false} />;
   }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingState variant="skeleton" />;
   }
 
   if (error || !business) {
-    return <LoadingState variant="error" message={error || 'Ошибка загрузки'} onRetry={() => window.location.reload()} />;
+    return <LoadingState emptyTitle="Ошибка загрузки" emptyDescription={error?.message ?? 'Попробуйте позже'} hasData={false} />;
   }
 
   const photos = business.photo_url ? [business.photo_url] : [];

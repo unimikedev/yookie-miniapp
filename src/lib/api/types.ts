@@ -56,6 +56,7 @@ export interface Business {
   is_active: boolean;
   photo_url?: string | null;
   rating?: number;
+  review_count?: number;
   lat?: number;
   lng?: number;
   created_at?: string;
@@ -101,10 +102,13 @@ export interface MasterService {
 
 export interface Client {
   id: string;
-  telegram_id: bigint;
+  telegram_id?: bigint | number;
   phone: string;
   name: string;
   lead_source?: string;
+  telegram_username?: string;
+  last_visit?: string;
+  total_bookings?: number;
   created_at?: string;
   updated_at?: string;
 }

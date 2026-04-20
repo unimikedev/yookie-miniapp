@@ -3,6 +3,7 @@ export {
   HomeCategoryChip,
   MasterCard,
   NearbyCard,
+  PopularMasterCardView,
   PopularStudioCardView,
   MapPreviewCardView,
   HomeFilterChipsRow,

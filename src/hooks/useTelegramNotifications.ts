@@ -32,11 +32,10 @@ export const useTelegramNotifications = () => {
     };
 
     // Подписываемся на события от Telegram WebApp
-    tg.onEvent('message_received', handleBotMessage);
+    tg.onEvent('message_received', handleBotMessage as () => void);
 
-    // Для тестирования также слушаем mainButtonPressed (можно триггерить вручную)
     return () => {
-      tg.offEvent('message_received', handleBotMessage);
+      tg.offEvent('message_received', handleBotMessage as () => void);
     };
   }, []);
 

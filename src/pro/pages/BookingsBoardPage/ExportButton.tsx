@@ -58,18 +58,19 @@ export function ExportButton({ type }: { type: 'clients' | 'bookings' }) {
           data: [headers, ...rows]
         };
       } else {
-        const bookings = await listBookings(merchantId);
+        const today = new Date().toISOString().slice(0, 10);
+        const bookings = await listBookings(merchantId, { from: `${today}T00:00:00`, to: `${today}T23:59:59` });
         const headers = ['ID', 'Клиент', 'Телефон', 'Услуга', 'Мастер', 'Дата', 'Время', 'Статус', 'Создано'];
         const rows = bookings.map(b => [
           b.id,
-          b.client_name,
-          b.client_phone || '',
-          b.service_name,
-          b.master_name || '',
-          new Date(b.start_time).toLocaleDateString('ru-RU'),
-          new Date(b.start_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+          b.clients?.name ?? '',
+          b.clients?.phone ?? '',
+          b.services?.name ?? '',
+          b.masters?.name ?? '',
+          new Date(b.starts_at).toLocaleDateString('ru-RU'),
+          new Date(b.starts_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
           b.status,
-          new Date(b.created_at).toLocaleString('ru-RU')
+          new Date(b.created_at ?? '').toLocaleString('ru-RU')
         ]);
         exportData = {
           filename: `bookings_${new Date().toISOString().split('T')[0]}.csv`,

@@ -52,6 +52,7 @@ export interface PopularMasterCard {
   photoUrl: string | null;
   businessId: string;
   masterId: string;
+  businessName?: string;
 }
 
 export interface PopularStudioCard {

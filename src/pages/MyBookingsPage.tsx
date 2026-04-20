@@ -205,7 +205,7 @@ export default function MyBookingsPage() {
 
         <LoadingState
           isLoading={isLoading}
-          error={error}
+          error={error?.message ?? null}
           hasData={bookings.length > 0}
           skeletonType="list"
           count={3}
