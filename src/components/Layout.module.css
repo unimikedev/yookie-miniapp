@@ -25,48 +25,33 @@
 }
 
 /* ─── Page transition wrapper ───────────────────────────────────────────── */
-.pageTransition {
-  /* gpu-accelerated layer; reset after animation via animation-fill-mode: both */
-}
 
-/* Forward: navigating into a detail page — new screen slides in from right */
+/* fill-mode: backwards — applies "from" state before animation starts (no flash),
+   but does NOT persist any transform/opacity after animation ends.
+   This prevents the wrapper from creating a stacking context that breaks
+   position:sticky inside the page content. */
+
 .pageFwd {
-  animation: pageFwdEnter 0.26s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: pageFwdEnter 0.26s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
-/* Back: returning to a tab page — new screen slides in from left */
 .pageBack {
-  animation: pageBackEnter 0.26s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: pageBackEnter 0.26s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
-/* Fade: switching between peer-level tab pages */
 .pageFade {
-  animation: pageFadeIn 0.18s ease both;
+  animation: pageFadeIn 0.18s ease backwards;
 }
 
+/* "to" omitted — browser interpolates to the element's natural style (no transform, opacity 1) */
 @keyframes pageFwdEnter {
-  from {
-    transform: translateX(48px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(48px); opacity: 0; }
 }
 
 @keyframes pageBackEnter {
-  from {
-    transform: translateX(-48px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(-48px); opacity: 0; }
 }
 
 @keyframes pageFadeIn {
   from { opacity: 0; }
-  to   { opacity: 1; }
 }

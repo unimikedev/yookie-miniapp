@@ -106,7 +106,7 @@
   align-items: center;
   gap: 12px;
   width: fit-content;
-  min-width: calc(75vw - 24px);
+  min-width: calc(60vw - 24px);
   max-width: 300px;
   min-height: 80px;
   padding: 12px 14px;
@@ -216,7 +216,7 @@
   align-items: center;
   gap: 12px;
   width: fit-content;
-  min-width: calc(75vw - 24px); /* ~75% screen width minus margins */
+  min-width: calc(60vw - 24px);
   max-width: 300px;
   height: 96px;
   padding: 12px;
@@ -228,7 +228,7 @@
 
 .nearbyCardCompact {
   width: fit-content;
-  min-width: calc(75vw - 24px);
+  min-width: calc(60vw - 24px);
   max-width: 280px;
   height: 96px;
   padding: 12px;
