@@ -226,6 +226,18 @@ export interface CancelBookingPayload {
   phone: string;
 }
 
+/**
+ * Merchant Registration Payload
+ * Backend: POST /api/v1/auth/register-merchant
+ */
+export interface MerchantRegisterPayload {
+  email: string;
+  password: string;
+  businessName: string;
+  type: 'salon' | 'individual';
+  location?: string;
+}
+
 export interface FetchBusinessesParams {
   city?: string;
   category?: CategoryEnum;
