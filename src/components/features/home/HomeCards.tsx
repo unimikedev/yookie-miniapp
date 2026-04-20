@@ -133,10 +133,12 @@ export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardP
       <div className={styles.masterBody}>
         <div className={styles.masterTop}>
           <span className={styles.masterName}>{name}</span>
-          <span className={styles.masterRating}>
-            <StarIcon />
-            {item.rating.toFixed(1)}
-          </span>
+          {isVisitedItem && (
+            <span className={styles.masterRating}>
+              <StarIcon />
+              {item.rating.toFixed(1)}
+            </span>
+          )}
         </div>
         <span className={styles.masterMeta}>
           {specialization}
@@ -233,10 +235,6 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
       <div className={styles.masterBody}>
         <div className={styles.masterTop}>
           <span className={styles.masterName}>{formatMasterName(item.name)}</span>
-          <span className={styles.masterRating}>
-            <StarIcon />
-            {item.rating.toFixed(1)}
-          </span>
         </div>
         <span className={styles.masterMeta}>
           {item.specialization} · {item.businessName || ''}

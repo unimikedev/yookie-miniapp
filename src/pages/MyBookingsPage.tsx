@@ -206,14 +206,14 @@ export default function MyBookingsPage() {
         <LoadingState
           isLoading={isLoading}
           error={error?.message ?? null}
-          hasData={bookings.length > 0}
+          hasData={tab === 'active' ? activeGroups.length > 0 : pastGroups.length > 0}
           skeletonType="list"
           count={3}
           emptyTitle={tab === 'active' ? 'Нет активных записей' : 'Нет завершенных записей'}
           emptyDescription={tab === 'active' ? 'Запишитесь к мастеру прямо сейчас' : 'Ваши завершенные записи появятся здесь'}
-          emptyAction={<button className={styles.actionBtn} onClick={() => navigate('/')}>Найти мастера</button>}
+          emptyAction={tab === 'active' ? <button className={styles.actionBtn} onClick={() => navigate('/')}>Найти мастера</button> : undefined}
         >
-          {tab === 'active' && activeGroups.length > 0 ? (
+          {tab === 'active' ? (
             <>
                 <p className={styles.sectionLabel}>Активные ({activeGroups.length})</p>
                 {activeGroups.map((group, gi) => {
@@ -329,7 +329,7 @@ export default function MyBookingsPage() {
                   )
                 })}
               </>
-          ) : tab === 'completed' && pastGroups.length > 0 ? (
+          ) : (
             <>
               <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
               <div className={styles.pastList}>
@@ -365,7 +365,7 @@ export default function MyBookingsPage() {
                 })}
               </div>
             </>
-          ) : null}
+          )}
         </LoadingState>
       </div>
 

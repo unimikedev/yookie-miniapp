@@ -107,8 +107,8 @@
   gap: 12px;
   width: calc(75vw - 24px);
   max-width: 300px;
-  height: 96px;
-  padding: 12px;
+  min-height: 80px;
+  padding: 12px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
