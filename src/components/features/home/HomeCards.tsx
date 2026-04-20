@@ -428,11 +428,13 @@ export function HomeFilterChipsRow({
 export function HScroll({
   children,
   snap = false,
-  autoScroll = false
+  autoScroll = false,
+  className
 }: {
   children: React.ReactNode
   snap?: boolean
   autoScroll?: boolean
+  className?: string
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -481,7 +483,7 @@ export function HScroll({
   return (
     <div
       ref={scrollRef}
-      className={`${styles.hScroll} ${snap ? styles.hScrollSnap : ''}`}
+      className={`${styles.hScroll} ${snap ? styles.hScrollSnap : ''} ${className ?? ''}`}
     >
       {children}
     </div>

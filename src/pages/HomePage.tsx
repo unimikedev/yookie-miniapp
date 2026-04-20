@@ -537,7 +537,7 @@ export default function HomePage() {
                 {isLoading || !data ? (
                   <div className={styles.skeleton}><Skeleton variant="rect" height={104} /></div>
                 ) : (
-                  <HScroll snap>
+                  <HScroll snap className="contentReveal">
                     {fd.nearby.map((n) => (
                       <NearbyCard key={n.id} item={n} onClick={() => navigate(`/business/${n.businessId}`)} compact />
                     ))}
@@ -551,7 +551,7 @@ export default function HomePage() {
                 {isLoading || !data ? (
                   <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>
                 ) : (
-                  <HScroll snap autoScroll>
+                  <HScroll snap autoScroll className="contentReveal">
                     {fd.popularMasters.map((m) => (
                       <MasterCard key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`)} />
                     ))}
@@ -568,7 +568,7 @@ export default function HomePage() {
                 {isLoading || !data ? (
                   <div className={styles.skeleton}><Skeleton variant="rect" height={246} /></div>
                 ) : fd.popularStudios.length > 0 ? (
-                  <div className={styles.visitedCol}>
+                  <div className={`${styles.visitedCol} contentReveal`}>
                     {fd.popularStudios.map((s) => (
                       <PopularStudioCardView key={s.id} item={s} onClick={() => navigate(`/business/${s.businessId}`)} isFavorite={isFavorite(s.businessId || '')} onToggleFavorite={() => toggle(s.businessId || '')} />
                     ))}

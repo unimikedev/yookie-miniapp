@@ -413,7 +413,7 @@ export default function ProviderDetailPage() {
 
       {/* Info block */}
       {!isLoading && business && (
-        <div className={styles.infoBlock}>
+        <div className={`${styles.infoBlock} contentReveal`}>
           <div className={styles.infoHeader}>
             <div className={styles.infoTitleWrap}>
               <h1 className={styles.infoTitle}>
@@ -486,7 +486,7 @@ export default function ProviderDetailPage() {
                   {[1, 2, 3].map(i => <Skeleton key={i} variant="rect" height={80} />)}
                 </div>
               ) : services.length > 0 ? (
-                <div className={styles.serviceList}>
+                <div className={`${styles.serviceList} contentReveal`}>
                   {services.slice(0, 6).map((service) => {
                     const isSelected = selectedServices.some((s) => s.service.id === service.id)
                     const svcAssignment = selectedServices.find(s => s.service.id === service.id)
@@ -662,7 +662,7 @@ export default function ProviderDetailPage() {
                 {[1, 2].map(i => <Skeleton key={i} variant="rect" height={200} />)}
               </div>
             ) : masters.length > 0 ? (
-              <div className={styles.specialistsScroll}>
+              <div className={`${styles.specialistsScroll} contentReveal`}>
                 {masters.map((master) => (
                   <SpecialistCard
                     key={master.id}
