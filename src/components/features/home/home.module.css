@@ -105,7 +105,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  width: calc(75vw - 24px);
+  width: fit-content;
+  min-width: calc(75vw - 24px);
   max-width: 300px;
   min-height: 80px;
   padding: 12px 14px;
@@ -214,7 +215,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  width: calc(75vw - 24px); /* ~75% screen width minus margins */
+  width: fit-content;
+  min-width: calc(75vw - 24px); /* ~75% screen width minus margins */
   max-width: 300px;
   height: 96px;
   padding: 12px;
@@ -225,7 +227,8 @@
 }
 
 .nearbyCardCompact {
-  width: calc(75vw - 24px);
+  width: fit-content;
+  min-width: calc(75vw - 24px);
   max-width: 280px;
   height: 96px;
   padding: 12px;
@@ -346,7 +349,8 @@
 .psCoverWrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 358 / 246;
+  /* Reduced height by ~20%: from 246 to ~197 (aspect-ratio 358/197) */
+  aspect-ratio: 358 / 197;
   background: var(--color-surface-elevated);
   overflow: hidden;
 }
