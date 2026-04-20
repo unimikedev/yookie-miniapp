@@ -143,7 +143,7 @@ export default function BookingsBoardPage() {
     }
   };
 
-  const handleBookingAction = async (status: 'confirmed' | 'cancelled') => {
+  const handleBookingAction = async (status: 'confirmed' | 'completed' | 'cancelled' | 'no_show') => {
     if (!selectedBooking || !merchantId) return;
     setActionLoading(true);
     setActionError(null);
@@ -293,6 +293,11 @@ export default function BookingsBoardPage() {
 
             {actionError && <p className={styles.formError}>{actionError}</p>}
 
+            {/* Helper text */}
+            <p className={styles.statusHelperText}>
+              Изменение статуса уведомит клиента в Telegram
+            </p>
+
             <div className={styles.actionRow}>
               {selectedBooking.status === 'pending' && (
                 <Button
@@ -304,13 +309,30 @@ export default function BookingsBoardPage() {
                 </Button>
               )}
               {(selectedBooking.status === 'pending' || selectedBooking.status === 'confirmed') && (
-                <button
-                  className={styles.cancelActionBtn}
-                  disabled={actionLoading}
-                  onClick={() => handleBookingAction('cancelled')}
-                >
-                  Отменить запись
-                </button>
+                <>
+                  <Button
+                    fullWidth
+                    variant="secondary"
+                    loading={actionLoading}
+                    onClick={() => handleBookingAction('completed')}
+                  >
+                    Завершено
+                  </Button>
+                  <button
+                    className={styles.cancelActionBtn}
+                    disabled={actionLoading}
+                    onClick={() => handleBookingAction('cancelled')}
+                  >
+                    Отменить запись
+                  </button>
+                  <button
+                    className={styles.cancelActionBtn}
+                    disabled={actionLoading}
+                    onClick={() => handleBookingAction('no_show')}
+                  >
+                    Не явился
+                  </button>
+                </>
               )}
             </div>
           </div>

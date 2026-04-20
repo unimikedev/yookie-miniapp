@@ -3,7 +3,16 @@
  */
 
 import { api } from './client';
-import { RequestOtpPayload, VerifyOtpPayload, VerifyOtpResponse, GoogleAuthResponse } from './types';
+import { RequestOtpPayload, VerifyOtpPayload, VerifyOtpResponse, GoogleAuthResponse, MerchantRegisterPayload } from './types';
+
+/**
+ * Register a new merchant (B2B)
+ * Backend: POST /auth/register-merchant
+ */
+export async function registerMerchant(payload: MerchantRegisterPayload): Promise<{ token: string; user: VerifyOtpResponse['user'] }> {
+  const response = await api.post<{ token: string; user: VerifyOtpResponse['user'] }>('/auth/register-merchant', payload);
+  return response;
+}
 
 /**
  * Request OTP code for phone number.
