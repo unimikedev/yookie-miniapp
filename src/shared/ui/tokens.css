@@ -236,12 +236,12 @@
   --color-border-subtle: #F3F4F6;
   --color-border-mid: #E5E7EB;
   --color-text: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #6B7280;
   --color-text-hint: #9CA3AF;
   --color-accent: #0EA5E9;
   --color-accent-light: #38BDF8;
-  --color-nav-bg: rgba(249, 250, 251, 0.85);
+  --color-nav-bg: rgba(255, 255, 255, 0.85);
   --color-nav-border: rgba(0, 0, 0, 0.08);
   --color-nav-shadow: rgba(0, 0, 0, 0.1);
   --color-nav-item-active: rgba(0, 0, 0, 0.05);

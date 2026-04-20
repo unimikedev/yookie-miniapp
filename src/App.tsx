@@ -15,9 +15,10 @@ function AnimatedRoutes() {
   const location = useLocation()
   const [prevLocation, setPrevLocation] = useState(location)
   const [direction, setDirection] = useState<'forward' | 'back' | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
-    if (prevLocation !== location) {
+    if (prevLocation !== location && !isTransitioning) {
       // Determine direction based on path depth
       const prevDepth = prevLocation.pathname.split('/').filter(Boolean).length
       const currDepth = location.pathname.split('/').filter(Boolean).length
@@ -30,8 +31,15 @@ function AnimatedRoutes() {
         setDirection('forward') // Same level, treat as forward
       }
       setPrevLocation(location)
+      setIsTransitioning(true)
+      
+      // Reset transition state after animation completes
+      setTimeout(() => {
+        setIsTransitioning(false)
+        setDirection(null)
+      }, 420) // 280ms * 1.5 = 420ms
     }
-  }, [location, prevLocation])
+  }, [location, prevLocation, isTransitioning])
 
   return (
     <div 

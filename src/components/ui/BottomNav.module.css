@@ -19,13 +19,13 @@
   max-width: 400px;
   height: 60px;
   padding: 0 2px;
-  background: var(--color-nav-bg, rgba(26, 29, 34, 0.5));
-  backdrop-filter: blur(36px) saturate(180%);
-  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  background: var(--color-nav-bg, rgba(26, 29, 34, 0.75));
+  backdrop-filter: blur(48px) saturate(180%);
+  -webkit-backdrop-filter: blur(48px) saturate(180%);
   border-radius: 28px;
   border: 1px solid var(--color-nav-border, rgba(255, 255, 255, 0.12));
   box-shadow: 0 8px 32px var(--color-nav-shadow, rgba(0, 0, 0, 0.3));
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
 }
 
 .item {
@@ -36,9 +36,9 @@
   justify-content: center;
   gap: 2px;
   padding: 8px 2px;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   text-decoration: none;
-  transition: color 0.675s ease, transform 0.675s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 1.0125s ease, transform 1.0125s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
   border-radius: 14px;
   position: relative;
@@ -62,7 +62,7 @@
   height: 4px;
   background: var(--color-accent);
   border-radius: 50%;
-  animation: fadeInDot 0.9s ease forwards;
+  animation: fadeInDot 1.35s ease forwards;
 }
 
 @keyframes fadeInDot {

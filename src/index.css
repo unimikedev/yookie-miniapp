@@ -88,17 +88,17 @@ img {
 
 /* ─── Page Transition Animations ────────────────────────────── */
 .page-transition {
-  animation: fadeIn 0.9s ease forwards;
+  animation: fadeIn 1.35s ease forwards;
 }
 
 /* Forward navigation (deeper level) - slide in from right */
 .page-transition.forward {
-  animation: slideInFromRight 0.945s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInFromRight 1.4175s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Back navigation (higher level) - slide in from left */
 .page-transition.back {
-  animation: slideInFromLeft 0.945s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInFromLeft 1.4175s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes fadeIn {
