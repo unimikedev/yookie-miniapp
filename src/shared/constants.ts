@@ -6,6 +6,15 @@
 import type { CategoryEnum } from '@/lib/api/types';
 
 export const TELEGRAM_BOT_URL = 'https://t.me/yookie_bot';
+export const TELEGRAM_BOT_USERNAME = 'yookie_bot';
+
+export function getMerchantShareLink(businessId: string): string {
+  return `https://t.me/${TELEGRAM_BOT_USERNAME}?startapp=b_${businessId}`;
+}
+
+export function getTelegramShareUrl(link: string, businessName: string): string {
+  return `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`Запишитесь в ${businessName} через Yookie — удобно и быстро!`)}`;
+}
 
 // Map category keys to their PNG icon filenames
 export const CATEGORY_ICONS: Record<CategoryEnum | 'brow_lash' | 'makeup' | 'spa_massage' | 'epilation' | 'other', string> = {
