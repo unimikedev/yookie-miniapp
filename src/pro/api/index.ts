@@ -81,6 +81,34 @@ export async function listBookings(
   }
 }
 
+export interface ActivityEvent {
+  id: string;
+  status: string;
+  cancelled_by: string | null;
+  cancel_reason: string | null;
+  starts_at: string;
+  created_at: string;
+  updated_at: string;
+  clients: { id: string; name: string; phone: string } | null;
+  services: { id: string; name: string } | null;
+  masters: { id: string; name: string } | null;
+}
+
+/**
+ * Recent activity feed for Pro dashboard.
+ * Backend: GET /businesses/:id/activity
+ */
+export async function listActivity(merchantId: string): Promise<ActivityEvent[]> {
+  try {
+    const res = await api.get<{ data: ActivityEvent[] }>(
+      `/businesses/${merchantId}/activity`
+    );
+    return res.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Fetch all pending bookings (no date filter) — for dashboard confirmation block.
  * Backend: GET /businesses/:id/bookings?status=pending

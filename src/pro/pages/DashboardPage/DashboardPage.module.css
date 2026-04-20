@@ -256,3 +256,71 @@
   color: var(--color-text-muted);
   font-size: 18px;
 }
+
+/* ── Activity feed ──────────────────────────── */
+.activitySection {
+  margin-bottom: 24px;
+}
+
+.activityRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  background: var(--color-surface);
+}
+
+.activityIcon {
+  font-size: 14px;
+  font-weight: 700;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.activityBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.activityLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.activityMeta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activityReason {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.activityTime {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Tone variants — left border accent */
+.activity-new       { border-left: 3px solid var(--color-accent); }
+.activity-confirmed { border-left: 3px solid #34D399; }
+.activity-cancelled { border-left: 3px solid #F87171; }
+.activity-completed { border-left: 3px solid #6B7280; }
+.activity-noshow    { border-left: 3px solid #FBBF24; }
+.activity-rescheduled { border-left: 3px solid #A78BFA; }

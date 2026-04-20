@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { dashboardSummary, listBookings, listPendingBookings, listStaff, updateBookingStatus } from '@/pro/api';
+import { dashboardSummary, listBookings, listPendingBookings, listStaff, updateBookingStatus, listActivity } from '@/pro/api';
+import type { ActivityEvent } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, Master } from '@/lib/api/types';
 import styles from './DashboardPage.module.css';
@@ -28,6 +29,7 @@ export default function DashboardPage() {
   const { merchantId } = useMerchantStore();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [pending, setPending] = useState<Booking[]>([]);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [staff, setStaff] = useState<Master[]>([]);
   const [actionId, setActionId] = useState<string | null>(null);
 
@@ -35,9 +37,12 @@ export default function DashboardPage() {
 
   const loadPending = useCallback(() => {
     if (!merchantId) return;
-    listPendingBookings(merchantId)
-      .then(setPending)
-      .catch(() => {});
+    listPendingBookings(merchantId).then(setPending).catch(() => {});
+  }, [merchantId]);
+
+  const loadActivity = useCallback(() => {
+    if (!merchantId) return;
+    listActivity(merchantId).then(setActivity).catch(() => {});
   }, [merchantId]);
 
   useEffect(() => {
@@ -52,16 +57,18 @@ export default function DashboardPage() {
     };
     loadSummary();
     loadPending();
+    loadActivity();
 
     const unsub = subscribe((ev) => {
       if ('merchantId' in ev && ev.merchantId === merchantId) {
         loadSummary();
         loadPending();
+        loadActivity();
       }
     });
-    const stopPoll = startPolling(() => { loadSummary(); loadPending(); }, 15000);
+    const stopPoll = startPolling(() => { loadSummary(); loadPending(); loadActivity(); }, 15000);
     return () => { unsub(); stopPoll(); };
-  }, [merchantId, loadPending]);
+  }, [merchantId, loadPending, loadActivity]);
 
   const handleAction = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
     if (!merchantId) return;
@@ -69,6 +76,7 @@ export default function DashboardPage() {
     try {
       await updateBookingStatus(merchantId, bookingId, status);
       loadPending();
+      loadActivity();
     } finally {
       setActionId(null);
     }
@@ -159,6 +167,32 @@ export default function DashboardPage() {
         )}
       </section>
 
+      {activity.length > 0 && (
+        <section className={styles.activitySection}>
+          <h3 className={styles.sectionTitle}>Последние события</h3>
+          {activity.map((ev) => {
+            const info = activityInfo(ev);
+            return (
+              <div key={ev.id} className={`${styles.activityRow} ${styles[`activity-${info.tone}`]}`}>
+                <span className={styles.activityIcon}>{info.icon}</span>
+                <div className={styles.activityBody}>
+                  <span className={styles.activityLabel}>{info.label}</span>
+                  <span className={styles.activityMeta}>
+                    {ev.clients?.name ?? '—'}
+                    {ev.services?.name ? ` · ${ev.services.name}` : ''}
+                    {ev.masters?.name ? ` · ${ev.masters.name}` : ''}
+                  </span>
+                  {ev.cancel_reason && (
+                    <span className={styles.activityReason}>«{ev.cancel_reason}»</span>
+                  )}
+                </div>
+                <span className={styles.activityTime}>{relativeTime(ev.updated_at)}</span>
+              </div>
+            );
+          })}
+        </section>
+      )}
+
       <section className={styles.links}>
         <LinkRow label="Услуги" onClick={() => navigate('/pro/services')} />
         <LinkRow label="Сотрудники" onClick={() => navigate('/pro/staff')} />
@@ -167,6 +201,45 @@ export default function DashboardPage() {
       </section>
     </ProLayout>
   );
+}
+
+type Tone = 'new' | 'confirmed' | 'cancelled' | 'completed' | 'noshow' | 'rescheduled';
+
+function activityInfo(ev: ActivityEvent): { icon: string; label: string; tone: Tone } {
+  const isRescheduled =
+    ev.status === 'pending' &&
+    Math.abs(new Date(ev.updated_at).getTime() - new Date(ev.created_at).getTime()) > 60_000;
+
+  if (isRescheduled) {
+    return { icon: '↻', label: 'Клиент перенёс запись', tone: 'rescheduled' };
+  }
+  switch (ev.status) {
+    case 'pending':
+      return { icon: '●', label: 'Новая запись', tone: 'new' };
+    case 'confirmed':
+      return { icon: '✓', label: 'Запись подтверждена', tone: 'confirmed' };
+    case 'cancelled':
+      if (ev.cancelled_by === 'client') return { icon: '✕', label: 'Клиент отменил запись', tone: 'cancelled' };
+      return { icon: '✕', label: 'Запись отменена', tone: 'cancelled' };
+    case 'completed':
+      return { icon: '✓', label: 'Визит завершён', tone: 'completed' };
+    case 'no_show':
+      return { icon: '!', label: 'Клиент не явился', tone: 'noshow' };
+    default:
+      return { icon: '·', label: ev.status, tone: 'new' };
+  }
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60_000);
+  if (min < 1) return 'только что';
+  if (min < 60) return `${min} мин назад`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `${h} ч назад`;
+  const d = Math.floor(h / 24);
+  if (d === 1) return 'вчера';
+  return `${d} д назад`;
 }
 
 function Kpi({ label, value }: { label: string; value: React.ReactNode }) {
