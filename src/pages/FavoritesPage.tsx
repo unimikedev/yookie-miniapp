@@ -5,6 +5,7 @@ import { Business, CATEGORY_LABELS } from '@/lib/api/types'
 import { fetchBusiness } from '@/lib/api/businesses'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import { MOCK_BUSINESSES } from '@/lib/mockBusinesses'
+import { Skeleton } from '@/shared/ui'
 import { FavoriteButton } from '@/components/features'
 import styles from './FavoritesPage.module.css'
 
@@ -72,7 +73,11 @@ export default function FavoritesPage() {
           </div>
 
           {isLoading ? (
-            [1, 2].map(i => <div key={i} className={styles.skeletonCard}><div className={styles.skeletonPlaceholder} /></div>)
+            [1, 2].map(i => (
+              <div key={i} className={styles.studioCard}>
+                <Skeleton variant="rect" height={140} />
+              </div>
+            ))
           ) : favoriteIds.size === 0 ? (
             <div className={styles.emptyState}>
               <p className={styles.emptyTitle}>Нет сохранённых студий</p>

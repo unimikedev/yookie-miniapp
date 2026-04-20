@@ -6,7 +6,7 @@
     var(--color-surface) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  animation: shimmer 3s infinite;
 }
 
 .text {
