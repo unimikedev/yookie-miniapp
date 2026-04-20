@@ -43,6 +43,15 @@ interface SlotTarget {
 
 const EMPTY_FORM = { clientName: '', clientPhone: '', serviceId: '', notes: '' };
 
+// Phone validation regex for Uzbekistan format: +998 XX XXX-XX-XX or similar
+const PHONE_REGEX = /^\+998\s?\d{2}\s?\d{3}\s?\d{2}\s?\d{2}$/;
+const PHONE_MIN_LENGTH = 12; // +998 + 9 digits minimum
+
+function isValidPhone(phone: string): boolean {
+  const cleaned = phone.replace(/[\s()-]/g, '');
+  return cleaned.startsWith('+998') && cleaned.length >= 12 && PHONE_MIN_LENGTH <= cleaned.length;
+}
+
 export default function BookingsBoardPage() {
   const { merchantId } = useMerchantStore();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -134,7 +143,28 @@ export default function BookingsBoardPage() {
   const handleCreateBooking = async () => {
     if (!merchantId || !slotTarget) return;
     const { clientName, clientPhone, serviceId } = form;
-    if (!clientName.trim() || !clientPhone.trim() || !serviceId) return;
+    
+    // Validate required fields
+    if (!clientName.trim()) {
+      setSaveError('Введите имя клиента');
+      return;
+    }
+    
+    if (!clientPhone.trim()) {
+      setSaveError('Введите телефон клиента');
+      return;
+    }
+    
+    // Validate phone format
+    if (!isValidPhone(clientPhone)) {
+      setSaveError('Введите корректный номер телефона (например, +998 90 123-45-67)');
+      return;
+    }
+    
+    if (!serviceId) {
+      setSaveError('Выберите услугу');
+      return;
+    }
 
     setSaving(true);
     setSaveError(null);
@@ -239,6 +269,7 @@ export default function BookingsBoardPage() {
               placeholder="+998 90 000 00 00"
               value={form.clientPhone}
               onChange={(e) => setForm((f) => ({ ...f, clientPhone: e.target.value }))}
+              maxLength={17}
             />
             <select
               className={styles.formInput}

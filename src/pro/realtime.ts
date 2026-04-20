@@ -38,7 +38,7 @@ export function emit(ev: RealtimeEvent): void {
 }
 
 /** Polling shim: re-fetch every N ms. Replace with WS when backend supports it. */
-export function startPolling(fn: () => void, ms = 15000): () => void {
+export function startPolling(fn: () => void, ms = 5000): () => void {
   const id = window.setInterval(fn, ms);
   return () => window.clearInterval(id);
 }

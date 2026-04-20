@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useBusinessStore } from '@/stores/businessStore';
 
 /**
  * Хук для проверки полноты профиля мерчанта
- * 
+ *
  * Проверяет минимальные требования для публикации бизнеса в B2C:
  * - Заполнены основные данные (название, категория, город)
  * - Добавлена хотя бы 1 услуга
@@ -14,6 +15,12 @@ export function useMerchantProfileValidation(merchantId: string | null) {
   const [isValidated, setIsValidated] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [completionPercentage, setCompletionPercentage] = useState(0);
+  
+  // Get data from businessStore which syncs B2B and B2C
+  const currentMerchant = useBusinessStore(state => state.currentMerchant);
+  const merchantServices = useBusinessStore(state => state.merchantServices);
+  const merchantStaff = useBusinessStore(state => state.merchantStaff);
+  const merchantAvailability = useBusinessStore(state => state.merchantAvailability);
 
   useEffect(() => {
     if (!merchantId) {
@@ -23,68 +30,64 @@ export function useMerchantProfileValidation(merchantId: string | null) {
       return;
     }
 
-    // В реальности здесь будет запрос к API для получения полного профиля
-    // const { data } = await api.get(`/merchants/${merchantId}/validation`);
-    
-    // Пока эмулируем проверку на основе данных из merchantStore
     const validate = () => {
       const errors: string[] = [];
       let score = 0;
       const maxScore = 5;
 
-      // TODO: Интегрировать с реальным merchantStore
-      // const merchant = useMerchantStore.getState().getMerchantById(merchantId);
-      
+      // Get current data from store
+      const merchant = currentMerchant;
+      const services = merchantServices;
+      const staff = merchantStaff;
+      const availability = merchantAvailability;
+
       // 1. Проверка основных данных (название, категория, город)
-      // if (!merchant?.name || !merchant?.category || !merchant?.city) {
-      //   errors.push('Заполните основную информацию о бизнесе');
-      // } else {
-      //   score++;
-      // }
+      if (!merchant?.business_name || !merchant?.category || !merchant?.city) {
+        errors.push('Заполните основную информацию о бизнесе');
+      } else {
+        score++;
+      }
 
       // 2. Проверка наличия услуг
-      // if (!merchant?.services || merchant.services.length === 0) {
-      //   errors.push('Добавьте хотя бы одну услугу');
-      // } else {
-      //   score++;
-      // }
+      if (!services || services.length === 0) {
+        errors.push('Добавьте хотя бы одну услугу');
+      } else {
+        score++;
+      }
 
       // 3. Проверка наличия мастеров
-      // if (!merchant?.staff || merchant.staff.length === 0) {
-      //   errors.push('Добавьте хотя бы одного мастера');
-      // } else {
-      //   score++;
-      // }
+      if (!staff || staff.length === 0) {
+        errors.push('Добавьте хотя бы одного мастера');
+      } else {
+        score++;
+      }
 
       // 4. Проверка графика работы
-      // if (!merchant?.schedule || Object.keys(merchant.schedule).length === 0) {
-      //   errors.push('Настройте график работы');
-      // } else {
-      //   score++;
-      // }
+      if (!availability || availability.filter(a => a.is_open).length === 0) {
+        errors.push('Настройте график работы');
+      } else {
+        score++;
+      }
 
       // 5. Проверка фото (рекомендация, не блокирует)
-      // if (merchant?.photo_url) {
-      //   score++;
-      // } else {
-      //   errors.push('Загрузите фото для лучшего восприятия (не обязательно)');
-      // }
-
-      // Эмуляция для демонстрации
-      score = 3; // Допустим, заполнено 3 из 5
-      if (score < maxScore) {
-        errors.push('Профиль заполнен не полностью');
+      if (merchant?.photo_url) {
+        score++;
+      } else {
+        errors.push('Загрузите фото для лучшего восприятия (не обязательно)');
       }
 
       const percentage = Math.round((score / maxScore) * 100);
       
       setCompletionPercentage(percentage);
       setValidationErrors(errors);
-      setIsValidated(errors.length === 0 || (errors.length === 1 && errors[0].includes('фото')));
+      // Consider validated if all critical checks pass (first 4)
+      // Photo is optional, so we allow 4/5 score
+      const criticalErrors = errors.filter(e => !e.includes('фото'));
+      setIsValidated(criticalErrors.length === 0);
     };
 
     validate();
-  }, [merchantId]);
+  }, [merchantId, currentMerchant, merchantServices, merchantStaff, merchantAvailability]);
 
   return {
     isValidated,
@@ -106,40 +109,45 @@ export interface OnboardingStep {
 }
 
 export function getOnboardingSteps(merchantId: string | null): OnboardingStep[] {
+  const currentMerchant = useBusinessStore.getState().currentMerchant;
+  const merchantServices = useBusinessStore.getState().merchantServices;
+  const merchantStaff = useBusinessStore.getState().merchantStaff;
+  const merchantAvailability = useBusinessStore.getState().merchantAvailability;
+
   return [
     {
       id: 'profile',
       title: 'Заполните профиль',
       description: 'Название, категория, город, описание',
-      isCompleted: false, // TODO: проверить merchantStore
+      isCompleted: !!(currentMerchant?.business_name && currentMerchant?.category && currentMerchant?.city),
       actionUrl: '/pro/settings',
     },
     {
       id: 'services',
       title: 'Добавьте услуги',
       description: 'Минимум 1 услуга с ценой и длительностью',
-      isCompleted: false,
+      isCompleted: merchantServices.length > 0,
       actionUrl: '/pro/services',
     },
     {
       id: 'staff',
       title: 'Добавьте мастеров',
       description: 'Минимум 1 мастер с именем и специализацией',
-      isCompleted: false,
+      isCompleted: merchantStaff.length > 0,
       actionUrl: '/pro/staff',
     },
     {
       id: 'schedule',
       title: 'Настройте график',
       description: 'Укажите рабочие дни и часы',
-      isCompleted: false,
+      isCompleted: merchantAvailability.filter(a => a.is_open).length > 0,
       actionUrl: '/pro/schedule',
     },
     {
       id: 'photo',
       title: 'Загрузите фото',
       description: 'Фото салона или рабочего места',
-      isCompleted: false,
+      isCompleted: !!currentMerchant?.photo_url,
       actionUrl: '/pro/settings',
     },
   ];

@@ -226,6 +226,16 @@ function BusinessWizard() {
 
   const handleCreate = async () => {
     if (!name.trim()) { setStep(1); setError('Введите название'); return; }
+    
+    // Check validation before allowing business creation
+    // Critical fields: name (checked above), services, staff, schedule
+    // Photo is optional
+    const hasCriticalIssues = validationErrors.filter(e => !e.includes('фото')).length > 0;
+    if (hasCriticalIssues && createdBusinessId) {
+      setError('Заполните все обязательные поля: услуги, мастера и график работы');
+      return;
+    }
+    
     setSaving(true);
     setError(null);
     try {
@@ -259,6 +269,7 @@ function BusinessWizard() {
       }
 
       setMerchantId(newBiz.id);
+      setCreatedBusinessId(newBiz.id);
 
       // Create pending staff
       if (pendingStaff.length > 0) {
@@ -454,6 +465,33 @@ function BusinessWizard() {
             <div className={styles.stepHeadline}>
               <h1 className={styles.stepTitle}>Фото и команда</h1>
               <p className={styles.stepSubtitle}>Привлекательные фото повышают конверсию записей</p>
+            </div>
+
+            {/* Onboarding checklist */}
+            <div className={styles.onboardingChecklist}>
+              <div className={styles.checklistHeader}>
+                <h3 className={styles.checklistTitle}>Готовность к запуску</h3>
+                <span className={styles.checklistProgress}>{completionPercentage}%</span>
+              </div>
+              {onboardingSteps.map((step) => (
+                <div
+                  key={step.id}
+                  className={`${styles.checklistItem} ${step.isCompleted ? styles.checklistItemCompleted : ''}`}
+                >
+                  <div className={styles.checklistIcon}>
+                    {step.isCompleted ? '✅' : '⬜'}
+                  </div>
+                  <div className={styles.checklistContent}>
+                    <span className={styles.checklistItemTitle}>{step.title}</span>
+                    <span className={styles.checklistItemDesc}>{step.description}</span>
+                  </div>
+                </div>
+              ))}
+              {!isValidated && (
+                <p className={styles.checklistWarning}>
+                  ⚠️ Заполните все обязательные пункты для публикации в B2C
+                </p>
+              )}
             </div>
 
             {/* Photo upload */}
