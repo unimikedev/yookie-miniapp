@@ -109,7 +109,7 @@
   min-width: calc(60vw - 24px);
   max-width: 300px;
   min-height: 80px;
-  padding: 12px 14px;
+  padding: 14px 12px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
@@ -219,7 +219,7 @@
   min-width: calc(60vw - 24px);
   max-width: 300px;
   height: 96px;
-  padding: 12px;
+  padding: 14px 12px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 24px;
@@ -231,7 +231,7 @@
   min-width: calc(60vw - 24px);
   max-width: 280px;
   height: 96px;
-  padding: 12px;
+  padding: 14px 12px;
 }
 
 .nearbyThumb {
@@ -327,7 +327,7 @@
   align-items: center;
   gap: 4px;
   font-size: var(--text-caption-size);
-  font-weight: 700;
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
   white-space: nowrap;
   flex-shrink: 0;

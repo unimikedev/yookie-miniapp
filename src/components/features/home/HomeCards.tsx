@@ -119,9 +119,10 @@ export interface MasterCardProps {
 export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardProps) {
   const isVisitedItem = 'masterName' in item
   const name = isVisitedItem ? formatMasterName((item as VisitedMasterCard).masterName) : (item as PopularMasterCard).name
-  const specialization = isVisitedItem 
-    ? (item as VisitedMasterCard).specialization 
-    : `${(item as PopularMasterCard).specialization} · ${(item as PopularMasterCard).businessName || ''}`
+  const specialization = isVisitedItem
+    ? (item as VisitedMasterCard).specialization
+    : [(item as PopularMasterCard).specialization, (item as PopularMasterCard).businessName]
+        .filter(Boolean).join(' · ')
   
   return (
     <div className={styles.masterCard} onClick={onClick} role="button" tabIndex={0}>
@@ -237,7 +238,7 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
           <span className={styles.masterName}>{formatMasterName(item.name)}</span>
         </div>
         <span className={styles.masterMeta}>
-          {item.specialization} · {item.businessName || ''}
+          {[item.specialization, item.businessName].filter(Boolean).join(' · ')}
         </span>
         <span className={styles.masterPrice}>от {Math.round(item.priceFrom / 1000)} тыс.</span>
       </div>

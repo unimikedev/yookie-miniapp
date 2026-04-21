@@ -46,11 +46,12 @@
   font-weight: var(--text-caption-weight);
   font-family: var(--font-family);
   cursor: pointer;
-  transition: background 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-              color 0.22s ease,
-              padding 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: background 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.38s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   flex-shrink: 0;
+  will-change: background, padding;
 }
 
 .tab:active {
@@ -81,8 +82,9 @@
   color: #0F1115;
   line-height: 1;
   white-space: nowrap;
-  transition: max-width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-              opacity 0.22s ease;
+  will-change: max-width, opacity;
+  transition: max-width 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .labelVisible {
