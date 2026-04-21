@@ -22,17 +22,15 @@ export interface VisitedBusiness {
   }>;
 }
 
-interface VisitedResponse {
-  data: VisitedBusiness[];
-}
-
 /**
  * Fetch businesses/masters the client has visited
+ * Backend: GET /clients/me/visited → { data: VisitedBusiness[] }
+ * API client unwraps the outer { data: ... }, so we receive VisitedBusiness[] directly.
  */
-export async function fetchVisitedMasters(phone?: string, limit = 10): Promise<VisitedResponse> {
+export async function fetchVisitedMasters(phone?: string, limit = 10): Promise<VisitedBusiness[]> {
   const params: Record<string, unknown> = { limit };
   if (phone) params.phone = phone;
 
-  const response = await api.get<VisitedResponse>('/clients/me/visited', params);
-  return response;
+  const response = await api.get<VisitedBusiness[]>('/clients/me/visited', params);
+  return response ?? [];
 }
