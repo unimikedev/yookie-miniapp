@@ -183,6 +183,13 @@ class ApiClient {
       }
 
       const data = await response.json();
+      
+      // Backend now wraps all responses in { data: T } format
+      // Unwrap the inner data field to maintain backward compatibility
+      if (data && typeof data === 'object' && 'data' in data) {
+        return data.data as T;
+      }
+      
       return data as T;
     } catch (error) {
       clearTimeout(timeoutId);

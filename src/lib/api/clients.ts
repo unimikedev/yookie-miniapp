@@ -12,17 +12,15 @@ export interface ClientStats {
   totalSpent: number;
 }
 
-interface ClientStatsResponse {
-  data: ClientStats;
-}
-
 /**
  * Fetch client statistics
+ * Backend: GET /clients/me/stats → { data: ClientStats }
+ * API client unwraps the outer { data: ... }, so we receive ClientStats directly.
  */
 export async function fetchClientStats(phone?: string): Promise<ClientStats> {
   const params: Record<string, unknown> = {};
   if (phone) params.phone = phone;
 
-  const response = await api.get<ClientStatsResponse>('/clients/me/stats', params);
-  return response.data;
+  const response = await api.get<ClientStats>('/clients/me/stats', params);
+  return response;
 }

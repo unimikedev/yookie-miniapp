@@ -17,6 +17,8 @@ import {
 /**
  * Fetch list of businesses with optional filtering and geo-search.
  * Backend: GET /businesses → { data: Business[], total: number }
+ * API client unwraps the outer { data: ... }, but PaginatedResponse already has data[] + metadata,
+ * so backend returns { data: { data: [], total: N } } and we receive { data: [], total: N } directly.
  */
 export async function fetchBusinesses(
   params: FetchBusinessesParams = {}
@@ -43,6 +45,8 @@ export async function fetchBusinesses(
 /**
  * Fetch businesses sorted by distance from user position.
  * Returns enriched business objects with distance_km, min_price, etc.
+ * Backend: GET /businesses?lat=&lng=... → { data: NearbyBusinessResult[]; total: number }
+ * API client unwraps the outer { data: ... }, so we receive { data: [], total: N } directly.
  */
 export async function fetchNearbyBusinesses(
   params: FetchBusinessesParams & { lat: number; lng: number }
@@ -61,51 +65,55 @@ export async function fetchNearbyBusinesses(
   if (params.priceMax !== undefined) queryParams.priceMax = params.priceMax;
   if (params.minRating !== undefined) queryParams.minRating = params.minRating;
 
-  return api.get<{ data: NearbyBusinessResult[]; total: number }>('/businesses', queryParams);
+  return api.get<{ data: NearbyBusinessResult[]; total: number }>('/businesses', queryParams) as unknown as Promise<{ data: NearbyBusinessResult[]; total: number }>;
 }
 
 /**
  * Fetch walking/driving route between two points.
  * Backend: GET /geo/route → { data: RouteResult }
+ * API client unwraps the outer { data: ... }, so we receive RouteResult directly.
  */
 export async function fetchRoute(
   from: { lat: number; lng: number },
   to: { lat: number; lng: number },
   mode: 'walking' | 'driving' = 'walking'
 ): Promise<RouteResult> {
-  const response = await api.get<{ data: RouteResult }>('/geo/route', {
+  const response = await api.get<RouteResult>('/geo/route', {
     fromLat: from.lat,
     fromLng: from.lng,
     toLat: to.lat,
     toLng: to.lng,
     mode,
   });
-  return response.data;
+  return response;
 }
 
 /**
  * Fetch single business by ID.
  * Backend: GET /businesses/:id → { data: Business }
+ * API client unwraps the outer { data: ... }, so we receive Business directly.
  */
 export async function fetchBusiness(id: string): Promise<Business> {
-  const response = await api.get<{ data: Business }>(`/businesses/${id}`);
-  return response.data;
+  const response = await api.get<Business>(`/businesses/${id}`);
+  return response;
 }
 
 /**
  * Fetch all masters for a business.
  * Backend: GET /businesses/:id/masters → { data: Master[] }
+ * API client unwraps the outer { data: ... }, so we receive Master[] directly.
  */
 export async function fetchBusinessMasters(businessId: string): Promise<Master[]> {
-  const response = await api.get<{ data: Master[] }>(`/businesses/${businessId}/masters`);
-  return response.data ?? [];
+  const response = await api.get<Master[]>(`/businesses/${businessId}/masters`);
+  return response ?? [];
 }
 
 /**
  * Fetch all services for a business.
  * Backend: GET /businesses/:id/services → { data: Service[] }
+ * API client unwraps the outer { data: ... }, so we receive Service[] directly.
  */
 export async function fetchBusinessServices(businessId: string): Promise<Service[]> {
-  const response = await api.get<{ data: Service[] }>(`/businesses/${businessId}/services`);
-  return response.data ?? [];
+  const response = await api.get<Service[]>(`/businesses/${businessId}/services`);
+  return response ?? [];
 }

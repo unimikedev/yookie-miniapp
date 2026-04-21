@@ -32,6 +32,8 @@ interface ReviewsResponse {
 
 /**
  * Fetch reviews for a business (paginated)
+ * Backend: GET /businesses/:id/reviews → { data: ReviewsResponse }
+ * API client unwraps the outer { data: ... }, so we receive ReviewsResponse directly.
  */
 export async function fetchBusinessReviews(
   businessId: string,
@@ -47,6 +49,8 @@ export async function fetchBusinessReviews(
 
 /**
  * Create a review for a completed booking
+ * Backend: POST /reviews → { data: Review }
+ * API client unwraps the outer { data: ... }, so we receive Review directly.
  */
 export async function createReview(data: {
   bookingId: string;
@@ -54,11 +58,11 @@ export async function createReview(data: {
   comment?: string;
   phone: string;
 }): Promise<Review> {
-  const response = await api.post<{ data: Review }>('/reviews', {
+  const response = await api.post<Review>('/reviews', {
     bookingId: data.bookingId,
     rating: data.rating,
     comment: data.comment,
     phone: data.phone,
   });
-  return response.data;
+  return response;
 }

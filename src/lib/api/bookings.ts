@@ -33,6 +33,7 @@ interface BackendSlotResult {
 /**
  * Fetch available time slots for a master on a specific date.
  * Backend: GET /businesses/:businessId/slots?date=&masterId= → { data: SlotResult[] }
+ * API client unwraps the outer { data: ... }, so we receive SlotResult[] directly.
  */
 export async function fetchSlots(
   businessId: string,
@@ -45,13 +46,13 @@ export async function fetchSlots(
   if (serviceId) params.serviceId = serviceId
   if (totalDuration && totalDuration > 0) params.totalDuration = String(totalDuration)
 
-  const response = await api.get<{ data: BackendSlotResult[] }>(
+  const response = await api.get<BackendSlotResult[]>(
     `/businesses/${businessId}/slots`,
     params
   );
 
   // Backend returns array of SlotResult per master — find ours
-  const masterResult = (response.data ?? []).find((r) => r.masterId === masterId)
+  const masterResult = (response ?? []).find((r) => r.masterId === masterId)
   const backendSlots = masterResult?.slots ?? []
 
   // Transform backend TimeSlot → frontend TimeSlot
@@ -66,6 +67,7 @@ export async function fetchSlots(
 /**
  * Create a new booking.
  * Backend: POST /bookings → { data: Booking }
+ * API client unwraps the outer { data: ... }, so we receive Booking directly.
  * Body shape: { businessId, masterId, serviceId, startsAt, client: { phone, name } }
  * Falls back to mock when backend is unavailable (DEV only).
  */
@@ -91,10 +93,10 @@ export async function createBooking(data: CreateBookingPayload): Promise<Booking
     };
     if (data.notes) body.notes = data.notes;
 
-    const response = await api.post<{ data: Booking }>('/bookings', body);
+    const response = await api.post<Booking>('/bookings', body);
     // Save phone for non-authenticated users so /my?phone= works
     try { localStorage.setItem('yookie_booking_phone', data.clientPhone); } catch { /* noop */ }
-    return response.data;
+    return response;
   } catch (err) {
     // In DEV mode, fall back to mock so the booking flow still works
     if (import.meta.env.DEV && err instanceof Error && (
@@ -125,12 +127,13 @@ export async function createBooking(data: CreateBookingPayload): Promise<Booking
 /**
  * Fetch user's bookings by phone number.
  * Backend: GET /my?phone= (registered at prefix /api/v1) → { data: Booking[] }
+ * API client unwraps the outer { data: ... }, so we receive Booking[] directly.
  * Falls back to mock when backend is unavailable (DEV only).
  */
 export async function fetchMyBookings(phone: string): Promise<Booking[]> {
   try {
-    const response = await api.get<{ data: Booking[] }>('/my', { phone });
-    return response.data ?? [];
+    const response = await api.get<Booking[]>('/my', { phone });
+    return response ?? [];
   } catch (err) {
     if (import.meta.env.DEV && err instanceof Error && (
       err.message.includes('NETWORK_ERROR')
@@ -146,12 +149,13 @@ export async function fetchMyBookings(phone: string): Promise<Booking[]> {
 
 /**
  * Cancel a booking.
- * Backend: POST /bookings/:id/cancel → { success: true }
+ * Backend: POST /bookings/:id/cancel → { data: { success: true } }
+ * API client unwraps the outer { data: ... }, so we receive { success: true } directly.
  * Falls back to mock when backend is unavailable (DEV only).
  */
 export async function cancelBooking(id: string, phone: string): Promise<void> {
   try {
-    await api.post<unknown>(`/bookings/${id}/cancel`, { phone });
+    await api.post(`/bookings/${id}/cancel`, { phone });
   } catch (err) {
     if (import.meta.env.DEV && err instanceof Error && (
       err.message.includes('NETWORK_ERROR')
@@ -168,14 +172,15 @@ export async function cancelBooking(id: string, phone: string): Promise<void> {
 /**
  * Reschedule a booking.
  * Backend: POST /bookings/:id/reschedule → { data: Booking }
+ * API client unwraps the outer { data: ... }, so we receive Booking directly.
  */
 export async function rescheduleBooking(
   id: string,
   data: { phone: string; startsAt: string; masterId?: string }
 ): Promise<import('@/lib/api/types').Booking> {
-  const response = await api.post<{ data: import('@/lib/api/types').Booking }>(
+  const response = await api.post<import('@/lib/api/types').Booking>(
     `/bookings/${id}/reschedule`,
     data
   );
-  return response.data;
+  return response;
 }
