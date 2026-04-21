@@ -58,7 +58,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
   login: async (phone: string, code: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await verifyOtp(phone, code);
+      let telegramId: number | undefined;
+      try { telegramId = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id ?? undefined; } catch { /* noop */ }
+      const response = await verifyOtp(phone, code, telegramId);
       const { token, user } = response;
 
       // Store token in localStorage

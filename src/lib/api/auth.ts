@@ -19,9 +19,10 @@ export async function requestOtp(phone: string, telegramId?: number): Promise<vo
  */
 export async function verifyOtp(
   phone: string,
-  code: string
+  code: string,
+  telegramId?: number
 ): Promise<VerifyOtpResponse> {
-  const payload: VerifyOtpPayload = { phone, code };
+  const payload: VerifyOtpPayload & { telegramId?: number } = { phone, code, telegramId };
   const response = await api.post<VerifyOtpResponse>('/auth/otp/verify', payload);
   return response;
 }
