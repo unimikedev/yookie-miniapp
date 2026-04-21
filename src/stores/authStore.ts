@@ -28,6 +28,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  initStatus: 'idle' | 'loading' | 'ready' | 'error';
 }
 
 interface AuthActions {
@@ -39,6 +40,7 @@ interface AuthActions {
   setName: (name: string) => void;
   loadFromStorage: () => void;
   clearError: () => void;
+  initialize: () => Promise<void>;
 }
 
 const STORAGE_KEY = 'yookie_auth_token';
@@ -53,6 +55,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  initStatus: 'idle',
 
   // Actions
   login: async (phone: string, code: string) => {
@@ -78,6 +81,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
         name: user.name,
         isAuthenticated: true,
         isLoading: false,
+        initStatus: 'ready',
       });
 
       // Propagate businessId to merchant store so Pro section has a valid merchantId
@@ -86,7 +90,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
-      set({ error: message, isLoading: false });
+      set({ error: message, isLoading: false, initStatus: 'error' });
       throw error;
     }
   },
@@ -119,6 +123,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
         name: user.name,
         isAuthenticated: true,
         isLoading: false,
+        initStatus: 'ready',
       });
 
       if (user.businessId) {
@@ -126,7 +131,7 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Google login failed';
-      set({ error: message, isLoading: false });
+      set({ error: message, isLoading: false, initStatus: 'error' });
       throw error;
     }
   },
@@ -201,20 +206,38 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
           phone: user.phone,
           name: user.name,
           isAuthenticated: true,
+          initStatus: 'ready',
         });
         if (user.businessId) {
           useMerchantStore.getState().setMerchantId(user.businessId);
         }
+      } else {
+        set({ initStatus: 'ready' });
       }
     } catch {
       // Storage read failed or invalid data
+      set({ initStatus: 'error' });
+    }
+  },
+
+  initialize: async () => {
+    const state = _get();
+    if (state.initStatus !== 'idle') return; // Already initialized or in progress
+
+    set({ initStatus: 'loading' });
+    try {
+      _get().loadFromStorage();
+      set({ initStatus: 'ready' });
+    } catch (err) {
+      console.error('[authStore] Initialization failed:', err);
+      set({ initStatus: 'error' });
     }
   },
 }));
 
-// Auto-load from storage on first access
-let initialized = false;
-if (typeof window !== 'undefined' && !initialized) {
-  initialized = true;
-  useAuthStore.getState().loadFromStorage();
+// Promise-based initialization pattern to prevent race conditions
+let authInitPromise: Promise<void> | null = null;
+
+if (typeof window !== 'undefined' && !authInitPromise) {
+  authInitPromise = useAuthStore.getState().initialize();
 }

@@ -360,3 +360,45 @@ export interface MerchantClient {
   created_at: string;
   updated_at: string;
 }
+
+/**
+ * Standardized API Response wrapper
+ */
+export interface ApiResponse<T> {
+  data: T;
+  success?: boolean;
+  message?: string;
+}
+
+/**
+ * Booking creation request payload (typed)
+ */
+export interface CreateBookingRequest {
+  businessId: string;
+  masterId: string;
+  serviceId: string;
+  startsAt: string;
+  client: {
+    phone: string;
+    name: string;
+    telegramId?: number;
+  };
+  notes?: string;
+}
+
+/**
+ * User authentication response (typed)
+ */
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    phone: string;
+    name: string;
+    email?: string | null;
+    avatarUrl?: string | null;
+    businessId?: string | null;
+    role?: string;
+  };
+  isNewUser?: boolean;
+}

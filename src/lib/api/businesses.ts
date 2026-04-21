@@ -98,12 +98,6 @@ export async function fetchBusiness(id: string): Promise<Business> {
  */
 export async function fetchBusinessMasters(businessId: string): Promise<Master[]> {
   const response = await api.get<{ data: Master[] }>(`/businesses/${businessId}/masters`);
-  if (import.meta.env.DEV) {
-    console.log(`[fetchBusinessMasters] businessId=${businessId}, response keys=${response ? Object.keys(response) : 'null'}, data length=${response.data?.length ?? 'null'}`);
-    if (response.data && response.data.length > 0) {
-      console.log(`[fetchBusinessMasters] first master:`, JSON.stringify(response.data[0]).substring(0, 200));
-    }
-  }
   return response.data ?? [];
 }
 

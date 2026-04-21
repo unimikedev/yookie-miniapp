@@ -9,6 +9,7 @@ import { api } from '@/lib/api/client';
 interface FavoritesState {
   favoriteIds: Set<string>;
   isLoading: boolean;
+  initStatus: 'idle' | 'loading' | 'ready' | 'error';
 }
 
 interface FavoritesActions {
@@ -19,6 +20,7 @@ interface FavoritesActions {
   loadFromStorage: () => void;
   syncFromBackend: () => Promise<void>;
   clear: () => void;
+  initialize: () => Promise<void>;
 }
 
 const STORAGE_KEY = 'yookie_favorites';
@@ -57,6 +59,7 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
   // State
   favoriteIds: new Set<string>(),
   isLoading: false,
+  initStatus: 'idle',
 
   // Actions
   toggle: (businessId: string) => {
@@ -72,15 +75,31 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newSet)));
       } catch { /* noop */ }
 
-      // Sync with backend (fire-and-forget, non-blocking)
+      // Sync with backend (fire-and-forget, non-blocking) with proper error logging
       const phone = getPhone();
       if (phone) {
         if (state.favoriteIds.has(businessId)) {
           // Was favorited → now removing
-          api.delete(`/favorites/${businessId}`, { phone }).catch(() => {});
+          api.delete(`/favorites/${businessId}`, { phone }).catch((err) => {
+            console.error('[favoritesStore] Failed to remove favorite:', err);
+            // Rollback on failure
+            set((s) => {
+              const rollbackSet = new Set(s.favoriteIds);
+              rollbackSet.add(businessId);
+              return { favoriteIds: rollbackSet };
+            });
+          });
         } else {
           // Was not favorited → now adding
-          api.post(`/favorites/${businessId}`, {}).catch(() => {});
+          api.post(`/favorites/${businessId}`, {}).catch((err) => {
+            console.error('[favoritesStore] Failed to add favorite:', err);
+            // Rollback on failure
+            set((s) => {
+              const rollbackSet = new Set(s.favoriteIds);
+              rollbackSet.delete(businessId);
+              return { favoriteIds: rollbackSet };
+            });
+          });
         }
       }
 
@@ -103,10 +122,18 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newSet)));
       } catch { /* noop */ }
 
-      // Sync with backend
+      // Sync with backend with proper error logging and rollback
       const phone = getPhone();
       if (phone) {
-        api.post(`/favorites/${businessId}`, {}).catch(() => {});
+        api.post(`/favorites/${businessId}`, {}).catch((err) => {
+          console.error('[favoritesStore] Failed to add favorite:', err);
+          // Rollback on failure
+          set((s) => {
+            const rollbackSet = new Set(s.favoriteIds);
+            rollbackSet.delete(businessId);
+            return { favoriteIds: rollbackSet };
+          });
+        });
       }
 
       return { favoriteIds: newSet };
@@ -124,10 +151,18 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newSet)));
       } catch { /* noop */ }
 
-      // Sync with backend
+      // Sync with backend with proper error logging and rollback
       const phone = getPhone();
       if (phone) {
-        api.delete(`/favorites/${businessId}`, { phone }).catch(() => {});
+        api.delete(`/favorites/${businessId}`, { phone }).catch((err) => {
+          console.error('[favoritesStore] Failed to remove favorite:', err);
+          // Rollback on failure
+          set((s) => {
+            const rollbackSet = new Set(s.favoriteIds);
+            rollbackSet.add(businessId);
+            return { favoriteIds: rollbackSet };
+          });
+        });
       }
 
       return { favoriteIds: newSet };
@@ -154,7 +189,7 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
     const phone = getPhone();
     if (!phone) return;
 
-    set({ isLoading: true });
+    set({ isLoading: true, initStatus: 'loading' });
     try {
       const response = await api.get<{ data: Array<{ id: string }> }>('/favorites', { phone });
       const ids = new Set((response.data ?? []).map((item: { id: string }) => item.id));
@@ -167,13 +202,14 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
         }
       } catch { /* noop */ }
 
-      set({ favoriteIds: ids, isLoading: false });
+      set({ favoriteIds: ids, isLoading: false, initStatus: 'ready' });
       // Persist merged result
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(ids)));
       } catch { /* noop */ }
-    } catch {
-      set({ isLoading: false });
+    } catch (err) {
+      console.error('[favoritesStore] Failed to sync from backend:', err);
+      set({ isLoading: false, initStatus: 'error' });
     }
   },
 
@@ -181,16 +217,28 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch { /* noop */ }
-    set({ favoriteIds: new Set<string>() });
+    set({ favoriteIds: new Set<string>(), initStatus: 'idle' });
+  },
+
+  initialize: async () => {
+    const state = get();
+    if (state.initStatus !== 'idle') return; // Already initialized or in progress
+
+    set({ initStatus: 'loading' });
+    try {
+      state.loadFromStorage();
+      await state.syncFromBackend();
+      set({ initStatus: 'ready' });
+    } catch (err) {
+      console.error('[favoritesStore] Initialization failed:', err);
+      set({ initStatus: 'error' });
+    }
   },
 }));
 
-// Auto-load from storage on first access
-let initialized = false;
-if (typeof window !== 'undefined' && !initialized) {
-  initialized = true;
-  const store = useFavoritesStore.getState();
-  store.loadFromStorage();
-  // Sync from backend in background
-  store.syncFromBackend().catch(() => {});
+// Promise-based initialization pattern to prevent race conditions
+let initPromise: Promise<void> | null = null;
+
+if (typeof window !== 'undefined' && !initPromise) {
+  initPromise = useFavoritesStore.getState().initialize();
 }
