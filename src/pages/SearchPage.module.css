@@ -99,6 +99,19 @@
   color: var(--color-accent);
 }
 
+.filterPillDay {
+  font-variant-numeric: tabular-nums;
+}
+
+.filterDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  align-self: center;
+  margin: 0 2px;
+}
+
 .meta {
   display: flex;
   align-items: flex-end;

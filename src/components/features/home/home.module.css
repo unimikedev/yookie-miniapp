@@ -331,6 +331,33 @@
   flex-shrink: 0;
 }
 
+/* ── Popular studio card — dots pager ───────────────────────── */
+.psDots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  z-index: 2;
+  align-items: center;
+}
+
+.psDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.psDotActive {
+  width: 16px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
 /* ── Popular master horizontal card uses unified masterCard styles ────────────────── */
 
 /* ── Popular studio large card 358×246 ───────────────────── */

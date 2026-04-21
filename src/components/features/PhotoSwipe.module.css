@@ -34,10 +34,10 @@
   animation: slideInFromLeft 0.22s ease-out;
 }
 
-/* Dots — exactly centered horizontally, 32px from bottom */
+/* Dots — centered, 16px from bottom so they sit above the hero edge */
 .dots {
   position: absolute;
-  bottom: 32px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;

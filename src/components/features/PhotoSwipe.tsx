@@ -56,7 +56,6 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
     )
   }
 
-  const showThumbnails = photos.length > 1
   const slideClass = slideDir === 'right' ? styles.slideRight : slideDir === 'left' ? styles.slideLeft : ''
 
   return (
@@ -69,32 +68,11 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
     >
       <img key={current} src={photos[current]} alt={alt} className={`${styles.photo} ${slideClass}`} />
 
-      {/* Dots pager — centered */}
-      <div className={styles.dots}>
-        {photos.map((_, i) => (
-          <span key={i} className={`${styles.dot} ${i === current ? styles.dotActive : ''}`} />
-        ))}
-      </div>
-
-      {/* Thumbnails — right-aligned */}
-      {showThumbnails && (
-        <div className={styles.thumbnails}>
-          {photos.slice(0, 3).map((photo, idx) => (
-            <img
-              key={idx}
-              className={`${styles.thumbnail} ${idx === current ? styles.thumbnailActive : ''}`}
-              src={photo}
-              alt=""
-              onClick={(e) => {
-                e.stopPropagation()
-                setSlideDir(idx > current ? 'right' : 'left')
-                setCurrent(idx)
-              }}
-            />
+      {photos.length > 1 && (
+        <div className={styles.dots}>
+          {photos.map((_, i) => (
+            <span key={i} className={`${styles.dot} ${i === current ? styles.dotActive : ''}`} />
           ))}
-          {photos.length > 3 && (
-            <div className={styles.thumbnailMore}>+{photos.length - 3}</div>
-          )}
         </div>
       )}
     </div>

@@ -1,0 +1,24 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  animation: splashOut 0.25s ease 0.55s forwards;
+}
+
+.logo {
+  animation: logoPulse 0.6s ease-out;
+}
+
+@keyframes logoPulse {
+  0%   { opacity: 0; transform: scale(0.88); }
+  60%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes splashOut {
+  to { opacity: 0; pointer-events: none; }
+}

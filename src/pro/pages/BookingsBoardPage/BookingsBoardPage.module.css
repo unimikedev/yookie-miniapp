@@ -312,3 +312,23 @@
   opacity: 0.5;
   cursor: default;
 }
+
+/* ── Reschedule indicators ──────────────────────────────────────── */
+.bookingCardReschedule {
+  border-left-color: #A78BFA;
+}
+
+.rescheduleStatus {
+  color: #A78BFA;
+  font-weight: 600;
+}
+
+.rescheduleHint {
+  font-size: var(--text-caption-size);
+  color: #A78BFA;
+  background: rgba(167, 139, 250, 0.1);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 0;
+  line-height: 1.4;
+}

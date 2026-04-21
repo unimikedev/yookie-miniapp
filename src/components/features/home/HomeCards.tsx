@@ -294,7 +294,6 @@ export function PopularStudioCardView({
     }
   }
 
-  const showThumbnails = allPhotos.length > 1
   const slideClass = slideDir === 'right' ? styles.slideRight : slideDir === 'left' ? styles.slideLeft : ''
 
   return (
@@ -323,24 +322,14 @@ export function PopularStudioCardView({
         >
           <HeartIcon filled={isFavorite} size={20} />
         </button>
-        {showThumbnails && (
-          <div className={styles.psThumbnails}>
-            {allPhotos.slice(0, 3).map((photo, idx) => (
-              <img
+        {allPhotos.length > 1 && (
+          <div className={styles.psDots}>
+            {allPhotos.map((_, idx) => (
+              <span
                 key={idx}
-                className={`${styles.psThumbnail} ${idx === currentPhoto ? styles.psThumbnailActive : ''}`}
-                src={photo}
-                alt=""
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setSlideDir(idx > currentPhoto ? 'right' : 'left')
-                  setCurrentPhoto(idx)
-                }}
+                className={`${styles.psDot} ${idx === currentPhoto ? styles.psDotActive : ''}`}
               />
             ))}
-            {allPhotos.length > 3 && (
-              <div className={styles.psThumbnailMore}>+{allPhotos.length - 3}</div>
-            )}
           </div>
         )}
       </div>

@@ -24,12 +24,28 @@ const FilterIcon = () => (
   </svg>
 )
 
+function buildDayChips(): Array<{ label: string; date: Date }> {
+  const chips = []
+  const DAY_SHORT = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб']
+  for (let i = 0; i < 5; i++) {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    d.setDate(d.getDate() + i)
+    const label = i === 0 ? 'Сегодня' : i === 1 ? 'Завтра' : `${DAY_SHORT[d.getDay()]} ${d.getDate()}`
+    chips.push({ label, date: d })
+  }
+  return chips
+}
+
+const DAY_CHIPS = buildDayChips()
+
 export default function SearchPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const categoryParam = searchParams.get('category') as string | null
   const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
+  const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const { toggle, isFavorite } = useFavoritesStore()
   const { city } = useCityStore()
 
@@ -51,6 +67,10 @@ export default function SearchPage() {
       next.has(f) ? next.delete(f) : next.add(f)
       return next
     })
+  }
+
+  const toggleDay = (idx: number) => {
+    setSelectedDay(prev => prev === idx ? null : idx)
   }
 
   // Global search across businesses, masters, services
@@ -163,6 +183,16 @@ export default function SearchPage() {
               onClick={() => toggleFilter(f)}
             >
               {f}
+            </button>
+          ))}
+          <div className={styles.filterDivider} />
+          {DAY_CHIPS.map((chip, idx) => (
+            <button
+              key={idx}
+              className={`${styles.filterPill} ${styles.filterPillDay} ${selectedDay === idx ? styles.filterPillActive : ''}`}
+              onClick={() => toggleDay(idx)}
+            >
+              {chip.label}
             </button>
           ))}
         </div>

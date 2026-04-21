@@ -19,6 +19,11 @@ const STATUS_LABELS: Record<string, string> = {
   no_show: 'Не явился',
 };
 
+function getStatusLabel(booking: Booking): string {
+  if (booking.status === 'pending' && booking.rescheduled) return 'Запрос на перенос'
+  return STATUS_LABELS[booking.status] ?? booking.status
+}
+
 const HOURS = Array.from({ length: 13 }, (_, i) => i + 8); // 08:00 — 20:00
 const SLOT_HEIGHT = 60; // px per hour
 
@@ -330,8 +335,13 @@ export default function BookingsBoardPage() {
             </div>
             <div className={styles.bookingDetailRow}>
               <span className={styles.bookingDetailLabel}>Статус</span>
-              <span>{STATUS_LABELS[selectedBooking.status] ?? selectedBooking.status}</span>
+              <span className={selectedBooking.status === 'pending' && selectedBooking.rescheduled ? styles.rescheduleStatus : ''}>
+                {getStatusLabel(selectedBooking)}
+              </span>
             </div>
+            {selectedBooking.status === 'pending' && selectedBooking.rescheduled && (
+              <p className={styles.rescheduleHint}>Клиент запросил перенос записи. Подтвердите или отмените.</p>
+            )}
             {selectedBooking.notes && (
               <div className={styles.bookingDetailRow}>
                 <span className={styles.bookingDetailLabel}>Заметки</span>
@@ -431,17 +441,18 @@ function TimelineView({ hours, staff, bookings, dragging, onDragStart, onDrop, o
 /* ── Booking Card ────────────────────────────────────────────────────────── */
 function BookingCard({ booking, onDragStart, onClick }: { booking: Booking; onDragStart: () => void; onClick: () => void }) {
   const statusClass = styles[`status-${booking.status}`] ?? '';
+  const isReschedule = booking.status === 'pending' && booking.rescheduled;
 
   return (
     <div
-      className={`${styles.bookingCard} ${statusClass}`}
+      className={`${styles.bookingCard} ${statusClass} ${isReschedule ? styles.bookingCardReschedule : ''}`}
       draggable
       onDragStart={onDragStart}
       onClick={(e) => { e.stopPropagation(); onClick(); }}
     >
       <span className={styles.cardTime}>{fmt(booking.starts_at)}</span>
       <span className={styles.cardClient}>{booking.clients?.name ?? '—'}</span>
-      <span className={styles.cardService}>{booking.services?.name ?? '—'}</span>
+      <span className={styles.cardService}>{isReschedule ? '↻ Перенос' : (booking.services?.name ?? '—')}</span>
     </div>
   );
 }
