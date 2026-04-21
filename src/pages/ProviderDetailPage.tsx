@@ -736,7 +736,7 @@ export default function ProviderDetailPage() {
             {business?.instagram && (
               <InstagramGallery
                 username={business.instagram}
-                postUrls={(business as any).instagram_post_urls}
+                postUrls={business.instagram_post_urls}
               />
             )}
 

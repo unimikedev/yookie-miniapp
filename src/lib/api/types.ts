@@ -49,6 +49,7 @@ export interface Business {
   city: string;
   phone: string;
   instagram?: string;
+  instagram_post_urls?: string[];
   telegram_username?: string;
   working_hours: Record<string, { open: string; close: string }>;
   slot_duration_min: number;

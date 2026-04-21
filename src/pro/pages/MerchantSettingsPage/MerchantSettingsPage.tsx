@@ -101,6 +101,75 @@ function MapPickerOverlay({ initialCenter, onConfirm, onClose }: MapPickerProps)
   );
 }
 
+/* ── Instagram post URLs editor ─────────────────────────────────── */
+const IG_POST_RE = /instagram\.com\/(p|reel)\/([A-Za-z0-9_-]+)/
+
+interface UrlsEditorProps {
+  urls: string[]
+  input: string
+  onInputChange: (v: string) => void
+  onAdd: (url: string) => void
+  onRemove: (i: number) => void
+}
+
+function InstagramPostUrlsEditor({ urls, input, onInputChange, onAdd, onRemove }: UrlsEditorProps) {
+  const isValid = IG_POST_RE.test(input)
+  const atMax = urls.length >= 6
+
+  const handleAdd = () => {
+    if (!isValid || atMax) return
+    // Normalize to canonical URL
+    const match = input.match(IG_POST_RE)!
+    onAdd(`https://www.instagram.com/${match[1]}/${match[2]}/`)
+  }
+
+  return (
+    <div className={styles.fieldGroup}>
+      <label className={styles.fieldLabel}>
+        Посты для галереи
+        <span className={styles.fieldBadge}>{urls.length}/6</span>
+      </label>
+
+      {/* Existing URLs */}
+      {urls.length > 0 && (
+        <div className={styles.igUrlList}>
+          {urls.map((url, i) => (
+            <div key={url} className={styles.igUrlItem}>
+              <span className={styles.igUrlText}>{url.replace('https://www.instagram.com/', 'ig.com/')}</span>
+              <button className={styles.igUrlRemove} onClick={() => onRemove(i)} type="button">✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add input */}
+      {!atMax && (
+        <div className={styles.igUrlAdd}>
+          <input
+            className={styles.fieldInput}
+            value={input}
+            onChange={e => onInputChange(e.target.value.trim())}
+            placeholder="https://www.instagram.com/p/…"
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          />
+          <button
+            className={styles.igUrlAddBtn}
+            onClick={handleAdd}
+            disabled={!isValid}
+            type="button"
+          >
+            +
+          </button>
+        </div>
+      )}
+
+      <p className={styles.fieldHint}>
+        Вставьте ссылку на публичный пост или Reel — клиенты увидят реальные работы
+      </p>
+    </div>
+  )
+}
+
 /* ── Wizard (new business) ──────────────────────────────────────── */
 function BusinessWizard() {
   const navigate = useNavigate();
@@ -127,6 +196,8 @@ function BusinessWizard() {
   const [lng, setLng] = useState<number | null>(null);
   const [phone, setPhone] = useState('+998');
   const [instagram, setInstagram] = useState('');
+  const [instagramPostUrls, setInstagramPostUrls] = useState<string[]>([]);
+  const [instagramPostInput, setInstagramPostInput] = useState('');
   const [telegramUsername, setTelegramUsername] = useState('');
   const [showMapPicker, setShowMapPicker] = useState(false);
 
@@ -247,6 +318,7 @@ function BusinessWizard() {
         address: address.trim() || undefined,
         phone: phone.trim() !== '+998' ? phone.trim() : undefined,
         instagram: instagram.trim() ? instagram.replace(/^@/, '') : undefined,
+        instagram_post_urls: instagramPostUrls.length > 0 ? instagramPostUrls : undefined,
         telegram_username: telegramUsername.trim() ? telegramUsername.replace(/^@/, '') : undefined,
         photo_url: photoUrls[0] || undefined,
         is_active: true,
@@ -446,9 +518,20 @@ function BusinessWizard() {
                 />
               </div>
               <p className={styles.fieldHint}>
-                Ваши работы из Instagram появятся в профиле заведения как галерея портфолио — клиенты увидят ваш стиль ещё до записи
+                Добавьте ссылки на посты — они появятся в профиле как галерея работ
               </p>
             </div>
+
+            {/* Instagram post URLs */}
+            {instagram.trim() && (
+              <InstagramPostUrlsEditor
+                urls={instagramPostUrls}
+                input={instagramPostInput}
+                onInputChange={setInstagramPostInput}
+                onAdd={url => { if (instagramPostUrls.length < 6) setInstagramPostUrls(prev => [...prev, url]); setInstagramPostInput(''); }}
+                onRemove={i => setInstagramPostUrls(prev => prev.filter((_, j) => j !== i))}
+              />
+            )}
 
             <div className={styles.fieldGroup}>
               <label className={styles.fieldLabel}>Telegram</label>
@@ -678,6 +761,8 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   const [city, setCity] = useState('Tashkent');
   const [phone, setPhone] = useState('');
   const [instagram, setInstagram] = useState('');
+  const [instagramPostUrls, setInstagramPostUrls] = useState<string[]>([]);
+  const [instagramPostInput, setInstagramPostInput] = useState('');
   const [telegramUsername, setTelegramUsername] = useState('');
   const [category, setCategory] = useState<CategoryEnum>('other');
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
@@ -700,8 +785,9 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
           const matched = UZBEKISTAN_CITIES.find(c => c.id === b.city || c.name === b.city);
           setCity(matched?.id ?? 'Tashkent');
           setPhone(b.phone || '');
-          setInstagram((b as any).instagram || '');
-          setTelegramUsername((b as any).telegram_username || '');
+          setInstagram(b.instagram || '');
+          setInstagramPostUrls(b.instagram_post_urls ?? []);
+          setTelegramUsername(b.telegram_username || '');
           setCategory(b.category || 'other');
           if (b.photo_url) setPhotoUrls([b.photo_url]);
           setLat((b as any).lat ?? null);
@@ -774,6 +860,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
         city,
         phone: phone.trim() || undefined,
         instagram: instagram.trim() ? instagram.replace(/^@/, '') : null,
+        instagram_post_urls: instagramPostUrls,
         telegram_username: telegramUsername.trim() ? telegramUsername.replace(/^@/, '') : null,
         photo_url: photoUrls[0] || null,
         is_active: true,
@@ -873,9 +960,19 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
             <input className={`${styles.fieldInput} ${styles.socialField}`} value={instagram} onChange={e => setInstagram(e.target.value.replace(/^@/, ''))} placeholder="username" />
           </div>
           <p className={styles.fieldHint}>
-            Ваши работы из Instagram появятся в профиле как галерея портфолио
+            Добавьте ссылки на посты — они появятся в профиле как галерея работ
           </p>
         </div>
+
+        {instagram.trim() && (
+          <InstagramPostUrlsEditor
+            urls={instagramPostUrls}
+            input={instagramPostInput}
+            onInputChange={setInstagramPostInput}
+            onAdd={url => { if (instagramPostUrls.length < 6) setInstagramPostUrls(prev => [...prev, url]); setInstagramPostInput(''); }}
+            onRemove={i => setInstagramPostUrls(prev => prev.filter((_, j) => j !== i))}
+          />
+        )}
 
         <div className={styles.fieldGroup}>
           <label className={styles.fieldLabel}>Telegram</label>
