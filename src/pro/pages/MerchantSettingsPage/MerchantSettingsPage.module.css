@@ -26,6 +26,28 @@
   color: var(--color-accent);
 }
 
+.fieldBadge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: rgba(107, 206, 255, 0.15);
+  color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+  text-transform: none;
+}
+
+.fieldHint {
+  margin-top: 6px;
+  font-size: var(--text-caption-size);
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
 .fieldInput,
 .fieldTextarea {
   width: 100%;

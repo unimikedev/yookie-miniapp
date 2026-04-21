@@ -1,0 +1,127 @@
+/* ── InstagramGallery ────────────────────────────────────────────── */
+
+.root {
+  padding: 0 0 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  line-height: var(--text-h3-lh);
+  letter-spacing: var(--text-h3-ls);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.profileLink {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.profileLink:active {
+  opacity: 0.65;
+}
+
+/* ── Horizontal scroll track ─────────────────────────────────────── */
+.scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 16px 4px;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────── */
+.card {
+  flex-shrink: 0;
+  width: clamp(140px, 62vw, 220px);
+  scroll-snap-align: start;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.card:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.cardInner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+}
+
+/* Actual image — sits on top of gradient, fades in */
+.cardImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-2xl);
+}
+
+/* Semi-transparent overlay that always sits on top */
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+/* Instagram SVG icon */
+.igIcon {
+  width: 36px;
+  height: 36px;
+  opacity: 0.85;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+}
+
+/* Bottom caption bar */
+.cardCaption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 20px 10px 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0;
+  pointer-events: none;
+}

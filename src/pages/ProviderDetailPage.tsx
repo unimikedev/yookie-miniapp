@@ -29,7 +29,7 @@ import { createBooking } from '@/lib/api/bookings'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
-import { PhotoSwipe, FavoriteButton } from '@/components/features'
+import { PhotoSwipe, FavoriteButton, InstagramGallery } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
@@ -732,6 +732,13 @@ export default function ProviderDetailPage() {
                 value="Есть слоты"
               />
             </div>
+
+            {business?.instagram && (
+              <InstagramGallery
+                username={business.instagram}
+                postUrls={(business as any).instagram_post_urls}
+              />
+            )}
 
             <div className={styles.section}>
               <ContactInfo

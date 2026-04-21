@@ -428,11 +428,14 @@ function BusinessWizard() {
             </div>
 
             <div className={styles.sectionDivider}>
-              <span className={styles.sectionDividerLabel}>Социальные сети</span>
+              <span className={styles.sectionDividerLabel}>Портфолио и контакты</span>
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Instagram</label>
+              <label className={styles.fieldLabel}>
+                Instagram
+                <span className={styles.fieldBadge}>Портфолио</span>
+              </label>
               <div className={styles.socialInput}>
                 <span className={styles.socialPrefix}>@</span>
                 <input
@@ -442,6 +445,9 @@ function BusinessWizard() {
                   placeholder="username"
                 />
               </div>
+              <p className={styles.fieldHint}>
+                Ваши работы из Instagram появятся в профиле заведения как галерея портфолио — клиенты увидят ваш стиль ещё до записи
+              </p>
             </div>
 
             <div className={styles.fieldGroup}>
@@ -854,15 +860,21 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
         </div>
 
         <div className={styles.sectionDivider}>
-          <span className={styles.sectionDividerLabel}>Социальные сети</span>
+          <span className={styles.sectionDividerLabel}>Портфолио и контакты</span>
         </div>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Instagram</label>
+          <label className={styles.fieldLabel}>
+            Instagram
+            <span className={styles.fieldBadge}>Портфолио</span>
+          </label>
           <div className={styles.socialInput}>
             <span className={styles.socialPrefix}>@</span>
             <input className={`${styles.fieldInput} ${styles.socialField}`} value={instagram} onChange={e => setInstagram(e.target.value.replace(/^@/, ''))} placeholder="username" />
           </div>
+          <p className={styles.fieldHint}>
+            Ваши работы из Instagram появятся в профиле как галерея портфолио
+          </p>
         </div>
 
         <div className={styles.fieldGroup}>

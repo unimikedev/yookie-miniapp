@@ -11,6 +11,8 @@ export { default as PhotoSwipe } from './PhotoSwipe';
 export { default as ReviewForm } from './ReviewForm';
 export { default as RescheduleBottomSheet } from './RescheduleBottomSheet';
 
+export { default as InstagramGallery } from './InstagramGallery/InstagramGallery';
+
 // Detail page shared components
 export {
   Chip,
