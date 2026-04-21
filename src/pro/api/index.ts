@@ -541,3 +541,7 @@ export async function updateAvailability(
     throw err;
   }
 }
+
+export async function patchBusiness(merchantId: string, fields: Record<string, unknown>): Promise<void> {
+  await api.patch<unknown>(`/businesses/${merchantId}`, fields)
+}

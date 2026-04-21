@@ -69,8 +69,15 @@ export async function fetchSlots(
  * Body shape: { businessId, masterId, serviceId, startsAt, client: { phone, name } }
  * Falls back to mock when backend is unavailable (DEV only).
  */
+function getTgUserId(): number | undefined {
+  try {
+    return (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id ?? undefined
+  } catch { return undefined }
+}
+
 export async function createBooking(data: CreateBookingPayload): Promise<Booking> {
   try {
+    const telegramId = data.telegramId ?? getTgUserId()
     const body: Record<string, unknown> = {
       businessId: data.businessId,
       masterId: data.masterId,
@@ -79,6 +86,7 @@ export async function createBooking(data: CreateBookingPayload): Promise<Booking
       client: {
         phone: data.clientPhone,
         name: data.clientName,
+        ...(telegramId ? { telegramId } : {}),
       },
     };
     if (data.notes) body.notes = data.notes;

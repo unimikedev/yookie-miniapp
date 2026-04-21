@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { dashboardSummary, listBookings, listPendingBookings, listStaff, updateBookingStatus, listActivity } from '@/pro/api';
+import { dashboardSummary, listBookings, listPendingBookings, listStaff, updateBookingStatus, listActivity, patchBusiness } from '@/pro/api';
 import type { ActivityEvent } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, Master } from '@/lib/api/types';
@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { merchantId } = useMerchantStore();
   const [summary, setSummary] = useState<Summary | null>(null);
+  const tgSyncDone = useRef(false);
   const [pending, setPending] = useState<Booking[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [staff, setStaff] = useState<Master[]>([]);
@@ -44,6 +45,15 @@ export default function DashboardPage() {
     if (!merchantId) return;
     listActivity(merchantId).then(setActivity).catch(() => {});
   }, [merchantId]);
+
+  // One-time: save merchant's Telegram ID so notifications work
+  useEffect(() => {
+    if (!merchantId || tgSyncDone.current) return;
+    const tgId = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id
+    if (!tgId) return
+    tgSyncDone.current = true
+    patchBusiness(merchantId, { admin_telegram_id: tgId }).catch(() => {})
+  }, [merchantId])
 
   useEffect(() => {
     if (!merchantId) return;

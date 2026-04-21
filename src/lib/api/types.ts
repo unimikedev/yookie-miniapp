@@ -226,6 +226,7 @@ export interface CreateBookingPayload {
   clientPhone: string;
   clientName: string;
   notes?: string;
+  telegramId?: number;
 }
 
 export interface CancelBookingPayload {
