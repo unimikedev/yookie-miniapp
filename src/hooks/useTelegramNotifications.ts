@@ -1,42 +1,44 @@
 import { useEffect } from 'react';
 import { notificationService, WebhookPayload } from '../lib/notificationService';
+import { api } from '../lib/api/client';
+
+const SYNC_KEY = 'yookie_tg_synced';
 
 /**
- * Хук для прослушивания уведомлений от Telegram Bot API
- * Подписывается на сообщения бота и обрабатывает webhook события
+ * Хук для прослушивания уведомлений от Telegram Bot API и синхронизации Telegram ID.
+ * Сохраняет telegram_id клиента при каждом новом сеансе в Telegram.
  */
 export const useTelegramNotifications = () => {
   useEffect(() => {
-    // Проверяем, что мы внутри Telegram
     if (!window.Telegram?.WebApp) {
-      console.log('[useTelegramNotifications] Not running in Telegram');
       return;
     }
 
     const tg = window.Telegram.WebApp;
+    const telegramId: number | undefined = tg.initDataUnsafe?.user?.id;
 
-    // Обработчик сообщений от бота (вебхуки приходят как сообщения)
+    // Sync Telegram ID once per session if authenticated
+    if (telegramId && !sessionStorage.getItem(SYNC_KEY)) {
+      const token = (() => { try { return localStorage.getItem('yookie_auth_token'); } catch { return null; } })();
+      if (token) {
+        sessionStorage.setItem(SYNC_KEY, '1');
+        api.post('/auth/sync-telegram', { telegramId }).catch(() => {});
+      }
+    }
+
     const handleBotMessage = (event: any) => {
       try {
-        // Пытаемся распарсить данные вебхука из сообщения
-        // Формат: { type: 'booking-created', data: {...}, timestamp: 1234567890 }
         const payload: WebhookPayload = JSON.parse(event.data);
-        
         if (payload.type && payload.data) {
           notificationService.handleEvent(payload);
         }
-      } catch (error) {
-        // Если не удалось распарсить, игнорируем (это может быть обычное сообщение)
-        console.log('[useTelegramNotifications] Non-webhook message received');
+      } catch {
+        // non-webhook message, ignore
       }
     };
 
-    // Подписываемся на события от Telegram WebApp
     tg.onEvent('message_received', handleBotMessage as () => void);
-
-    return () => {
-      tg.offEvent('message_received', handleBotMessage as () => void);
-    };
+    return () => { tg.offEvent('message_received', handleBotMessage as () => void); };
   }, []);
 
   return null;
