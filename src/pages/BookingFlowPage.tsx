@@ -127,11 +127,32 @@ export default function BookingFlowPage() {
         )
       );
 
-      // Check for failures
+      // Check for failures and implement atomic rollback
       const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
       if (failures.length > 0) {
+        // Collect successful booking IDs for potential rollback
+        const successfulBookingIds: string[] = [];
+        results.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            successfulBookingIds.push(result.value.id);
+          }
+        });
+
+        // Attempt rollback of any successful bookings from this batch
+        if (successfulBookingIds.length > 0 && effectivePhone) {
+          console.error('[BookingFlowPage] Rolling back', successfulBookingIds.length, 'successful bookings due to batch failure');
+          // Fire-and-forget rollback attempts - best effort
+          successfulBookingIds.forEach((bookingId) => {
+            import('@/lib/api/bookings').then(({ cancelBooking }) => {
+              cancelBooking(bookingId, effectivePhone).catch((rollbackErr) => {
+                console.error('[BookingFlowPage] Rollback failed for booking', bookingId, rollbackErr);
+              });
+            });
+          });
+        }
+
         const err = failures[0].reason;
-        throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей');
+        throw err instanceof Error ? err : new Error('Не удалось завершить полную бронь. Пожалуйста, попробуйте еще раз.');
       }
 
       // Sync each successful booking to merchant store
@@ -149,13 +170,15 @@ export default function BookingFlowPage() {
         navigate('/my-bookings')
       }, 2000)
     } catch (err: any) {
-      // Проверяем на конфликт слотов (409)
+      // Use centralized error mapping from errorMapper
       const isConflictError = err?.status === 409 || 
+                              err?.code === 'BOOKING_CONFLICT' || 
+                              err?.code === 'SLOT_UNAVAILABLE' ||
                               err?.message?.includes('BOOKING_CONFLICT') || 
                               err?.message?.includes('SLOT_UNAVAILABLE');
       
       if (isConflictError && services.length > 0) {
-        // Показываем модалку с альтернативными слотами для первого сервиса
+        // Show modal with alternative slots for first service
         const firstService = services[0];
         setConflictSlotInfo({
           serviceId: firstService.service.id,
@@ -346,7 +369,7 @@ export default function BookingFlowPage() {
                             id: slot.starts_at,
                             start: `${hours}:${minutes}`,
                             end: slot.ends_at ? new Date(slot.ends_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '',
-                            available: true,
+                            is_available: true,
                           };
                           
                           bookingStore.setSlot(newSlot);

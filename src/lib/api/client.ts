@@ -13,6 +13,8 @@ interface ClientConfig {
 class ApiClient {
   private baseUrl: string;
   private timeout: number;
+  private isRefreshing = false;
+  private refreshSubscribers: Array<(token: string | null) => void> = [];
 
   constructor(config: ClientConfig) {
     this.baseUrl = config.baseUrl;
@@ -28,6 +30,37 @@ class ApiClient {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Clear auth token and redirect to login on 401
+   */
+  private handleUnauthorized(): void {
+    // Clear auth tokens
+    try {
+      localStorage.removeItem('yookie_auth_token');
+      localStorage.removeItem('yookie_auth_user');
+    } catch { /* noop */ }
+
+    // Redirect to login page (only if not already there)
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth')) {
+      window.location.href = '/auth';
+    }
+  }
+
+  /**
+   * Subscribe to token refresh events
+   */
+  private subscribeToTokenRefresh(callback: (token: string | null) => void): void {
+    this.refreshSubscribers.push(callback);
+  }
+
+  /**
+   * Notify all subscribers about token refresh result
+   */
+  private notifyRefreshSubscribers(token: string | null): void {
+    this.refreshSubscribers.forEach((callback) => callback(token));
+    this.refreshSubscribers = [];
   }
 
   /**
@@ -131,12 +164,22 @@ class ApiClient {
           // Response is not JSON, use defaults
         }
 
-        throw new ApiError(
+        const apiError = new ApiError(
           response.status,
           errorData.code,
           errorData.message,
           errorData.details
         );
+
+        // Handle 401 Unauthorized - clear token and redirect to login
+        if (response.status === 401) {
+          // Prevent infinite loops by checking if we're already handling this
+          if (!this.isRefreshing) {
+            this.handleUnauthorized();
+          }
+        }
+
+        throw apiError;
       }
 
       const data = await response.json();
