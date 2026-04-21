@@ -394,34 +394,32 @@ export default function MyBookingsPage() {
         </div>
       )}
 
-      {rescheduleBookingData && (
-        <RescheduleBottomSheet
-          open={!!rescheduleBookingId}
-          onClose={() => { setRescheduleBookingId(null); setRescheduleGroupIds([]); }}
-          businessId={rescheduleBookingData.business_id}
-          masterId={rescheduleBookingData.master_id}
-          currentStartsAt={rescheduleBookingData.starts_at}
-          onConfirm={handleRescheduleConfirm}
-          loading={rescheduleLoading}
-          serviceId={(rescheduleBookingData.services as { id?: string } | null)?.id}
-          serviceDurationMin={(() => {
-            // Sum total duration of ALL bookings in the group being rescheduled
-            const groupBookings = bookings.filter(b => rescheduleGroupIds.includes(b.id))
-            if (groupBookings.length > 1) {
-              return groupBookings.reduce((sum, b) => {
-                const dur = (b.services as { duration_min?: number } | null)?.duration_min
-                return sum + (dur || Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60000))
-              }, 0)
-            }
-            const svc = rescheduleBookingData.services as { duration_min?: number } | null
-            if (svc?.duration_min) return svc.duration_min
-            if (rescheduleBookingData.ends_at) {
-              return Math.round((new Date(rescheduleBookingData.ends_at).getTime() - new Date(rescheduleBookingData.starts_at).getTime()) / 60000)
-            }
-            return undefined
-          })()}
-        />
-      )}
+      <RescheduleBottomSheet
+        open={!!rescheduleBookingId && !!rescheduleBookingData}
+        onClose={() => { setRescheduleBookingId(null); setRescheduleGroupIds([]); }}
+        businessId={rescheduleBookingData?.business_id ?? ''}
+        masterId={rescheduleBookingData?.master_id ?? ''}
+        currentStartsAt={rescheduleBookingData?.starts_at ?? ''}
+        onConfirm={handleRescheduleConfirm}
+        loading={rescheduleLoading}
+        serviceId={(rescheduleBookingData?.services as { id?: string } | null)?.id}
+        serviceDurationMin={(() => {
+          if (!rescheduleBookingData) return undefined
+          const groupBookings = bookings.filter(b => rescheduleGroupIds.includes(b.id))
+          if (groupBookings.length > 1) {
+            return groupBookings.reduce((sum, b) => {
+              const dur = (b.services as { duration_min?: number } | null)?.duration_min
+              return sum + (dur || Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60000))
+            }, 0)
+          }
+          const svc = rescheduleBookingData.services as { duration_min?: number } | null
+          if (svc?.duration_min) return svc.duration_min
+          if (rescheduleBookingData.ends_at) {
+            return Math.round((new Date(rescheduleBookingData.ends_at).getTime() - new Date(rescheduleBookingData.starts_at).getTime()) / 60000)
+          }
+          return undefined
+        })()}
+      />
     </div>
   )
 }

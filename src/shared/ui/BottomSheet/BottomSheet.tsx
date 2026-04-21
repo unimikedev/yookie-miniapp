@@ -8,6 +8,8 @@ export interface BottomSheetProps {
   title?: string;
   children: ReactNode;
   'aria-label'?: string;
+  /** Skip the content wrapper's padding and overflow — use when child controls its own scroll/layout */
+  fullHeight?: boolean;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
@@ -16,6 +18,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   title,
   children,
   'aria-label': ariaLabel,
+  fullHeight = false,
 }) => {
   const sheetRef = useRef<HTMLDivElement>(null);
   const startYRef = useRef<number>(0);
@@ -108,7 +111,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           </div>
         )}
 
-        <div className={styles.content}>{children}</div>
+        <div className={`${styles.content} ${fullHeight ? styles.contentFull : ''}`}>{children}</div>
       </div>
     </>
   );

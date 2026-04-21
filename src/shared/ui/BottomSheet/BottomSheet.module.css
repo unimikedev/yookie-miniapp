@@ -107,6 +107,14 @@
   padding-bottom: calc(20px + var(--safe-area-bottom, 0px));
 }
 
+/* Used by sheets that manage their own layout (e.g. with sticky footer) */
+.contentFull {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .content::-webkit-scrollbar {
   width: 6px;
 }

@@ -117,7 +117,7 @@ export default function RescheduleBottomSheet({
     : 'Выберите дату'
 
   return (
-    <BottomSheet open={open} onClose={handleClose} title="Перенести запись">
+    <BottomSheet open={open} onClose={handleClose} title="Перенести запись" fullHeight>
       <div className={styles.sheetBody}>
         {/* Scrollable content */}
         <div ref={contentRef} className={styles.content}>
