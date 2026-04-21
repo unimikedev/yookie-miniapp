@@ -31,6 +31,7 @@
    This prevents the wrapper from creating a stacking context that breaks
    position:sticky inside the page content. */
 
+/* ── Enter animations ───────────────────────────────────────── */
 .pageFwd {
   animation: pageFwdEnter 0.26s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
@@ -43,7 +44,6 @@
   animation: pageFadeIn 0.18s ease backwards;
 }
 
-/* "to" omitted — browser interpolates to the element's natural style (no transform, opacity 1) */
 @keyframes pageFwdEnter {
   from { transform: translateX(48px); opacity: 0; }
 }
@@ -54,4 +54,32 @@
 
 @keyframes pageFadeIn {
   from { opacity: 0; }
+}
+
+/* ── Exit animations ────────────────────────────────────────── */
+.pageFwdExit {
+  animation: pageFwdExit 0.26s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+.pageBackExit {
+  animation: pageBackExit 0.26s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+.pageFadeOut {
+  animation: pageFadeOut 0.18s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes pageFwdExit {
+  to { transform: translateX(-48px); opacity: 0; }
+}
+
+@keyframes pageBackExit {
+  to { transform: translateX(48px); opacity: 0; }
+}
+
+@keyframes pageFadeOut {
+  to { opacity: 0; }
 }

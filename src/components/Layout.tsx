@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { useTelegramSafeArea } from '@/hooks/useTelegramSafeArea'
@@ -13,37 +13,65 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
-function getSlideClass(prevPath: string, currPath: string): string {
-  const prevIsTab = TAB_PATHS.has(prevPath)
-  const currIsTab = TAB_PATHS.has(currPath)
-  if (prevIsTab && currIsTab) return styles.pageFade   // tab ↔ tab — subtle fade
-  if (!prevIsTab && currIsTab) return styles.pageBack  // detail → tab — slide from left
-  return styles.pageFwd                                 // anything → detail — slide from right
+function getEnterClass(fromPath: string, toPath: string): string {
+  const fromIsTab = TAB_PATHS.has(fromPath)
+  const toIsTab = TAB_PATHS.has(toPath)
+  if (fromIsTab && toIsTab) return styles.pageFade
+  if (!fromIsTab && toIsTab) return styles.pageBack  // detail → tab: slide in from left
+  return styles.pageFwd                               // tab/any → detail: slide in from right
 }
+
+function getExitClass(fromPath: string, toPath: string): string {
+  const fromIsTab = TAB_PATHS.has(fromPath)
+  const toIsTab = TAB_PATHS.has(toPath)
+  if (fromIsTab && toIsTab) return styles.pageFadeOut
+  if (!fromIsTab && toIsTab) return styles.pageBackExit  // detail → tab: slide out to right
+  return styles.pageFwdExit                               // tab/any → detail: slide out to left
+}
+
+const TRANSITION_MS = 260
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { isOpen: isOverlayOpen } = useOverlayStore()
   const tgBackHandlerRef = useRef<(() => void) | null>(null)
-  const prevPathRef = useRef<string>(location.pathname)
 
-  // Apply Telegram safe area insets to CSS vars — runs once, listens for mode changes
   useTelegramSafeArea()
 
-  const isProRoute = location.pathname.startsWith('/pro')
   const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
   const showTgBack = !PAGES_WITH_NAV.includes(location.pathname)
 
-  // Compute slide direction before updating the ref (prev path is still the old one during render)
-  const slideClass = prevPathRef.current !== location.pathname
-    ? getSlideClass(prevPathRef.current, location.pathname)
-    : styles.pageFade
+  // Delayed-unmount transition state
+  const [shownChildren, setShownChildren] = useState<React.ReactNode>(children)
+  const [transClass, setTransClass] = useState<string>('')
+  const shownPathRef = useRef(location.pathname)
+  const shownKeyRef = useRef(location.key)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Update prev path after render
   useEffect(() => {
-    prevPathRef.current = location.pathname
-  }, [location.pathname])
+    if (location.key === shownKeyRef.current) return
+
+    const fromPath = shownPathRef.current
+    const toPath = location.pathname
+    const newChildren = children
+    const newKey = location.key
+
+    // Trigger exit animation on currently displayed content
+    setTransClass(getExitClass(fromPath, toPath))
+
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      shownPathRef.current = toPath
+      shownKeyRef.current = newKey
+      setShownChildren(newChildren)
+      setTransClass(getEnterClass(fromPath, toPath))
+    }, TRANSITION_MS)
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Global Telegram BackButton — shows on detail/nested pages, hides on root tabs and pro routes
   useEffect(() => {
@@ -75,8 +103,8 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className={styles.layout}>
       <main className={`${styles.main} ${showNav ? styles.withNav : ''}`}>
-        <div key={location.key} className={`${styles.pageTransition} ${slideClass}`}>
-          {children}
+        <div className={`${styles.pageTransition} ${transClass}`}>
+          {shownChildren}
         </div>
       </main>
       {showNav && <BottomNav />}
