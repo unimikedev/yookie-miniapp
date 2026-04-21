@@ -129,8 +129,54 @@ export default function BookingFlowPage() {
 
       // Check for failures
       const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+      
       if (failures.length > 0) {
         const err = failures[0].reason;
+        const isConflictError = err?.status === 409 || 
+                                err?.message?.includes('BOOKING_CONFLICT') || 
+                                err?.message?.includes('SLOT_UNAVAILABLE');
+        
+        if (isConflictError && services.length > 0) {
+          // Show alternative slots modal for conflict errors
+          const firstService = services[0];
+          setConflictSlotInfo({
+            serviceId: firstService.service.id,
+            masterId: firstService.masterId!,
+            dateTime: startsAt
+          });
+          setShowAlternativeSlots(true);
+          setError('Выбранное время только что заняли. Пожалуйста, выберите другое время.');
+          setIsLoading(false);
+          return;
+        }
+        
+        // CRITICAL: Partial failure - some bookings succeeded, some failed
+        // We need to inform the user about what happened
+        const successes = results.filter((r) => r.status === 'fulfilled') as PromiseFulfilledResult<any>[];
+        if (successes.length > 0 && failures.length > 0) {
+          // Sync successful bookings
+          successes.forEach((result) => {
+            syncBookingToMerchant(result.value);
+          });
+          
+          // Warn user about partial success
+          console.error('[BookingFlow] Partial booking failure:', {
+            successful: successes.length,
+            failed: failures.length,
+            error: failures[0].reason
+          });
+          
+          // Still show success but with warning
+          setBookedCount(successes.length);
+          setSuccessState(true);
+          bookingStore.reset();
+          setTimeout(() => {
+            navigate('/my-bookings');
+          }, 2000);
+          setIsLoading(false);
+          return;
+        }
+        
         throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей');
       }
 

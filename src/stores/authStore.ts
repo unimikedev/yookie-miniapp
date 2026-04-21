@@ -216,3 +216,10 @@ if (typeof window !== 'undefined' && !initialized) {
   initialized = true;
   useAuthStore.getState().loadFromStorage();
 }
+
+// Listen for 401 events from API client to auto-logout
+if (typeof window !== 'undefined') {
+  window.addEventListener('auth:unauthorized', () => {
+    useAuthStore.getState().logout();
+  });
+}

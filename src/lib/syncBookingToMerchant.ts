@@ -35,11 +35,13 @@ export function syncBookingToMerchant(booking: Booking): void {
   }
 
   // Transform B2C Booking → MerchantBooking
+  // Extract client info from populated relations or fallback to direct fields
+  const clientInfo = booking.clients;
   const merchantBooking: Omit<MerchantBooking, 'id' | 'created_at' | 'updated_at'> = {
     merchant_id: merchantId,
     client_id: booking.client_id || `client-${Date.now()}`,
-    client_name: (booking as any).client_name ?? '',
-    client_phone: (booking as any).client_phone ?? '',
+    client_name: clientInfo?.name ?? (booking as any).client_name ?? '',
+    client_phone: clientInfo?.phone ?? (booking as any).client_phone ?? '',
     service_id: booking.service_id,
     master_id: booking.master_id,
     starts_at: booking.starts_at,

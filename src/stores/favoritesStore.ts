@@ -62,7 +62,9 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
   toggle: (businessId: string) => {
     set((state) => {
       const newSet = new Set(state.favoriteIds);
-      if (newSet.has(businessId)) {
+      const wasFavorited = newSet.has(businessId);
+      
+      if (wasFavorited) {
         newSet.delete(businessId);
       } else {
         newSet.add(businessId);
@@ -72,15 +74,21 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newSet)));
       } catch { /* noop */ }
 
-      // Sync with backend (fire-and-forget, non-blocking)
+      // Sync with backend (fire-and-forget, non-blocking but logged)
       const phone = getPhone();
       if (phone) {
-        if (state.favoriteIds.has(businessId)) {
+        if (wasFavorited) {
           // Was favorited → now removing
-          api.delete(`/favorites/${businessId}`, { phone }).catch(() => {});
+          api.delete(`/favorites/${businessId}`, { phone }).catch((err) => {
+            console.warn('[favoritesStore] Failed to remove favorite from backend:', err);
+            // Note: Local state already updated, backend sync failed
+          });
         } else {
           // Was not favorited → now adding
-          api.post(`/favorites/${businessId}`, {}).catch(() => {});
+          api.post(`/favorites/${businessId}`, {}).catch((err) => {
+            console.warn('[favoritesStore] Failed to add favorite to backend:', err);
+            // Note: Local state already updated, backend sync failed
+          });
         }
       }
 
@@ -103,10 +111,13 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newSet)));
       } catch { /* noop */ }
 
-      // Sync with backend
+      // Sync with backend (logged for visibility)
       const phone = getPhone();
       if (phone) {
-        api.post(`/favorites/${businessId}`, {}).catch(() => {});
+        api.post(`/favorites/${businessId}`, {}).catch((err) => {
+          console.warn('[favoritesStore] Failed to add favorite to backend:', err);
+          // Note: Local state already updated, backend sync failed
+        });
       }
 
       return { favoriteIds: newSet };
@@ -124,10 +135,13 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(newSet)));
       } catch { /* noop */ }
 
-      // Sync with backend
+      // Sync with backend (logged for visibility)
       const phone = getPhone();
       if (phone) {
-        api.delete(`/favorites/${businessId}`, { phone }).catch(() => {});
+        api.delete(`/favorites/${businessId}`, { phone }).catch((err) => {
+          console.warn('[favoritesStore] Failed to remove favorite from backend:', err);
+          // Note: Local state already updated, backend sync failed
+        });
       }
 
       return { favoriteIds: newSet };

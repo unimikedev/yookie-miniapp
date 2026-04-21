@@ -647,12 +647,12 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
           const matched = UZBEKISTAN_CITIES.find(c => c.id === b.city || c.name === b.city);
           setCity(matched?.id ?? 'Tashkent');
           setPhone(b.phone || '');
-          setInstagram((b as any).instagram || '');
-          setTelegramUsername((b as any).telegram_username || '');
+          setInstagram(b.instagram || '');
+          setTelegramUsername(b.telegram_username || '');
           setCategory(b.category || 'other');
           if (b.photo_url) setPhotoUrls([b.photo_url]);
-          setLat((b as any).lat ?? null);
-          setLng((b as any).lng ?? null);
+          setLat(b.lat ?? null);
+          setLng(b.lng ?? null);
         }
       })
       .catch(() => {});

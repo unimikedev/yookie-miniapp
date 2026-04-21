@@ -31,6 +31,18 @@ class ApiClient {
   }
 
   /**
+   * Clear auth tokens on 401
+   */
+  private handleUnauthorized(): void {
+    try {
+      localStorage.removeItem('yookie_auth_token');
+      localStorage.removeItem('yookie_auth_user');
+    } catch { /* noop */ }
+    // Dispatch custom event for auth store to react
+    window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+  }
+
+  /**
    * Make GET request
    */
   async get<T>(path: string, params?: Record<string, unknown>): Promise<T> {
@@ -120,6 +132,11 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        // Handle 401 Unauthorized - clear tokens and notify
+        if (response.status === 401) {
+          this.handleUnauthorized();
+        }
+
         let errorData: ApiErrorResponse = {
           code: 'UNKNOWN_ERROR',
           message: response.statusText,
@@ -145,6 +162,10 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       if (error instanceof ApiError) {
+        // Re-throw 401 errors after handling
+        if ((error as any).status === 401) {
+          this.handleUnauthorized();
+        }
         throw error;
       }
 

@@ -51,7 +51,6 @@ export function useBusiness(businessId: string | undefined): UseBusinessResult {
           if (import.meta.env.DEV && !hasRealData) {
             const mockBiz = getMockBusiness(businessId);
             if (mockBiz) {
-              console.log(`[useBusiness] API returned empty data for ${businessId}, using mock fallback`);
               setBusiness(businessData ?? mockBiz);
               setMasters(getMockMasters(businessId));
               setServices(getMockServices(businessId));
