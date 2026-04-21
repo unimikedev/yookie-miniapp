@@ -15,8 +15,13 @@ export const useTelegramNotifications = () => {
     const tg = window.Telegram.WebApp;
     const telegramId: number | undefined = tg.initDataUnsafe?.user?.id;
 
-    // Sync Telegram ID on every app open if authenticated
+    // Sync Telegram ID on every app open using stored booking phone
     if (telegramId) {
+      const phone = (() => { try { return localStorage.getItem('yookie_booking_phone'); } catch { return null; } })();
+      if (phone) {
+        api.post('/notifications/sync-client-telegram', { telegramId, phone }).catch(() => {});
+      }
+      // Also sync via auth token (for logged-in users whose JWT phone matches)
       const token = (() => { try { return localStorage.getItem('yookie_auth_token'); } catch { return null; } })();
       if (token) {
         api.post('/auth/sync-telegram', { telegramId }).catch(() => {});
