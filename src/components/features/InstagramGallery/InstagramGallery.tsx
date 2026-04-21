@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import styles from './InstagramGallery.module.css'
 
 interface InstagramGalleryProps {
@@ -7,7 +7,7 @@ interface InstagramGalleryProps {
   className?: string
 }
 
-const CARD_GRADIENTS = [
+const GRADIENTS = [
   'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
   'linear-gradient(135deg, #405de6 0%, #5851db 40%, #833ab4 100%)',
   'linear-gradient(135deg, #fcb045 0%, #fd1d1d 50%, #833ab4 100%)',
@@ -21,87 +21,105 @@ function parseShortcode(url: string): string | null {
   return m ? m[1] : null
 }
 
-function InstagramCard({
-  url,
-  username,
-  index,
-}: {
-  url: string
-  username: string
-  index: number
-}) {
-  const [visible, setVisible] = useState(false)
-  const ref = useRef<HTMLAnchorElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
-      { rootMargin: '80px' }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+function PostCard({ url, username, index }: { url: string; username: string; index: number }) {
+  const [inView, setInView]     = useState(false)
+  const [loaded, setLoaded]     = useState(false)
+  const containerRef            = useRef<HTMLDivElement>(null)
+  const timerRef                = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const shortcode = parseShortcode(url)
-  const isPost = !!shortcode
-  const thumbUrl = isPost
-    ? `https://www.instagram.com/p/${shortcode}/media/?size=m`
-    : null
+  const postUrl   = shortcode ? `https://www.instagram.com/p/${shortcode}/` : url
+  const embedUrl  = shortcode ? `https://www.instagram.com/p/${shortcode}/embed/` : null
 
-  const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length]
+  // Lazy: load iframe only when card scrolls into view
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect() } },
+      { rootMargin: '120px' }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
 
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }, [url])
+  // Fade in after iframe fires onLoad; also set a 3s timeout in case onLoad fires late
+  const handleLoad = () => {
+    timerRef.current = setTimeout(() => setLoaded(true), 400)
+  }
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
+
+  const openPost = () => window.open(postUrl, '_blank', 'noopener,noreferrer')
 
   return (
-    <a
-      ref={ref}
-      href={url}
-      className={styles.card}
-      onClick={handleClick}
-      rel="noopener noreferrer"
+    <div ref={containerRef} className={styles.card} onClick={openPost} role="button" tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && openPost()}
       aria-label={`Открыть пост @${username} в Instagram`}
     >
-      <div className={styles.cardInner} style={{ background: gradient }}>
-        {visible && thumbUrl && (
-          <img
-            src={thumbUrl}
-            alt=""
-            className={styles.cardImg}
-            loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-          />
-        )}
-        <div className={styles.cardOverlay}>
-          <InstagramIcon />
-        </div>
-        <div className={styles.cardCaption}>
-          <span>@{username}</span>
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
-            <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
+      {/* Gradient placeholder — always underneath */}
+      <div
+        className={styles.placeholder}
+        style={{
+          background: GRADIENTS[index % GRADIENTS.length],
+          opacity: loaded ? 0 : 1,
+        }}
+      >
+        <IgIcon />
       </div>
-    </a>
+
+      {/* iframe — lazy, scaled to fit 200×200 card */}
+      {inView && embedUrl && (
+        <div className={styles.iframeWrap} style={{ opacity: loaded ? 1 : 0 }}>
+          <iframe
+            src={embedUrl}
+            className={styles.iframe}
+            frameBorder="0"
+            scrolling="no"
+            onLoad={handleLoad}
+            title={`Instagram пост @${username}`}
+          />
+        </div>
+      )}
+
+      {/* Invisible tap target overlay + caption */}
+      <div className={styles.tapOverlay}>
+        <span className={styles.tapLabel}>Открыть в Instagram ↗</span>
+      </div>
+    </div>
   )
 }
 
-function InstagramIcon() {
+/* Profile-only card (no specific post URL) */
+function ProfileCard({ username, index }: { username: string; index: number }) {
+  const profileUrl = `https://www.instagram.com/${username}/`
+  const openProfile = () => window.open(profileUrl, '_blank', 'noopener,noreferrer')
+
   return (
-    <svg
-      className={styles.igIcon}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
+    <div
+      className={`${styles.card} ${styles.profileCard}`}
+      onClick={openProfile}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && openProfile()}
+      aria-label={`Открыть Instagram @${username}`}
+      style={{ background: GRADIENTS[index % GRADIENTS.length] }}
     >
-      <rect x="2" y="2" width="20" height="20" rx="6" stroke="white" strokeWidth="1.8"/>
-      <circle cx="12" cy="12" r="4.5" stroke="white" strokeWidth="1.8"/>
-      <circle cx="17.5" cy="6.5" r="1.2" fill="white"/>
+      <IgIcon />
+      <div className={styles.profileCardCaption}>
+        <span className={styles.profileCardUser}>@{username}</span>
+        <span className={styles.profileCardCta}>Смотреть работы ↗</span>
+      </div>
+    </div>
+  )
+}
+
+function IgIcon() {
+  return (
+    <svg className={styles.igIcon} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="2" y="2" width="20" height="20" rx="6" stroke="white" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4.5" stroke="white" strokeWidth="1.8" />
+      <circle cx="17.5" cy="6.5" r="1.2" fill="white" />
     </svg>
   )
 }
@@ -109,15 +127,11 @@ function InstagramIcon() {
 export default function InstagramGallery({ username, postUrls, className }: InstagramGalleryProps) {
   if (!username) return null
 
-  const profileUrl = `https://www.instagram.com/${username}/`
   const cleanUsername = username.replace(/^@/, '')
+  const profileUrl    = `https://www.instagram.com/${cleanUsername}/`
 
-  // Use provided post URLs (up to 6), or generate 3 profile-link placeholders
-  const cards = postUrls && postUrls.length > 0
-    ? postUrls.slice(0, 6)
-    : Array.from({ length: 3 }, () => profileUrl)
-
-  if (cards.length === 0) return null
+  const hasPostUrls = postUrls && postUrls.length > 0
+  const validPosts  = hasPostUrls ? postUrls.filter(u => parseShortcode(u)) : []
 
   return (
     <section className={`${styles.root} ${className ?? ''}`}>
@@ -126,21 +140,26 @@ export default function InstagramGallery({ username, postUrls, className }: Inst
         <a
           href={profileUrl}
           className={styles.profileLink}
-          onClick={(e) => { e.preventDefault(); window.open(profileUrl, '_blank', 'noopener,noreferrer') }}
+          onClick={e => { e.preventDefault(); window.open(profileUrl, '_blank', 'noopener,noreferrer') }}
           rel="noopener noreferrer"
-          aria-label={`Instagram @${cleanUsername}`}
         >
-          <span>@{cleanUsername}</span>
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
-            <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          @{cleanUsername}
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden>
+            <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </a>
       </div>
 
       <div className={styles.scroll}>
-        {cards.map((url, i) => (
-          <InstagramCard key={`${url}-${i}`} url={url} username={cleanUsername} index={i} />
-        ))}
+        {validPosts.length > 0
+          ? validPosts.slice(0, 6).map((url, i) => (
+              <PostCard key={`${url}-${i}`} url={url} username={cleanUsername} index={i} />
+            ))
+          : /* Fallback when no post URLs — show CTA cards */
+            Array.from({ length: 3 }, (_, i) => (
+              <ProfileCard key={i} username={cleanUsername} index={i} />
+            ))
+        }
       </div>
     </section>
   )

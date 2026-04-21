@@ -1,4 +1,4 @@
-/* ── InstagramGallery ────────────────────────────────────────────── */
+/* ── InstagramGallery ───────────────────────────────────────────── */
 
 .root {
   padding: 0 0 20px;
@@ -24,19 +24,16 @@
 .profileLink {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   font-size: var(--text-caption-size);
   font-weight: var(--text-caption-weight);
   color: var(--color-accent);
   text-decoration: none;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.15s;
 }
+.profileLink:active { opacity: 0.6; }
 
-.profileLink:active {
-  opacity: 0.65;
-}
-
-/* ── Horizontal scroll track ─────────────────────────────────────── */
+/* ── Scroll track ────────────────────────────────────────────────── */
 .scroll {
   display: flex;
   gap: 10px;
@@ -47,81 +44,111 @@
   -ms-overflow-style: none;
   padding: 0 16px 4px;
 }
+.scroll::-webkit-scrollbar { display: none; }
 
-.scroll::-webkit-scrollbar {
-  display: none;
-}
-
-/* ── Card ─────────────────────────────────────────────────────────── */
+/* ── Card shell — fixed 200×200, clips iframe ────────────────────── */
 .card {
-  flex-shrink: 0;
-  width: clamp(140px, 62vw, 220px);
-  scroll-snap-align: start;
-  border-radius: var(--radius-2xl);
-  overflow: hidden;
-  text-decoration: none;
-  display: block;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform var(--transition-fast), opacity var(--transition-fast);
-}
-
-.card:active {
-  transform: scale(0.96);
-  opacity: 0.9;
-}
-
-.cardInner {
   position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
-  border-radius: var(--radius-2xl);
+  scroll-snap-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, opacity 0.15s;
+  user-select: none;
 }
+.card:active { transform: scale(0.95); opacity: 0.88; }
 
-/* Actual image — sits on top of gradient, fades in */
-.cardImg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-2xl);
-}
-
-/* Semi-transparent overlay that always sits on top */
-.cardOverlay {
+/* ── Gradient placeholder (always rendered, fades out after load) ── */
+.placeholder {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.18);
+  transition: opacity 0.4s ease;
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Instagram SVG icon */
 .igIcon {
   width: 36px;
   height: 36px;
-  opacity: 0.85;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+  opacity: 0.8;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.35));
 }
 
-/* Bottom caption bar */
-.cardCaption {
+/* ── iframe container — clips the scaled 400px embed to 200px ────── */
+.iframeWrap {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+  pointer-events: none; /* overlay handles taps */
+  z-index: 2;
+}
+
+/*
+ * Instagram embeds render at ~400px native width.
+ * Scale 0.5 → visual 200px wide.
+ * The top 400px of native content (header + photo) maps to 200px visible.
+ * transform-origin: top left so it clips from top-left corner.
+ */
+.iframe {
+  width: 400px;
+  height: 500px;
+  transform: scale(0.5);
+  transform-origin: top left;
+  border: none;
+  background: #fff;
+}
+
+/* ── Tap overlay — sits above iframe, shows label on press ────────── */
+.tapOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
   display: flex;
+  align-items: flex-end;
+  padding: 0 10px 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 45%);
+}
+
+.tapLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+/* ── Profile-only card (no post URLs given) ─────────────────────── */
+.profileCard {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  padding: 20px 10px 10px;
-  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
+  justify-content: center;
+  gap: 10px;
+}
+
+.profileCardCaption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.profileCardUser {
   font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
-  color: rgba(255,255,255,0.92);
-  letter-spacing: 0;
-  pointer-events: none;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
+}
+
+.profileCardCta {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
 }
