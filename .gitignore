@@ -1,4 +1,3 @@
-```
 # Dependencies
 node_modules/
 
@@ -8,10 +7,11 @@ build/
 *.js.map
 *.ts.map
 
-# Environment
+# Environment (local only — .env.production is committed for Railway build)
 .env
 .env.local
 *.env.*
+!.env.production
 
 # Editors
 .vscode/
@@ -58,4 +58,3 @@ Thumbs.db
 
 # Git
 .git/
-```
