@@ -17,8 +17,8 @@ import {
 /**
  * Fetch list of businesses with optional filtering and geo-search.
  * Backend: GET /businesses → { data: Business[], total: number }
- * API client unwraps the outer { data: ... }, but PaginatedResponse already has data[] + metadata,
- * so backend returns { data: { data: [], total: N } } and we receive { data: [], total: N } directly.
+ * ApiClient unwraps { data: X } → returns X. Since backend sends { data: [...], total: N },
+ * we receive [...] (the array) directly. Normalize to PaginatedResponse here.
  */
 export async function fetchBusinesses(
   params: FetchBusinessesParams = {}
@@ -38,8 +38,16 @@ export async function fetchBusinesses(
   if (params.priceMax !== undefined) queryParams.priceMax = params.priceMax;
   if (params.minRating !== undefined) queryParams.minRating = params.minRating;
 
-  const response = await api.get<PaginatedResponse<Business>>('/businesses', queryParams);
-  return response;
+  const raw = await api.get<unknown>('/businesses', queryParams);
+
+  // ApiClient unwraps one { data: X } level. Backend returns { data: [...], total: N }
+  // so we receive the array directly. Normalize to PaginatedResponse.
+  if (Array.isArray(raw)) {
+    const businesses = raw as Business[];
+    return { data: businesses, total: businesses.length, page: 0, limit: params.limit ?? 20, has_next: false, has_prev: false };
+  }
+  // Already a PaginatedResponse (e.g. if backend is updated to double-wrap)
+  return raw as PaginatedResponse<Business>;
 }
 
 /**
@@ -65,7 +73,10 @@ export async function fetchNearbyBusinesses(
   if (params.priceMax !== undefined) queryParams.priceMax = params.priceMax;
   if (params.minRating !== undefined) queryParams.minRating = params.minRating;
 
-  return api.get<{ data: NearbyBusinessResult[]; total: number }>('/businesses', queryParams) as unknown as Promise<{ data: NearbyBusinessResult[]; total: number }>;
+  const raw = await api.get<unknown>('/businesses', queryParams);
+  // Same unwrap issue: API client strips { data: X } → returns array directly.
+  const items = Array.isArray(raw) ? (raw as NearbyBusinessResult[]) : ((raw as { data?: NearbyBusinessResult[] })?.data ?? []);
+  return { data: items, total: items.length };
 }
 
 /**

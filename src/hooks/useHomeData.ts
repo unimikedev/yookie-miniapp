@@ -285,7 +285,7 @@ export function useHomeData(): UseHomeDataResult {
     return () => {
       cancelled = true;
     };
-  }, [tick]);
+  }, [tick, city.id]);
 
   return { data, isLoading, error, refetch: () => setTick((t) => t + 1) };
 }

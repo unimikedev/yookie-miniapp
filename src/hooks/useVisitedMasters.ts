@@ -39,7 +39,7 @@ export function useVisitedMasters(): UseVisitedMastersResult {
     fetchVisitedMasters(phone, 8)
       .then((res) => {
         if (!cancelled) {
-          setVisited(res.data ?? []);
+          setVisited(res ?? []);
           setIsLoading(false);
         }
       })
