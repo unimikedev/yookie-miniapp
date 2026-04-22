@@ -6,42 +6,42 @@
   position: relative;
   min-height: 100dvh;
   background: var(--color-bg);
-  /* Use Telegram safe area directly without extra hardcoded padding */
-  padding-top: var(--safe-area-top-half);
+  /* offset for fixed blue header so mainContent starts below it */
+  padding-top: calc(var(--safe-area-top-half) + 68px - 24px);
   padding-bottom: calc(var(--safe-area-bottom) + 16px);
 }
 
-/* ── Green gradient — fixed behind header, covers system bar ── */
+/* ── Blue gradient — fixed, covers safe area + header ── */
 .topGradient {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  /* Telegram header + system bar */
-  height: calc(var(--safe-area-top-half) + 64px);
+  height: calc(var(--safe-area-top-half) + 68px);
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
 }
 
-/* ── Main content — slides over gradient ───── */
-.mainContent {
-  position: relative;
-  z-index: 2;
-  background: var(--color-bg);
-  border-radius: 32px 32px 0 0;
-  margin-top: 0;
-  padding-top: 12px;
-  width: 100%;
-}
-
-/* ── Header ─────────────────────────────────────────────── */
-.header {
+/* ── Blue header — fixed on top of gradient ── */
+.blueHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding-top: var(--safe-area-top-half);
+  height: calc(var(--safe-area-top-half) + 68px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px 4px;
-  min-height: 64px;
+  padding-left: 8px;
+  padding-right: 8px;
+  pointer-events: none;
+}
+
+.blueHeader > * {
+  pointer-events: auto;
 }
 
 .logoBlock {
@@ -51,32 +51,17 @@
   justify-content: center;
   min-width: 0;
   gap: 2px;
-  margin-left: 16px;
-}
-
-.headerBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  flex-shrink: 0;
-  transition: opacity 0.15s;
-  margin-right: 16px;
-}
-
-.headerBtn:active {
-  opacity: 0.75;
+  padding-left: 16px;
 }
 
 .logoImage {
   height: 28px;
   width: auto;
   display: block;
+}
+
+.logoWhite {
+  filter: brightness(0) invert(1);
 }
 
 .logoSub {
@@ -86,13 +71,47 @@
   color: var(--color-text-muted);
 }
 
-/* ── Search — sticky, pins to top of viewport ──────────── */
+.logoSubWhite {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.headerBtnBlue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+  margin-right: 12px;
+}
+
+.headerBtnBlue:active {
+  opacity: 0.7;
+}
+
+/* ── Main content — white card with rounded top corners ── */
+.mainContent {
+  position: relative;
+  z-index: 2;
+  background: var(--color-bg);
+  border-radius: 32px 32px 0 0;
+  padding-top: 16px;
+  width: 100%;
+  min-height: calc(100dvh - var(--safe-area-top-half) - 44px);
+}
+
+/* ── Search — sticky, pins just below blue header when scrolling ── */
 .searchWrap {
   position: sticky;
-  top: calc(var(--safe-area-top-half) + 12px);
+  top: 0;
   z-index: 10;
-  background: transparent;
-  padding: 4px 16px 4px;
+  background: var(--color-bg);
+  padding: 4px 16px 8px;
+  border-radius: 32px 32px 0 0;
 }
 
 .searchBox {

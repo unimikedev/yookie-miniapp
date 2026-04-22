@@ -55,7 +55,7 @@ const HeartIconLarge = () => (
   <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
     <path
       d="M10 17.5C9.7 17.5 9.4 17.4 9.14 17.2L1.5 10.5C0.53 9.58 0 8.33 0 7C0 4.24 2.24 2 5 2C6.9 2 8.57 3.11 9.4 4.7C9.54 4.88 9.76 5 10 5C10.24 5 10.46 4.88 10.6 4.7C11.43 3.11 13.1 2 15 2C17.76 2 20 4.24 20 7C20 8.33 19.47 9.58 18.5 10.5L10.86 17.2C10.6 17.4 10.3 17.5 10 17.5Z"
-      fill="#6BCEFF"
+      fill="white"
     />
   </svg>
 )
@@ -353,18 +353,18 @@ export default function HomePage() {
     <div className={styles.page}>
       <div className={styles.topGradient} aria-hidden="true" />
 
-      <div className={styles.mainContent}>
-        {/* Header */}
-        <header className={styles.header}>
-          <div className={styles.logoBlock}>
-            <img src="/logo.svg" alt="Yookie" className={styles.logoImage} />
-            <span className={styles.logoSub}>Маркетплейс оффлайн услуг</span>
-          </div>
-          <button className={styles.headerBtn} onClick={() => navigate('/favorites')} aria-label="Избранное">
-            <HeartIconLarge />
-          </button>
-        </header>
+      {/* Header sits on the blue gradient area */}
+      <header className={styles.blueHeader}>
+        <div className={styles.logoBlock}>
+          <img src="/logo.svg" alt="Yookie" className={`${styles.logoImage} ${styles.logoWhite}`} />
+          <span className={`${styles.logoSub} ${styles.logoSubWhite}`}>Маркетплейс оффлайн услуг</span>
+        </div>
+        <button className={styles.headerBtnBlue} onClick={() => navigate('/favorites')} aria-label="Избранное">
+          <HeartIconLarge />
+        </button>
+      </header>
 
+      <div className={styles.mainContent}>
         {/* Search — inline with dropdown */}
         <div className={styles.searchWrap}>
           <div className={styles.searchBox}>
