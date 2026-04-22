@@ -10,7 +10,7 @@ interface Tab {
 }
 
 const ownerTabs: Tab[] = [
-  { key: 'dashboard', label: 'Обзор', path: '/pro', icon: '◎' },
+  { key: 'dashboard', label: 'Расписание', path: '/pro', icon: '◎' },
   { key: 'bookings', label: 'Записи', path: '/pro/bookings', icon: '▦' },
   { key: 'schedule', label: 'График', path: '/pro/schedule', icon: '◷' },
   { key: 'services', label: 'Услуги', path: '/pro/services', icon: '✦' },

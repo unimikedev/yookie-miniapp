@@ -1,20 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { dashboardSummary, listBookings, listPendingBookings, listStaff, updateBookingStatus, listActivity, patchBusiness } from '@/pro/api';
+import { listBookings, listPendingBookings, listStaff, updateBookingStatus, listActivity, patchBusiness } from '@/pro/api';
 import type { ActivityEvent } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
-import type { Booking, Master } from '@/lib/api/types';
+import type { Booking, BookingStatus, Master } from '@/lib/api/types';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Button } from '@/components/ui/Button';
 import styles from './DashboardPage.module.css';
 
-interface Summary {
-  bookingsCount: number;
-  revenuePlaceholder: number;
-  loadPercent: number;
-  emptySlots: number;
-  cancellations: number;
-}
+const STATUS_LABELS: Record<string, string> = {
+  pending:   'Ожидает',
+  confirmed: 'Подтверждена',
+  cancelled: 'Отменена',
+  completed: 'Завершена',
+  no_show:   'Не явился',
+};
 
 function fmt(iso: string) {
   return new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -24,17 +26,49 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
+function isoDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { merchantId } = useMerchantStore();
-  const [summary, setSummary] = useState<Summary | null>(null);
   const tgSyncDone = useRef(false);
+
   const [pending, setPending] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [staff, setStaff] = useState<Master[]>([]);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [date, setDate] = useState(() => new Date());
 
-  const today = new Date().toISOString().slice(0, 10);
+  const dateStr  = useMemo(() => isoDate(date), [date]);
+  const todayStr = useMemo(() => isoDate(new Date()), []);
+  const isToday  = dateStr === todayStr;
+
+  const dateLabel = date.toLocaleDateString('ru-RU', {
+    weekday: 'short', day: 'numeric', month: 'short',
+  });
+
+  const prevDay   = () => setDate(d => { const n = new Date(d); n.setDate(n.getDate() - 1); return n; });
+  const nextDay   = () => setDate(d => { const n = new Date(d); n.setDate(n.getDate() + 1); return n; });
+  const goToToday = () => setDate(new Date());
+
+  // One-time: sync merchant Telegram ID for notifications
+  useEffect(() => {
+    if (!merchantId || tgSyncDone.current) return;
+    const tgId = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id;
+    if (!tgId) return;
+    tgSyncDone.current = true;
+    patchBusiness(merchantId, { admin_telegram_id: tgId }).catch(() => {});
+  }, [merchantId]);
+
+  useEffect(() => {
+    if (!merchantId) return;
+    listStaff(merchantId).then(setStaff).catch(() => {});
+  }, [merchantId]);
 
   const loadPending = useCallback(() => {
     if (!merchantId) return;
@@ -46,58 +80,86 @@ export default function DashboardPage() {
     listActivity(merchantId).then(setActivity).catch(() => {});
   }, [merchantId]);
 
-  // One-time: save merchant's Telegram ID so notifications work
-  useEffect(() => {
-    if (!merchantId || tgSyncDone.current) return;
-    const tgId = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id
-    if (!tgId) return
-    tgSyncDone.current = true
-    patchBusiness(merchantId, { admin_telegram_id: tgId }).catch(() => {})
-  }, [merchantId])
+  const loadBookings = useCallback(() => {
+    if (!merchantId) return;
+    listBookings(merchantId, {
+      from: `${dateStr}T00:00:00`,
+      to:   `${dateStr}T23:59:59`,
+    }).then(setBookings).catch(() => {});
+  }, [merchantId, dateStr]);
 
   useEffect(() => {
     if (!merchantId) return;
-    listStaff(merchantId).then(setStaff).catch(() => {});
-  }, [merchantId]);
-
-  useEffect(() => {
-    if (!merchantId) return;
-    const loadSummary = () => {
-      dashboardSummary(merchantId, today).then(setSummary).catch(() => {});
-    };
-    loadSummary();
-    loadPending();
-    loadActivity();
+    loadBookings();
+    if (isToday) { loadPending(); loadActivity(); }
 
     const unsub = subscribe((ev) => {
       if ('merchantId' in ev && ev.merchantId === merchantId) {
-        loadSummary();
-        loadPending();
-        loadActivity();
+        loadBookings();
+        if (isToday) { loadPending(); loadActivity(); }
       }
     });
-    const stopPoll = startPolling(() => { loadSummary(); loadPending(); loadActivity(); }, 15000);
+    const stopPoll = startPolling(() => {
+      loadBookings();
+      if (isToday) { loadPending(); loadActivity(); }
+    }, 15000);
     return () => { unsub(); stopPoll(); };
-  }, [merchantId, loadPending, loadActivity]);
+  }, [merchantId, loadBookings, loadPending, loadActivity, isToday]);
 
-  const handleAction = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
+  const handlePendingAction = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
     if (!merchantId) return;
     setActionId(bookingId);
     try {
       await updateBookingStatus(merchantId, bookingId, status);
       loadPending();
+      loadBookings();
       loadActivity();
     } finally {
       setActionId(null);
     }
   };
 
-  const staffMap = new Map(staff.map((s) => [s.id, s.name]));
+  const handleBookingAction = async (status: BookingStatus) => {
+    if (!selectedBooking || !merchantId) return;
+    setActionLoading(true);
+    try {
+      await updateBookingStatus(merchantId, selectedBooking.id, status);
+      setSelectedBooking(null);
+      loadBookings();
+      loadPending();
+      loadActivity();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const staffMap = new Map(staff.map(s => [s.id, s.name]));
+
+  const sortedBookings = useMemo(
+    () => [...bookings].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()),
+    [bookings]
+  );
 
   return (
-    <ProLayout title="Сегодня">
-      {/* ── Pending bookings — top priority block ── */}
-      {pending.length > 0 && (
+    <ProLayout title="Расписание">
+
+      {/* ── Date navigation ── */}
+      <div className={styles.dateNav}>
+        <div className={styles.dateNavLeft}>
+          <button className={styles.dateArrow} onClick={prevDay}>‹</button>
+          <span className={styles.dateLabel} style={{ textTransform: 'capitalize' }}>{dateLabel}</span>
+          <button className={styles.dateArrow} onClick={nextDay}>›</button>
+          {!isToday && (
+            <button className={styles.todayBtn} onClick={goToToday}>Сегодня</button>
+          )}
+        </div>
+        <button className={styles.newBookingBtn} onClick={() => navigate('/pro/bookings?new=1')}>
+          + Запись
+        </button>
+      </div>
+
+      {/* ── Pending confirmations (today only) ── */}
+      {isToday && pending.length > 0 && (
         <section className={styles.pendingSection}>
           <h2 className={styles.pendingTitle}>
             Ожидают подтверждения
@@ -119,7 +181,9 @@ export default function DashboardPage() {
               <div className={styles.pendingClient}>
                 <span className={styles.pendingClientName}>{b.clients?.name ?? '—'}</span>
                 {b.clients?.phone && (
-                  <span className={styles.pendingClientPhone}>{b.clients.phone}</span>
+                  <a href={`tel:${b.clients.phone}`} className={styles.pendingClientPhone}>
+                    {b.clients.phone}
+                  </a>
                 )}
               </div>
               {b.services?.name && (
@@ -132,14 +196,14 @@ export default function DashboardPage() {
                 <button
                   className={styles.confirmBtn}
                   disabled={actionId === b.id}
-                  onClick={() => handleAction(b.id, 'confirmed')}
+                  onClick={() => handlePendingAction(b.id, 'confirmed')}
                 >
                   {actionId === b.id ? '…' : '✓ Подтвердить'}
                 </button>
                 <button
                   className={styles.declineBtn}
                   disabled={actionId === b.id}
-                  onClick={() => handleAction(b.id, 'cancelled')}
+                  onClick={() => handlePendingAction(b.id, 'cancelled')}
                 >
                   Отклонить
                 </button>
@@ -149,41 +213,39 @@ export default function DashboardPage() {
         </section>
       )}
 
-      <section className={styles.kpis}>
-        <Kpi label="ЗАПИСИ" value={summary?.bookingsCount ?? '—'} />
-        <Kpi label="ВЫРУЧКА" value={summary ? `${summary.revenuePlaceholder.toLocaleString('ru')} ₽` : '—'} />
-        <Kpi label="ЗАГРУЗКА" value={summary ? `${summary.loadPercent}%` : '—'} />
-      </section>
+      {/* ── Day schedule ── */}
+      <section className={styles.scheduleSection}>
+        <div className={styles.scheduleTitleRow}>
+          <h3 className={styles.sectionTitle}>{isToday ? 'Сегодня' : 'Записи'}</h3>
+          {bookings.length > 0 && (
+            <span className={styles.countBadge}>{bookings.length}</span>
+          )}
+        </div>
 
-      <section className={styles.quickActions}>
-        <button className={styles.primary} onClick={() => navigate('/pro/bookings?new=1')}>
-          + Новая запись
-        </button>
-        <button className={styles.secondary} onClick={() => navigate('/pro/bookings')}>
-          Открыть календарь
-        </button>
-      </section>
-
-      <section className={styles.alerts}>
-        <h3 className={styles.sectionTitle}>Сводка</h3>
-        <AlertRow
-          tone="info"
-          title={`Свободных слотов: ${summary?.emptySlots ?? '—'}`}
-          hint="Рассмотрите возможность продвижения"
-        />
-        {summary && summary.cancellations > 0 && (
-          <AlertRow
-            tone="warn"
-            title={`Отмены сегодня: ${summary.cancellations}`}
-            hint="Проверьте график мастеров"
-          />
+        {sortedBookings.length === 0 ? (
+          <div className={styles.emptyDay}>
+            <span>Нет записей на этот день</span>
+            <button className={styles.emptyAddBtn} onClick={() => navigate('/pro/bookings?new=1')}>
+              Добавить запись →
+            </button>
+          </div>
+        ) : (
+          sortedBookings.map((b) => (
+            <TodayRow
+              key={b.id}
+              booking={b}
+              masterName={staffMap.get(b.master_id)}
+              onClick={() => setSelectedBooking(b)}
+            />
+          ))
         )}
       </section>
 
-      {activity.length > 0 && (
+      {/* ── Activity feed ── */}
+      {isToday && activity.length > 0 && (
         <section className={styles.activitySection}>
           <h3 className={styles.sectionTitle}>Последние события</h3>
-          {activity.map((ev) => {
+          {activity.slice(0, 5).map((ev) => {
             const info = activityInfo(ev);
             return (
               <div key={ev.id} className={`${styles.activityRow} ${styles[`activity-${info.tone}`]}`}>
@@ -193,7 +255,6 @@ export default function DashboardPage() {
                   <span className={styles.activityMeta}>
                     {ev.clients?.name ?? '—'}
                     {ev.services?.name ? ` · ${ev.services.name}` : ''}
-                    {ev.masters?.name ? ` · ${ev.masters.name}` : ''}
                   </span>
                   {ev.cancel_reason && (
                     <span className={styles.activityReason}>«{ev.cancel_reason}»</span>
@@ -206,13 +267,138 @@ export default function DashboardPage() {
         </section>
       )}
 
+      {/* ── Quick links ── */}
       <section className={styles.links}>
-        <LinkRow label="Услуги" onClick={() => navigate('/pro/services')} />
-        <LinkRow label="Сотрудники" onClick={() => navigate('/pro/staff')} />
-        <LinkRow label="Клиенты" onClick={() => navigate('/pro/clients')} />
-        <LinkRow label="Профиль заведения" onClick={() => navigate('/pro/settings')} />
+        <LinkRow label="Услуги"             onClick={() => navigate('/pro/services')} />
+        <LinkRow label="Сотрудники"         onClick={() => navigate('/pro/staff')} />
+        <LinkRow label="Клиенты"            onClick={() => navigate('/pro/clients')} />
+        <LinkRow label="Профиль заведения"  onClick={() => navigate('/pro/settings')} />
       </section>
+
+      {/* ── Booking detail sheet ── */}
+      <BottomSheet
+        open={selectedBooking !== null}
+        onClose={() => setSelectedBooking(null)}
+        title="Запись"
+      >
+        {selectedBooking && (
+          <div className={styles.detailSheet}>
+            <p className={styles.detailTime}>
+              {fmt(selectedBooking.starts_at)} — {fmt(selectedBooking.ends_at)}
+              <span className={`${styles.detailStatusBadge} ${styles[`statusBadge-${selectedBooking.status}`]}`}>
+                {selectedBooking.status === 'pending' && selectedBooking.rescheduled
+                  ? '↻ Перенос'
+                  : (STATUS_LABELS[selectedBooking.status] ?? selectedBooking.status)}
+              </span>
+            </p>
+
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Клиент</span>
+              <span className={styles.detailValue}>{selectedBooking.clients?.name ?? '—'}</span>
+            </div>
+            {selectedBooking.clients?.phone && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Телефон</span>
+                <a href={`tel:${selectedBooking.clients.phone}`} className={styles.detailPhone}>
+                  📞 {selectedBooking.clients.phone}
+                </a>
+              </div>
+            )}
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Услуга</span>
+              <span className={styles.detailValue}>{selectedBooking.services?.name ?? '—'}</span>
+            </div>
+            {staffMap.get(selectedBooking.master_id) && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Мастер</span>
+                <span className={styles.detailValue}>{staffMap.get(selectedBooking.master_id)}</span>
+              </div>
+            )}
+            {selectedBooking.notes && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Заметки</span>
+                <span className={styles.detailValue}>{selectedBooking.notes}</span>
+              </div>
+            )}
+
+            <div className={styles.detailActions}>
+              {selectedBooking.status === 'pending' && (
+                <Button fullWidth loading={actionLoading} onClick={() => handleBookingAction('confirmed')}>
+                  ✓ Подтвердить
+                </Button>
+              )}
+              {selectedBooking.status === 'confirmed' && (
+                <div className={styles.quickStatusRow}>
+                  <button
+                    className={styles.arrivedBtn}
+                    disabled={actionLoading}
+                    onClick={() => handleBookingAction('completed')}
+                  >
+                    ✓ Пришёл
+                  </button>
+                  <button
+                    className={styles.noShowBtn}
+                    disabled={actionLoading}
+                    onClick={() => handleBookingAction('no_show')}
+                  >
+                    ✗ Не явился
+                  </button>
+                </div>
+              )}
+              {(selectedBooking.status === 'pending' || selectedBooking.status === 'confirmed') && (
+                <button
+                  className={styles.cancelDetailBtn}
+                  disabled={actionLoading}
+                  onClick={() => handleBookingAction('cancelled')}
+                >
+                  Отменить запись
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </BottomSheet>
     </ProLayout>
+  );
+}
+
+/* ── Sub-components ─────────────────────────────────────────────────────── */
+
+function TodayRow({
+  booking,
+  masterName,
+  onClick,
+}: {
+  booking: Booking;
+  masterName?: string;
+  onClick: () => void;
+}) {
+  const isReschedule = booking.status === 'pending' && booking.rescheduled;
+  const shortLabel: Record<string, string> = {
+    pending:   isReschedule ? '↻' : '⏳',
+    confirmed: '✓',
+    completed: '✓✓',
+    cancelled: '✕',
+    no_show:   '!',
+  };
+
+  return (
+    <div
+      className={`${styles.todayRow} ${styles[`todayRow-${booking.status}`]}`}
+      onClick={onClick}
+    >
+      <span className={styles.todayTime}>{fmt(booking.starts_at)}</span>
+      <div className={styles.todayInfo}>
+        <span className={styles.todayClient}>{booking.clients?.name ?? '—'}</span>
+        <span className={styles.todayMeta}>
+          {isReschedule ? '↻ Запрос на перенос' : (booking.services?.name ?? '—')}
+          {masterName ? ` · ${masterName}` : ''}
+        </span>
+      </div>
+      <span className={`${styles.todayBadge} ${styles[`statusBadge-${booking.status}`]}`}>
+        {shortLabel[booking.status] ?? ''}
+      </span>
+    </div>
   );
 }
 
@@ -223,54 +409,30 @@ function activityInfo(ev: ActivityEvent): { icon: string; label: string; tone: T
     ev.status === 'pending' &&
     Math.abs(new Date(ev.updated_at).getTime() - new Date(ev.created_at).getTime()) > 60_000;
 
-  if (isRescheduled) {
-    return { icon: '↻', label: 'Клиент перенёс запись', tone: 'rescheduled' };
-  }
+  if (isRescheduled) return { icon: '↻', label: 'Клиент перенёс запись', tone: 'rescheduled' };
   switch (ev.status) {
-    case 'pending':
-      return { icon: '●', label: 'Новая запись', tone: 'new' };
-    case 'confirmed':
-      return { icon: '✓', label: 'Запись подтверждена', tone: 'confirmed' };
-    case 'cancelled':
-      if (ev.cancelled_by === 'client') return { icon: '✕', label: 'Клиент отменил запись', tone: 'cancelled' };
-      return { icon: '✕', label: 'Запись отменена', tone: 'cancelled' };
-    case 'completed':
-      return { icon: '✓', label: 'Визит завершён', tone: 'completed' };
-    case 'no_show':
-      return { icon: '!', label: 'Клиент не явился', tone: 'noshow' };
-    default:
-      return { icon: '·', label: ev.status, tone: 'new' };
+    case 'pending':   return { icon: '●', label: 'Новая запись', tone: 'new' };
+    case 'confirmed': return { icon: '✓', label: 'Запись подтверждена', tone: 'confirmed' };
+    case 'cancelled': return {
+      icon: '✕',
+      label: ev.cancelled_by === 'client' ? 'Клиент отменил запись' : 'Запись отменена',
+      tone: 'cancelled',
+    };
+    case 'completed': return { icon: '✓', label: 'Визит завершён', tone: 'completed' };
+    case 'no_show':   return { icon: '!', label: 'Клиент не явился', tone: 'noshow' };
+    default:          return { icon: '·', label: ev.status, tone: 'new' };
   }
 }
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
-  const min = Math.floor(diff / 60_000);
-  if (min < 1) return 'только что';
+  const min  = Math.floor(diff / 60_000);
+  if (min < 1)  return 'только что';
   if (min < 60) return `${min} мин назад`;
   const h = Math.floor(min / 60);
-  if (h < 24) return `${h} ч назад`;
+  if (h < 24)   return `${h} ч назад`;
   const d = Math.floor(h / 24);
-  if (d === 1) return 'вчера';
-  return `${d} д назад`;
-}
-
-function Kpi({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className={styles.kpi}>
-      <span className={styles.kpiLabel}>{label}</span>
-      <span className={styles.kpiValue}>{value}</span>
-    </div>
-  );
-}
-
-function AlertRow({ tone, title, hint }: { tone: 'info' | 'warn'; title: string; hint: string }) {
-  return (
-    <div className={`${styles.alert} ${styles[`alert-${tone}`]}`}>
-      <span className={styles.alertTitle}>{title}</span>
-      <span className={styles.alertHint}>{hint}</span>
-    </div>
-  );
+  return d === 1 ? 'вчера' : `${d} д назад`;
 }
 
 function LinkRow({ label, onClick }: { label: string; onClick: () => void }) {

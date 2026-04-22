@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { listBookings, listStaff, listServices, createBooking, updateBookingStatus, rescheduleBooking } from '@/pro/api';
+import { listBookings, listStaff, listServices, listClients, createBooking, updateBookingStatus, rescheduleBooking } from '@/pro/api';
 import { subscribe, startPolling } from '@/pro/realtime';
-import type { Booking, Master, Service } from '@/lib/api/types';
+import type { Booking, BookingStatus, Client, Master, Service } from '@/lib/api/types';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { ExportButton } from './ExportButton';
@@ -72,6 +72,7 @@ export default function BookingsBoardPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [clients, setClients] = useState<Client[]>([]);
 
   const dateStr = useMemo(() => isoDate(date), [date]);
 
@@ -143,6 +144,8 @@ export default function BookingsBoardPage() {
     setSlotTarget({ staffId, staffName, hour });
     setForm({ ...EMPTY_FORM, serviceId: services[0]?.id ?? '' });
     setSaveError(null);
+    // Load clients for phone-search autocomplete
+    if (merchantId) listClients(merchantId).then(setClients).catch(() => {});
   };
 
   const handleCreateBooking = async () => {
@@ -195,7 +198,7 @@ export default function BookingsBoardPage() {
     }
   };
 
-  const handleBookingAction = async (status: 'confirmed' | 'cancelled') => {
+  const handleBookingAction = async (status: BookingStatus) => {
     if (!selectedBooking || !merchantId) return;
     setActionLoading(true);
     setActionError(null);
@@ -209,6 +212,13 @@ export default function BookingsBoardPage() {
       setActionLoading(false);
     }
   };
+
+  // Find existing client by phone prefix (for autocomplete)
+  const clientSuggestion = useMemo<Client | null>(() => {
+    const raw = form.clientPhone.replace(/[\s()+-]/g, '');
+    if (raw.length < 7) return null;
+    return clients.find(c => c.phone?.replace(/[\s()+-]/g, '').includes(raw)) ?? null;
+  }, [form.clientPhone, clients]);
 
   const actions = (
     <div className={styles.viewToggle}>
@@ -276,6 +286,19 @@ export default function BookingsBoardPage() {
               onChange={(e) => setForm((f) => ({ ...f, clientPhone: e.target.value }))}
               maxLength={17}
             />
+            {clientSuggestion && (
+              <button
+                type="button"
+                className={styles.clientSuggestion}
+                onClick={() => setForm(f => ({
+                  ...f,
+                  clientPhone: clientSuggestion.phone ?? f.clientPhone,
+                  clientName:  clientSuggestion.name  ?? f.clientName,
+                }))}
+              >
+                ✓ {clientSuggestion.name} · {clientSuggestion.phone}
+              </button>
+            )}
             <select
               className={styles.formInput}
               value={form.serviceId}
@@ -327,7 +350,11 @@ export default function BookingsBoardPage() {
             </div>
             <div className={styles.bookingDetailRow}>
               <span className={styles.bookingDetailLabel}>Телефон</span>
-              <span>{selectedBooking.clients?.phone ?? '—'}</span>
+              {selectedBooking.clients?.phone ? (
+                <a href={`tel:${selectedBooking.clients.phone}`} className={styles.phoneLink}>
+                  📞 {selectedBooking.clients.phone}
+                </a>
+              ) : <span>—</span>}
             </div>
             <div className={styles.bookingDetailRow}>
               <span className={styles.bookingDetailLabel}>Услуга</span>
@@ -358,8 +385,26 @@ export default function BookingsBoardPage() {
                   loading={actionLoading}
                   onClick={() => handleBookingAction('confirmed')}
                 >
-                  Подтвердить
+                  ✓ Подтвердить
                 </Button>
+              )}
+              {selectedBooking.status === 'confirmed' && (
+                <div className={styles.quickStatusRow}>
+                  <button
+                    className={styles.arrivedBtn}
+                    disabled={actionLoading}
+                    onClick={() => handleBookingAction('completed')}
+                  >
+                    ✓ Пришёл
+                  </button>
+                  <button
+                    className={styles.noShowActionBtn}
+                    disabled={actionLoading}
+                    onClick={() => handleBookingAction('no_show')}
+                  >
+                    ✗ Не явился
+                  </button>
+                </div>
               )}
               {(selectedBooking.status === 'pending' || selectedBooking.status === 'confirmed') && (
                 <button

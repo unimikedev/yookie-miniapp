@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
+import { patchBusiness } from '@/pro/api';
 import { useBusiness } from '@/hooks/useBusiness';
 import { LoadingState } from '@/components/ui/LoadingState';
 import styles from './MerchantPreviewPage.module.css';
@@ -14,6 +15,29 @@ export default function MerchantPreviewPage() {
   const { merchantId } = useMerchantStore();
   const { business, isLoading, error } = useBusiness(merchantId!);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [localPublished, setLocalPublished] = useState(false);
+
+  const isPublished = localPublished || (business?.is_active ?? false);
+
+  useEffect(() => {
+    if (business?.is_active) setLocalPublished(true);
+  }, [business?.is_active]);
+
+  const handlePublish = async () => {
+    if (!merchantId || isPublished) return;
+    setPublishing(true);
+    setPublishError(null);
+    try {
+      await patchBusiness(merchantId, { is_active: true });
+      setLocalPublished(true);
+    } catch {
+      setPublishError('Не удалось опубликовать. Попробуйте ещё раз.');
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   if (!merchantId) {
     return <LoadingState emptyTitle="Бизнес не найден" emptyDescription="Сначала создайте бизнес" hasData={false} />;
@@ -122,14 +146,24 @@ export default function MerchantPreviewPage() {
           )}
         </div>
 
-        {/* Warning banner */}
-        <div className={styles.warningBanner}>
-          <span className={styles.warningIcon}>⚠️</span>
-          <div className={styles.warningText}>
-            <strong>Это предпросмотр</strong>
-            <p>Ваш профиль еще не опубликован. Заполните все разделы в настройках.</p>
+        {/* Status banner */}
+        {isPublished ? (
+          <div className={styles.publishedBanner}>
+            <span>✅</span>
+            <div className={styles.warningText}>
+              <strong>Профиль опубликован</strong>
+              <p>Клиенты могут найти и записаться к вам.</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className={styles.warningBanner}>
+            <span className={styles.warningIcon}>⚠️</span>
+            <div className={styles.warningText}>
+              <strong>Профиль не опубликован</strong>
+              <p>Клиенты пока не видят ваш профиль. Опубликуйте, когда будете готовы.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}
@@ -140,16 +174,25 @@ export default function MerchantPreviewPage() {
         >
           Редактировать
         </button>
-        <button
-          className={styles.publishBtn}
-          onClick={() => {
-            // TODO: Trigger publish action via API
-            alert('Функция публикации будет доступна после проверки профиля');
-          }}
-        >
-          Опубликовать
-        </button>
+        {isPublished ? (
+          <button className={styles.publishedBtn} disabled>
+            ✓ Опубликовано
+          </button>
+        ) : (
+          <button
+            className={styles.publishBtn}
+            disabled={publishing}
+            onClick={handlePublish}
+          >
+            {publishing ? 'Публикация…' : 'Опубликовать'}
+          </button>
+        )}
       </div>
+      {publishError && (
+        <p style={{ color: 'var(--color-error)', textAlign: 'center', fontSize: 13, padding: '0 16px 16px' }}>
+          {publishError}
+        </p>
+      )}
     </div>
   );
 }

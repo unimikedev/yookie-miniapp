@@ -252,8 +252,32 @@
   color: white;
 }
 
-.publishBtn:hover {
-  opacity: 0.9;
+.publishBtn:hover { opacity: 0.9; }
+.publishBtn:disabled { opacity: 0.6; cursor: default; }
+
+.publishedBtn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  background: #D1FAE5;
+  color: #065F46;
+  cursor: default;
+}
+
+.publishedBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #D1FAE5;
+  border: 1px solid rgba(52,211,153,0.4);
+  border-radius: 12px;
+  margin: 16px 16px 0;
+  font-size: 14px;
+  color: #065F46;
 }
 
 /* Dark mode support */
