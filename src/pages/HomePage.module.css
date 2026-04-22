@@ -5,19 +5,19 @@
 .page {
   position: relative;
   min-height: 100dvh;
-  background: var(--color-bg);
-  /* offset for fixed blue header so mainContent starts below it */
-  padding-top: calc(var(--safe-area-top-half) + 68px - 24px);
+  background: transparent;
+  /* push page content exactly below fixed blue header */
+  padding-top: calc(var(--safe-area-top-half) + 68px);
   padding-bottom: calc(var(--safe-area-bottom) + 16px);
 }
 
-/* ── Blue gradient — fixed, covers safe area + header ── */
+/* ── Blue gradient — fixed, extends a bit below header for rounded-corner overlap ── */
 .topGradient {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: calc(var(--safe-area-top-half) + 68px);
+  height: calc(var(--safe-area-top-half) + 68px + 32px);
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
