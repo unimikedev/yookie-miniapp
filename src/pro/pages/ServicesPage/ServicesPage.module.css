@@ -9,6 +9,75 @@
   cursor: pointer;
 }
 
+/* ── Category filter (L2, underline style) ─────────────────────── */
+.catFilter {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+.catFilter::-webkit-scrollbar { display: none; }
+
+.catTab {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm-size);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.catTabActive {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* ── Search ─────────────────────────────────────────────────────── */
+.searchWrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+}
+.searchInput::placeholder { color: var(--color-text-muted); }
+
+.searchClear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Edit form ──────────────────────────────────────────────────── */
 .form {
   display: flex;
   flex-direction: column;
@@ -22,6 +91,7 @@
 
 .input {
   width: 100%;
+  box-sizing: border-box;
   padding: 10px 12px;
   border: 1px solid var(--color-border);
   border-radius: 10px;
@@ -30,19 +100,13 @@
   font-family: var(--font-family);
   font-size: var(--text-body-size);
 }
-
-.input::placeholder {
-  color: var(--color-text-muted);
-}
+.input::placeholder { color: var(--color-text-muted); }
 
 .row {
   display: flex;
   gap: 10px;
 }
-
-.row .input {
-  flex: 1;
-}
+.row .input { flex: 1; }
 
 .formActions {
   display: flex;
@@ -73,16 +137,19 @@
   font-weight: 700;
   cursor: pointer;
 }
+.saveBtn:disabled { opacity: 0.5; cursor: default; }
 
-.saveBtn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
+/* ── Service list ───────────────────────────────────────────────── */
 .list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.cardWrap {
+  background: var(--color-surface);
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .card {
@@ -90,20 +157,36 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: var(--color-surface);
-  border-radius: 14px;
 }
 
 .cardMain {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .cardName {
   font-size: var(--text-body-size);
   font-weight: 600;
   color: var(--color-text);
+}
+
+.cardCat {
+  font-size: var(--text-caption-xs-size);
+  color: var(--color-text-muted);
+  background: var(--color-surface-elevated);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
 }
 
 .cardMeta {
@@ -114,6 +197,25 @@
 .cardActions {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.mastersBtn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mastersBtnActive {
+  background: rgba(99,102,241,0.1);
+  color: var(--color-accent);
 }
 
 .editBtn,
@@ -127,7 +229,63 @@
   font-size: 14px;
   cursor: pointer;
 }
+.deleteBtn { color: var(--color-error); }
 
-.deleteBtn {
-  color: var(--color-error);
+/* ── Master assignment panel ────────────────────────────────────── */
+.masterAssign {
+  padding: 12px 16px 16px;
+  background: var(--color-surface-elevated);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.masterAssignTitle {
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 10px;
+}
+
+.masterAssignList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.masterAssignChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family);
+  font-size: var(--text-caption-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.masterAssignChipOn {
+  border-color: var(--color-accent);
+  background: rgba(99,102,241,0.1);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.masterAssignChip:disabled { opacity: 0.5; cursor: default; }
+
+.masterAssignCheck {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 40px 0;
+  font-size: var(--text-body-size);
 }

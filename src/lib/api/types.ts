@@ -79,6 +79,17 @@ export interface Master {
   position: number | string;
   created_at?: string;
   updated_at?: string;
+  master_services?: Array<{
+    service_id: string;
+    price?: number;
+    services?: {
+      id: string;
+      name: string;
+      price: number;
+      duration_min: number;
+      category?: string;
+    };
+  }>;
 }
 
 export interface Service {

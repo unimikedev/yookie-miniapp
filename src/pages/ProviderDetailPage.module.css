@@ -762,3 +762,139 @@
 .errorSecondaryBtn:active {
   opacity: 0.8;
 }
+
+/* ── Working hours in info block ──────────────────────────────── */
+.infoHours {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 6px;
+}
+
+/* ── Service category filter (L2, underline tabs) ─────────────── */
+.serviceCatFilter {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin: 0 -16px 16px;
+  padding: 0 16px;
+  scrollbar-width: none;
+}
+.serviceCatFilter::-webkit-scrollbar { display: none; }
+
+.serviceCatTab {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm-size);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.serviceCatTabActive {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* ── Service search ────────────────────────────────────────────── */
+.serviceSearchWrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.serviceSearchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+}
+.serviceSearchInput::placeholder { color: var(--color-text-muted); }
+
+.serviceSearchClear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Master accordion (services per master) ───────────────────── */
+.masterAccordion {
+  margin-bottom: 12px;
+}
+
+.masterServicesList {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 6px;
+}
+
+.masterServicesEmpty {
+  font-size: var(--text-body-sm-size);
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.masterServiceGroup {
+  margin-bottom: 12px;
+}
+.masterServiceGroup:last-child { margin-bottom: 0; }
+
+.masterServiceCatLabel {
+  display: block;
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.masterServiceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.masterServiceRow:last-child { border-bottom: none; }
+
+.masterServiceName {
+  font-size: var(--text-body-sm-size);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.masterServiceMeta {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  margin-left: 12px;
+}

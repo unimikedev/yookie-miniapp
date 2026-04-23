@@ -367,6 +367,21 @@ export async function deleteService(merchantId: string, serviceId: string): Prom
 export type StaffInput = Partial<Master> & { name: string; specialization: string };
 
 /**
+ * Replace the full set of services a master can perform.
+ * Backend: PATCH /businesses/:id/masters/:mid  { service_ids: [...] }
+ */
+export async function updateMasterServices(
+  merchantId: string,
+  masterId: string,
+  serviceIds: string[],
+): Promise<void> {
+  await api.patch<{ data: Master }>(
+    `/businesses/${merchantId}/masters/${masterId}`,
+    { service_ids: serviceIds },
+  );
+}
+
+/**
  * Create or update a staff member (master).
  * Backend: POST /businesses/:id/masters (create)
  *          PATCH /businesses/:id/masters/:mid (update)

@@ -63,6 +63,9 @@ export default function ProviderDetailPage() {
   const [activeTab, setActiveTab] = useState(0)
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [activeServiceCat, setActiveServiceCat] = useState<string | null>(null)
+  const [serviceSearch, setServiceSearch] = useState('')
+  const [expandedMasterId, setExpandedMasterId] = useState<string | null>(null)
 
   // Booking flow state
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -342,15 +345,42 @@ export default function ProviderDetailPage() {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     const dayName = days[new Date().getDay()]
     const hours = (business.working_hours as Record<string, { open: string; close: string }>)[dayName]
-    return hours ? `${hours.open} - ${hours.close}` : null
+    return hours ? `${hours.open}–${hours.close}` : null
   }, [business])
 
-  const handleMasterClick = (masterId: string) => {
-    const master = masters.find((m) => m.id === masterId)
-    if (master) {
-      setMaster(master)
-      navigate(`/business/${id}/master/${masterId}`)
+  // Unique service categories (ordered by first appearance)
+  const serviceCategories = useMemo(() => {
+    const seen = new Set<string>()
+    const cats: string[] = []
+    for (const s of services) {
+      const cat = s.category?.trim()
+      if (cat && !seen.has(cat)) { seen.add(cat); cats.push(cat) }
     }
+    return cats
+  }, [services])
+
+  // Filter services by category + search
+  const filteredServices = useMemo(() => {
+    let result = services
+    if (activeServiceCat) result = result.filter(s => s.category?.trim() === activeServiceCat)
+    if (serviceSearch.trim()) {
+      const q = serviceSearch.toLowerCase()
+      result = result.filter(s => s.name.toLowerCase().includes(q))
+    }
+    return result
+  }, [services, activeServiceCat, serviceSearch])
+
+  // Filter masters available for a given service (falls back to all if no M2M defined)
+  const mastersForService = (serviceId: string): Master[] => {
+    const assigned = masters.filter(m =>
+      m.master_services && m.master_services.length > 0 &&
+      m.master_services.some(ms => ms.service_id === serviceId)
+    )
+    return assigned.length > 0 ? assigned : masters
+  }
+
+  const handleMasterClick = (masterId: string) => {
+    setExpandedMasterId(expandedMasterId === masterId ? null : masterId)
   }
 
   // ── Hero image ──────────────────────────────────────────────────
@@ -458,6 +488,15 @@ export default function ProviderDetailPage() {
               </button>
             </div>
           )}
+          {todayHours && (
+            <div className={styles.infoHours}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="6" stroke="#6B7280" strokeWidth="1.4" />
+                <path d="M7 3.5V7L9.5 9" stroke="#6B7280" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              <span>Сегодня: {todayHours}</span>
+            </div>
+          )}
           {isIndividual && soloMaster?.bio && (
             <p className={styles.masterBio}>{soloMaster.bio}</p>
           )}
@@ -481,16 +520,54 @@ export default function ProviderDetailPage() {
               <div className={styles.sectionHead}>
                 <h2 className={styles.sectionTitle}>Услуги</h2>
               </div>
+
+              {/* L2 category filter — underline tabs */}
+              {!isLoading && serviceCategories.length > 1 && (
+                <div className={styles.serviceCatFilter}>
+                  <button
+                    className={`${styles.serviceCatTab} ${activeServiceCat === null ? styles.serviceCatTabActive : ''}`}
+                    onClick={() => setActiveServiceCat(null)}
+                  >
+                    Все
+                  </button>
+                  {serviceCategories.map(cat => (
+                    <button
+                      key={cat}
+                      className={`${styles.serviceCatTab} ${activeServiceCat === cat ? styles.serviceCatTabActive : ''}`}
+                      onClick={() => setActiveServiceCat(cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Search — shown when > 6 services */}
+              {!isLoading && services.length > 6 && (
+                <div className={styles.serviceSearchWrap}>
+                  <input
+                    className={styles.serviceSearchInput}
+                    placeholder="Поиск услуги…"
+                    value={serviceSearch}
+                    onChange={e => setServiceSearch(e.target.value)}
+                  />
+                  {serviceSearch && (
+                    <button className={styles.serviceSearchClear} onClick={() => setServiceSearch('')}>✕</button>
+                  )}
+                </div>
+              )}
+
               {isLoading ? (
                 <div className={styles.skeletonList}>
                   {[1, 2, 3].map(i => <Skeleton key={i} variant="rect" height={80} />)}
                 </div>
-              ) : services.length > 0 ? (
+              ) : filteredServices.length > 0 ? (
                 <div className={`${styles.serviceList} contentReveal`}>
-                  {services.slice(0, 6).map((service) => {
+                  {filteredServices.map((service) => {
                     const isSelected = selectedServices.some((s) => s.service.id === service.id)
                     const svcAssignment = selectedServices.find(s => s.service.id === service.id)
                     const assignedMasterId = svcAssignment?.masterId
+                    const eligibleMasters = mastersForService(service.id)
                     return (
                       <div key={service.id} data-service-id={service.id}>
                         <ServiceCard
@@ -498,11 +575,9 @@ export default function ProviderDetailPage() {
                           selected={isSelected}
                           onSelect={handleServiceToggle}
                         />
-                        {/* Master chips below selected service:
-                            HIDDEN if only 1 master (auto-assigned) */}
-                        {isSelected && masters.length > 1 && (
+                        {isSelected && eligibleMasters.length > 1 && (
                           <div className={styles.masterChipRow}>
-                            {masters.map((master) => (
+                            {eligibleMasters.map((master) => (
                               <MasterChip
                                 key={master.id}
                                 master={master}
@@ -516,8 +591,10 @@ export default function ProviderDetailPage() {
                     )
                   })}
                 </div>
-              ) : (
+              ) : services.length === 0 ? (
                 <EmptyState title="Услуги не найдены" description="Услуги ещё не добавлены" compact />
+              ) : (
+                <EmptyState title="Ничего не найдено" description="Попробуйте другой запрос" compact />
               )}
             </section>
 
@@ -663,16 +740,51 @@ export default function ProviderDetailPage() {
               </div>
             ) : masters.length > 0 ? (
               <div className={`${styles.specialistsScroll} contentReveal`}>
-                {masters.map((master) => (
-                  <SpecialistCard
-                    key={master.id}
-                    name={formatMasterName(master.name)}
-                    role={master.specialization ?? ''}
-                    rating={Number(master.rating) ?? 0}
-                    photoUrl={master.photo_url}
-                    onClick={() => handleMasterClick(master.id)}
-                  />
-                ))}
+                {masters.map((master) => {
+                  const isExpanded = expandedMasterId === master.id
+                  const masterSvcs = (master.master_services ?? [])
+                    .filter(ms => ms.services)
+                    .map(ms => ms.services!)
+                  // Group by category
+                  const catMap = new Map<string, typeof masterSvcs>()
+                  for (const s of masterSvcs) {
+                    const cat = s.category?.trim() || 'Другое'
+                    if (!catMap.has(cat)) catMap.set(cat, [])
+                    catMap.get(cat)!.push(s)
+                  }
+                  return (
+                    <div key={master.id} className={styles.masterAccordion}>
+                      <SpecialistCard
+                        name={formatMasterName(master.name)}
+                        role={master.specialization ?? ''}
+                        rating={Number(master.rating) ?? 0}
+                        photoUrl={master.photo_url}
+                        onClick={() => handleMasterClick(master.id)}
+                      />
+                      {isExpanded && (
+                        <div className={styles.masterServicesList}>
+                          {masterSvcs.length === 0 ? (
+                            <p className={styles.masterServicesEmpty}>Услуги не назначены</p>
+                          ) : (
+                            [...catMap.entries()].map(([cat, svcs]) => (
+                              <div key={cat} className={styles.masterServiceGroup}>
+                                {catMap.size > 1 && (
+                                  <span className={styles.masterServiceCatLabel}>{cat}</span>
+                                )}
+                                {svcs.map(s => (
+                                  <div key={s.id} className={styles.masterServiceRow}>
+                                    <span className={styles.masterServiceName}>{s.name}</span>
+                                    <span className={styles.masterServiceMeta}>{s.duration_min} мин · {s.price.toLocaleString('ru')} сўм</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             ) : (
               <EmptyState title="Мастера не найдены" description="Мастера ещё не добавлены" />
