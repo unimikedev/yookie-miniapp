@@ -350,6 +350,18 @@ export async function upsertService(
 }
 
 /**
+ * Update the display position of a single service (fire-and-forget safe).
+ * Backend: PATCH /businesses/:id/services/:sid  { position }
+ */
+export async function reorderService(merchantId: string, serviceId: string, position: number): Promise<void> {
+  try {
+    await api.patch<unknown>(`/businesses/${merchantId}/services/${serviceId}`, { position });
+  } catch {
+    // non-critical
+  }
+}
+
+/**
  * Delete (soft) a service.
  * Backend: DELETE /businesses/:id/services/:sid
  */

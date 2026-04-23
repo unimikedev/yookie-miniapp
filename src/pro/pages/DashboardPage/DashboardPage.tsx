@@ -95,20 +95,23 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!merchantId) return;
     loadBookings();
-    if (isToday) { loadPending(); loadActivity(); }
+    loadPending();
+    loadActivity();
 
     const unsub = subscribe((ev) => {
       if ('merchantId' in ev && ev.merchantId === merchantId) {
         loadBookings();
-        if (isToday) { loadPending(); loadActivity(); }
+        loadPending();
+        loadActivity();
       }
     });
     const stopPoll = startPolling(() => {
       loadBookings();
-      if (isToday) { loadPending(); loadActivity(); }
+      loadPending();
+      loadActivity();
     }, 15000);
     return () => { unsub(); stopPoll(); };
-  }, [merchantId, loadBookings, loadPending, loadActivity, isToday]);
+  }, [merchantId, loadBookings, loadPending, loadActivity]);
 
   const handlePendingAction = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
     if (!merchantId) return;
@@ -171,8 +174,8 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* ── Pending confirmations (today only) ── */}
-      {isToday && pending.length > 0 && (
+      {/* ── Pending confirmations ── */}
+      {pending.length > 0 && (
         <section className={styles.pendingSection}>
           <h2 className={styles.pendingTitle}>
             Ожидают подтверждения
@@ -255,7 +258,7 @@ export default function DashboardPage() {
       </section>
 
       {/* ── Activity feed ── */}
-      {isToday && activity.length > 0 && (
+      {activity.length > 0 && (
         <section className={styles.activitySection}>
           <h3 className={styles.sectionTitle}>Последние события</h3>
           {activity.slice(0, 5).map((ev) => {
