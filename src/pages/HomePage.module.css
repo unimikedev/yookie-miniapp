@@ -2,36 +2,44 @@
    HomePage — Figma frame "Главная" 184:6540
    ══════════════════════════════════════════════════════════ */
 
+/* ── Sticky spacer to protect from Telegram UI overlay ── */
+.telegramSafeSpacer {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-area-top-quarter);
+  z-index: 9999;
+  pointer-events: none;
+}
+
 .page {
   position: relative;
   min-height: 100dvh;
   background: transparent;
-  /* push page content exactly below fixed blue header */
-  padding-top: calc(var(--safe-area-top) + 68px);
+  /* push page content exactly below inline blue header */
+  padding-top: 0;
   padding-bottom: calc(var(--safe-area-bottom) + 16px);
 }
 
-/* ── Blue gradient — fixed, extends above and below header for safe area overlap ── */
+/* ── Blue gradient — inline, extends above and below header for safe area overlap ── */
 .topGradient {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: calc(var(--safe-area-top) + 68px + 48px);
+  height: calc(var(--safe-area-top-quarter) + 68px + 48px);
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
 }
 
-/* ── Blue header — fixed on top of gradient ── */
+/* ── Blue header — inline on top of gradient ── */
 .blueHeader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   z-index: 5;
-  padding-top: var(--safe-area-top);
-  height: calc(var(--safe-area-top) + 68px);
+  padding-top: var(--safe-area-top-quarter);
+  height: calc(var(--safe-area-top-quarter) + 68px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -101,7 +109,7 @@
   border-radius: 32px 32px 0 0;
   padding-top: 16px;
   width: 100%;
-  min-height: calc(100dvh - var(--safe-area-top) - 44px);
+  min-height: calc(100dvh - var(--safe-area-top-quarter) - 68px);
 }
 
 /* ── Search — sticky, pins just below blue header when scrolling ── */
@@ -290,6 +298,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  justify-content: center;
 }
 
 .searchResultName {
@@ -299,6 +308,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 
 .searchResultMeta {
@@ -307,6 +317,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 
 .searchResultArrow {
