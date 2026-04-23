@@ -351,9 +351,6 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
-      {/* Sticky spacer to protect subsequent sticky elements from Telegram UI overlay */}
-      <div className={styles.telegramSafeSpacer} />
-      
       <div className={styles.topGradient} aria-hidden="true" />
 
       {/* Header sits on the blue gradient area */}
