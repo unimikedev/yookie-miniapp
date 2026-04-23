@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useBusiness } from '@/hooks/useBusiness'
-import { createBooking } from '@/lib/api/bookings'
+import { createBooking, createBookingBatch } from '@/lib/api/bookings'
 import { syncBookingToMerchant } from '@/lib/syncBookingToMerchant'
 import { getErrorFromApiError } from '@/lib/errorMapper'
 import { useAlternativeSlots } from '@/hooks/useAlternativeSlots'
@@ -113,54 +113,36 @@ export default function BookingFlowPage() {
         throw new Error('No services selected')
       }
 
-      const results = await Promise.allSettled(
-        services.map((svc) =>
-          createBooking({
-            businessId: bookingStore.selectedBusiness!.id,
-            masterId: svc.masterId!,
+      let bookedList: import('@/lib/api/types').Booking[]
+
+      if (services.length > 1) {
+        // Batch endpoint: one admin notification for all services
+        bookedList = await createBookingBatch({
+          businessId: bookingStore.selectedBusiness!.id,
+          startsAt,
+          clientPhone: effectivePhone,
+          clientName,
+          notes: notes || undefined,
+          services: services.map((svc) => ({
             serviceId: svc.service.id,
-            startsAt,
-            clientPhone: effectivePhone,
-            clientName,
-            notes: notes || undefined,
-          })
-        )
-      );
-
-      // Check for failures and implement atomic rollback
-      const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
-      if (failures.length > 0) {
-        // Collect successful booking IDs for potential rollback
-        const successfulBookingIds: string[] = [];
-        results.forEach((result) => {
-          if (result.status === 'fulfilled') {
-            successfulBookingIds.push(result.value.id);
-          }
-        });
-
-        // Attempt rollback of any successful bookings from this batch
-        if (successfulBookingIds.length > 0 && effectivePhone) {
-          console.error('[BookingFlowPage] Rolling back', successfulBookingIds.length, 'successful bookings due to batch failure');
-          // Fire-and-forget rollback attempts - best effort
-          successfulBookingIds.forEach((bookingId) => {
-            import('@/lib/api/bookings').then(({ cancelBooking }) => {
-              cancelBooking(bookingId, effectivePhone).catch((rollbackErr) => {
-                console.error('[BookingFlowPage] Rollback failed for booking', bookingId, rollbackErr);
-              });
-            });
-          });
-        }
-
-        const err = failures[0].reason;
-        throw err instanceof Error ? err : new Error('Не удалось завершить полную бронь. Пожалуйста, попробуйте еще раз.');
+            masterId: svc.masterId!,
+          })),
+        })
+      } else {
+        // Single booking
+        const booking = await createBooking({
+          businessId: bookingStore.selectedBusiness!.id,
+          masterId: services[0].masterId!,
+          serviceId: services[0].service.id,
+          startsAt,
+          clientPhone: effectivePhone,
+          clientName,
+          notes: notes || undefined,
+        })
+        bookedList = [booking]
       }
 
-      // Sync each successful booking to merchant store
-      results.forEach((result) => {
-        if (result.status === 'fulfilled') {
-          syncBookingToMerchant(result.value);
-        }
-      });
+      bookedList.forEach((b) => syncBookingToMerchant(b));
 
       setBookedCount(services.length)
       setSuccessState(true)

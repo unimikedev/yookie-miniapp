@@ -169,6 +169,39 @@ export async function cancelBooking(id: string, phone: string): Promise<void> {
   }
 }
 
+export interface BatchBookingPayload {
+  businessId: string
+  startsAt: string
+  clientPhone: string
+  clientName: string
+  notes?: string
+  services: Array<{ serviceId: string; masterId: string }>
+  telegramId?: number
+}
+
+/**
+ * Create multiple bookings in a single request (one notification to admin).
+ * Backend: POST /bookings/batch → { data: Booking[] }
+ */
+export async function createBookingBatch(data: BatchBookingPayload): Promise<Booking[]> {
+  const telegramId = data.telegramId ?? getTgUserId()
+  const body: Record<string, unknown> = {
+    businessId: data.businessId,
+    startsAt: data.startsAt,
+    services: data.services,
+    client: {
+      phone: data.clientPhone,
+      name: data.clientName,
+      ...(telegramId ? { telegramId } : {}),
+    },
+  }
+  if (data.notes) body.notes = data.notes
+
+  const response = await api.post<Booking[]>('/bookings/batch', body)
+  try { localStorage.setItem('yookie_booking_phone', data.clientPhone) } catch { /* noop */ }
+  return response ?? []
+}
+
 /**
  * Reschedule a booking.
  * Backend: POST /bookings/:id/reschedule → { data: Booking }

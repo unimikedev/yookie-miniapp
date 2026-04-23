@@ -70,11 +70,11 @@ export async function listBookings(
     // Backend accepts `date` (single day), not from/to range.
     // Extract date from `from` param (YYYY-MM-DDT00:00:00 → YYYY-MM-DD)
     const date = params.from.slice(0, 10);
-    const res = await api.get<{ data: Booking[] }>(
+    const res = await api.get<Booking[]>(
       `/businesses/${merchantId}/bookings`,
       { date }
     );
-    return res.data ?? [];
+    return res ?? [];
   } catch (err) {
     if (shouldFallback(err)) return mockListMerchantBookings(merchantId, params);
     throw err;
@@ -100,10 +100,10 @@ export interface ActivityEvent {
  */
 export async function listActivity(merchantId: string): Promise<ActivityEvent[]> {
   try {
-    const res = await api.get<{ data: ActivityEvent[] }>(
+    const res = await api.get<ActivityEvent[]>(
       `/businesses/${merchantId}/activity`
     );
-    return res.data ?? [];
+    return res ?? [];
   } catch {
     return [];
   }
@@ -115,11 +115,11 @@ export async function listActivity(merchantId: string): Promise<ActivityEvent[]>
  */
 export async function listPendingBookings(merchantId: string): Promise<Booking[]> {
   try {
-    const res = await api.get<{ data: Booking[] }>(
+    const res = await api.get<Booking[]>(
       `/businesses/${merchantId}/bookings`,
       { status: 'pending' }
     );
-    return res.data ?? [];
+    return res ?? [];
   } catch (err) {
     if (shouldFallback(err)) return [];
     throw err;
@@ -132,10 +132,10 @@ export async function listPendingBookings(merchantId: string): Promise<Booking[]
  */
 export async function listServices(merchantId: string): Promise<Service[]> {
   try {
-    const res = await api.get<{ data: Service[] }>(
+    const res = await api.get<Service[]>(
       `/businesses/${merchantId}/services`
     );
-    return res.data ?? [];
+    return res ?? [];
   } catch (err) {
     if (shouldFallback(err)) return mockListMerchantServices(merchantId);
     throw err;
@@ -148,10 +148,10 @@ export async function listServices(merchantId: string): Promise<Service[]> {
  */
 export async function listStaff(merchantId: string): Promise<Master[]> {
   try {
-    const res = await api.get<{ data: Master[] }>(
+    const res = await api.get<Master[]>(
       `/businesses/${merchantId}/masters`
     );
-    return res.data ?? [];
+    return res ?? [];
   } catch (err) {
     if (shouldFallback(err)) return mockListMerchantStaff(merchantId);
     throw err;
@@ -166,11 +166,11 @@ export async function listStaff(merchantId: string): Promise<Master[]> {
 export async function listClients(merchantId: string): Promise<Client[]> {
   try {
     // Fetch recent bookings and extract unique clients
-    const res = await api.get<{ data: Booking[] }>(
+    const res = await api.get<Booking[]>(
       `/businesses/${merchantId}/bookings`,
       {}
     );
-    const bookings = res.data ?? [];
+    const bookings = res ?? [];
     const clientMap = new Map<string, Client>();
     for (const b of bookings) {
       if (b.clients && b.client_id && !clientMap.has(b.client_id)) {
@@ -211,18 +211,16 @@ export async function dashboardSummary(
     const dayEnd = `${date}T23:59:59`;
     const [analytics, bookings, staff] = await Promise.all([
       api.get<{
-        data: {
-          bookings: { total: number; completed: number; cancelled: number };
-          revenue: { total: number };
-        };
+        bookings: { total: number; completed: number; cancelled: number };
+        revenue: { total: number };
       }>(`/businesses/${merchantId}/analytics`, { from: dayStart, to: dayEnd }),
-      api.get<{ data: Booking[] }>(`/businesses/${merchantId}/bookings`, { date }),
-      api.get<{ data: Master[] }>(`/businesses/${merchantId}/masters`),
+      api.get<Booking[]>(`/businesses/${merchantId}/bookings`, { date }),
+      api.get<Master[]>(`/businesses/${merchantId}/masters`),
     ]);
 
-    const bData = analytics.data?.bookings ?? { total: 0, completed: 0, cancelled: 0 };
-    const todayBookings = bookings.data ?? [];
-    const staffCount = (staff.data ?? []).filter((s) => s.is_active).length;
+    const bData = analytics?.bookings ?? { total: 0, completed: 0, cancelled: 0 };
+    const todayBookings = bookings ?? [];
+    const staffCount = (staff ?? []).filter((s) => s.is_active).length;
 
     // Crude load: booked minutes / (active staff * 10h)
     const minutesBooked = todayBookings.reduce((sum, b) => {
@@ -236,7 +234,7 @@ export async function dashboardSummary(
 
     return {
       bookingsCount: bData.total,
-      revenuePlaceholder: analytics.data?.revenue?.total ?? 0,
+      revenuePlaceholder: analytics?.revenue?.total ?? 0,
       loadPercent,
       emptySlots,
       cancellations: bData.cancelled,
@@ -263,11 +261,10 @@ export interface CreateBookingInput {
  * Backend: POST /bookings
  */
 export async function createBooking(input: CreateBookingInput): Promise<Booking> {
-  const res = await api.post<{ data: Booking }>('/bookings', {
+  return api.post<Booking>('/bookings', {
     ...input,
     leadSource: 'direct',
   });
-  return res.data;
 }
 
 /**
@@ -281,11 +278,10 @@ export async function updateBookingStatus(
   status: BookingStatus
 ): Promise<Booking> {
   try {
-    const res = await api.patch<{ data: Booking }>(
+    return api.patch<Booking>(
       `/bookings/${bookingId}/status`,
       { status }
     );
-    return res.data;
   } catch (err) {
     if (shouldFallback(err)) return mockUpdateBookingStatus(_merchantId, bookingId, status);
     throw err;
@@ -302,11 +298,10 @@ export async function rescheduleBooking(
   patch: { startsAt?: string; endsAt?: string; masterId?: string }
 ): Promise<Booking> {
   try {
-    const res = await api.post<{ data: Booking }>(
+    return api.post<Booking>(
       `/bookings/${bookingId}/reschedule`,
       { startsAt: patch.startsAt, masterId: patch.masterId }
     );
-    return res.data;
   } catch (err) {
     if (shouldFallback(err)) return mockRescheduleBooking(_merchantId, bookingId, patch);
     throw err;
@@ -332,17 +327,15 @@ export async function upsertService(
 ): Promise<Service> {
   try {
     if (input.id) {
-      const res = await api.patch<{ data: Service }>(
+      return api.patch<Service>(
         `/businesses/${merchantId}/services/${input.id}`,
         { name: input.name, price: input.price, duration_min: input.duration_min, description: input.description, category: input.category }
       );
-      return res.data;
     }
-    const res = await api.post<{ data: Service }>(
+    return api.post<Service>(
       `/businesses/${merchantId}/services`,
       { name: input.name, price: input.price, duration_min: input.duration_min, description: input.description, category: input.category }
     );
-    return res.data;
   } catch (err) {
     if (shouldFallback(err)) return mockUpsertService(merchantId, input);
     throw err;
@@ -412,17 +405,15 @@ export async function upsertStaff(
       breaks: input.breaks,
     };
     if (input.id) {
-      const res = await api.patch<{ data: Master }>(
+      return api.patch<Master>(
         `/businesses/${merchantId}/masters/${input.id}`,
         body
       );
-      return res.data;
     }
-    const res = await api.post<{ data: Master }>(
+    return api.post<Master>(
       `/businesses/${merchantId}/masters`,
       body
     );
-    return res.data;
   } catch (err) {
     if (shouldFallback(err)) return mockUpsertStaff(merchantId, input);
     throw err;
