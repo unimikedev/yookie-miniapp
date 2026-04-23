@@ -28,7 +28,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: calc(var(--safe-area-top-quarter) + 68px + 48px);
+  height: calc(var(--safe-area-top-quarter) + 16px + 68px + 48px);
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
@@ -38,8 +38,8 @@
 .blueHeader {
   position: relative;
   z-index: 5;
-  padding-top: var(--safe-area-top-quarter);
-  height: calc(var(--safe-area-top-quarter) + 68px);
+  padding-top: calc(var(--safe-area-top-quarter) + 16px);
+  height: calc(var(--safe-area-top-quarter) + 16px + 68px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -109,12 +109,13 @@
   border-radius: 32px 32px 0 0;
   padding-top: 16px;
   width: 100%;
-  min-height: calc(100dvh - var(--safe-area-top-quarter) - 68px);
+  min-height: calc(100dvh - var(--safe-area-top-quarter) - 16px - 68px);
 }
 
-/* ── Search — inline, no sticky ── */
+/* ── Search — sticky with safe spacer above ── */
 .searchWrap {
-  position: relative;
+  position: sticky;
+  top: var(--safe-area-top-quarter);
   z-index: 10;
   background: var(--color-bg);
   padding: 4px 16px 8px;
