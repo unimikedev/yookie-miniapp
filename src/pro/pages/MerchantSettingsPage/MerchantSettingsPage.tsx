@@ -325,17 +325,29 @@ function BusinessWizard() {
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };
 
-      const res = await api.post<{ data: Business; token?: string }>('/businesses', body);
-      const newBiz = res.data;
+      const authToken = localStorage.getItem('yookie_auth_token');
+      const createRes = await fetch(`${API_BASE}/businesses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        },
+        body: JSON.stringify(body),
+      });
+      if (!createRes.ok) {
+        const errJson = await createRes.json().catch(() => ({}));
+        throw new Error((errJson as { message?: string }).message || 'Ошибка создания заведения');
+      }
+      const { data: newBiz, token: newToken } = await createRes.json() as { data: Business; token?: string };
 
-      if (res.token) {
+      if (newToken) {
         try {
-          localStorage.setItem('yookie_auth_token', res.token);
+          localStorage.setItem('yookie_auth_token', newToken);
           const authState = useAuthStore.getState();
           if (authState.user) {
             const updatedUser = { ...authState.user, businessId: newBiz.id };
             localStorage.setItem('yookie_auth_user', JSON.stringify(updatedUser));
-            useAuthStore.setState({ user: updatedUser, token: res.token });
+            useAuthStore.setState({ user: updatedUser, token: newToken });
           }
         } catch { /* storage unavailable */ }
       }
@@ -782,9 +794,8 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.get<{ data: Business }>(`/businesses/${merchantId}`)
-      .then(res => {
-        const b = res.data;
+    api.get<Business>(`/businesses/${merchantId}`)
+      .then(b => {
         if (b) {
           setName(b.name || '');
           setDescription(b.description || '');
