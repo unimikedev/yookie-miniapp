@@ -68,10 +68,11 @@ export default function MorePage() {
   };
 
   const items = [
-    { label: 'Сотрудники', path: '/pro/staff' },
-    { label: 'Клиенты', path: '/pro/clients' },
-    { label: 'Профиль заведения', path: '/pro/settings' },
-    { label: 'Предпросмотр страницы', path: '/pro/preview' },
+    { label: 'График работы',       path: '/pro/schedule' },
+    { label: 'Услуги',              path: '/pro/services' },
+    { label: 'Сотрудники',          path: '/pro/staff' },
+    { label: 'Профиль заведения',   path: '/pro/settings' },
+    { label: 'Предпросмотр',        path: '/pro/preview' },
   ];
 
   return (

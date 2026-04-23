@@ -6,6 +6,7 @@ import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, BookingStatus, Client, Master, Service } from '@/lib/api/types';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
+import { Toast } from '@/components/ui/Toast';
 import { ExportButton } from './ExportButton';
 import styles from './BookingsBoardPage.module.css';
 
@@ -73,6 +74,10 @@ export default function BookingsBoardPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
+  const [selectedMasterId, setSelectedMasterId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
+
+  const showToast = (msg: string) => setToast({ msg, key: Date.now() });
 
   const dateStr = useMemo(() => isoDate(date), [date]);
 
@@ -191,6 +196,7 @@ export default function BookingsBoardPage() {
 
       setSlotTarget(null);
       load();
+      showToast('Запись создана');
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Ошибка создания записи');
     } finally {
@@ -206,12 +212,29 @@ export default function BookingsBoardPage() {
       await updateBookingStatus(merchantId, selectedBooking.id, status);
       setSelectedBooking(null);
       load();
+      const toastMsg: Record<BookingStatus, string> = {
+        confirmed: 'Запись подтверждена',
+        cancelled: 'Запись отменена',
+        completed: 'Визит завершён',
+        no_show:   'Клиент не явился',
+        pending:   '',
+      };
+      if (toastMsg[status]) showToast(toastMsg[status]);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Ошибка');
     } finally {
       setActionLoading(false);
     }
   };
+
+  const filteredStaff = useMemo(
+    () => selectedMasterId ? staff.filter(s => s.id === selectedMasterId) : staff,
+    [staff, selectedMasterId],
+  );
+  const filteredBookings = useMemo(
+    () => selectedMasterId ? bookings.filter(b => b.master_id === selectedMasterId) : bookings,
+    [bookings, selectedMasterId],
+  );
 
   // Find existing client by phone prefix (for autocomplete)
   const clientSuggestion = useMemo<Client | null>(() => {
@@ -246,11 +269,32 @@ export default function BookingsBoardPage() {
         <button className={styles.dateArrow} onClick={nextDay}>›</button>
       </div>
 
+      {/* Master filter chips */}
+      {staff.length > 1 && (
+        <div className={styles.masterFilter}>
+          <button
+            className={`${styles.masterChip} ${selectedMasterId === null ? styles.masterChipActive : ''}`}
+            onClick={() => setSelectedMasterId(null)}
+          >
+            Все
+          </button>
+          {staff.map(s => (
+            <button
+              key={s.id}
+              className={`${styles.masterChip} ${selectedMasterId === s.id ? styles.masterChipActive : ''}`}
+              onClick={() => setSelectedMasterId(s.id)}
+            >
+              {s.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {view === 'timeline' ? (
         <TimelineView
           hours={HOURS}
-          staff={staff}
-          bookings={bookings}
+          staff={filteredStaff}
+          bookings={filteredBookings}
           dragging={dragging}
           onDragStart={handleDragStart}
           onDrop={handleDrop}
@@ -258,7 +302,11 @@ export default function BookingsBoardPage() {
           onBookingClick={setSelectedBooking}
         />
       ) : (
-        <ListView bookings={bookings} staff={staff} onBookingClick={setSelectedBooking} />
+        <ListView bookings={filteredBookings} staff={staff} onBookingClick={setSelectedBooking} />
+      )}
+
+      {toast && (
+        <Toast key={toast.key} message={toast.msg} onDone={() => setToast(null)} />
       )}
 
       <BottomSheet

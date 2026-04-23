@@ -723,6 +723,13 @@ function BusinessWizard() {
         >
           {saving ? 'Создание…' : step < TOTAL_STEPS ? 'Далее' : 'Создать бизнес'}
         </button>
+        <button
+          className={styles.wizardSkipBtn}
+          onClick={handleCreate}
+          disabled={saving}
+        >
+          {step === 1 ? 'Создать сейчас →' : 'Пропустить →'}
+        </button>
       </div>
     </div>
   );

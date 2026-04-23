@@ -390,3 +390,34 @@
   margin: 0;
   line-height: 1.4;
 }
+
+/* ── Master filter chips ────────────────────────────────────────── */
+.masterFilter {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.masterFilter::-webkit-scrollbar { display: none; }
+
+.masterChip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family);
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.masterChipActive {
+  border-color: var(--color-accent);
+  background: rgba(99,102,241,0.1);
+  color: var(--color-accent);
+}

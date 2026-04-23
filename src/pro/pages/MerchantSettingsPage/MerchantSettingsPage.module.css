@@ -654,6 +654,24 @@
   cursor: default;
 }
 
+.wizardSkipBtn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--text-body-sm-size);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.15s;
+}
+.wizardSkipBtn:disabled { opacity: 0.4; cursor: default; }
+.wizardSkipBtn:hover:not(:disabled) { color: var(--color-text-secondary); }
+
 .wizardPreviewBtnWrapper {
   padding: 0 20px 12px;
 }

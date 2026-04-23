@@ -8,6 +8,7 @@ import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, BookingStatus, Master } from '@/lib/api/types';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
+import { Toast } from '@/components/ui/Toast';
 import styles from './DashboardPage.module.css';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -43,6 +44,9 @@ export default function DashboardPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [date, setDate] = useState(() => new Date());
+  const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
+
+  const showToast = (msg: string) => setToast({ msg, key: Date.now() });
 
   const dateStr  = useMemo(() => isoDate(date), [date]);
   const todayStr = useMemo(() => isoDate(new Date()), []);
@@ -114,6 +118,7 @@ export default function DashboardPage() {
       loadPending();
       loadBookings();
       loadActivity();
+      showToast(status === 'confirmed' ? 'Запись подтверждена' : 'Запись отклонена');
     } finally {
       setActionId(null);
     }
@@ -128,6 +133,14 @@ export default function DashboardPage() {
       loadBookings();
       loadPending();
       loadActivity();
+      const toastMsg: Record<BookingStatus, string> = {
+        confirmed: 'Запись подтверждена',
+        cancelled: 'Запись отменена',
+        completed: 'Визит завершён',
+        no_show:   'Клиент не явился',
+        pending:   '',
+      };
+      if (toastMsg[status]) showToast(toastMsg[status]);
     } finally {
       setActionLoading(false);
     }
@@ -274,6 +287,10 @@ export default function DashboardPage() {
         <LinkRow label="Клиенты"            onClick={() => navigate('/pro/clients')} />
         <LinkRow label="Профиль заведения"  onClick={() => navigate('/pro/settings')} />
       </section>
+
+      {toast && (
+        <Toast key={toast.key} message={toast.msg} onDone={() => setToast(null)} />
+      )}
 
       {/* ── Booking detail sheet ── */}
       <BottomSheet
