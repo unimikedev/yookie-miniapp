@@ -60,7 +60,7 @@
 
 .tabActive {
   background: var(--color-accent);
-  color: #0F1115;
+  color: var(--color-text-on-accent, #0F1115);
   padding: 10px 14px;
 }
 
@@ -71,6 +71,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: inherit;
 }
 
 .label {
@@ -79,7 +80,7 @@
   overflow: hidden;
   font-size: var(--text-caption-size);
   font-weight: var(--text-caption-weight);
-  color: #0F1115;
+  color: var(--color-text-on-accent, #0F1115);
   line-height: 1;
   white-space: nowrap;
   will-change: max-width, opacity;

@@ -60,6 +60,7 @@
   --color-text-muted: #6B7280;
   --color-text-hint: #6B7280;
   --color-accent: #6BCEFF;
+  --color-text-on-accent: #0F1115;
   --color-accent-light: #8FD8FF;
   --color-nav-bg: rgba(26, 29, 34, 0.85);
   --color-nav-border: rgba(255, 255, 255, 0.08);
@@ -250,6 +251,7 @@
   --color-text-muted: #6B7280;
   --color-text-hint: #9CA3AF;
   --color-accent: #0EA5E9;
+  --color-text-on-accent: #FFFFFF;
   --color-accent-light: #38BDF8;
   --color-nav-bg: rgba(255, 255, 255, 0.85);
   --color-nav-border: rgba(0, 0, 0, 0.08);
