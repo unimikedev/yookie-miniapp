@@ -227,7 +227,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 6px;
   padding: 0 16px;
   font-size: var(--text-body-sm-size);
   font-weight: var(--text-body-sm-weight);
@@ -269,7 +269,7 @@
 .chipRow {
   display: flex;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 24px 16px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -282,6 +282,7 @@
 /* ── Content ─────────────────────────────────────────────── */
 .content {
   padding-bottom: 16px;
+  padding-top: 40px;
 }
 
 .section {
