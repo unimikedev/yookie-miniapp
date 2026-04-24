@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useAuthStore } from '@/stores/authStore';
-import { upsertStaff } from '@/pro/api';
+import { upsertStaff, getInviteInfo, acceptInvite } from '@/pro/api';
 import { api } from '@/lib/api/client';
 import { UZBEKISTAN_CITIES } from '@/stores/cityStore';
 import { formatPhoneMask } from '@/lib/utils/phone';
@@ -168,6 +168,158 @@ function InstagramPostUrlsEditor({ urls, input, onInputChange, onAdd, onRemove }
       </p>
     </div>
   )
+}
+
+/* ── Join existing business ─────────────────────────────────── */
+function JoinBusiness({ onBack }: { onBack: () => void }) {
+  const navigate = useNavigate();
+  const merchantStore = useMerchantStore();
+  const [input, setInput] = useState('');
+  const [preview, setPreview] = useState<{ businessName: string; role: string; masterId?: string | null } | null>(null);
+  const [token, setToken] = useState('');
+  const [lookingUp, setLookingUp] = useState(false);
+  const [accepting, setAccepting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const parseToken = (raw: string): string => {
+    const trimmed = raw.trim();
+    const deepLinkMatch = trimmed.match(/inv_([a-f0-9]{32})/i);
+    if (deepLinkMatch) return deepLinkMatch[1];
+    if (/^[a-f0-9]{32}$/i.test(trimmed)) return trimmed;
+    return '';
+  };
+
+  const handleLookup = async () => {
+    setError(null);
+    const tok = parseToken(input);
+    if (!tok) { setError('Вставьте ссылку-приглашение или код'); return; }
+    setLookingUp(true);
+    try {
+      const info = await getInviteInfo(tok);
+      if (!info.valid) { setError(info.reason ?? 'Приглашение недействительно'); return; }
+      setToken(tok);
+      setPreview({ businessName: info.businessName ?? 'Бизнес', role: info.role ?? 'staff', masterId: info.masterId });
+    } catch {
+      setError('Не удалось проверить приглашение');
+    } finally {
+      setLookingUp(false);
+    }
+  };
+
+  const handleAccept = async () => {
+    setAccepting(true);
+    setError(null);
+    try {
+      const result = await acceptInvite(token);
+      localStorage.setItem('yookie_auth_token', result.token);
+      try {
+        const stored = JSON.parse(localStorage.getItem('yookie_auth_user') || '{}');
+        stored.businessId = result.businessId;
+        stored.role = result.role;
+        localStorage.setItem('yookie_auth_user', JSON.stringify(stored));
+        useAuthStore.setState(s => ({
+          user: s.user ? { ...s.user, businessId: result.businessId, role: result.role as any } : s.user,
+        }));
+      } catch { /* noop */ }
+      merchantStore.setMerchantId(result.businessId);
+      merchantStore.setRole(result.role as 'staff' | 'owner');
+      if (result.masterId) merchantStore.setMasterId(result.masterId);
+      merchantStore.enterProMode();
+      navigate('/pro', { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось принять приглашение');
+    } finally {
+      setAccepting(false);
+    }
+  };
+
+  return (
+    <div className={styles.joinPage}>
+      <div className={styles.joinHeader}>
+        <button className={styles.joinBackBtn} onClick={onBack} aria-label="Назад">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <path d="M12 4L6 10L12 16" />
+          </svg>
+        </button>
+        <span className={styles.joinHeaderTitle}>Подключиться к бизнесу</span>
+      </div>
+
+      <div className={styles.joinBody}>
+        <p className={styles.joinInstruction}>
+          Вставьте ссылку-приглашение, которую вам отправил владелец бизнеса.
+        </p>
+
+        <div>
+          <div className={styles.joinInputRow}>
+            <input
+              className={styles.joinInput}
+              placeholder="Ссылка или код приглашения"
+              value={input}
+              onChange={e => { setInput(e.target.value); setPreview(null); setToken(''); setError(null); }}
+              onKeyDown={e => e.key === 'Enter' && !lookingUp && handleLookup()}
+              autoFocus
+            />
+            <button className={styles.joinLookupBtn} onClick={handleLookup} disabled={lookingUp || !input.trim()}>
+              {lookingUp ? '…' : 'Найти'}
+            </button>
+          </div>
+          <p className={styles.joinHint}>
+            Формат: ссылка вида t.me/yookie_bot?startapp=inv_… или 32-значный код
+          </p>
+        </div>
+
+        {error && <p className={styles.joinError}>{error}</p>}
+
+        {preview && (
+          <div className={styles.joinPreviewCard}>
+            <span className={styles.joinPreviewBizName}>{preview.businessName}</span>
+            <span className={styles.joinPreviewRole}>
+              {preview.role === 'staff' ? 'Сотрудник' : preview.role}
+            </span>
+            <button className={styles.joinAcceptBtn} onClick={handleAccept} disabled={accepting}>
+              {accepting ? 'Подключение…' : 'Присоединиться'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Onboarding choice screen ───────────────────────────────── */
+function OnboardingChoice({ onCreateNew, onJoin }: { onCreateNew: () => void; onJoin: () => void }) {
+  return (
+    <div className={styles.onboardingPage}>
+      <div className={styles.onboardingLogo}>Y</div>
+
+      <div className={styles.onboardingHeadline}>
+        <h1 className={styles.onboardingTitle}>Yookie Pro</h1>
+        <p className={styles.onboardingSubtitle}>
+          Управляйте записями, сотрудниками и расписанием
+        </p>
+      </div>
+
+      <div className={styles.onboardingChoices}>
+        <button className={`${styles.choiceCard} ${styles.choiceCardPrimary}`} onClick={onCreateNew}>
+          <div className={styles.choiceIcon}>🏢</div>
+          <div className={styles.choiceBody}>
+            <span className={styles.choiceTitle}>Создать бизнес</span>
+            <p className={styles.choiceDesc}>Зарегистрируйте своё заведение и начните принимать записи</p>
+          </div>
+          <span className={styles.choiceArrow}>›</span>
+        </button>
+
+        <button className={styles.choiceCard} onClick={onJoin}>
+          <div className={styles.choiceIcon}>🔗</div>
+          <div className={styles.choiceBody}>
+            <span className={styles.choiceTitle}>Подключиться к бизнесу</span>
+            <p className={styles.choiceDesc}>Есть ссылка-приглашение от владельца — войдите как сотрудник</p>
+          </div>
+          <span className={styles.choiceArrow}>›</span>
+        </button>
+      </div>
+    </div>
+  );
 }
 
 /* ── Wizard (new business) ──────────────────────────────────────── */
@@ -758,8 +910,9 @@ export default function MerchantSettingsPage() {
   const auth = useAuthStore();
   const { merchantId, setMerchantId } = useMerchantStore();
   const isNew = !merchantId;
+  const [onboardingMode, setOnboardingMode] = useState<'choice' | 'create' | 'join'>('choice');
 
-  // Auth guard for wizard mode
+  // Auth guard
   useEffect(() => {
     if (!auth.isAuthenticated) {
       navigate('/auth?return=/pro', { replace: true });
@@ -768,8 +921,17 @@ export default function MerchantSettingsPage() {
 
   if (!auth.isAuthenticated) return null;
 
-  // New business → wizard
-  if (isNew) return <BusinessWizard />;
+  // New business → fork screen
+  if (isNew) {
+    if (onboardingMode === 'join') return <JoinBusiness onBack={() => setOnboardingMode('choice')} />;
+    if (onboardingMode === 'create') return <BusinessWizard />;
+    return (
+      <OnboardingChoice
+        onCreateNew={() => setOnboardingMode('create')}
+        onJoin={() => setOnboardingMode('join')}
+      />
+    );
+  }
 
   // Existing business → edit form
   return <BusinessEditForm merchantId={merchantId} />;
