@@ -29,6 +29,7 @@ export async function fetchBusinesses(
   if (params.category) queryParams.category = params.category;
   if (params.search) queryParams.search = params.search;
   if (params.page !== undefined) queryParams.page = params.page;
+  if (params.offset !== undefined) queryParams.offset = params.offset;
   if (params.limit !== undefined) queryParams.limit = params.limit;
   if (params.lat !== undefined) queryParams.lat = params.lat;
   if (params.lng !== undefined) queryParams.lng = params.lng;

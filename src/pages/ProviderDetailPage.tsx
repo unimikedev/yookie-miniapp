@@ -14,7 +14,6 @@ import { Skeleton, EmptyState, Badge, Rating } from '@/shared/ui'
 import {
   ServiceCard,
   ReviewCard,
-  SpecialistCard,
   MasterChip,
   Chip,
   InfoCard,
@@ -36,8 +35,7 @@ import { formatMasterName } from '@/lib/utils/name'
 import { toLocalYMD } from '@/lib/utils/date'
 import styles from './ProviderDetailPage.module.css'
 
-const TABS_ALL = ['Услуги', 'Мастера', 'Отзывы', 'О нас']
-const TABS_NO_SPECIALISTS = ['Услуги', 'Отзывы', 'О нас']
+const TABS = ['Услуги', 'Отзывы', 'О нас']
 
 interface ReviewItem {
   id: string
@@ -65,7 +63,11 @@ export default function ProviderDetailPage() {
   const [reviewsLoading, setReviewsLoading] = useState(false)
   const [activeServiceCat, setActiveServiceCat] = useState<string | null>(null)
   const [serviceSearch, setServiceSearch] = useState('')
-  const [expandedMasterId, setExpandedMasterId] = useState<string | null>(null)
+  const [masterFilter, setMasterFilter] = useState<string | null>(null)
+
+  // Swipe-back gesture refs
+  const swipeStartX = useRef(0)
+  const swipeStartY = useRef(0)
 
   // Booking flow state
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -126,10 +128,10 @@ export default function ProviderDetailPage() {
       }
     }
     if (state?.fromDeepLink && state.highlightMaster) {
-      const masterSection = document.getElementById('masters-section');
-      if (masterSection) {
-        masterSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      setMasterFilter(state.highlightMaster);
+      setTimeout(() => {
+        servicesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
     }
   }, [location.state, services, masters, soloMaster]);
 
@@ -359,16 +361,25 @@ export default function ProviderDetailPage() {
     return cats
   }, [services])
 
-  // Filter services by category + search
+  // Filter services by master filter, category, and search
   const filteredServices = useMemo(() => {
     let result = services
+    if (masterFilter) {
+      const masterSvcIds = new Set(
+        masters.find(m => m.id === masterFilter)
+          ?.master_services?.map(ms => ms.service_id) ?? []
+      )
+      if (masterSvcIds.size > 0) {
+        result = result.filter(s => masterSvcIds.has(s.id))
+      }
+    }
     if (activeServiceCat) result = result.filter(s => s.category?.trim() === activeServiceCat)
     if (serviceSearch.trim()) {
       const q = serviceSearch.toLowerCase()
       result = result.filter(s => s.name.toLowerCase().includes(q))
     }
     return result
-  }, [services, activeServiceCat, serviceSearch])
+  }, [services, masterFilter, activeServiceCat, serviceSearch, masters])
 
   // Filter masters available for a given service (falls back to all if no M2M defined)
   const mastersForService = (serviceId: string): Master[] => {
@@ -379,23 +390,27 @@ export default function ProviderDetailPage() {
     return assigned.length > 0 ? assigned : masters
   }
 
-  const handleMasterClick = (masterId: string) => {
-    setExpandedMasterId(expandedMasterId === masterId ? null : masterId)
-  }
-
   // ── Hero image ──────────────────────────────────────────────────
   // For individual: show master photo; for business: use uploaded photo_url, fall back to mock
-  const coverImage = business
-    ? (business.photo_url ?? getMockBusinessImage(business.category, business.id))
-    : null
-  const coverPhotos = coverImage ? [coverImage] : []
+  const coverPhotos = useMemo(() => {
+    if (!business) return []
+    const seen = new Set<string>()
+    const result: string[] = []
+    for (const p of [business.photo_url, ...(business.photo_urls ?? [])]) {
+      if (p && !seen.has(p)) { seen.add(p); result.push(p) }
+    }
+    if (result.length === 0) {
+      const mock = getMockBusinessImage(business.category, business.id)
+      if (mock) result.push(mock)
+    }
+    return result
+  }, [business])
   const soloMasterPhoto = soloMaster
     ? (soloMaster.photo_url ?? getMockMasterImage(soloMaster.id))
     : null
   const soloMasterPhotos = soloMasterPhoto ? [soloMasterPhoto] : []
 
-  // Tabs: hide "Специалисты" for individual providers
-  const tabs = isIndividual ? TABS_NO_SPECIALISTS : TABS_ALL
+  const tabs = TABS
 
   // ── Error state ─────────────────────────────────────────────────
   if (error) {
@@ -423,7 +438,18 @@ export default function ProviderDetailPage() {
 
   // ── Render ──────────────────────────────────────────────────────
   return (
-    <div className={styles.page}>
+    <div
+      className={styles.page}
+      onTouchStart={(e) => {
+        swipeStartX.current = e.touches[0].clientX
+        swipeStartY.current = e.touches[0].clientY
+      }}
+      onTouchEnd={(e) => {
+        const dx = e.changedTouches[0].clientX - swipeStartX.current
+        const dy = Math.abs(e.changedTouches[0].clientY - swipeStartY.current)
+        if (dx > 80 && dy < 60) navigate(-1)
+      }}
+    >
       {/* Hero: business cover OR individual master photo */}
       <div className={styles.coverWrap}>
         {isLoading ? (
@@ -520,6 +546,30 @@ export default function ProviderDetailPage() {
               <div className={styles.sectionHead}>
                 <h2 className={styles.sectionTitle}>Услуги</h2>
               </div>
+
+              {/* Master filter row — shown for business providers with multiple masters */}
+              {!isLoading && !isIndividual && masters.length > 1 && (
+                <div className={styles.masterFilterRow}>
+                  <button
+                    className={`${styles.masterFilterChip} ${masterFilter === null ? styles.masterFilterChipActive : ''}`}
+                    onClick={() => setMasterFilter(null)}
+                  >
+                    Все мастера
+                  </button>
+                  {masters.map(master => (
+                    <button
+                      key={master.id}
+                      className={`${styles.masterFilterChip} ${masterFilter === master.id ? styles.masterFilterChipActive : ''}`}
+                      onClick={() => setMasterFilter(prev => prev === master.id ? null : master.id)}
+                    >
+                      {master.photo_url && (
+                        <img src={master.photo_url} alt="" className={styles.masterFilterAvatar} />
+                      )}
+                      {formatMasterName(master.name)}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* L2 category filter — underline tabs */}
               {!isLoading && serviceCategories.length > 1 && (
@@ -728,73 +778,8 @@ export default function ProviderDetailPage() {
           </>
         )}
 
-        {/* ── Мастера tab (index 1 for ALL, hidden for individual) ─ */}
-        {activeTab === 1 && !isIndividual && (
-          <section id="masters-section" className={styles.section}>
-            <div className={styles.sectionHead}>
-              <h2 className={styles.sectionTitle}>Мастера</h2>
-            </div>
-            {isLoading ? (
-              <div className={styles.skeletonList}>
-                {[1, 2].map(i => <Skeleton key={i} variant="rect" height={200} />)}
-              </div>
-            ) : masters.length > 0 ? (
-              <div className={`${styles.specialistsScroll} contentReveal`}>
-                {masters.map((master) => {
-                  const isExpanded = expandedMasterId === master.id
-                  const masterSvcs = (master.master_services ?? [])
-                    .filter(ms => ms.services)
-                    .map(ms => ms.services!)
-                  // Group by category
-                  const catMap = new Map<string, typeof masterSvcs>()
-                  for (const s of masterSvcs) {
-                    const cat = s.category?.trim() || 'Другое'
-                    if (!catMap.has(cat)) catMap.set(cat, [])
-                    catMap.get(cat)!.push(s)
-                  }
-                  return (
-                    <div key={master.id} className={styles.masterAccordion}>
-                      <SpecialistCard
-                        name={formatMasterName(master.name)}
-                        role={master.specialization ?? ''}
-                        rating={Number(master.rating) ?? 0}
-                        photoUrl={master.photo_url}
-                        onClick={() => handleMasterClick(master.id)}
-                      />
-                      {isExpanded && (
-                        <div className={styles.masterServicesList}>
-                          {masterSvcs.length === 0 ? (
-                            <p className={styles.masterServicesEmpty}>Услуги не назначены</p>
-                          ) : (
-                            [...catMap.entries()].map(([cat, svcs]) => (
-                              <div key={cat} className={styles.masterServiceGroup}>
-                                {catMap.size > 1 && (
-                                  <span className={styles.masterServiceCatLabel}>{cat}</span>
-                                )}
-                                {svcs.map(s => (
-                                  <div key={s.id} className={styles.masterServiceRow}>
-                                    <span className={styles.masterServiceName}>{s.name}</span>
-                                    <span className={styles.masterServiceMeta}>{s.duration_min} мин · {s.price.toLocaleString('ru')} сўм</span>
-                                  </div>
-                                ))}
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <EmptyState title="Мастера не найдены" description="Мастера ещё не добавлены" />
-            )}
-          </section>
-        )}
-
-        {/* ── Отзывы tab ────────────────────────────────────────────
-            index 2 for TABS_ALL (business), index 1 for TABS_NO_SPECIALISTS */}
-        {((activeTab === 2 && !isIndividual) || (activeTab === 1 && isIndividual)) && (
+        {/* ── Отзывы tab (index 1) ─────────────────────────────── */}
+        {activeTab === 1 && (
           <section className={`${styles.section} ${styles.reviewsSection}`}>
             <div className={styles.sectionHead}>
               <h2 className={styles.sectionTitle}>Отзывы</h2>
@@ -821,9 +806,8 @@ export default function ProviderDetailPage() {
           </section>
         )}
 
-        {/* ── О нас tab ─────────────────────────────────────────────
-            index 3 for TABS_ALL (business), index 2 for TABS_NO_SPECIALISTS */}
-        {((activeTab === 3 && !isIndividual) || (activeTab === 2 && isIndividual)) && (
+        {/* ── О нас tab (index 2) ──────────────────────────────── */}
+        {activeTab === 2 && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>О нас</h2>
             <p className={styles.aboutText}>

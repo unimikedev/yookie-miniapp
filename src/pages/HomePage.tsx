@@ -22,10 +22,12 @@ import {
   HomeFilterChipsRow,
   HScroll,
 } from '@/components/features/home'
-import type { CategoryEnum } from '@/lib/api/types'
-import type { HomeFilterChip } from '@/lib/api/home'
+import type { CategoryEnum, Business } from '@/lib/api/types'
+import { CATEGORY_LABELS } from '@/lib/api/types'
+import type { HomeFilterChip, PopularStudioCard } from '@/lib/api/home'
 import { CATEGORIES, CATEGORY_ICONS } from '@/shared/constants'
 import { fetchBusinesses } from '@/lib/api/businesses'
+import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import styles from './HomePage.module.css'
 
 interface SearchResultItem {
@@ -43,11 +45,50 @@ const TYPING_PLACEHOLDER = 'Найти '
 
 const FILTER_CHIPS: HomeFilterChip[] = [
   { key: 'sort', label: '', icon: 'arrows' },
+  { key: 'new_places', label: 'Новые места' },
+  { key: 'popular', label: 'Популярные' },
+  { key: 'top_rated', label: 'Топ рейтинг' },
   { key: 'promo', label: 'Акции' },
   { key: 'nearby', label: 'Рядом' },
   { key: 'available', label: 'Свободен' },
-  { key: 'top_rated', label: 'Высокий рейтинг' },
 ]
+
+type FeedFilterKey = 'new_places' | 'popular' | 'top_rated'
+const FEED_CHIPS = new Set<string>(['new_places', 'popular', 'top_rated'])
+const FEED_LIMIT = 10
+const FEED_TITLES: Record<FeedFilterKey, string> = {
+  new_places: 'Новые места',
+  popular: 'Популярные',
+  top_rated: 'Топ рейтинг',
+}
+const FEED_SORTS: Record<FeedFilterKey, 'popular' | 'rating' | undefined> = {
+  new_places: undefined,
+  popular: 'popular',
+  top_rated: 'rating',
+}
+
+function toFeedCard(b: Business): PopularStudioCard {
+  const ab = b as any
+  const primaryPhoto = b.photo_url ?? getMockBusinessImage(b.category, b.id)
+  const seen = new Set<string>()
+  const allPhotos: string[] = []
+  for (const p of [primaryPhoto, ...(b.photo_urls ?? [])]) {
+    if (p && !seen.has(p)) { seen.add(p); allPhotos.push(p) }
+  }
+  return {
+    id: `feed-${b.id}`,
+    providerType: b.provider_type,
+    name: b.name,
+    category: b.category,
+    categoryLabel: CATEGORY_LABELS[b.category] ?? b.category,
+    rating: ab.rating ?? 0,
+    reviewCount: ab.review_count ?? 0,
+    photoUrl: allPhotos[0] ?? null,
+    photos: allPhotos.length > 1 ? allPhotos.slice(1) : undefined,
+    businessId: b.id,
+    priceFrom: ab.min_price ?? 0,
+  }
+}
 
 /* ── SVG Icons ──────────────────────────────────────────── */
 
@@ -135,9 +176,20 @@ export default function HomePage() {
     )
   }
   
-  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
+  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['new_places']))
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
+  const [marqueePaused, setMarqueePaused] = useState(false)
+
+  // Infinite feed state
+  const [feedFilter, setFeedFilter] = useState<FeedFilterKey>('new_places')
+  const [feedItems, setFeedItems] = useState<PopularStudioCard[]>([])
+  const [feedOffset, setFeedOffset] = useState(0)
+  const [feedHasMore, setFeedHasMore] = useState(true)
+  const [feedLoading, setFeedLoading] = useState(false)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  // Mutable ref so IntersectionObserver callback always sees latest state
+  const loadMoreFeedRef = useRef<() => void>(() => {})
 
   // ── Inline search ──
   const [searchQuery, setSearchQuery] = useState('')
@@ -281,16 +333,83 @@ export default function HomePage() {
   const effectiveVisitedLoading = visitedLoading
 
   const handleFilterClick = (key: string) => {
-    setActiveFilters(prev => {
-      const next = new Set(prev)
-      next.has(key) ? next.delete(key) : next.add(key)
-      return next
-    })
+    if (FEED_CHIPS.has(key)) {
+      // Radio: clicking active feed chip resets to 'new_places'
+      const next = (key === feedFilter ? 'new_places' : key) as FeedFilterKey
+      setFeedFilter(next)
+      setActiveFilters(prev => {
+        const updated = new Set(prev)
+        FEED_CHIPS.forEach(k => updated.delete(k))
+        updated.add(next)
+        return updated
+      })
+    } else {
+      setActiveFilters(prev => {
+        const next = new Set(prev)
+        next.has(key) ? next.delete(key) : next.add(key)
+        return next
+      })
+    }
   }
 
   const handleCategoryClick = (catKey: CategoryEnum) => {
     setSelectedCategory(prev => prev === catKey ? null : catKey)
   }
+
+  // ── Feed: reset + load first page when filter or city changes ──
+  useEffect(() => {
+    let cancelled = false
+    setFeedItems([])
+    setFeedOffset(0)
+    setFeedHasMore(true)
+    setFeedLoading(true)
+    ;(async () => {
+      try {
+        const res = await fetchBusinesses({ city: city.id, limit: FEED_LIMIT, offset: 0, sort: FEED_SORTS[feedFilter] })
+        if (cancelled) return
+        const items = (res.data ?? []).map(toFeedCard)
+        setFeedItems(items)
+        setFeedOffset(items.length)
+        setFeedHasMore(items.length >= FEED_LIMIT)
+      } catch {
+        if (!cancelled) setFeedHasMore(false)
+      } finally {
+        if (!cancelled) setFeedLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [feedFilter, city.id])
+
+  // ── Feed: update mutable ref so IntersectionObserver always gets fresh state ──
+  loadMoreFeedRef.current = () => {
+    if (feedLoading || !feedHasMore) return
+    ;(async () => {
+      setFeedLoading(true)
+      try {
+        const res = await fetchBusinesses({ city: city.id, limit: FEED_LIMIT, offset: feedOffset, sort: FEED_SORTS[feedFilter] })
+        const items = (res.data ?? []).map(toFeedCard)
+        setFeedItems(prev => [...prev, ...items])
+        setFeedOffset(prev => prev + items.length)
+        setFeedHasMore(items.length >= FEED_LIMIT)
+      } catch {
+        setFeedHasMore(false)
+      } finally {
+        setFeedLoading(false)
+      }
+    })()
+  }
+
+  // ── Feed: IntersectionObserver — set up once, uses ref ──
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+    const obs = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting) loadMoreFeedRef.current() },
+      { rootMargin: '300px' }
+    )
+    obs.observe(sentinel)
+    return () => obs.disconnect()
+  }, [])
 
   // Apply ALL active filters to ALL sections
   const getFilteredData = () => {
@@ -433,11 +552,26 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Category chips */}
-        <div className={styles.catRow}>
-          {CATEGORIES.map((cat) => (
-            <HomeCategoryChip key={cat.key} label={cat.label} iconSrc={cat.icon} onClick={() => handleCategoryClick(cat.key)} active={selectedCategory === cat.key} />
-          ))}
+        {/* Category chips — infinite auto-scroll marquee */}
+        <div
+          className={styles.catMarqueeWrap}
+          onTouchStart={() => setMarqueePaused(true)}
+          onTouchEnd={() => setTimeout(() => setMarqueePaused(false), 1500)}
+        >
+          <div
+            className={styles.catMarqueeTrack}
+            style={{ animationPlayState: marqueePaused ? 'paused' : 'running' }}
+          >
+            {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
+              <HomeCategoryChip
+                key={`${cat.key}-${idx}`}
+                label={cat.label}
+                iconSrc={cat.icon}
+                onClick={() => handleCategoryClick(cat.key)}
+                active={selectedCategory === cat.key}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Sections */}
@@ -559,23 +693,31 @@ export default function HomePage() {
                 )}
               </section>
 
-              {/* Filter chips — filters everything below */}
+              {/* Filter chips — drives the feed section below */}
               <HomeFilterChipsRow chips={FILTER_CHIPS} activeFilters={activeFilters} onFilterClick={handleFilterClick} />
 
-              {/* Популярные */}
+              {/* Dynamic feed — title and content driven by active filter */}
               <section className={styles.sectionInner}>
-                <SectionHeader title="Популярные" onMoreClick={() => navigate('/search')} />
-                {isLoading || !data ? (
-                  <div className={styles.skeleton}><Skeleton variant="rect" height={246} /></div>
-                ) : fd.popularStudios.length > 0 ? (
-                  <div className={`${styles.visitedCol} contentReveal`}>
-                    {fd.popularStudios.map((s) => (
-                      <PopularStudioCardView key={s.id} item={s} onClick={() => navigate(`/business/${s.businessId}`)} isFavorite={isFavorite(s.businessId || '')} onToggleFavorite={() => toggle(s.businessId || '')} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.emptySection}>Ничего не найдено по фильтрам</p>
-                )}
+                <SectionHeader title={FEED_TITLES[feedFilter]} onMoreClick={() => navigate('/search')} />
+                <div className={`${styles.visitedCol} contentReveal`}>
+                  {feedItems.map((s) => (
+                    <PopularStudioCardView
+                      key={s.id}
+                      item={s}
+                      onClick={() => navigate(`/business/${s.businessId}`)}
+                      isFavorite={isFavorite(s.businessId || '')}
+                      onToggleFavorite={() => toggle(s.businessId || '')}
+                    />
+                  ))}
+                  {feedItems.length === 0 && !feedLoading && (
+                    <p className={styles.emptySection}>Нет заведений</p>
+                  )}
+                  {feedLoading && (
+                    <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>
+                  )}
+                </div>
+                {/* Sentinel — triggers loading next page */}
+                <div ref={sentinelRef} style={{ height: 1 }} />
               </section>
             </>
           )}

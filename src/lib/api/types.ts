@@ -56,6 +56,7 @@ export interface Business {
   booking_link?: string;
   is_active: boolean;
   photo_url?: string | null;
+  photo_urls?: string[] | null;
   rating?: number;
   review_count?: number;
   lat?: number;
@@ -257,6 +258,7 @@ export interface FetchBusinessesParams {
   category?: CategoryEnum;
   search?: string;
   page?: number;
+  offset?: number;
   limit?: number;
   /** Geo-search params */
   lat?: number;

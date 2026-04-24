@@ -133,8 +133,12 @@ function toPopularMaster(b: Business, idx: number, userPos: { lat: number; lng: 
 
 function toPopularStudio(b: Business): PopularStudioCard {
   const ab = b as ApiBusiness;
-  const photoUrl = b.photo_url ?? getMockBusinessImage(b.category, b.id);
-  const photos = [photoUrl, photoUrl, photoUrl].filter((p): p is string => Boolean(p));
+  const primaryPhoto = b.photo_url ?? getMockBusinessImage(b.category, b.id);
+  const seen = new Set<string>()
+  const allPhotos: string[] = []
+  for (const p of [primaryPhoto, ...(b.photo_urls ?? [])]) {
+    if (p && !seen.has(p)) { seen.add(p); allPhotos.push(p) }
+  }
   return {
     id: `ps-${b.id}`,
     providerType: b.provider_type,
@@ -143,9 +147,10 @@ function toPopularStudio(b: Business): PopularStudioCard {
     categoryLabel: CATEGORY_LABELS[b.category],
     rating: b.rating ?? 0,
     reviewCount: ab.review_count ?? 0,
-    photoUrl,
-    photos,
+    photoUrl: allPhotos[0] ?? primaryPhoto,
+    photos: allPhotos.length > 1 ? allPhotos.slice(1) : undefined,
     businessId: b.id,
+    priceFrom: ab.min_price ?? 0,
   };
 }
 

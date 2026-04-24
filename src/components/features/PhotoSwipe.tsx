@@ -1,5 +1,5 @@
 /**
- * PhotoSwipe — swipeable photo carousel with thumbnail indicators and slide animation.
+ * PhotoSwipe — swipeable photo carousel with N/N counter, thumbnails and slide animation.
  * Used on ProviderDetailPage and MasterDetailPage hero sections.
  */
 
@@ -47,6 +47,12 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
     }
   }, [current, photos.length])
 
+  const goTo = useCallback((idx: number) => {
+    if (idx === current) return
+    setSlideDir(idx > current ? 'right' : 'left')
+    setCurrent(idx)
+  }, [current])
+
   if (!photos.length) return null
   if (photos.length === 1) {
     return (
@@ -58,6 +64,12 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
 
   const slideClass = slideDir === 'right' ? styles.slideRight : slideDir === 'left' ? styles.slideLeft : ''
 
+  // Show up to 3 thumbnail previews (excluding current photo)
+  const thumbIndices = photos
+    .map((_, i) => i)
+    .filter(i => i !== current)
+    .slice(0, 3)
+
   return (
     <div
       className={`${styles.swipeWrap} ${className ?? ''}`}
@@ -68,13 +80,24 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
     >
       <img key={current} src={photos[current]} alt={alt} className={`${styles.photo} ${slideClass}`} />
 
-      {photos.length > 1 && (
-        <div className={styles.dots}>
-          {photos.map((_, i) => (
-            <span key={i} className={`${styles.dot} ${i === current ? styles.dotActive : ''}`} />
-          ))}
-        </div>
-      )}
+      {/* N/N counter */}
+      <div className={styles.counter}>{current + 1}/{photos.length}</div>
+
+      {/* Thumbnail strip — bottom-right, overlapping container */}
+      <div className={styles.thumbnails}>
+        {thumbIndices.map(i => (
+          <img
+            key={i}
+            src={photos[i]}
+            alt={`${alt ?? ''} ${i + 1}`}
+            className={`${styles.thumbnail} ${i === current ? styles.thumbnailActive : ''}`}
+            onClick={(e) => { e.stopPropagation(); goTo(i) }}
+          />
+        ))}
+        {photos.length > 4 && (
+          <div className={styles.thumbnailMore}>+{photos.length - 4}</div>
+        )}
+      </div>
     </div>
   )
 }

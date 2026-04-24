@@ -6,32 +6,32 @@
   position: relative;
   min-height: 100dvh;
   background: transparent;
-  /* push page content exactly below fixed blue header */
-  padding-top: calc(var(--safe-area-top-half) + 68px);
+  /* safe area (TG header) + our header height */
+  padding-top: calc(var(--safe-area-top, 64px) + 56px);
   padding-bottom: calc(var(--safe-area-bottom) + 16px);
 }
 
-/* ── Blue gradient — fixed, extends a bit below header for rounded-corner overlap ── */
+/* ── Blue gradient — fixed, extends well below our header into the white card ── */
 .topGradient {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: calc(var(--safe-area-top-half) + 68px + 32px);
+  /* covers TG safe zone + our header + 56px overlap onto white card */
+  height: calc(var(--safe-area-top, 64px) + 56px + 56px);
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
   z-index: 0;
   pointer-events: none;
 }
 
-/* ── Blue header — fixed on top of gradient ── */
+/* ── Blue header — fixed right below the Telegram safe area ── */
 .blueHeader {
   position: fixed;
-  top: 0;
+  top: var(--safe-area-top, 64px);
   left: 0;
   right: 0;
   z-index: 5;
-  padding-top: var(--safe-area-top-half);
-  height: calc(var(--safe-area-top-half) + 68px);
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -101,13 +101,13 @@
   border-radius: 32px 32px 0 0;
   padding-top: 16px;
   width: 100%;
-  min-height: calc(100dvh - var(--safe-area-top-half) - 44px);
+  min-height: calc(100dvh - var(--safe-area-top, 64px) - 56px);
 }
 
-/* ── Search — sticky, pins just below blue header when scrolling ── */
+/* ── Search — sticky, pins below both the TG safe area AND our header ── */
 .searchWrap {
   position: sticky;
-  top: 0;
+  top: calc(var(--safe-area-top, 64px) + 56px);
   z-index: 10;
   background: var(--color-bg);
   padding: 4px 16px 8px;
@@ -408,6 +408,28 @@
 
 .catRow::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Infinite category scroll marquee ─────────────────────── */
+@keyframes catMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.catMarqueeWrap {
+  overflow: hidden;
+  width: 100%;
+  padding: 8px 0 0;
+}
+
+.catMarqueeTrack {
+  display: inline-flex;
+  gap: 12px;
+  padding-left: 16px;
+  padding-right: 12px;
+  animation: catMarquee 64s linear infinite;
+  animation-play-state: running;
+  will-change: transform;
 }
 
 /* ── Content sections ───────────────────────────────────── */
