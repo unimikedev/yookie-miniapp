@@ -1,12 +1,9 @@
 /**
  * useHomeData — single source of truth for HomePage sections.
  *
- * Backend is the source of truth for all business data; however the
- * marketing home sections (visited / nearby / popular) don't yet have
- * dedicated endpoints. This hook fetches the generic businesses list
- * once and projects it into the shapes the UI requires. If the API
- * call fails or returns empty, we fall back to deterministic mock
- * data so the home screen always renders in demo/dev mode.
+ * Fetches real business data from backend with GPS coordinates when available.
+ * No fake/seeded data — all values come from the API or are omitted.
+ * Falls back to mock businesses only when API is completely unreachable (DEV).
  */
 
 import { useEffect, useState } from 'react';
@@ -14,24 +11,10 @@ import { fetchBusinesses } from '../lib/api/businesses';
 import { CATEGORY_LABELS } from '../lib/api/types';
 import type { Business } from '../lib/api/types';
 import { useCityStore } from '../stores/cityStore';
-// Single source of truth for mock businesses. Must match mockBusinesses.ts
-// so that navigating from a home card to /business/:id hits an id that
-// the detail-page fallback (getMockBusiness) can resolve.
 import {
   MOCK_BUSINESSES as SHARED_MOCK_BUSINESSES,
-  MOCK_MASTERS as SHARED_MOCK_MASTERS,
 } from '../lib/mockBusinesses';
 
-/**
- * Pick a real mock master id for the given business so that navigating
- * from a home card to /business/:id/master/:masterId resolves against
- * the shared mock dataset used by MasterDetailPage.
- */
-function pickMasterId(businessId: string, idx = 0): string {
-  const candidates = SHARED_MOCK_MASTERS.filter((m) => m.business_id === businessId);
-  if (candidates.length === 0) return `${businessId}-master-${idx}`;
-  return candidates[idx % candidates.length].id;
-}
 import type {
   HomePageData,
   VisitedMasterCard,
@@ -39,7 +22,7 @@ import type {
   PopularMasterCard,
   PopularStudioCard,
 } from '../lib/api/home';
-import { getMockBusinessImage, getMockMasterImage } from '../lib/utils/mockImages';
+import { getMockBusinessImage } from '../lib/utils/mockImages';
 
 /** Real master data embedded in API response */
 interface ApiMaster {
@@ -55,6 +38,7 @@ interface ApiBusiness extends Business {
   masters?: ApiMaster[];
   min_price?: number;
   distance_km?: number | null;
+  review_count?: number;
 }
 
 interface UseHomeDataResult {
@@ -64,103 +48,91 @@ interface UseHomeDataResult {
   refetch: () => void;
 }
 
-/* ── Deterministic helpers ─────────────────────────────────────────────── */
-
-function hashInt(seed: string): number {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return h;
+/** Haversine distance in meters between two lat/lng points */
+function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function seedDistance(seed: string): number {
-  // 200m — 2000m
-  return 200 + (hashInt(seed) % 180) * 10;
-}
-
-function seedPrice(seed: string): number {
-  // 150 000 — 600 000 sum, rounded to 50k
-  const h = hashInt(seed + 'price');
-  return 150_000 + (h % 10) * 50_000;
-}
-
-function seedRating(seed: string): number {
-  // 4.3 — 5.0
-  return +(4.3 + (hashInt(seed + 'r') % 8) * 0.1).toFixed(1);
+/** Get distance in meters: prefers API distance_km, falls back to haversine if GPS available */
+function getDistanceMeters(
+  b: ApiBusiness,
+  userPos: { lat: number; lng: number } | null
+): number {
+  if (b.distance_km != null) return Math.round(b.distance_km * 1000);
+  if (userPos && b.lat != null && b.lng != null) {
+    return Math.round(haversineMeters(userPos.lat, userPos.lng, b.lat, b.lng));
+  }
+  return 0;
 }
 
 /* ── Projection from Business → card shapes ───────────────────────────── */
 
-function toVisited(b: Business): VisitedMasterCard {
-  const h = hashInt(b.id + 'lv');
-  const daysAgo = (h % 14) + 1;
-  const lastVisit = new Date();
-  lastVisit.setDate(lastVisit.getDate() - daysAgo);
-  const formattedDate = lastVisit.toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-
-  // Use real master from API if available
-  const apiMasters = (b as ApiBusiness).masters ?? [];
-  const activeMasters = apiMasters.filter((m: ApiMaster) => m.is_active);
+function toVisited(b: Business, userPos: { lat: number; lng: number } | null): VisitedMasterCard {
+  const ab = b as ApiBusiness;
+  const activeMasters = (ab.masters ?? []).filter((m) => m.is_active);
   const master = activeMasters[0] ?? null;
 
   return {
     id: `visited-${b.id}`,
     providerType: b.provider_type,
-    masterName: master?.name ?? firstMasterName(b),
+    masterName: master?.name ?? b.name,
     businessName: b.name,
     specialization: master?.specialization ?? CATEGORY_LABELS[b.category] ?? '',
-    distanceMeters: seedDistance(b.id),
-    priceFrom: (b as ApiBusiness).min_price || seedPrice(b.id),
-    rating: master?.rating ?? b.rating ?? seedRating(b.id),
-    photoUrl: master?.photo_url ?? getMockMasterImage(b.id),
-    hasSlotsToday: (hashInt(b.id) & 1) === 0,
+    distanceMeters: getDistanceMeters(ab, userPos),
+    priceFrom: ab.min_price ?? 0,
+    rating: master?.rating ?? b.rating ?? 0,
+    photoUrl: master?.photo_url ?? b.photo_url ?? getMockBusinessImage(b.category, b.id),
+    hasSlotsToday: true,
     businessId: b.id,
-    masterId: master?.id ?? pickMasterId(b.id, 0),
-    lastVisitDate: formattedDate,
+    masterId: master?.id ?? '',
+    lastVisitDate: '',
   };
 }
 
-function toNearby(b: Business): NearbyBusinessCard {
+function toNearby(b: Business, userPos: { lat: number; lng: number } | null): NearbyBusinessCard {
+  const ab = b as ApiBusiness;
   return {
     id: `nearby-${b.id}`,
     providerType: b.provider_type,
     name: b.name,
     category: b.category,
     categoryLabel: CATEGORY_LABELS[b.category],
-    distanceMeters: seedDistance(b.id + 'n'),
-    priceFrom: (b as ApiBusiness).min_price || seedPrice(b.id + 'n'),
-    rating: b.rating ?? seedRating(b.id),
+    distanceMeters: getDistanceMeters(ab, userPos),
+    priceFrom: ab.min_price ?? 0,
+    rating: b.rating ?? 0,
     photoUrl: b.photo_url ?? getMockBusinessImage(b.category, b.id),
     businessId: b.id,
   };
 }
 
-function toPopularMaster(b: Business, idx: number): PopularMasterCard {
-  const seed = b.id + '-pm-' + idx;
-
-  // Use real master from API if available
-  const apiMasters = (b as ApiBusiness).masters ?? [];
-  const activeMasters = apiMasters.filter((m: ApiMaster) => m.is_active);
-  const master = activeMasters[idx % Math.max(1, activeMasters.length)] ?? null;
+function toPopularMaster(b: Business, idx: number, userPos: { lat: number; lng: number } | null): PopularMasterCard {
+  const ab = b as ApiBusiness;
+  const activeMasters = (ab.masters ?? []).filter((m) => m.is_active);
+  const master = activeMasters[idx % Math.max(1, activeMasters.length)] ?? activeMasters[0] ?? null;
 
   return {
     id: `pm-${b.id}-${idx}`,
     providerType: b.provider_type,
-    name: master?.name ?? nthMasterName(idx),
-    specialization: master?.specialization ?? masterSpecialization(b.category),
-    distanceMeters: seedDistance(seed),
-    priceFrom: seedPrice(seed),
-    rating: master?.rating ?? seedRating(seed),
-    photoUrl: master?.photo_url ?? getMockMasterImage(seed),
+    name: master?.name ?? b.name,
+    specialization: master?.specialization ?? CATEGORY_LABELS[b.category] ?? '',
+    distanceMeters: getDistanceMeters(ab, userPos),
+    priceFrom: ab.min_price ?? 0,
+    rating: master?.rating ?? b.rating ?? 0,
+    photoUrl: master?.photo_url ?? b.photo_url ?? getMockBusinessImage(b.category, b.id),
     businessId: b.id,
-    masterId: master?.id ?? pickMasterId(b.id, idx),
+    masterId: master?.id ?? '',
   };
 }
 
 function toPopularStudio(b: Business): PopularStudioCard {
+  const ab = b as ApiBusiness;
   const photoUrl = b.photo_url ?? getMockBusinessImage(b.category, b.id);
   const photos = [photoUrl, photoUrl, photoUrl].filter((p): p is string => Boolean(p));
   return {
@@ -169,58 +141,33 @@ function toPopularStudio(b: Business): PopularStudioCard {
     name: b.name,
     category: b.category,
     categoryLabel: CATEGORY_LABELS[b.category],
-    rating: b.rating ?? seedRating(b.id),
-    reviewCount: 80 + (hashInt(b.id + 'rc') % 200),
+    rating: b.rating ?? 0,
+    reviewCount: ab.review_count ?? 0,
     photoUrl,
     photos,
     businessId: b.id,
   };
 }
 
-/* ── Name pools (deterministic, avoid Math.random) ────────────────────── */
-
-const MASTER_NAMES = [
-  'Александр В.',
-  'Гульноза',
-  'Самира',
-  'Дильшод',
-  'Азиза',
-  'Рустам',
-  'Нигора',
-  'Тимур',
-];
-
-function firstMasterName(b: Business) {
-  return MASTER_NAMES[hashInt(b.id) % MASTER_NAMES.length];
+/** Get user GPS position (one-shot, non-blocking). Returns null on denial/error. */
+function getUserPosition(): Promise<{ lat: number; lng: number } | null> {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null),
+      { timeout: 5000, maximumAge: 60000 }
+    );
+  });
 }
 
-function nthMasterName(idx: number) {
-  return MASTER_NAMES[(idx * 3 + 1) % MASTER_NAMES.length];
+/** Only show businesses with at least 1 active master and at least 1 service (min_price > 0) */
+function isReadyForListing(b: Business): boolean {
+  const ab = b as ApiBusiness;
+  const hasActiveMaster = (ab.masters ?? []).some((m) => m.is_active);
+  const hasServices = (ab.min_price ?? 0) > 0;
+  return hasActiveMaster && hasServices;
 }
-
-function masterSpecialization(cat: string): string {
-  const map: Record<string, string> = {
-    hair: 'Стилист',
-    barber: 'Барбер',
-    nail: 'Мастер маникюра',
-    brow_lash: 'Бровист',
-    makeup: 'Визажист',
-    spa_massage: 'Массажист',
-    epilation: 'Мастер эпиляции',
-    cosmetology: 'Косметолог',
-    tattoo: 'Тату-мастер',
-    piercing: 'Мастер пирсинга',
-    yoga: 'Тренер йоги',
-    fitness: 'Фитнес-тренер',
-  };
-  return map[cat] ?? 'Мастер';
-}
-
-/* ── Mock fallback ────────────────────────────────────────────────────── */
-
-// Re-exported from lib/mockBusinesses so home cards and detail pages share
-// the same business identifiers.
-const MOCK_BUSINESSES: Business[] = SHARED_MOCK_BUSINESSES;
 
 /* ── Hook ─────────────────────────────────────────────────────────────── */
 
@@ -239,31 +186,48 @@ export function useHomeData(): UseHomeDataResult {
       setIsLoading(true);
       setError(null);
 
-      let businesses: Business[] = [];
-      try {
-        const res = await fetchBusinesses({ city: city.id, limit: 50 });
-        businesses = res.data ?? [];
-      } catch {
-        /* fall through to mock */
-      }
-
-      const isRealData = businesses.length > 0;
-      if (!isRealData) businesses = MOCK_BUSINESSES;
+      // Get GPS non-blockingly (runs in parallel with data fetch)
+      const [userPos, apiResult] = await Promise.allSettled([
+        getUserPosition(),
+        fetchBusinesses({
+          city: city.id,
+          limit: 50,
+          sort: undefined,
+        }),
+      ]);
 
       if (cancelled) return;
 
-      // For real API data, hide only explicitly deactivated businesses.
-      // Masters are not embedded in the list response, so we can't check them here.
+      const pos = userPos.status === 'fulfilled' ? userPos.value : null;
+      let businesses: Business[] = [];
+
+      if (apiResult.status === 'fulfilled') {
+        businesses = apiResult.value.data ?? [];
+      }
+
+      const isRealData = businesses.length > 0;
+
+      // Only fall back to mocks in DEV when backend is unreachable
+      if (!isRealData) businesses = SHARED_MOCK_BUSINESSES;
+
+      // Filter: only show businesses ready for listing (has masters + services)
       const readyBusinesses = isRealData
-        ? businesses.filter((b) => b.is_active !== false)
+        ? businesses.filter(isReadyForListing)
         : businesses;
 
-      const visited = readyBusinesses.slice(0, 4).map(toVisited);
-      const nearby = readyBusinesses.slice(0, 6).map(toNearby);
-      const popularMasters = readyBusinesses
-        .slice(0, 6)
-        .map((b, i) => toPopularMaster(b as unknown as ApiBusiness, i));
-      const popularStudios = readyBusinesses.slice(0, 6).map(toPopularStudio);
+      // If GPS available, re-sort by distance
+      const sorted = pos
+        ? [...readyBusinesses].sort((a, b) => {
+            const da = getDistanceMeters(a as ApiBusiness, pos);
+            const db2 = getDistanceMeters(b as ApiBusiness, pos);
+            return da - db2;
+          })
+        : readyBusinesses;
+
+      const visited = sorted.slice(0, 4).map((b) => toVisited(b, pos));
+      const nearby = sorted.slice(0, 6).map((b) => toNearby(b, pos));
+      const popularMasters = sorted.slice(0, 6).map((b, i) => toPopularMaster(b, i, pos));
+      const popularStudios = sorted.slice(0, 6).map(toPopularStudio);
 
       setData({
         visited,

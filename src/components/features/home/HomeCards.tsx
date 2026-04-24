@@ -15,11 +15,13 @@ import type {
 import { formatMasterName } from '@/lib/utils/name'
 
 /* ── formatters ─────────────────────────────────────────── */
-const formatDistance = (m: number): string =>
-  m < 1000 ? `${m} м` : `${(m / 1000).toFixed(1).replace('.', ',')} км`
+const formatDistance = (m: number): string => {
+  if (!m) return ''
+  return m < 1000 ? `${m} м` : `${(m / 1000).toFixed(1).replace('.', ',')} км`
+}
 
 const formatPriceFrom = (price: number): string =>
-  `от ${Math.round(price / 1000)} тыс.`
+  price > 0 ? `от ${Math.round(price / 1000)} тыс.` : ''
 
 /* ── icons ──────────────────────────────────────────────── */
 const StarIcon = ({ color = '#6BCEFF' }: { color?: string }) => (
@@ -196,17 +198,20 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
             </span>
             <div className={styles.nearbyRatingRow}>
               <StarIcon />
-              <span>{item.rating.toFixed(1)}</span>
-              <span> · </span>
-              <span className={styles.nearbyDistance}>{formatDistance(item.distanceMeters)}</span>
+              <span>{item.rating > 0 ? item.rating.toFixed(1) : '—'}</span>
+              {formatDistance(item.distanceMeters) && (
+                <><span> · </span><span className={styles.nearbyDistance}>{formatDistance(item.distanceMeters)}</span></>
+              )}
             </div>
           </>
         ) : (
           <>
             <span className={styles.nearbyMeta}>
-              {item.categoryLabel} • {formatDistance(item.distanceMeters)}
+              {item.categoryLabel}{formatDistance(item.distanceMeters) ? ` • ${formatDistance(item.distanceMeters)}` : ''}
             </span>
-            <span className={styles.nearbyPrice}>{formatPriceFrom(item.priceFrom)}</span>
+            {formatPriceFrom(item.priceFrom) && (
+              <span className={styles.nearbyPrice}>{formatPriceFrom(item.priceFrom)}</span>
+            )}
           </>
         )}
       </div>
