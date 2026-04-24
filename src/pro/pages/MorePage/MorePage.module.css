@@ -148,3 +148,55 @@
   color: var(--color-text-secondary);
   text-align: center;
 }
+
+/* ── Account section ── */
+.accountSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.accountError {
+  margin: 0;
+  padding: 10px 12px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid var(--color-error, #ef4444);
+  border-radius: 10px;
+  color: var(--color-error, #ef4444);
+  font-size: 13px;
+}
+
+.leaveBtn {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 14px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+}
+
+.leaveBtn:disabled { opacity: 0.5; }
+
+.logoutBtn {
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: 1.5px solid var(--color-error, #ef4444);
+  border-radius: 14px;
+  color: var(--color-error, #ef4444);
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+}
+
+.logoutBtn:disabled { opacity: 0.5; }

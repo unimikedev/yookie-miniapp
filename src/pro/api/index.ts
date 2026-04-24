@@ -523,6 +523,34 @@ export async function acceptInvite(token: string): Promise<{
   }>;
 }
 
+// ─── Leave / Resign ───────────────────────────────────────────────────────────
+
+/** Disconnect user from the business without removing their master record. */
+export async function leaveBusinessApi(businessId: string): Promise<{ token: string }> {
+  const res = await fetch(`${INVITE_API_BASE}/businesses/${businessId}/leave`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { message?: string };
+    throw new Error(body.message || 'Не удалось выйти из бизнеса');
+  }
+  return res.json() as Promise<{ token: string }>;
+}
+
+/** Disconnect user AND deactivate their master record + cancel future bookings. */
+export async function resignFromBusinessApi(businessId: string): Promise<{ token: string }> {
+  const res = await fetch(`${INVITE_API_BASE}/businesses/${businessId}/resign`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { message?: string };
+    throw new Error(body.message || 'Не удалось уволиться');
+  }
+  return res.json() as Promise<{ token: string }>;
+}
+
 // ─── Availability ─────────────────────────────────────────────────────────────
 // Backend stores availability as `working_days` (Record<day, bool>) + `breaks`
 // on the master record. We update via PATCH /businesses/:id/masters/:mid.

@@ -4,6 +4,7 @@ import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { patchBusiness } from '@/pro/api';
 import { useBusiness } from '@/hooks/useBusiness';
 import { LoadingState } from '@/components/ui/LoadingState';
+import { useBusinessExit } from '@/pro/hooks/useBusinessExit';
 import styles from './MerchantPreviewPage.module.css';
 
 /**
@@ -12,12 +13,13 @@ import styles from './MerchantPreviewPage.module.css';
  */
 export default function MerchantPreviewPage() {
   const navigate = useNavigate();
-  const { merchantId } = useMerchantStore();
+  const { merchantId, role } = useMerchantStore();
   const { business, isLoading, error } = useBusiness(merchantId!);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [localPublished, setLocalPublished] = useState(false);
+  const { leaveWithoutResigning, resignAndLeave, logout, loading: exitLoading, error: exitError } = useBusinessExit();
 
   const isPublished = localPublished || (business?.is_active ?? false);
 
@@ -192,6 +194,35 @@ export default function MerchantPreviewPage() {
         <p style={{ color: 'var(--color-error)', textAlign: 'center', fontSize: 13, padding: '0 16px 16px' }}>
           {publishError}
         </p>
+      )}
+
+      {role === 'staff' && (
+        <div className={styles.accountSection}>
+          {exitError && <p className={styles.accountError}>{exitError}</p>}
+          <button
+            className={styles.leaveBtn}
+            onClick={() => merchantId && leaveWithoutResigning(merchantId)}
+            disabled={exitLoading}
+          >
+            Выйти из бизнеса
+            <span className={styles.leaveBtnHint}>Профиль мастера сохранится</span>
+          </button>
+          <button
+            className={styles.resignBtn}
+            onClick={() => merchantId && resignAndLeave(merchantId)}
+            disabled={exitLoading}
+          >
+            Уволиться
+            <span className={styles.leaveBtnHint}>Профиль и записи будут удалены</span>
+          </button>
+          <button
+            className={styles.logoutBtn}
+            onClick={logout}
+            disabled={exitLoading}
+          >
+            Выйти из аккаунта
+          </button>
+        </div>
       )}
     </div>
   );

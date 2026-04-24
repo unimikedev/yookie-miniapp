@@ -5,6 +5,7 @@ import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { getMerchantShareLink, getTelegramShareUrl } from '@/shared/constants';
 import { api } from '@/lib/api/client';
+import { useBusinessExit } from '@/pro/hooks/useBusinessExit';
 import styles from './MorePage.module.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
@@ -12,6 +13,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 export default function MorePage() {
   const navigate = useNavigate();
   const { merchantId } = useMerchantStore();
+  const { leaveWithoutResigning, logout, loading: exitLoading, error: exitError } = useBusinessExit();
 
   const [copied, setCopied] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
@@ -146,6 +148,24 @@ export default function MorePage() {
             <span className={styles.chev}>›</span>
           </button>
         ))}
+
+        <div className={styles.accountSection}>
+          {exitError && <p className={styles.accountError}>{exitError}</p>}
+          <button
+            className={styles.leaveBtn}
+            onClick={() => merchantId && leaveWithoutResigning(merchantId)}
+            disabled={exitLoading}
+          >
+            Выйти из бизнеса
+          </button>
+          <button
+            className={styles.logoutBtn}
+            onClick={logout}
+            disabled={exitLoading}
+          >
+            Выйти из аккаунта
+          </button>
+        </div>
       </div>
     </ProLayout>
   );
