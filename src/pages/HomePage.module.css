@@ -409,37 +409,21 @@
   display: none;
 }
 
-/* ── Infinite category scroll marquee ─────────────────────── */
-@keyframes catMarquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
+/* ── Category scroll row ─────────────────────────────────── */
 .catMarqueeWrap {
-  overflow: hidden;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
   width: 100%;
-  padding: 8px 0 0;
+  padding: 8px 16px 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  /* Prevent rAF scroll from causing page scroll bounce */
+  overscroll-behavior-x: contain;
 }
 
 .catMarqueeWrap::-webkit-scrollbar {
   display: none;
-}
-
-.catMarqueeTrack {
-  display: flex;
-  animation: catMarquee 64s linear infinite;
-  will-change: transform;
-}
-
-/* Each copy has identical left padding (= inter-chip gap) so translateX(-50%)
-   lands exactly at the start of copy 2 — creating a seamless loop. */
-.catMarqueeCopy {
-  display: flex;
-  gap: 12px;
-  padding-left: 12px;
-  flex-shrink: 0;
 }
 
 /* ── Content sections ───────────────────────────────────── */

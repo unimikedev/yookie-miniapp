@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useOverlayStore } from '@/stores/overlayStore'
 import { useTelegramSafeArea } from '@/hooks/useTelegramSafeArea'
@@ -18,16 +19,16 @@ function getEnterClass(fromPath: string, toPath: string): string {
   const fromIsTab = TAB_PATHS.has(fromPath)
   const toIsTab = TAB_PATHS.has(toPath)
   if (fromIsTab && toIsTab) return styles.pageFade
-  if (!fromIsTab && toIsTab) return styles.pageBack  // detail → tab: slide in from left
-  return styles.pageFwd                               // tab/any → detail: slide in from right
+  if (!fromIsTab && toIsTab) return styles.pageBack
+  return styles.pageFwd
 }
 
 function getExitClass(fromPath: string, toPath: string): string {
   const fromIsTab = TAB_PATHS.has(fromPath)
   const toIsTab = TAB_PATHS.has(toPath)
   if (fromIsTab && toIsTab) return styles.pageFadeOut
-  if (!fromIsTab && toIsTab) return styles.pageBackExit  // detail → tab: slide out to right
-  return styles.pageFwdExit                               // tab/any → detail: slide out to left
+  if (!fromIsTab && toIsTab) return styles.pageBackExit
+  return styles.pageFwdExit
 }
 
 const TRANSITION_MS = 260
@@ -51,10 +52,8 @@ export default function Layout({ children }: LayoutProps) {
 
   const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
   const showTgBack = !PAGES_WITH_NAV.includes(location.pathname)
-  // Home header lives here (outside page-transition wrapper) so position:fixed works
   const isHome = location.pathname === '/'
 
-  // Delayed-unmount transition state
   const [shownChildren, setShownChildren] = useState<React.ReactNode>(children)
   const [transClass, setTransClass] = useState<string>('')
   const shownPathRef = useRef(location.pathname)
@@ -69,7 +68,6 @@ export default function Layout({ children }: LayoutProps) {
     const newChildren = children
     const newKey = location.key
 
-    // Trigger exit animation on currently displayed content
     setTransClass(getExitClass(fromPath, toPath))
 
     if (timerRef.current) clearTimeout(timerRef.current)
@@ -85,7 +83,6 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [location.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Global Telegram BackButton — shows on detail/nested pages, hides on root tabs and pro routes
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp
     if (!tg) return
@@ -112,23 +109,27 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [showTgBack, navigate])
 
+  // Portal into document.body guarantees position:fixed works regardless of
+  // any ancestor transform/will-change that would otherwise break fixed children
+  const homeHeader = isHome ? createPortal(
+    <>
+      <div className={homeStyles.topGradient} aria-hidden="true" />
+      <header className={homeStyles.blueHeader}>
+        <div className={homeStyles.logoBlock}>
+          <img src="/logo.svg" alt="Yookie" className={`${homeStyles.logoImage} ${homeStyles.logoWhite}`} />
+          <span className={`${homeStyles.logoSub} ${homeStyles.logoSubWhite}`}>Маркетплейс оффлайн услуг</span>
+        </div>
+        <button className={homeStyles.headerBtnBlue} onClick={() => navigate('/favorites')} aria-label="Избранное">
+          <HeartIcon />
+        </button>
+      </header>
+    </>,
+    document.body
+  ) : null
+
   return (
     <div className={styles.layout}>
-      {/* Home-only fixed elements — outside pageTransition so position:fixed works correctly */}
-      {isHome && (
-        <>
-          <div className={homeStyles.topGradient} aria-hidden="true" />
-          <header className={homeStyles.blueHeader}>
-            <div className={homeStyles.logoBlock}>
-              <img src="/logo.svg" alt="Yookie" className={`${homeStyles.logoImage} ${homeStyles.logoWhite}`} />
-              <span className={`${homeStyles.logoSub} ${homeStyles.logoSubWhite}`}>Маркетплейс оффлайн услуг</span>
-            </div>
-            <button className={homeStyles.headerBtnBlue} onClick={() => navigate('/favorites')} aria-label="Избранное">
-              <HeartIcon />
-            </button>
-          </header>
-        </>
-      )}
+      {homeHeader}
       <main className={`${styles.main} ${showNav ? styles.withNav : ''}`}>
         <div className={`${styles.pageTransition} ${transClass}`}>
           {shownChildren}

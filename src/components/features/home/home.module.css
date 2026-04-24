@@ -517,6 +517,18 @@
   font-weight: var(--text-body-weight);
 }
 
+.psNewBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(107, 206, 255, 0.18);
+  color: var(--color-accent);
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  width: fit-content;
+}
+
 .psPrice {
   display: flex;
   flex-direction: column;

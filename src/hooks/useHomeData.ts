@@ -174,6 +174,21 @@ function isReadyForListing(b: Business): boolean {
   return hasActiveMaster && hasServices;
 }
 
+function buildHomeData(readyBusinesses: Business[], pos: { lat: number; lng: number } | null): HomePageData {
+  const sorted = pos
+    ? [...readyBusinesses].sort((a, b) =>
+        getDistanceMeters(a as ApiBusiness, pos) - getDistanceMeters(b as ApiBusiness, pos)
+      )
+    : readyBusinesses;
+
+  const visited = sorted.slice(0, 4).map((b) => toVisited(b, pos));
+  const nearby = sorted.slice(0, 6).map((b) => toNearby(b, pos));
+  const popularMasters = sorted.slice(0, 6).map((b, i) => toPopularMaster(b, i, pos));
+  const popularStudios = sorted.slice(0, 6).map(toPopularStudio);
+
+  return { visited, map: { nearbyCount: nearby.length }, nearby, popularMasters, popularStudios };
+}
+
 /* ── Hook ─────────────────────────────────────────────────────────────── */
 
 export function useHomeData(): UseHomeDataResult {
@@ -191,57 +206,27 @@ export function useHomeData(): UseHomeDataResult {
       setIsLoading(true);
       setError(null);
 
-      // Get GPS non-blockingly (runs in parallel with data fetch)
-      const [userPos, apiResult] = await Promise.allSettled([
-        getUserPosition(),
-        fetchBusinesses({
-          city: city.id,
-          limit: 50,
-          sort: undefined,
-        }),
-      ]);
-
-      if (cancelled) return;
-
-      const pos = userPos.status === 'fulfilled' ? userPos.value : null;
+      // Phase 1 — fetch businesses and show immediately (no GPS wait)
       let businesses: Business[] = [];
-
-      if (apiResult.status === 'fulfilled') {
-        businesses = apiResult.value.data ?? [];
+      try {
+        const apiResult = await fetchBusinesses({ city: city.id, limit: 50 });
+        if (cancelled) return;
+        businesses = apiResult.data ?? [];
+      } catch {
+        if (cancelled) return;
       }
 
       const isRealData = businesses.length > 0;
-
-      // Only fall back to mocks in DEV when backend is unreachable
       if (!isRealData) businesses = SHARED_MOCK_BUSINESSES;
+      const readyBusinesses = isRealData ? businesses.filter(isReadyForListing) : businesses;
 
-      // Filter: only show businesses ready for listing (has masters + services)
-      const readyBusinesses = isRealData
-        ? businesses.filter(isReadyForListing)
-        : businesses;
-
-      // If GPS available, re-sort by distance
-      const sorted = pos
-        ? [...readyBusinesses].sort((a, b) => {
-            const da = getDistanceMeters(a as ApiBusiness, pos);
-            const db2 = getDistanceMeters(b as ApiBusiness, pos);
-            return da - db2;
-          })
-        : readyBusinesses;
-
-      const visited = sorted.slice(0, 4).map((b) => toVisited(b, pos));
-      const nearby = sorted.slice(0, 6).map((b) => toNearby(b, pos));
-      const popularMasters = sorted.slice(0, 6).map((b, i) => toPopularMaster(b, i, pos));
-      const popularStudios = sorted.slice(0, 6).map(toPopularStudio);
-
-      setData({
-        visited,
-        map: { nearbyCount: nearby.length },
-        nearby,
-        popularMasters,
-        popularStudios,
-      });
+      setData(buildHomeData(readyBusinesses, null));
       setIsLoading(false);
+
+      // Phase 2 — get GPS silently and re-sort by distance
+      const pos = await getUserPosition();
+      if (cancelled || !pos) return;
+      setData(buildHomeData(readyBusinesses, pos));
     };
 
     run().catch((e) => {
@@ -251,9 +236,7 @@ export function useHomeData(): UseHomeDataResult {
       }
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [tick, city.id]);
 
   return { data, isLoading, error, refetch: () => setTick((t) => t + 1) };

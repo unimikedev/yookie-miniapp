@@ -58,10 +58,16 @@
   opacity: 0.8;
 }
 
+/* Dark theme: dark text on cyan pill (high contrast) */
 .tabActive {
   background: var(--color-accent);
-  color: #ffffff;
+  color: #0F1115;
   padding: 10px 14px;
+}
+
+/* Light theme: white text on cyan pill */
+:global([data-theme="light"]) .tabActive {
+  color: #ffffff;
 }
 
 .icon {

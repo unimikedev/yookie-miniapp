@@ -35,7 +35,7 @@ import { formatMasterName } from '@/lib/utils/name'
 import { toLocalYMD } from '@/lib/utils/date'
 import styles from './ProviderDetailPage.module.css'
 
-const TABS = ['Услуги', 'Отзывы', 'О нас']
+const TABS = ['Услуги', 'Мастера', 'Отзывы', 'О нас']
 
 interface ReviewItem {
   id: string
@@ -478,13 +478,19 @@ export default function ProviderDetailPage() {
                   : business.name}
               </h1>
               <div className={styles.infoRatingRow}>
-                <span className={styles.infoRatingValue}>
-                  {Number(business.rating).toFixed(1)}
-                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                    <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#6BCEFF" />
-                  </svg>
-                </span>
-                <span className={styles.infoRatingCount}> · {(business as any).review_count ?? 0} отзывов</span>
+                {(business.rating != null && Number(business.rating) > 0) ? (
+                  <span className={styles.infoRatingValue}>
+                    {Number(business.rating).toFixed(1)}
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 0L8.63 4.79L13.64 5.46L10 8.97L10.88 13.96L7 11.42L3.12 13.96L4 8.97L0.36 5.46L5.37 4.79L7 0Z" fill="#6BCEFF" />
+                    </svg>
+                  </span>
+                ) : (
+                  <span className={styles.infoRatingNew}>Новое</span>
+                )}
+                {(business.rating != null && Number(business.rating) > 0) && (
+                  <span className={styles.infoRatingCount}> · {(business as any).review_count ?? 0} отзывов</span>
+                )}
                 <span className={styles.infoDot}> · </span>
                 {!isIndividual && business.category && (
                   <span className={styles.infoCategory}>{CATEGORY_LABELS[business.category]}</span>
@@ -547,27 +553,11 @@ export default function ProviderDetailPage() {
                 <h2 className={styles.sectionTitle}>Услуги</h2>
               </div>
 
-              {/* Master filter row — shown for business providers with multiple masters */}
-              {!isLoading && !isIndividual && masters.length > 1 && (
-                <div className={styles.masterFilterRow}>
-                  <button
-                    className={`${styles.masterFilterChip} ${masterFilter === null ? styles.masterFilterChipActive : ''}`}
-                    onClick={() => setMasterFilter(null)}
-                  >
-                    Все мастера
-                  </button>
-                  {masters.map(master => (
-                    <button
-                      key={master.id}
-                      className={`${styles.masterFilterChip} ${masterFilter === master.id ? styles.masterFilterChipActive : ''}`}
-                      onClick={() => setMasterFilter(prev => prev === master.id ? null : master.id)}
-                    >
-                      {master.photo_url && (
-                        <img src={master.photo_url} alt="" className={styles.masterFilterAvatar} />
-                      )}
-                      {formatMasterName(master.name)}
-                    </button>
-                  ))}
+              {/* Active master filter indicator — set from Мастера tab */}
+              {masterFilter && (
+                <div className={styles.masterActiveFilterBar}>
+                  <span>Мастер: {formatMasterName(masters.find(m => m.id === masterFilter)?.name ?? '')}</span>
+                  <button className={styles.masterActiveFilterClear} onClick={() => setMasterFilter(null)}>✕</button>
                 </div>
               )}
 
@@ -778,8 +768,57 @@ export default function ProviderDetailPage() {
           </>
         )}
 
-        {/* ── Отзывы tab (index 1) ─────────────────────────────── */}
+        {/* ── Мастера tab (index 1) ────────────────────────────── */}
         {activeTab === 1 && (
+          <section className={styles.section}>
+            <div className={styles.sectionHead}>
+              <h2 className={styles.sectionTitle}>Специалисты</h2>
+            </div>
+            {isLoading ? (
+              <div className={styles.skeletonList}>
+                {[1, 2].map(i => <Skeleton key={i} variant="rect" height={80} />)}
+              </div>
+            ) : masters.length > 0 ? (
+              <div className={styles.mastersList}>
+                {masters.map(master => (
+                  <div key={master.id} className={styles.masterRow}>
+                    <div className={styles.masterRowPhoto}>
+                      {master.photo_url
+                        ? <img src={master.photo_url} alt={master.name} />
+                        : <span className={styles.masterRowPhotoFallback}>{master.name.charAt(0)}</span>
+                      }
+                    </div>
+                    <div className={styles.masterRowInfo}>
+                      <span className={styles.masterRowName}>{formatMasterName(master.name)}</span>
+                      {master.specialization && (
+                        <span className={styles.masterRowSpec}>{master.specialization}</span>
+                      )}
+                      {master.rating > 0 && (
+                        <span className={styles.masterRowRating}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M6 0.5L7.545 3.63L11 4.135L8.5 6.57L9.09 10.01L6 8.385L2.91 10.01L3.5 6.57L1 4.135L4.455 3.63L6 0.5Z" fill="#6BCEFF" />
+                          </svg>
+                          {master.rating.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      className={styles.masterRowBtn}
+                      onClick={() => { setMasterFilter(master.id); setActiveTab(0) }}
+                    >
+                      Услуги
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="Мастера не найдены" description="Специалисты ещё не добавлены" compact />
+            )}
+          </section>
+        )}
+
+        {/* ── Отзывы tab (index 2) ─────────────────────────────── */}
+        {activeTab === 2 && (
           <section className={`${styles.section} ${styles.reviewsSection}`}>
             <div className={styles.sectionHead}>
               <h2 className={styles.sectionTitle}>Отзывы</h2>
@@ -806,8 +845,8 @@ export default function ProviderDetailPage() {
           </section>
         )}
 
-        {/* ── О нас tab (index 2) ──────────────────────────────── */}
-        {activeTab === 2 && (
+        {/* ── О нас tab (index 3) ──────────────────────────────── */}
+        {activeTab === 3 && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>О нас</h2>
             <p className={styles.aboutText}>

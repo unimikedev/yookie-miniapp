@@ -167,40 +167,28 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
 
-  // Marquee: transform-delta touch handling (no scroll-mode switching)
-  const marqueeTrackRef = useRef<HTMLDivElement>(null)
-  const marqueeTouchRef = useRef<{ x: number; baseX: number }>({ x: 0, baseX: 0 })
-  const MARQUEE_DURATION = 64
+  // Marquee: scrollable div with slow JS auto-scroll for hint
+  const marqueeRef = useRef<HTMLDivElement>(null)
+  const marqueeRafRef = useRef<number | null>(null)
+  const marqueePausedRef = useRef(false)
 
-  const handleMarqueeTouchStart = (e: React.TouchEvent) => {
-    const track = marqueeTrackRef.current
-    if (!track) return
-    const matrix = new DOMMatrix(getComputedStyle(track).transform)
-    track.style.animationPlayState = 'paused'
-    marqueeTouchRef.current = { x: e.touches[0].clientX, baseX: matrix.m41 }
-  }
+  useEffect(() => {
+    const el = marqueeRef.current
+    if (!el) return
+    const tick = () => {
+      if (!marqueePausedRef.current) {
+        el.scrollLeft += 0.4
+        const half = el.scrollWidth / 2
+        if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
+      }
+      marqueeRafRef.current = requestAnimationFrame(tick)
+    }
+    marqueeRafRef.current = requestAnimationFrame(tick)
+    return () => { if (marqueeRafRef.current) cancelAnimationFrame(marqueeRafRef.current) }
+  }, [])
 
-  const handleMarqueeTouchMove = (e: React.TouchEvent) => {
-    const track = marqueeTrackRef.current
-    if (!track) return
-    const halfWidth = track.scrollWidth / 2
-    if (halfWidth <= 0) return
-    const dx = e.touches[0].clientX - marqueeTouchRef.current.x
-    const newX = Math.min(0, Math.max(-halfWidth, marqueeTouchRef.current.baseX + dx))
-    track.style.transform = `translateX(${newX}px)`
-  }
-
-  const handleMarqueeTouchEnd = () => {
-    const track = marqueeTrackRef.current
-    if (!track) return
-    const halfWidth = track.scrollWidth / 2
-    if (halfWidth <= 0) { track.style.animationPlayState = 'running'; return }
-    const currentX = new DOMMatrix(getComputedStyle(track).transform).m41
-    const progress = Math.abs(currentX) / halfWidth
-    track.style.animationDelay = `${-(progress * MARQUEE_DURATION)}s`
-    track.style.transform = ''
-    track.style.animationPlayState = 'running'
-  }
+  const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
+  const handleMarqueeTouchEnd = () => { setTimeout(() => { marqueePausedRef.current = false }, 1500) }
 
   // Infinite feed state
   const [feedFilter, setFeedFilter] = useState<FeedFilterKey>('new_places')
@@ -553,38 +541,22 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Category chips — infinite auto-scroll marquee, touch to drag interactively */}
+        {/* Category chips — scrollable row, JS auto-scrolls slowly to hint scrollability */}
         <div
+          ref={marqueeRef}
           className={styles.catMarqueeWrap}
           onTouchStart={handleMarqueeTouchStart}
-          onTouchMove={handleMarqueeTouchMove}
           onTouchEnd={handleMarqueeTouchEnd}
         >
-          <div ref={marqueeTrackRef} className={styles.catMarqueeTrack}>
-            {/* Two identical copies — track scrolls by exactly 50% for seamless loop */}
-            <div className={styles.catMarqueeCopy}>
-              {CATEGORIES.map(cat => (
-                <HomeCategoryChip
-                  key={cat.key}
-                  label={cat.label}
-                  iconSrc={cat.icon}
-                  onClick={() => handleCategoryClick(cat.key)}
-                  active={selectedCategory === cat.key}
-                />
-              ))}
-            </div>
-            <div className={styles.catMarqueeCopy}>
-              {CATEGORIES.map(cat => (
-                <HomeCategoryChip
-                  key={`${cat.key}-2`}
-                  label={cat.label}
-                  iconSrc={cat.icon}
-                  onClick={() => handleCategoryClick(cat.key)}
-                  active={selectedCategory === cat.key}
-                />
-              ))}
-            </div>
-          </div>
+          {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
+            <HomeCategoryChip
+              key={`${cat.key}-${idx}`}
+              label={cat.label}
+              iconSrc={cat.icon}
+              onClick={() => handleCategoryClick(cat.key)}
+              active={selectedCategory === cat.key}
+            />
+          ))}
         </div>
 
         {/* Sections */}
