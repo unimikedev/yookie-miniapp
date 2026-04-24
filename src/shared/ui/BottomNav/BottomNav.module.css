@@ -60,7 +60,7 @@
 
 .tabActive {
   background: var(--color-accent);
-  color: #0F1115;
+  color: #ffffff;
   padding: 10px 14px;
 }
 
@@ -79,7 +79,7 @@
   overflow: hidden;
   font-size: var(--text-caption-size);
   font-weight: var(--text-caption-weight);
-  color: #0F1115;
+  color: inherit;
   line-height: 1;
   white-space: nowrap;
   will-change: max-width, opacity;

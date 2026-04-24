@@ -428,13 +428,18 @@
 }
 
 .catMarqueeTrack {
-  display: inline-flex;
-  gap: 12px;
-  padding-left: 16px;
-  padding-right: 12px;
+  display: flex;
   animation: catMarquee 64s linear infinite;
-  animation-play-state: running;
   will-change: transform;
+}
+
+/* Each copy has identical left padding (= inter-chip gap) so translateX(-50%)
+   lands exactly at the start of copy 2 — creating a seamless loop. */
+.catMarqueeCopy {
+  display: flex;
+  gap: 12px;
+  padding-left: 12px;
+  flex-shrink: 0;
 }
 
 /* ── Content sections ───────────────────────────────────── */

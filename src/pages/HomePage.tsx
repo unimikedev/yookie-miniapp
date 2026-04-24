@@ -90,19 +90,6 @@ function toFeedCard(b: Business): PopularStudioCard {
   }
 }
 
-/* ── SVG Icons ──────────────────────────────────────────── */
-
-const HeartIconLarge = () => (
-  <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
-    <path
-      d="M10 17.5C9.7 17.5 9.4 17.4 9.14 17.2L1.5 10.5C0.53 9.58 0 8.33 0 7C0 4.24 2.24 2 5 2C6.9 2 8.57 3.11 9.4 4.7C9.54 4.88 9.76 5 10 5C10.24 5 10.46 4.88 10.6 4.7C11.43 3.11 13.1 2 15 2C17.76 2 20 4.24 20 7C20 8.33 19.47 9.58 18.5 10.5L10.86 17.2C10.6 17.4 10.3 17.5 10 17.5Z"
-      fill="white"
-    />
-  </svg>
-)
-
-/* ── SVG Icons ──────────────────────────────────────────── */
-
 const SearchIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     <circle cx="9" cy="9" r="6" stroke="#6B7280" strokeWidth="2" />
@@ -180,34 +167,38 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
 
-  // Marquee interactive scroll refs
-  const marqueeWrapRef = useRef<HTMLDivElement>(null)
+  // Marquee: transform-delta touch handling (no scroll-mode switching)
   const marqueeTrackRef = useRef<HTMLDivElement>(null)
+  const marqueeTouchRef = useRef<{ x: number; baseX: number }>({ x: 0, baseX: 0 })
   const MARQUEE_DURATION = 64
 
-  const handleMarqueeTouchStart = () => {
+  const handleMarqueeTouchStart = (e: React.TouchEvent) => {
     const track = marqueeTrackRef.current
-    const wrap = marqueeWrapRef.current
-    if (!track || !wrap) return
+    if (!track) return
     const matrix = new DOMMatrix(getComputedStyle(track).transform)
-    const currentX = Math.abs(matrix.m41)
     track.style.animationPlayState = 'paused'
-    track.style.transform = 'translateX(0)'
-    wrap.style.overflowX = 'auto'
-    requestAnimationFrame(() => { wrap.scrollLeft = currentX })
+    marqueeTouchRef.current = { x: e.touches[0].clientX, baseX: matrix.m41 }
+  }
+
+  const handleMarqueeTouchMove = (e: React.TouchEvent) => {
+    const track = marqueeTrackRef.current
+    if (!track) return
+    const halfWidth = track.scrollWidth / 2
+    if (halfWidth <= 0) return
+    const dx = e.touches[0].clientX - marqueeTouchRef.current.x
+    const newX = Math.min(0, Math.max(-halfWidth, marqueeTouchRef.current.baseX + dx))
+    track.style.transform = `translateX(${newX}px)`
   }
 
   const handleMarqueeTouchEnd = () => {
     const track = marqueeTrackRef.current
-    const wrap = marqueeWrapRef.current
-    if (!track || !wrap) return
-    const scrollLeft = wrap.scrollLeft
+    if (!track) return
     const halfWidth = track.scrollWidth / 2
-    const progress = halfWidth > 0 ? (scrollLeft % halfWidth) / halfWidth : 0
-    const delay = -(progress * MARQUEE_DURATION)
-    wrap.style.overflowX = 'hidden'
+    if (halfWidth <= 0) { track.style.animationPlayState = 'running'; return }
+    const currentX = new DOMMatrix(getComputedStyle(track).transform).m41
+    const progress = Math.abs(currentX) / halfWidth
+    track.style.animationDelay = `${-(progress * MARQUEE_DURATION)}s`
     track.style.transform = ''
-    track.style.animationDelay = `${delay}s`
     track.style.animationPlayState = 'running'
   }
 
@@ -493,19 +484,6 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.topGradient} aria-hidden="true" />
-
-      {/* Header sits on the blue gradient area */}
-      <header className={styles.blueHeader}>
-        <div className={styles.logoBlock}>
-          <img src="/logo.svg" alt="Yookie" className={`${styles.logoImage} ${styles.logoWhite}`} />
-          <span className={`${styles.logoSub} ${styles.logoSubWhite}`}>Маркетплейс оффлайн услуг</span>
-        </div>
-        <button className={styles.headerBtnBlue} onClick={() => navigate('/favorites')} aria-label="Избранное">
-          <HeartIconLarge />
-        </button>
-      </header>
-
       <div className={styles.mainContent}>
         {/* Search — inline with dropdown */}
         <div className={styles.searchWrap}>
@@ -575,26 +553,37 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Category chips — infinite auto-scroll marquee, touch to scroll interactively */}
+        {/* Category chips — infinite auto-scroll marquee, touch to drag interactively */}
         <div
-          ref={marqueeWrapRef}
           className={styles.catMarqueeWrap}
           onTouchStart={handleMarqueeTouchStart}
+          onTouchMove={handleMarqueeTouchMove}
           onTouchEnd={handleMarqueeTouchEnd}
         >
-          <div
-            ref={marqueeTrackRef}
-            className={styles.catMarqueeTrack}
-          >
-            {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
-              <HomeCategoryChip
-                key={`${cat.key}-${idx}`}
-                label={cat.label}
-                iconSrc={cat.icon}
-                onClick={() => handleCategoryClick(cat.key)}
-                active={selectedCategory === cat.key}
-              />
-            ))}
+          <div ref={marqueeTrackRef} className={styles.catMarqueeTrack}>
+            {/* Two identical copies — track scrolls by exactly 50% for seamless loop */}
+            <div className={styles.catMarqueeCopy}>
+              {CATEGORIES.map(cat => (
+                <HomeCategoryChip
+                  key={cat.key}
+                  label={cat.label}
+                  iconSrc={cat.icon}
+                  onClick={() => handleCategoryClick(cat.key)}
+                  active={selectedCategory === cat.key}
+                />
+              ))}
+            </div>
+            <div className={styles.catMarqueeCopy}>
+              {CATEGORIES.map(cat => (
+                <HomeCategoryChip
+                  key={`${cat.key}-2`}
+                  label={cat.label}
+                  iconSrc={cat.icon}
+                  onClick={() => handleCategoryClick(cat.key)}
+                  active={selectedCategory === cat.key}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
