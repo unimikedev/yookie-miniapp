@@ -109,7 +109,6 @@
   position: sticky;
   top: calc(var(--safe-area-top, 64px) + 56px);
   z-index: 10;
-  background: var(--color-bg);
   padding: 4px 16px 8px;
   border-radius: 32px 32px 0 0;
 }
@@ -420,6 +419,12 @@
   overflow: hidden;
   width: 100%;
   padding: 8px 0 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.catMarqueeWrap::-webkit-scrollbar {
+  display: none;
 }
 
 .catMarqueeTrack {

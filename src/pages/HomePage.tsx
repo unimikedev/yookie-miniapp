@@ -179,7 +179,37 @@ export default function HomePage() {
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['new_places']))
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
-  const [marqueePaused, setMarqueePaused] = useState(false)
+
+  // Marquee interactive scroll refs
+  const marqueeWrapRef = useRef<HTMLDivElement>(null)
+  const marqueeTrackRef = useRef<HTMLDivElement>(null)
+  const MARQUEE_DURATION = 64
+
+  const handleMarqueeTouchStart = () => {
+    const track = marqueeTrackRef.current
+    const wrap = marqueeWrapRef.current
+    if (!track || !wrap) return
+    const matrix = new DOMMatrix(getComputedStyle(track).transform)
+    const currentX = Math.abs(matrix.m41)
+    track.style.animationPlayState = 'paused'
+    track.style.transform = 'translateX(0)'
+    wrap.style.overflowX = 'auto'
+    requestAnimationFrame(() => { wrap.scrollLeft = currentX })
+  }
+
+  const handleMarqueeTouchEnd = () => {
+    const track = marqueeTrackRef.current
+    const wrap = marqueeWrapRef.current
+    if (!track || !wrap) return
+    const scrollLeft = wrap.scrollLeft
+    const halfWidth = track.scrollWidth / 2
+    const progress = halfWidth > 0 ? (scrollLeft % halfWidth) / halfWidth : 0
+    const delay = -(progress * MARQUEE_DURATION)
+    wrap.style.overflowX = 'hidden'
+    track.style.transform = ''
+    track.style.animationDelay = `${delay}s`
+    track.style.animationPlayState = 'running'
+  }
 
   // Infinite feed state
   const [feedFilter, setFeedFilter] = useState<FeedFilterKey>('new_places')
@@ -441,13 +471,6 @@ export default function HomePage() {
       visited = visited.filter(v => (v as any).hasPromo !== false)
     }
 
-    if (activeFilters.has('top_rated')) {
-      visited.sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      nearby.sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      masters.sort((a, b) => (b.rating || 0) - (a.rating || 0))
-      studios.sort((a, b) => (b.rating || 0) - (a.rating || 0))
-    }
-
     if (activeFilters.has('sort')) {
       // Sort by rating (highest first) as default sort
       visited.sort((a, b) => (b.rating || 0) - (a.rating || 0))
@@ -552,15 +575,16 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Category chips — infinite auto-scroll marquee */}
+        {/* Category chips — infinite auto-scroll marquee, touch to scroll interactively */}
         <div
+          ref={marqueeWrapRef}
           className={styles.catMarqueeWrap}
-          onTouchStart={() => setMarqueePaused(true)}
-          onTouchEnd={() => setTimeout(() => setMarqueePaused(false), 1500)}
+          onTouchStart={handleMarqueeTouchStart}
+          onTouchEnd={handleMarqueeTouchEnd}
         >
           <div
+            ref={marqueeTrackRef}
             className={styles.catMarqueeTrack}
-            style={{ animationPlayState: marqueePaused ? 'paused' : 'running' }}
           >
             {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
               <HomeCategoryChip

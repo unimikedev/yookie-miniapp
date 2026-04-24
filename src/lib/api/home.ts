@@ -83,7 +83,7 @@ export interface HomePageData {
 }
 
 /** UI-level filter chip key used on the HomePage. */
-export type HomeFilterKey = 'sort' | 'promo' | 'nearby' | 'available' | 'top_rated';
+export type HomeFilterKey = 'sort' | 'promo' | 'nearby' | 'available' | 'top_rated' | 'new_places' | 'popular';
 
 export interface HomeFilterChip {
   key: HomeFilterKey;

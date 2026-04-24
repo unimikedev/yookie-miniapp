@@ -23,12 +23,12 @@
   align-items: center;
   gap: 4px;
   padding: 6px;
-  background: rgba(26, 29, 34, 0.72);
+  background: var(--color-nav-bg);
   border-radius: var(--radius-full);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-nav-border);
   box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.3),
-    0 2px 8px rgba(0, 0, 0, 0.2);
+    0 8px 24px var(--color-nav-shadow),
+    0 2px 8px var(--color-nav-shadow);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   transition: background 0.3s ease, border-color 0.3s ease;
@@ -41,7 +41,7 @@
   padding: 10px 12px;
   border-radius: var(--radius-full);
   background: transparent;
-  color: #A0A6B1;
+  color: var(--color-text-secondary);
   font-size: var(--text-caption-size);
   font-weight: var(--text-caption-weight);
   font-family: var(--font-family);
