@@ -32,6 +32,20 @@
   font-size: 20px;
 }
 
+.switcherBtn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .titleBlock {
   display: flex;
   flex-direction: column;

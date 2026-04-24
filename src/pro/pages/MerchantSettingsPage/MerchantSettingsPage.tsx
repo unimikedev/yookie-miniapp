@@ -323,12 +323,11 @@ function OnboardingChoice({ onCreateNew, onJoin }: { onCreateNew: () => void; on
 }
 
 /* ── Wizard (new business) ──────────────────────────────────────── */
-function BusinessWizard() {
+function BusinessWizard({ onBack }: { onBack?: () => void }) {
   const navigate = useNavigate();
-  const auth = useAuthStore();
-  const { setMerchantId } = useMerchantStore();
+  const { setMerchantId, setRole, setMasterId } = useMerchantStore();
 
-  const TOTAL_STEPS = 3;
+  const TOTAL_STEPS = 4;
   const [step, setStep] = useState(1);
   const [createdBusinessId, setCreatedBusinessId] = useState<string | null>(null);
 
@@ -336,7 +335,10 @@ function BusinessWizard() {
   const { isValidated, validationErrors, completionPercentage, isReadyForB2C } = useMerchantProfileValidation(createdBusinessId);
   const onboardingSteps = getOnboardingSteps(createdBusinessId);
 
-  // Step 1 — basic info
+  // Step 1 — provider type
+  const [providerType, setProviderType] = useState<'individual' | 'business'>('individual');
+
+  // Step 2 — basic info
   const [name, setName] = useState('');
   const [category, setCategory] = useState<CategoryEnum>('other');
   const [description, setDescription] = useState('');
@@ -436,21 +438,21 @@ function BusinessWizard() {
 
   const handleNext = () => {
     setError(null);
-    if (step === 1) {
+    if (step === 2) {
       if (!name.trim()) { setError('Введите название заведения'); return; }
     }
     setStep(s => s + 1);
   };
 
   const handleBack = () => {
-    if (step === 1) { navigate(-1); return; }
+    if (step === 1) { onBack ? onBack() : navigate(-1); return; }
     setStep(s => s - 1);
     setError(null);
   };
 
   const handleCreate = async () => {
     if (creatingRef.current) return;
-    if (!name.trim()) { setStep(1); setError('Введите название'); return; }
+    if (!name.trim()) { setStep(2); setError('Введите название'); return; }
     
     // Check validation before allowing business creation
     // Critical fields: name (checked above), services, staff, schedule
@@ -468,6 +470,7 @@ function BusinessWizard() {
       const body: Record<string, unknown> = {
         name: name.trim(),
         category,
+        provider_type: providerType,
         description: description.trim() || undefined,
         city,
         address: address.trim() || undefined,
@@ -496,9 +499,13 @@ function BusinessWizard() {
       }
       const { data: newBiz, token: newToken } = await createRes.json() as { data: Business; token?: string };
 
+      let parsedMasterId: string | null = null;
       if (newToken) {
         try {
           localStorage.setItem('yookie_auth_token', newToken);
+          // Decode JWT payload to extract masterId
+          const payload = JSON.parse(atob(newToken.split('.')[1])) as { masterId?: string | null };
+          parsedMasterId = payload.masterId ?? null;
           const authState = useAuthStore.getState();
           if (authState.user) {
             const updatedUser = { ...authState.user, businessId: newBiz.id };
@@ -509,6 +516,8 @@ function BusinessWizard() {
       }
 
       setMerchantId(newBiz.id);
+      setRole('owner');
+      if (parsedMasterId) setMasterId(parsedMasterId);
       setCreatedBusinessId(newBiz.id);
 
       // Create pending staff
@@ -565,8 +574,44 @@ function BusinessWizard() {
 
       {/* Scrollable content */}
       <div className={styles.wizardContent}>
-        {/* ── Step 1: Basic info ─────────────────────────────── */}
+        {/* ── Step 1: Provider type ──────────────────────────── */}
         {step === 1 && (
+          <div className={styles.stepBody}>
+            <div className={styles.stepHeadline}>
+              <h1 className={styles.stepTitle}>Как вы работаете?</h1>
+              <p className={styles.stepSubtitle}>Это определит структуру вашего кабинета</p>
+            </div>
+
+            <div className={styles.providerChoices}>
+              <button
+                className={`${styles.providerCard} ${providerType === 'individual' ? styles.providerCardActive : ''}`}
+                onClick={() => setProviderType('individual')}
+              >
+                <span className={styles.providerIcon}>🙋</span>
+                <div className={styles.providerBody}>
+                  <span className={styles.providerTitle}>Я работаю один</span>
+                  <p className={styles.providerDesc}>Вы сами принимаете клиентов — расписание и услуги для вас лично</p>
+                </div>
+                {providerType === 'individual' && <span className={styles.providerCheck}>✓</span>}
+              </button>
+
+              <button
+                className={`${styles.providerCard} ${providerType === 'business' ? styles.providerCardActive : ''}`}
+                onClick={() => setProviderType('business')}
+              >
+                <span className={styles.providerIcon}>🏢</span>
+                <div className={styles.providerBody}>
+                  <span className={styles.providerTitle}>У меня команда</span>
+                  <p className={styles.providerDesc}>Несколько мастеров или сотрудников — у каждого своё расписание</p>
+                </div>
+                {providerType === 'business' && <span className={styles.providerCheck}>✓</span>}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 2: Basic info ─────────────────────────────── */}
+        {step === 2 && (
           <div className={styles.stepBody}>
             <div className={styles.stepHeadline}>
               <h1 className={styles.stepTitle}>Расскажите о бизнесе</h1>
@@ -610,8 +655,8 @@ function BusinessWizard() {
           </div>
         )}
 
-        {/* ── Step 2: Location & contacts ────────────────────── */}
-        {step === 2 && (
+        {/* ── Step 3: Location & contacts ────────────────────── */}
+        {step === 3 && (
           <div className={styles.stepBody}>
             <div className={styles.stepHeadline}>
               <h1 className={styles.stepTitle}>Как вас найти?</h1>
@@ -717,8 +762,8 @@ function BusinessWizard() {
           </div>
         )}
 
-        {/* ── Step 3: Photos & staff ─────────────────────────── */}
-        {step === 3 && (
+        {/* ── Step 4: Photos & staff ─────────────────────────── */}
+        {step === 4 && (
           <div className={styles.stepBody}>
             <div className={styles.stepHeadline}>
               <h1 className={styles.stepTitle}>Фото и команда</h1>
@@ -897,7 +942,7 @@ function BusinessWizard() {
           onClick={handleCreate}
           disabled={saving || photoUploading}
         >
-          {step === 1 ? 'Создать сейчас →' : 'Пропустить →'}
+          {step <= 2 ? 'Создать сейчас →' : 'Пропустить →'}
         </button>
       </div>
     </div>
@@ -905,11 +950,11 @@ function BusinessWizard() {
 }
 
 /* ── Edit form (existing business) ─────────────────────────────── */
-export default function MerchantSettingsPage() {
+export default function MerchantSettingsPage({ forceNew }: { forceNew?: boolean } = {}) {
   const navigate = useNavigate();
   const auth = useAuthStore();
   const { merchantId, setMerchantId } = useMerchantStore();
-  const isNew = !merchantId;
+  const isNew = !merchantId || forceNew;
   const [onboardingMode, setOnboardingMode] = useState<'choice' | 'create' | 'join'>('choice');
 
   // Auth guard
@@ -921,10 +966,14 @@ export default function MerchantSettingsPage() {
 
   if (!auth.isAuthenticated) return null;
 
-  // New business → fork screen
+  // New business flow (or forced new)
   if (isNew) {
-    if (onboardingMode === 'join') return <JoinBusiness onBack={() => setOnboardingMode('choice')} />;
-    if (onboardingMode === 'create') return <BusinessWizard />;
+    const handleBack = forceNew
+      ? () => navigate(-1)
+      : () => setOnboardingMode('choice');
+
+    if (onboardingMode === 'join') return <JoinBusiness onBack={handleBack} />;
+    if (onboardingMode === 'create') return <BusinessWizard onBack={handleBack} />;
     return (
       <OnboardingChoice
         onCreateNew={() => setOnboardingMode('create')}

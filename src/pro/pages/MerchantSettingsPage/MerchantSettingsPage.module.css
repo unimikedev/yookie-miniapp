@@ -113,6 +113,78 @@
   flex-shrink: 0;
 }
 
+/* ── Provider type picker (wizard step 1) ───────────────────── */
+
+.providerChoices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.providerCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 18px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 18px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: var(--font-family);
+}
+
+.providerCardActive {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
+}
+
+.providerIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--color-surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.providerCardActive .providerIcon {
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+}
+
+.providerBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.providerTitle {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 3px;
+}
+
+.providerDesc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.providerCheck {
+  font-size: 18px;
+  color: var(--color-accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 /* ── Join business screen ───────────────────────────────────── */
 
 .joinPage {

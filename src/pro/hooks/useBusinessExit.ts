@@ -14,15 +14,15 @@ function confirm(msg: string): Promise<boolean> {
   });
 }
 
-function applyNewToken(newToken: string) {
+function applyNewToken(newToken: string, nextBusinessId?: string | null) {
   localStorage.setItem('yookie_auth_token', newToken);
   try {
     const stored = JSON.parse(localStorage.getItem('yookie_auth_user') || '{}');
-    stored.businessId = null;
+    stored.businessId = nextBusinessId ?? null;
     stored.role = null;
     localStorage.setItem('yookie_auth_user', JSON.stringify(stored));
     useAuthStore.setState(s => ({
-      user: s.user ? { ...s.user, businessId: null, role: null as any } : s.user,
+      user: s.user ? { ...s.user, businessId: nextBusinessId ?? null, role: null as any } : s.user,
     }));
   } catch { /* noop */ }
 }
@@ -46,10 +46,15 @@ export function useBusinessExit() {
     setLoading(true);
     setError(null);
     try {
-      const { token } = await leaveBusinessApi(businessId);
-      applyNewToken(token);
-      clearMerchant();
-      navigate('/pro', { replace: true });
+      const res = await leaveBusinessApi(businessId);
+      applyNewToken(res.token, res.nextBusinessId);
+      if (res.nextBusinessId) {
+        merchantStore.setMerchantId(res.nextBusinessId);
+        navigate('/pro', { replace: true });
+      } else {
+        clearMerchant();
+        navigate('/pro', { replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка');
     } finally {
@@ -64,10 +69,15 @@ export function useBusinessExit() {
     setLoading(true);
     setError(null);
     try {
-      const { token } = await resignFromBusinessApi(businessId);
-      applyNewToken(token);
-      clearMerchant();
-      navigate('/pro', { replace: true });
+      const res = await resignFromBusinessApi(businessId);
+      applyNewToken(res.token, res.nextBusinessId);
+      if (res.nextBusinessId) {
+        merchantStore.setMerchantId(res.nextBusinessId);
+        navigate('/pro', { replace: true });
+      } else {
+        clearMerchant();
+        navigate('/pro', { replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка');
     } finally {

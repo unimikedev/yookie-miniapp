@@ -77,6 +77,7 @@ export interface Master {
   breaks?: Array<{ start: string; end: string }>;
   is_active: boolean;
   position: number | string;
+  user_id?: string | null;
   created_at?: string;
   updated_at?: string;
   master_services?: Array<{
@@ -90,6 +91,13 @@ export interface Master {
       category?: string;
     };
   }>;
+  user_accounts?: {
+    id: string;
+    name: string;
+    phone: string;
+    avatar_url?: string | null;
+    role: string;
+  } | null;
 }
 
 export interface Service {

@@ -75,6 +75,7 @@ export default function MorePage() {
     { label: 'Сотрудники',          path: '/pro/staff' },
     { label: 'Профиль заведения',   path: '/pro/settings' },
     { label: 'Предпросмотр',        path: '/pro/preview' },
+    { label: 'Мои бизнесы',         path: '/pro/select' },
   ];
 
   return (
@@ -148,6 +149,13 @@ export default function MorePage() {
             <span className={styles.chev}>›</span>
           </button>
         ))}
+
+        <button
+          className={styles.addBusinessBtn}
+          onClick={() => navigate('/pro/new-business')}
+        >
+          + Добавить ещё бизнес
+        </button>
 
         <div className={styles.accountSection}>
           {exitError && <p className={styles.accountError}>{exitError}</p>}

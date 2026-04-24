@@ -149,6 +149,27 @@
   text-align: center;
 }
 
+/* ── Add business ── */
+.addBusinessBtn {
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1.5px dashed var(--color-border);
+  border-radius: 14px;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.addBusinessBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
 /* ── Account section ── */
 .accountSection {
   display: flex;

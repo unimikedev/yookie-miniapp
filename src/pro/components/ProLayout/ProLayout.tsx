@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useAuthStore } from '@/stores/authStore';
+import { listMyBusinesses } from '@/pro/api';
 import { ProBottomNav } from '@/pro/components/ProBottomNav/ProBottomNav';
 import styles from './ProLayout.module.css';
 
@@ -26,6 +27,12 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
   const location = useLocation();
   const auth = useAuthStore();
   const merchant = useMerchantStore();
+  const [hasMultiple, setHasMultiple] = useState(false);
+
+  useEffect(() => {
+    if (!merchant.merchantId) return;
+    listMyBusinesses().then((list) => setHasMultiple(list.length > 1)).catch(() => {});
+  }, [merchant.merchantId]);
 
   // Show back button on any Pro sub-page (not the dashboard root)
   const isSubPage = location.pathname !== '/pro';
@@ -100,7 +107,18 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
           <span className={styles.brand}>Yookie Pro</span>
           {title && <span className={styles.pageTitle}>{title}</span>}
         </div>
-        <div className={styles.actions}>{actions}</div>
+        <div className={styles.actions}>
+          {hasMultiple && (
+            <button
+              className={styles.switcherBtn}
+              onClick={() => navigate('/pro/select')}
+              title="Сменить бизнес"
+            >
+              ⇄
+            </button>
+          )}
+          {actions}
+        </div>
       </header>
 
       <main className={`${styles.main} ${hideNav ? '' : styles.withNav}`}>

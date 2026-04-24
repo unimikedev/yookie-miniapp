@@ -526,7 +526,7 @@ export async function acceptInvite(token: string): Promise<{
 // ─── Leave / Resign ───────────────────────────────────────────────────────────
 
 /** Disconnect user from the business without removing their master record. */
-export async function leaveBusinessApi(businessId: string): Promise<{ token: string }> {
+export async function leaveBusinessApi(businessId: string): Promise<{ token: string; nextBusinessId?: string | null }> {
   const res = await fetch(`${INVITE_API_BASE}/businesses/${businessId}/leave`, {
     method: 'POST',
     headers: authHeaders(),
@@ -535,11 +535,11 @@ export async function leaveBusinessApi(businessId: string): Promise<{ token: str
     const body = await res.json().catch(() => ({})) as { message?: string };
     throw new Error(body.message || 'Не удалось выйти из бизнеса');
   }
-  return res.json() as Promise<{ token: string }>;
+  return res.json() as Promise<{ token: string; nextBusinessId?: string | null }>;
 }
 
 /** Disconnect user AND deactivate their master record + cancel future bookings. */
-export async function resignFromBusinessApi(businessId: string): Promise<{ token: string }> {
+export async function resignFromBusinessApi(businessId: string): Promise<{ token: string; nextBusinessId?: string | null }> {
   const res = await fetch(`${INVITE_API_BASE}/businesses/${businessId}/resign`, {
     method: 'POST',
     headers: authHeaders(),
@@ -548,7 +548,7 @@ export async function resignFromBusinessApi(businessId: string): Promise<{ token
     const body = await res.json().catch(() => ({})) as { message?: string };
     throw new Error(body.message || 'Не удалось уволиться');
   }
-  return res.json() as Promise<{ token: string }>;
+  return res.json() as Promise<{ token: string; nextBusinessId?: string | null }>;
 }
 
 // ─── Availability ─────────────────────────────────────────────────────────────
@@ -593,4 +593,52 @@ export async function updateAvailability(
 
 export async function patchBusiness(merchantId: string, fields: Record<string, unknown>): Promise<void> {
   await api.patch<unknown>(`/businesses/${merchantId}`, fields)
+}
+
+// ─── Multi-business ───────────────────────────────────────────────────────────
+
+export interface BusinessSummary {
+  id: string;
+  name: string;
+  category: string;
+  photo_url?: string | null;
+  is_active: boolean;
+  provider_type: 'individual' | 'business';
+  role: string;
+  joined_at: string;
+}
+
+/** List all businesses the current user belongs to (any role). */
+export async function listMyBusinesses(): Promise<BusinessSummary[]> {
+  return api.get<BusinessSummary[]>('/businesses/mine') ?? [];
+}
+
+/** Switch the active business context — returns a fresh JWT. */
+export async function switchBusiness(businessId: string): Promise<{
+  token: string;
+  businessId: string;
+  role: string;
+  masterId: string | null;
+}> {
+  return api.post(`/businesses/${businessId}/switch`, {});
+}
+
+// ─── Members (real users in the business) ─────────────────────────────────────
+
+/**
+ * List all masters including linked user_accounts info.
+ * Backend: GET /businesses/:id/members
+ */
+export async function listMembers(merchantId: string): Promise<Master[]> {
+  return api.get<Master[]>(`/businesses/${merchantId}/members`) ?? [];
+}
+
+/** Change a user's role within the business. */
+export async function changeUserRole(merchantId: string, userId: string, role: string): Promise<void> {
+  await api.patch<unknown>(`/businesses/${merchantId}/members/${userId}/role`, { role });
+}
+
+/** Remove a user from the business (unlinks master, clears business_id). */
+export async function revokeUserAccess(merchantId: string, userId: string): Promise<void> {
+  await api.delete<unknown>(`/businesses/${merchantId}/members/${userId}`);
 }
