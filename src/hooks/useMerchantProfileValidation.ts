@@ -70,7 +70,7 @@ export function useMerchantProfileValidation(merchantId: string | null) {
       }
 
       // 5. Проверка фото (рекомендация, не блокирует)
-      if (merchant?.photo_url) {
+      if (merchant?.photo_urls?.length || (merchant as any)?.photo_url) {
         score++;
       } else {
         errors.push('Загрузите фото для лучшего восприятия (не обязательно)');
@@ -147,7 +147,7 @@ export function getOnboardingSteps(merchantId: string | null): OnboardingStep[] 
       id: 'photo',
       title: 'Загрузите фото',
       description: 'Фото салона или рабочего места',
-      isCompleted: !!currentMerchant?.photo_url,
+      isCompleted: !!(currentMerchant?.photo_urls?.length || (currentMerchant as any)?.photo_url),
       actionUrl: '/pro/settings',
     },
   ];

@@ -93,19 +93,11 @@ export default function AccountPage() {
   const user = platform.user
 
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
-
-  useEffect(() => {
-    if (!authStore.isAuthenticated) {
-      navigate('/auth?return=/account', { replace: true })
-    }
-  }, [authStore.isAuthenticated, navigate])
-
   const [stats, setStats] = useState<{ joinDays: number }>({ joinDays: 0 })
 
   useEffect(() => {
-    const phone = authStore.isAuthenticated && authStore.phone
-      ? authStore.phone
-      : localStorage.getItem('yookie_booking_phone')
+    if (!authStore.isAuthenticated) return
+    const phone = authStore.phone
     if (!phone) return
     let cancelled = false
     fetchClientStats(phone)
@@ -120,7 +112,63 @@ export default function AccountPage() {
     return () => { cancelled = true }
   }, [authStore.phone, authStore.isAuthenticated])
 
-  if (!authStore.isAuthenticated) return null
+  /* ── Guest screen ─────────────────────────────────────────────── */
+  if (!authStore.isAuthenticated) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.content}>
+          <div className={styles.profileSection}>
+            <div className={styles.avatarWrap}>
+              <div className={styles.avatar}>
+                <div className={styles.avatarFallback}>?</div>
+              </div>
+            </div>
+            <h1 className={styles.userName}>Вы не авторизованы</h1>
+            <p className={styles.userSub}>Войдите, чтобы записываться, смотреть историю и управлять профилем</p>
+            <button
+              className={styles.loginCTA}
+              onClick={() => navigate('/auth?return=/account')}
+            >
+              Войти / Зарегистрироваться
+            </button>
+          </div>
+
+          <div className={styles.menuList}>
+            <button className={styles.menuItem} onClick={() => setCitySelectorOpen(true)}>
+              <div className={styles.menuItemLeft}>
+                <div className={styles.menuIconWrap}><IconCity /></div>
+                <span className={styles.menuLabel}>Город</span>
+              </div>
+              <div className={styles.menuItemRight}>
+                <span className={styles.menuHint}>{city.name}</span>
+                <ChevronRight />
+              </div>
+            </button>
+            <button className={styles.menuItem} onClick={() => window.open(SUPPORT_URL, '_blank')}>
+              <div className={styles.menuItemLeft}>
+                <div className={styles.menuIconWrap}><IconSupport /></div>
+                <span className={styles.menuLabel}>Поддержка</span>
+              </div>
+              <div className={styles.menuItemRight}><ChevronRight /></div>
+            </button>
+            <button className={styles.menuItem} onClick={() => themeStore.toggle()}>
+              <div className={styles.menuItemLeft}>
+                <div className={styles.menuIconWrap}>
+                  {themeStore.theme === 'light' ? <IconSun /> : <IconMoon />}
+                </div>
+                <span className={styles.menuLabel}>Тема</span>
+              </div>
+              <div className={styles.menuItemRight}>
+                <span className={styles.menuHint}>{themeStore.theme === 'light' ? 'Светлая' : 'Тёмная'}</span>
+                <ChevronRight />
+              </div>
+            </button>
+          </div>
+        </div>
+        <CitySelector open={citySelectorOpen} onClose={() => setCitySelectorOpen(false)} />
+      </div>
+    )
+  }
 
   const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
   const initials = ((user?.firstName?.[0] ?? '') + (user?.lastName?.[0] ?? '')).toUpperCase()

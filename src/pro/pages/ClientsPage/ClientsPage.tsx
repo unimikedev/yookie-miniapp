@@ -83,7 +83,7 @@ export default function ClientsPage() {
                 className={styles.cardHead}
                 onClick={() => setExpanded(isOpen ? null : c.id)}
               >
-                <div className={styles.avatar}>{c.name[0]}</div>
+                <div className={styles.avatar}>{(c.name?.[0] ?? '?').toUpperCase()}</div>
                 <div className={styles.info}>
                   <span className={styles.name}>{c.name}</span>
                   <span className={styles.phone}>{c.phone}</span>

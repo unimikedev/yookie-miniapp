@@ -213,6 +213,7 @@ function BusinessWizard() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const creatingRef = useRef(false);
 
   const photoInputRef = useRef<HTMLInputElement>(null);
   const staffPhotoInputRef = useRef<HTMLInputElement>(null);
@@ -296,6 +297,7 @@ function BusinessWizard() {
   };
 
   const handleCreate = async () => {
+    if (creatingRef.current) return;
     if (!name.trim()) { setStep(1); setError('Введите название'); return; }
     
     // Check validation before allowing business creation
@@ -307,6 +309,7 @@ function BusinessWizard() {
       return;
     }
     
+    creatingRef.current = true;
     setSaving(true);
     setError(null);
     try {
@@ -321,6 +324,7 @@ function BusinessWizard() {
         instagram_post_urls: instagramPostUrls.length > 0 ? instagramPostUrls : undefined,
         telegram_username: telegramUsername.trim() ? telegramUsername.replace(/^@/, '') : undefined,
         photo_url: photoUrls[0] || undefined,
+        photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
         is_active: true,
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };
@@ -375,6 +379,7 @@ function BusinessWizard() {
       setError(err instanceof Error ? err.message : 'Ошибка создания');
     } finally {
       setSaving(false);
+      creatingRef.current = false;
     }
   };
 
@@ -639,7 +644,7 @@ function BusinessWizard() {
                     <div className={styles.staffAvatar}>
                       {s.photo_url
                         ? <img src={s.photo_url} alt={s.name} className={styles.staffAvatarImg} />
-                        : s.name[0]
+                        : (s.name?.[0] ?? '?').toUpperCase()
                       }
                     </div>
                     <div className={styles.staffInfo}>
@@ -738,7 +743,7 @@ function BusinessWizard() {
         <button
           className={styles.wizardSkipBtn}
           onClick={handleCreate}
-          disabled={saving}
+          disabled={saving || photoUploading}
         >
           {step === 1 ? 'Создать сейчас →' : 'Пропустить →'}
         </button>
@@ -807,7 +812,9 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
           setInstagramPostUrls(b.instagram_post_urls ?? []);
           setTelegramUsername(b.telegram_username || '');
           setCategory(b.category || 'other');
-          if (b.photo_url) setPhotoUrls([b.photo_url]);
+          const urls = (b as any).photo_urls as string[] | undefined;
+          if (urls && urls.length > 0) setPhotoUrls(urls);
+          else if (b.photo_url) setPhotoUrls([b.photo_url]);
           setLat((b as any).lat ?? null);
           setLng((b as any).lng ?? null);
         }
@@ -881,6 +888,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
         instagram_post_urls: instagramPostUrls,
         telegram_username: telegramUsername.trim() ? telegramUsername.replace(/^@/, '') : null,
         photo_url: photoUrls[0] || null,
+        photo_urls: photoUrls,
         is_active: true,
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };

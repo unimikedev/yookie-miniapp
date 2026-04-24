@@ -181,14 +181,16 @@ export default function DashboardPage() {
             Ожидают подтверждения
             <span className={styles.pendingBadge}>{pending.length}</span>
           </h2>
-          {pending.map((b) => (
+          {pending.map((b) => {
+            const masterName = staffMap.get(b.master_id);
+            return (
             <div key={b.id} className={styles.pendingCard}>
               <div className={styles.pendingMeta}>
                 <span className={styles.pendingTime}>
                   {fmtDate(b.starts_at)} · {fmt(b.starts_at)}
                 </span>
-                {staffMap.get(b.master_id) && (
-                  <span className={styles.pendingMaster}>{staffMap.get(b.master_id)}</span>
+                {masterName && (
+                  <span className={styles.pendingMaster}>{masterName}</span>
                 )}
               </div>
               {b.rescheduled && (
@@ -225,7 +227,8 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-          ))}
+          );
+          })}
         </section>
       )}
 

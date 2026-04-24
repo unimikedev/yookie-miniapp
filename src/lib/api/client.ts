@@ -135,9 +135,11 @@ class ApiClient {
 
     try {
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
         ...(options.headers as Record<string, string>),
       };
+      if (options.body !== undefined) {
+        headers['Content-Type'] = 'application/json';
+      }
 
       const token = this.getToken();
       if (token) {

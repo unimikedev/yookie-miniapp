@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getInviteInfo, acceptInvite } from '@/pro/api';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
+import { useAuthStore } from '@/stores/authStore';
 import styles from './InviteAcceptPage.module.css';
 
 interface InviteInfo {
@@ -42,12 +43,25 @@ export default function InviteAcceptPage() {
       const result = await acceptInvite(token);
       // Store new JWT
       localStorage.setItem('yookie_auth_token', result.token);
+      // Sync authStore user with new businessId and role
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('yookie_auth_user') || '{}');
+        storedUser.businessId = result.businessId;
+        storedUser.role = result.role;
+        localStorage.setItem('yookie_auth_user', JSON.stringify(storedUser));
+        useAuthStore.setState(s => ({
+          user: s.user ? { ...s.user, businessId: result.businessId, role: result.role as any } : s.user,
+        }));
+      } catch { /* noop */ }
       // Refresh merchant store with new token data
-      merchantStore.loadFromToken();
+      merchantStore.setMerchantId(result.businessId);
+      merchantStore.setRole(result.role as 'staff' | 'owner');
+      if (result.masterId) merchantStore.setMasterId(result.masterId);
       merchantStore.enterProMode();
       navigate('/pro', { replace: true });
-    } catch {
-      setError('Не удалось принять приглашение. Попробуйте позже.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Не удалось принять приглашение';
+      setError(msg + '. Попробуйте позже.');
     } finally {
       setAccepting(false);
     }

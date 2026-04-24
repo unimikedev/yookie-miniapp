@@ -16,19 +16,25 @@ function RequireMerchant({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RequireOwner({ children }: { children: React.ReactNode }) {
+  const { merchantId, role } = useMerchantStore();
+  if (!merchantId) return <Navigate to="/pro/settings" replace />;
+  if (role === 'staff') return <Navigate to="/pro/bookings" replace />;
+  return <>{children}</>;
+}
+
 export function ProRouter() {
   return (
     <Routes>
-      <Route index element={<RequireMerchant><DashboardPage /></RequireMerchant>} />
+      <Route index element={<RequireOwner><DashboardPage /></RequireOwner>} />
       <Route path="bookings" element={<RequireMerchant><BookingsBoardPage /></RequireMerchant>} />
       <Route path="schedule" element={<RequireMerchant><SchedulePage /></RequireMerchant>} />
       <Route path="services" element={<RequireMerchant><ServicesPage /></RequireMerchant>} />
-      <Route path="staff" element={<RequireMerchant><StaffPage /></RequireMerchant>} />
-      <Route path="clients" element={<RequireMerchant><ClientsPage /></RequireMerchant>} />
+      <Route path="staff" element={<RequireOwner><StaffPage /></RequireOwner>} />
+      <Route path="clients" element={<RequireOwner><ClientsPage /></RequireOwner>} />
       <Route path="settings" element={<MerchantSettingsPage />} />
       <Route path="preview" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
-      <Route path="more" element={<RequireMerchant><MorePage /></RequireMerchant>} />
-      {/* Staff: own profile page (reuses MerchantPreviewPage for MVP) */}
+      <Route path="more" element={<RequireOwner><MorePage /></RequireOwner>} />
       <Route path="my-profile" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
       <Route path="*" element={<Navigate to="/pro" replace />} />
     </Routes>

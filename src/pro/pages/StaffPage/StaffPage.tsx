@@ -25,6 +25,8 @@ export default function StaffPage() {
   const [creatingInvite, setCreatingInvite] = useState(false);
   const [copied, setCopied] = useState(false);
   const [loadingInvites, setLoadingInvites] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const isOwnerRole = role === 'owner' || role === null;
 
@@ -112,11 +114,14 @@ export default function StaffPage() {
   const handleSave = async () => {
     if (!merchantId || !editing) return;
     setSaving(true);
+    setSaveError(null);
     try {
       await upsertStaff(merchantId, editing);
       emit({ type: 'staff.changed', merchantId });
       setEditing(null);
       load();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Ошибка при сохранении');
     } finally {
       setSaving(false);
     }
@@ -124,9 +129,14 @@ export default function StaffPage() {
 
   const handleDelete = async (id: string) => {
     if (!merchantId) return;
-    await deleteStaff(merchantId, id);
-    emit({ type: 'staff.changed', merchantId });
-    load();
+    setDeleteError(null);
+    try {
+      await deleteStaff(merchantId, id);
+      emit({ type: 'staff.changed', merchantId });
+      load();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Не удалось удалить сотрудника');
+    }
   };
 
   const actions = (
@@ -259,6 +269,7 @@ export default function StaffPage() {
             value={editing.specialization}
             onChange={(e) => setEditing({ ...editing, specialization: e.target.value })}
           />
+          {saveError && <p className={styles.errorMsg}>{saveError}</p>}
           <div className={styles.formActions}>
             <button className={styles.cancelBtn} onClick={() => setEditing(null)}>Отмена</button>
             <button className={styles.saveBtn} onClick={handleSave} disabled={saving || !editing.name}>
@@ -268,13 +279,15 @@ export default function StaffPage() {
         </div>
       )}
 
+      {deleteError && <p className={styles.errorMsg}>{deleteError}</p>}
+
       <div className={styles.list}>
         {staff.map((s) => (
           <div key={s.id} className={styles.card}>
             {s.photo_url ? (
               <img src={s.photo_url} className={styles.avatarImg} alt={s.name} />
             ) : (
-              <div className={styles.avatar}>{s.name[0]}</div>
+              <div className={styles.avatar}>{(s.name?.[0] ?? '?').toUpperCase()}</div>
             )}
             <div className={styles.info}>
               <span className={styles.name}>{s.name}</span>

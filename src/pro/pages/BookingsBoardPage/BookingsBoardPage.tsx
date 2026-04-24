@@ -53,7 +53,7 @@ function isValidPhone(phone: string): boolean {
 }
 
 export default function BookingsBoardPage() {
-  const { merchantId } = useMerchantStore();
+  const { merchantId, role, masterId: myMasterId } = useMerchantStore();
   const [bookings, setBookings]           = useState<Booking[]>([]);
   const [staff, setStaff]                 = useState<Master[]>([]);
   const [services, setServices]           = useState<Service[]>([]);
@@ -205,8 +205,14 @@ export default function BookingsBoardPage() {
     }
   };
 
-  const filteredStaff    = useMemo(() => selectedMasterId ? staff.filter(s => s.id === selectedMasterId) : staff, [staff, selectedMasterId]);
-  const filteredBookings = useMemo(() => selectedMasterId ? bookings.filter(b => b.master_id === selectedMasterId) : bookings, [bookings, selectedMasterId]);
+  const filteredStaff    = useMemo(() => {
+    const base = role === 'staff' && myMasterId ? staff.filter(s => s.id === myMasterId) : staff;
+    return selectedMasterId ? base.filter(s => s.id === selectedMasterId) : base;
+  }, [staff, selectedMasterId, role, myMasterId]);
+  const filteredBookings = useMemo(() => {
+    const base = role === 'staff' && myMasterId ? bookings.filter(b => b.master_id === myMasterId) : bookings;
+    return selectedMasterId ? base.filter(b => b.master_id === selectedMasterId) : base;
+  }, [bookings, selectedMasterId, role, myMasterId]);
 
   const clientSuggestion = useMemo<Client | null>(() => {
     const raw = form.clientPhone.replace(/[\s()+-]/g, '');
@@ -270,8 +276,8 @@ export default function BookingsBoardPage() {
         </div>
       )}
 
-      {/* Master filter chips */}
-      {staff.length > 1 && (
+      {/* Master filter chips — hidden for staff (they only see their own column) */}
+      {role !== 'staff' && staff.length > 1 && (
         <div className={styles.masterFilter}>
           <button className={`${styles.masterChip} ${selectedMasterId === null ? styles.masterChipActive : ''}`} onClick={() => setSelectedMasterId(null)}>Все</button>
           {staff.map(s => (

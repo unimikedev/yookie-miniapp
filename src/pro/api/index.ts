@@ -380,7 +380,7 @@ export async function updateMasterServices(
   masterId: string,
   serviceIds: string[],
 ): Promise<void> {
-  await api.patch<{ data: Master }>(
+  await api.patch<Master>(
     `/businesses/${merchantId}/masters/${masterId}`,
     { service_ids: serviceIds },
   );
@@ -511,7 +511,10 @@ export async function acceptInvite(token: string): Promise<{
       'Content-Type': 'application/json',
     },
   });
-  if (!res.ok) throw new Error('Failed to accept invite');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { message?: string };
+    throw new Error(body.message || 'Не удалось принять приглашение');
+  }
   return res.json() as Promise<{
     token: string;
     businessId: string;
@@ -549,7 +552,7 @@ export async function updateAvailability(
     }
     // Store open/close as business working_hours format on the master
     // For now we just toggle days on/off via working_days field
-    await api.patch<{ data: Master }>(
+    await api.patch<Master>(
       `/businesses/${merchantId}/masters/${staffId}`,
       { working_days }
     );
