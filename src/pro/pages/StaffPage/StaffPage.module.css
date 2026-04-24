@@ -176,6 +176,15 @@
   color: var(--color-text-muted);
 }
 
+.masterServices {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
 .actions {
   display: flex;
   gap: 6px;
@@ -358,6 +367,54 @@
 .inviteCardExpiry {
   font-size: var(--text-caption-size);
   color: var(--color-text-muted);
+}
+
+/* ─── Service picker ───────────────────────────────────────────── */
+
+.servicesPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--color-surface-elevated);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.servicesLabel {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.serviceCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+  font-size: var(--text-body-sm-size);
+  color: var(--color-text);
+}
+
+.serviceCheckbox input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.serviceCheckbox span:nth-child(2) {
+  flex: 1;
+}
+
+.servicePrice {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .revokeBtn {

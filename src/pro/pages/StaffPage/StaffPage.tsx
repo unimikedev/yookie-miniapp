@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { listStaff, upsertStaff, deleteStaff, createInvite, listInvites, deleteInvite } from '@/pro/api';
+import { listStaff, listServices, updateMasterServices, upsertStaff, deleteStaff, createInvite, listInvites, deleteInvite } from '@/pro/api';
 import type { StaffInput, Invite } from '@/pro/api';
-import type { Master } from '@/lib/api/types';
+import type { Master, Service } from '@/lib/api/types';
 import { emit } from '@/pro/realtime';
 import styles from './StaffPage.module.css';
 
@@ -13,7 +13,9 @@ const EMPTY: StaffInput = { name: '', specialization: '' };
 export default function StaffPage() {
   const { merchantId, role } = useMerchantStore();
   const [staff, setStaff] = useState<Master[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [editing, setEditing] = useState<StaffInput | null>(null);
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
@@ -35,7 +37,11 @@ export default function StaffPage() {
     listStaff(merchantId).then(setStaff).catch(() => {});
   };
 
-  useEffect(load, [merchantId]);
+  useEffect(() => {
+    if (!merchantId) return;
+    load();
+    listServices(merchantId).then(setServices).catch(() => {});
+  }, [merchantId]);
 
   const loadInvites = () => {
     setLoadingInvites(true);
@@ -116,9 +122,11 @@ export default function StaffPage() {
     setSaving(true);
     setSaveError(null);
     try {
-      await upsertStaff(merchantId, editing);
+      const master = await upsertStaff(merchantId, editing);
+      await updateMasterServices(merchantId, master.id, selectedServiceIds);
       emit({ type: 'staff.changed', merchantId });
       setEditing(null);
+      setSelectedServiceIds([]);
       load();
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Ошибка при сохранении');
@@ -146,7 +154,7 @@ export default function StaffPage() {
           ✉
         </button>
       )}
-      <button className={styles.addBtn} onClick={() => setEditing({ ...EMPTY })}>
+      <button className={styles.addBtn} onClick={() => { setEditing({ ...EMPTY }); setSelectedServiceIds([]); }}>
         +
       </button>
     </div>
@@ -269,9 +277,31 @@ export default function StaffPage() {
             value={editing.specialization}
             onChange={(e) => setEditing({ ...editing, specialization: e.target.value })}
           />
+          {services.length > 0 && (
+            <div className={styles.servicesPicker}>
+              <p className={styles.servicesLabel}>Услуги мастера</p>
+              {services.map((svc) => (
+                <label key={svc.id} className={styles.serviceCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={selectedServiceIds.includes(svc.id)}
+                    onChange={(e) =>
+                      setSelectedServiceIds((prev) =>
+                        e.target.checked
+                          ? [...prev, svc.id]
+                          : prev.filter((id) => id !== svc.id)
+                      )
+                    }
+                  />
+                  <span>{svc.name}</span>
+                  <span className={styles.servicePrice}>{svc.price.toLocaleString()} сум</span>
+                </label>
+              ))}
+            </div>
+          )}
           {saveError && <p className={styles.errorMsg}>{saveError}</p>}
           <div className={styles.formActions}>
-            <button className={styles.cancelBtn} onClick={() => setEditing(null)}>Отмена</button>
+            <button className={styles.cancelBtn} onClick={() => { setEditing(null); setSelectedServiceIds([]); }}>Отмена</button>
             <button className={styles.saveBtn} onClick={handleSave} disabled={saving || !editing.name}>
               {saving ? '…' : 'Сохранить'}
             </button>
@@ -292,9 +322,17 @@ export default function StaffPage() {
             <div className={styles.info}>
               <span className={styles.name}>{s.name}</span>
               <span className={styles.spec}>{s.specialization}</span>
+              {(s.master_services ?? []).length > 0 && (
+                <span className={styles.masterServices}>
+                  {(s.master_services ?? []).map((ms) => ms.services?.name).filter(Boolean).join(', ')}
+                </span>
+              )}
             </div>
             <div className={styles.actions}>
-              <button className={styles.editBtn} onClick={() => setEditing({ ...s })}>✎</button>
+              <button className={styles.editBtn} onClick={() => {
+                setEditing({ ...s });
+                setSelectedServiceIds((s.master_services ?? []).map((ms) => ms.service_id));
+              }}>✎</button>
               <button className={styles.deleteBtn} onClick={() => handleDelete(s.id)}>✕</button>
             </div>
           </div>
