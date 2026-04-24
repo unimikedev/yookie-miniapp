@@ -107,22 +107,18 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
       const jwtMasterId = payload.masterId as string | null | undefined;
 
       if (businessId) {
-        // Basic validation: check it's a non-empty string
         if (typeof businessId !== 'string' || businessId.trim() === '') {
-          set({ 
-            merchantId: null, 
-            validationError: 'Некорректный идентификатор бизнеса. Пожалуйста, свяжитесь с поддержкой.' 
+          set({
+            merchantId: null,
+            validationError: 'Некорректный идентификатор бизнеса. Пожалуйста, свяжитесь с поддержкой.'
           });
           return;
         }
         localStorage.setItem(STORAGE_KEY, businessId);
         set({ merchantId: businessId, validationError: null });
-      } else {
-        set({ 
-          merchantId: null, 
-          validationError: 'Бизнес не найден в токене. Возможно, вы еще не зарегистрировали бизнес.' 
-        });
       }
+      // If token has no businessId, don't overwrite an existing merchantId —
+      // the user may have selected a business via the selector flow.
 
       if (jwtRole === 'owner' || jwtRole === 'staff') {
         set({ role: jwtRole });

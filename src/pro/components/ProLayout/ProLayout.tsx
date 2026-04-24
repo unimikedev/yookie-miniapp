@@ -38,19 +38,13 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
   const isSubPage = location.pathname !== '/pro';
 
   useEffect(() => {
-    // Not authenticated → redirect to auth with return path
     if (!auth.isAuthenticated) {
       navigate('/auth?return=/pro', { replace: true });
       return;
     }
-
-    // Try to load merchantId from JWT token (businessId field)
-    merchant.loadFromToken();
-    // Fallback: try localStorage
-    if (!merchant.merchantId) {
-      merchant.loadFromStorage();
-    }
-
+    // merchantStore already initializes from localStorage/token at module load.
+    // Re-calling loadFromToken() here would overwrite a valid merchantId with
+    // null if the JWT predates multi-business support (no businessId field).
     merchant.enterProMode();
     return () => merchant.exitProMode();
     // eslint-disable-next-line react-hooks/exhaustive-deps
