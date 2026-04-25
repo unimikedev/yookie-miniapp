@@ -20,12 +20,12 @@ const STATUS_KEY_MAP: Record<string, string> = {
   no_show:   'pro.bookings.statusNoShow',
 };
 
-function fmt(iso: string) {
-  return new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+function fmt(iso: string, locale: string) {
+  return new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+function fmtDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 }
 
 function isoDate(d: Date): string {
@@ -34,7 +34,8 @@ function isoDate(d: Date): string {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
   const { merchantId } = useMerchantStore();
   const tgSyncDone = useRef(false);
 
@@ -54,7 +55,7 @@ export default function DashboardPage() {
   const todayStr = useMemo(() => isoDate(new Date()), []);
   const isToday  = dateStr === todayStr;
 
-  const dateLabel = date.toLocaleDateString('ru-RU', {
+  const dateLabel = date.toLocaleDateString(locale, {
     weekday: 'short', day: 'numeric', month: 'short',
   });
 
@@ -189,7 +190,7 @@ export default function DashboardPage() {
             <div key={b.id} className={styles.pendingCard}>
               <div className={styles.pendingMeta}>
                 <span className={styles.pendingTime}>
-                  {fmtDate(b.starts_at)} · {fmt(b.starts_at)}
+                  {fmtDate(b.starts_at, locale)} · {fmt(b.starts_at, locale)}
                 </span>
                 {masterName && (
                   <span className={styles.pendingMaster}>{masterName}</span>
@@ -309,7 +310,7 @@ export default function DashboardPage() {
         {selectedBooking && (
           <div className={styles.detailSheet}>
             <p className={styles.detailTime}>
-              {fmt(selectedBooking.starts_at)} — {fmt(selectedBooking.ends_at)}
+              {fmt(selectedBooking.starts_at, locale)} — {fmt(selectedBooking.ends_at, locale)}
               <span className={`${styles.detailStatusBadge} ${styles[`statusBadge-${selectedBooking.status}`]}`}>
                 {selectedBooking.status === 'pending' && selectedBooking.rescheduled
                   ? `↻ ${t('pro.dashboard.rescheduleNotice')}`
@@ -398,7 +399,8 @@ function TodayRow({
   masterName?: string;
   onClick: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
   const isReschedule = booking.status === 'pending' && booking.rescheduled;
   const shortLabel: Record<string, string> = {
     pending:   isReschedule ? '↻' : '⏳',
@@ -413,7 +415,7 @@ function TodayRow({
       className={`${styles.todayRow} ${styles[`todayRow-${booking.status}`]}`}
       onClick={onClick}
     >
-      <span className={styles.todayTime}>{fmt(booking.starts_at)}</span>
+      <span className={styles.todayTime}>{fmt(booking.starts_at, locale)}</span>
       <div className={styles.todayInfo}>
         <span className={styles.todayClient}>{booking.clients?.name ?? '—'}</span>
         <span className={styles.todayMeta}>

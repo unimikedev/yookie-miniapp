@@ -1,5 +1,6 @@
 import React from 'react';
-import { CategoryEnum, CATEGORY_LABELS } from '@/lib/api/types';
+import { useTranslation } from 'react-i18next';
+import { CategoryEnum } from '@/lib/api/types';
 import { CATEGORY_ICONS } from '@/shared/constants';
 import styles from './CategoryGrid.module.css';
 
@@ -23,6 +24,7 @@ const FEATURED_CATEGORIES: CategoryEnum[] = [
 ];
 
 export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelect }) => {
+  const { t } = useTranslation();
   const handleSelect = (category: CategoryEnum) => {
     onSelect(category);
   };
@@ -31,7 +33,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelect }) => {
     <div className={styles.grid}>
       {FEATURED_CATEGORIES.map((category) => {
         const iconSrc = CATEGORY_ICONS[category] || CATEGORY_ICONS['other'];
-        const label = CATEGORY_LABELS[category];
+        const label = t(`categories.${category}`);
 
         return (
           <button

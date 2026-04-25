@@ -30,7 +30,8 @@
     "notFound": "Hech narsa topilmadi",
     "tryOther": "Boshqa so'rovni sinab ko'ring",
     "someErrorOccurred": "Kutilmagan xato yuz berdi. Sahifani yangilashga harakat qiling.",
-    "sendFeedback": "Biz bilan bog'laning"
+    "sendFeedback": "Biz bilan bog'laning",
+    "until": "{{time}} gacha"
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -82,7 +83,8 @@
     "searchMasters": "Ustalar",
     "noResults": "Hech narsa topilmadi",
     "typingWords": ["sartarosh", "usta", "stilist", "tatu usta", "qoshchi", "manikür", "massaj"],
-    "resetFilter": "Bekor qilish"
+    "resetFilter": "Bekor qilish",
+    "priceFrom": "{{price}} ming so'mdan"
   },
   "nearby": {
     "searchPlaceholder": "Salonlar va xizmatlarni qidirish...",
@@ -630,6 +632,38 @@
     "title": "Sahifa topilmadi",
     "description": "Bunday sahifa mavjud emas",
     "goHome": "Bosh sahifaga"
+  },
+  "cities": {
+    "Tashkent": "Toshkent",
+    "Samarkand": "Samarqand",
+    "Bukhara": "Buxoro",
+    "Namangan": "Namangan",
+    "Andijan": "Andijon",
+    "Fergana": "Farg'ona",
+    "Nukus": "Nukus",
+    "Karshi": "Qarshi",
+    "Termez": "Termiz",
+    "Navoi": "Navoiy",
+    "Jizzakh": "Jizzax",
+    "Urgench": "Urganch",
+    "Kokand": "Qo'qon",
+    "Chirchiq": "Chirchiq",
+    "Margilan": "Marg'ilon",
+    "Gulistan": "Guliston",
+    "Angren": "Angren"
+  },
+  "districts": {
+    "almazar": "Olmazor",
+    "bektemir": "Bektimir",
+    "mirobod": "Mirobod",
+    "mirzo_ulugbek": "Mirzo Ulug'bek",
+    "sergeli": "Sergeli",
+    "uchtepa": "Uchtepa",
+    "chilonzor": "Chilonzor",
+    "shaykhontohur": "Shayxontohur",
+    "yunusabad": "Yunusobod",
+    "yakkasaray": "Yakkasaroy",
+    "yashnobod": "Yashnobod"
   },
   "language": {
     "ru": "Русский",

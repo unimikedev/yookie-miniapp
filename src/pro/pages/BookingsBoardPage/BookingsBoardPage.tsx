@@ -24,8 +24,8 @@ function toMin(iso: string): number {
   return d.getHours() * 60 + d.getMinutes();
 }
 
-function fmt(iso: string): string {
-  return new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+function fmt(iso: string, locale = 'ru-RU'): string {
+  return new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
 function isoDate(d: Date): string {
@@ -47,7 +47,8 @@ function isValidPhone(phone: string): boolean {
 
 export default function BookingsBoardPage() {
   const { merchantId, role, masterId: myMasterId } = useMerchantStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
   const [bookings, setBookings]           = useState<Booking[]>([]);
   const [staff, setStaff]                 = useState<Master[]>([]);
   const [services, setServices]           = useState<Service[]>([]);
@@ -100,7 +101,7 @@ export default function BookingsBoardPage() {
   const nextDay = () => setDate(d => { const n = new Date(d); n.setDate(n.getDate() + 1); return n; });
   const goToday = () => setDate(new Date());
 
-  const dateLabel = date.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  const dateLabel = date.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
 
   /* ── Drag & Drop ──────────────────────────────────────────────── */
   const handleDrop = async (e: React.DragEvent, staffId: string) => {
@@ -254,7 +255,7 @@ export default function BookingsBoardPage() {
               className={`${styles.dayBtn} ${dStr === dateStr ? styles.dayBtnActive : ''} ${dStr === todayStr ? styles.dayBtnToday : ''}`}
               onClick={() => setDate(new Date(d))}
             >
-              <span className={styles.dayName}>{d.toLocaleDateString('ru-RU', { weekday: 'short' })}</span>
+              <span className={styles.dayName}>{d.toLocaleDateString(locale, { weekday: 'short' })}</span>
               <span className={styles.dayNum}>{d.getDate()}</span>
             </button>
           );
@@ -352,7 +353,7 @@ export default function BookingsBoardPage() {
         {selectedBooking && (
           <div className={styles.bookingDetail}>
             <div className={styles.detailHeader}>
-              <div className={styles.detailTime}>{fmt(selectedBooking.starts_at)} — {fmt(selectedBooking.ends_at)}</div>
+              <div className={styles.detailTime}>{fmt(selectedBooking.starts_at, locale)} — {fmt(selectedBooking.ends_at, locale)}</div>
               <span className={`${styles.detailStatusBadge} ${styles[`badge-${selectedBooking.status}`]}`}>
                 {selectedBooking.status === 'pending' && selectedBooking.rescheduled
                   ? t('pro.bookings.badgeRescheduled')
@@ -524,7 +525,8 @@ function TimelineView({ hours, staff, bookings, isToday, dragging, dragOverStaff
 
 /* ── Booking Card ─────────────────────────────────────────────────────────── */
 function BookingCard({ booking, isDragging, onDragStart, onClick }: { booking: Booking; isDragging: boolean; onDragStart: () => void; onClick: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
   const startMin    = toMin(booking.starts_at);
   const endMin      = toMin(booking.ends_at);
   const durationMin = endMin - startMin;
@@ -542,7 +544,7 @@ function BookingCard({ booking, isDragging, onDragStart, onClick }: { booking: B
       onDragStart={e => { e.stopPropagation(); onDragStart(); }}
       onClick={e => { e.stopPropagation(); onClick(); }}
     >
-      {!isTiny    && <span className={styles.cardTime}>{fmt(booking.starts_at)}</span>}
+      {!isTiny    && <span className={styles.cardTime}>{fmt(booking.starts_at, locale)}</span>}
       {!isCompact && <span className={styles.cardClient}>{booking.clients?.name ?? '—'}</span>}
       {!isCompact && <span className={styles.cardService}>{isReschedule ? t('pro.bookings.badgeRescheduled') : (booking.services?.name ?? '—')}</span>}
     </div>
@@ -551,7 +553,8 @@ function BookingCard({ booking, isDragging, onDragStart, onClick }: { booking: B
 
 /* ── Agenda list view ─────────────────────────────────────────────────────── */
 function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; staff: Master[]; onBookingClick: (b: Booking) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
   const sorted   = [...bookings].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
   const staffMap = new Map(staff.map(s => [s.id, s.name]));
 
@@ -573,8 +576,8 @@ function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; st
             className={`${styles.agendaItem} ${styles[`agendaBorder-${b.status}`] ?? ''}`}
             onClick={() => onBookingClick(b)}>
             <div className={styles.agendaTime}>
-              <span className={styles.agendaStart}>{fmt(b.starts_at)}</span>
-              <span className={styles.agendaEnd}>{fmt(b.ends_at)}</span>
+              <span className={styles.agendaStart}>{fmt(b.starts_at, locale)}</span>
+              <span className={styles.agendaEnd}>{fmt(b.ends_at, locale)}</span>
             </div>
             <div className={styles.agendaInfo}>
               <span className={styles.agendaClient}>{b.clients?.name ?? '—'}</span>

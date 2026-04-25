@@ -240,7 +240,7 @@ export default function HomePage() {
             type: 'business',
             id: b.id,
             name: b.name,
-            meta: CATEGORY_LABELS[b.category as CategoryEnum] || b.category || '',
+            meta: t(`categories.${b.category as CategoryEnum}`) || b.category || '',
             iconSrc: CATEGORY_ICONS[b.category as keyof typeof CATEGORY_ICONS] || '/categories/cosmetology.png',
             businessId: b.id,
           })
@@ -269,11 +269,12 @@ export default function HomePage() {
 
     // 3. Search categories by label
     for (const cat of CATEGORIES) {
-      if (cat.label.toLowerCase().includes(q)) {
+      const catLabel = t(`categories.${cat.key}`)
+      if (catLabel.toLowerCase().includes(q)) {
         results.unshift({
           type: 'category',
           id: `cat-${cat.key}`,
-          name: cat.label,
+          name: catLabel,
           meta: t('categories.category'),
           iconSrc: cat.icon,
         })
@@ -556,7 +557,7 @@ export default function HomePage() {
                 onClick={(e) => { e.stopPropagation(); setCitySelectorOpen(true); }}
                 aria-label="Смена города"
               >
-                <span>{district ? district.name : city.name}</span>
+                <span>{district ? t(`districts.${district.id}`) : t(`cities.${city.id}`)}</span>
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                   <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -594,7 +595,7 @@ export default function HomePage() {
           {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
             <HomeCategoryChip
               key={`${cat.key}-${idx}`}
-              label={cat.label}
+              label={t(`categories.${cat.key}`)}
               iconSrc={cat.icon}
               onClick={() => handleCategoryClick(cat.key)}
               active={selectedCategory === cat.key}
@@ -608,7 +609,7 @@ export default function HomePage() {
             /* Category-filtered view: show all matching businesses in a vertical grid */
             <section className={styles.sectionInner}>
               <SectionHeader
-                title={CATEGORIES.find(c => c.key === selectedCategory)?.label || ''}
+                title={selectedCategory ? t(`categories.${selectedCategory}`) : ''}
                 onMoreClick={() => setSelectedCategory(null)}
                 moreLabel={t('home.resetFilter')}
               />

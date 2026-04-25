@@ -24,7 +24,7 @@ export default function CitySelector({ open, onClose }: CitySelectorProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
 
   const filtered = UZBEKISTAN_CITIES.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+    t(`cities.${c.id}`).toLowerCase().includes(search.toLowerCase())
   )
 
   const handleClose = () => {
@@ -117,7 +117,7 @@ export default function CitySelector({ open, onClose }: CitySelectorProps) {
                 className={`${styles.cityItem} ${district?.id === d.id ? styles.cityItemActive : ''}`}
                 onClick={() => handleDistrictSelect(d)}
               >
-                <span className={styles.cityName}>{d.name}</span>
+                <span className={styles.cityName}>{t(`districts.${d.id}`)}</span>
                 {district?.id === d.id && (
                   <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                     <path d="M4 9L7.5 12.5L14 5.5" stroke="#6BCEFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -164,10 +164,10 @@ export default function CitySelector({ open, onClose }: CitySelectorProps) {
                   onClick={() => handleCitySelect(c)}
                 >
                   <span className={styles.cityName}>
-                    {c.name}
+                    {t(`cities.${c.id}`)}
                     {c.id === 'Tashkent' && (
                       <span className={styles.cityDistrict}>
-                        {district ? ` · ${district.name}` : ` · ${t('citySelector.districtsTitle').toLowerCase()} →`}
+                        {district ? ` · ${t(`districts.${district.id}`)}` : ` · ${t('citySelector.districtsTitle').toLowerCase()} →`}
                       </span>
                     )}
                   </span>

@@ -4,6 +4,7 @@
  */
 
 import React, { useRef, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import styles from './home.module.css'
 import type {
   VisitedMasterCard,
@@ -75,14 +76,16 @@ export interface SectionHeaderProps {
 export function SectionHeader({
   title,
   onMoreClick,
-  moreLabel = 'Все',
+  moreLabel,
 }: SectionHeaderProps) {
+  const { t } = useTranslation()
+  const label = moreLabel ?? t('common.all')
   return (
     <div className={styles.sectionHeader}>
       <h2 className={styles.sectionTitle}>{title}</h2>
       {onMoreClick && (
         <button className={styles.sectionMore} onClick={onMoreClick}>
-          <span>{moreLabel}</span>
+          <span>{label}</span>
           <ArrowRight />
         </button>
       )}
@@ -119,13 +122,14 @@ export interface MasterCardProps {
 }
 
 export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardProps) {
+  const { t } = useTranslation()
   const isVisitedItem = 'masterName' in item
   const name = isVisitedItem ? formatMasterName((item as VisitedMasterCard).masterName) : (item as PopularMasterCard).name
   const specialization = isVisitedItem
     ? (item as VisitedMasterCard).specialization
     : [(item as PopularMasterCard).specialization, (item as PopularMasterCard).businessName]
         .filter(Boolean).join(' · ')
-  
+
   return (
     <div className={styles.masterCard} onClick={onClick} role="button" tabIndex={0}>
       <div className={styles.masterPhotoWrap} aria-hidden="true">
@@ -143,7 +147,7 @@ export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardP
             </span>
           )}
           {isVisitedItem && !(item.rating > 0) && (
-            <span className={styles.masterNewBadge}>Новое</span>
+            <span className={styles.masterNewBadge}>{t('common.new')}</span>
           )}
         </div>
         <span className={styles.masterMeta}>
@@ -160,7 +164,7 @@ export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardP
                 <span className={styles.masterPriceSeparator}>•</span>
               </>
             )}
-            <span className={styles.masterPrice}>от {Math.round((item as PopularMasterCard).priceFrom / 1000)} тыс.</span>
+            <span className={styles.masterPrice}>{t('home.priceFrom', { price: Math.round((item as PopularMasterCard).priceFrom / 1000) })}</span>
           </span>
         )}
       </div>
@@ -176,6 +180,8 @@ export interface NearbyCardProps {
 }
 
 export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
+  const { t } = useTranslation()
+  const categoryLabel = t(`categories.${item.category}`)
   return (
     <div
       className={`${styles.nearbyCard} ${compact ? styles.nearbyCardCompact : ''}`}
@@ -201,7 +207,7 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
         {compact ? (
           <>
             <span className={styles.nearbyMeta}>
-              {item.formatLabel ?? item.categoryLabel} · до {item.openUntil ?? '00:00'}
+              {categoryLabel} · {t('common.until', { time: item.openUntil ?? '00:00' })}
             </span>
             <div className={styles.nearbyRatingRow}>
               {item.rating > 0 ? (
@@ -210,7 +216,7 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
                   <span>{item.rating.toFixed(1)}</span>
                 </>
               ) : (
-                <span className={styles.nearbyNewBadge}>Новое</span>
+                <span className={styles.nearbyNewBadge}>{t('common.new')}</span>
               )}
               {formatDistance(item.distanceMeters) && (
                 <><span> · </span><span className={styles.nearbyDistance}>{formatDistance(item.distanceMeters)}</span></>
@@ -220,10 +226,10 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
         ) : (
           <>
             <span className={styles.nearbyMeta}>
-              {item.categoryLabel}{formatDistance(item.distanceMeters) ? ` • ${formatDistance(item.distanceMeters)}` : ''}
+              {categoryLabel}{formatDistance(item.distanceMeters) ? ` • ${formatDistance(item.distanceMeters)}` : ''}
             </span>
-            {formatPriceFrom(item.priceFrom) && (
-              <span className={styles.nearbyPrice}>{formatPriceFrom(item.priceFrom)}</span>
+            {item.priceFrom > 0 && (
+              <span className={styles.nearbyPrice}>{t('home.priceFrom', { price: Math.round(item.priceFrom / 1000) })}</span>
             )}
           </>
         )}
@@ -239,6 +245,7 @@ export interface PopularMasterCardViewProps {
 }
 
 export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewProps) {
+  const { t } = useTranslation()
   return (
     <div
       className={styles.masterCard}
@@ -258,7 +265,7 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
         <span className={styles.masterMeta}>
           {[item.specialization, item.businessName].filter(Boolean).join(' · ')}
         </span>
-        <span className={styles.masterPrice}>от {Math.round(item.priceFrom / 1000)} тыс.</span>
+        <span className={styles.masterPrice}>{t('home.priceFrom', { price: Math.round(item.priceFrom / 1000) })}</span>
       </div>
     </div>
   )
@@ -278,6 +285,7 @@ export function PopularStudioCardView({
   onToggleFavorite,
   isFavorite = false,
 }: PopularStudioCardViewProps) {
+  const { t } = useTranslation()
   const allPhotos = [item.photoUrl, ...(item.photos || [])].filter(Boolean) as string[]
   const [currentPhoto, setCurrentPhoto] = useState(0)
   const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null)
@@ -360,20 +368,19 @@ export function PopularStudioCardView({
                 <span className={styles.psRatingRow}>
                   <StarIcon />
                   {item.rating.toFixed(1)}
-                  <span className={styles.psReviewCount}>({item.reviewCount} отзывов)</span>
+                  <span className={styles.psReviewCount}>({t('common.reviews', { count: item.reviewCount })})</span>
                 </span>
               ) : (
-                <span className={styles.psNewBadge}>Новое</span>
+                <span className={styles.psNewBadge}>{t('common.new')}</span>
               )}
             </div>
           </div>
           {item.priceFrom && (
             <div className={styles.psPrice}>
-              <span className={styles.psPriceFrom}>от</span>
-              <span className={styles.psPriceValue}>{Math.round(item.priceFrom / 1000)} тыс.</span>
+              <span className={styles.psPriceValue}>{t('home.priceFrom', { price: Math.round(item.priceFrom / 1000) })}</span>
             </div>
           )}
-          <span className={styles.psBadge}>{item.categoryLabel}</span>
+          <span className={styles.psBadge}>{t(`categories.${item.category}`)}</span>
         </div>
       </div>
     </div>

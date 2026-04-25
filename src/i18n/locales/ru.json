@@ -30,7 +30,8 @@
     "notFound": "Ничего не найдено",
     "tryOther": "Попробуйте другой запрос",
     "someErrorOccurred": "Произошла непредвиденная ошибка. Попробуйте обновить страницу.",
-    "sendFeedback": "Связаться с нами"
+    "sendFeedback": "Связаться с нами",
+    "until": "до {{time}}"
   },
   "nav": {
     "home": "Главная",
@@ -82,7 +83,8 @@
     "searchMasters": "Мастера",
     "noResults": "Ничего не найдено",
     "typingWords": ["барбера", "мастера", "стилиста", "тату мастера", "бровиста", "маникюр", "массаж"],
-    "resetFilter": "Сбросить"
+    "resetFilter": "Сбросить",
+    "priceFrom": "от {{price}} тыс."
   },
   "nearby": {
     "searchPlaceholder": "Поиск салонов и услуг...",
@@ -630,6 +632,38 @@
     "title": "Страница не найдена",
     "description": "Такой страницы не существует",
     "goHome": "На главную"
+  },
+  "cities": {
+    "Tashkent": "Ташкент",
+    "Samarkand": "Самарканд",
+    "Bukhara": "Бухара",
+    "Namangan": "Наманган",
+    "Andijan": "Андижан",
+    "Fergana": "Фергана",
+    "Nukus": "Нукус",
+    "Karshi": "Карши",
+    "Termez": "Термез",
+    "Navoi": "Навои",
+    "Jizzakh": "Джизак",
+    "Urgench": "Ургенч",
+    "Kokand": "Коканд",
+    "Chirchiq": "Чирчик",
+    "Margilan": "Маргилан",
+    "Gulistan": "Гулистан",
+    "Angren": "Ангрен"
+  },
+  "districts": {
+    "almazar": "Алмазарский",
+    "bektemir": "Бектемирский",
+    "mirobod": "Мирабадский",
+    "mirzo_ulugbek": "Мирзо-Улугбекский",
+    "sergeli": "Сергелийский",
+    "uchtepa": "Учтепинский",
+    "chilonzor": "Чиланзарский",
+    "shaykhontohur": "Шайхантаурский",
+    "yunusabad": "Юнусабадский",
+    "yakkasaray": "Яккасарайский",
+    "yashnobod": "Яшнободский"
   },
   "language": {
     "ru": "Русский",
