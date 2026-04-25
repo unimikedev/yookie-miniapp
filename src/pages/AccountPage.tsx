@@ -166,6 +166,14 @@ export default function AccountPage() {
                 <ChevronRight />
               </div>
             </button>
+            <div className={styles.menuItem}>
+              <div className={styles.menuItemLeft}>
+                <span className={styles.menuLabel}>{t('account.language')}</span>
+              </div>
+              <div className={styles.menuItemRight}>
+                <LanguageSwitcher compact />
+              </div>
+            </div>
           </div>
         </div>
         <CitySelector open={citySelectorOpen} onClose={() => setCitySelectorOpen(false)} />
@@ -195,6 +203,18 @@ export default function AccountPage() {
           <p className={styles.userSub}>{t('account.thankYou', { days: stats.joinDays || '—' })}</p>
         </div>
 
+        {/* Yookie Pro highlighted card */}
+        <button className={styles.proCard} onClick={() => navigate('/pro')}>
+          <div className={styles.proCardLeft}>
+            <div className={styles.proCardIconWrap}><IconPro /></div>
+            <div className={styles.proCardText}>
+              <span className={styles.proCardTitle}>{t('account.yookiePro')}</span>
+              <span className={styles.proCardSub}>{t('account.yookieProSub')}</span>
+            </div>
+          </div>
+          <ChevronRight />
+        </button>
+
         {/* Menu list — card style per design spec */}
         <div className={styles.menuList}>
 
@@ -212,26 +232,6 @@ export default function AccountPage() {
               <span className={styles.menuLabel}>{t('account.favorites')}</span>
             </div>
             <div className={styles.menuItemRight}><ChevronRight /></div>
-          </button>
-
-          <button className={`${styles.menuItem} ${styles.menuItemDisabled}`} onClick={() => {}}>
-            <div className={styles.menuItemLeft}>
-              <div className={styles.menuIconWrap}><IconPromo /></div>
-              <span className={styles.menuLabel}>{t('account.promo')}</span>
-            </div>
-            <div className={styles.menuItemRight}>
-              <span className={styles.menuHint}>{t('common.soon')}</span>
-            </div>
-          </button>
-
-          <button className={`${styles.menuItem} ${styles.menuItemDisabled}`} onClick={() => {}}>
-            <div className={styles.menuItemLeft}>
-              <div className={styles.menuIconWrap}><IconPayment /></div>
-              <span className={styles.menuLabel}>{t('account.payments')}</span>
-            </div>
-            <div className={styles.menuItemRight}>
-              <span className={styles.menuHint}>{t('common.soon')}</span>
-            </div>
           </button>
 
           <button className={styles.menuItem} onClick={() => setCitySelectorOpen(true)}>
@@ -263,16 +263,8 @@ export default function AccountPage() {
 
         </div>
 
-        {/* Secondary section: Pro + theme + logout */}
+        {/* Secondary section: theme + language + logout */}
         <div className={styles.menuList}>
-
-          <button className={styles.menuItem} onClick={() => navigate('/pro')}>
-            <div className={styles.menuItemLeft}>
-              <div className={styles.menuIconWrap}><IconPro /></div>
-              <span className={styles.menuLabel}>{t('account.yookiePro')}</span>
-            </div>
-            <div className={styles.menuItemRight}><ChevronRight /></div>
-          </button>
 
           <button className={styles.menuItem} onClick={() => themeStore.toggle()}>
             <div className={styles.menuItemLeft}>

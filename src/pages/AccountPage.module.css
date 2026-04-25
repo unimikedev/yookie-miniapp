@@ -277,3 +277,57 @@
   font-weight: var(--text-body-weight);
   color: var(--color-text-muted);
 }
+
+/* Yookie Pro highlight card */
+.proCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(107, 206, 255, 0.18) 0%, rgba(107, 206, 255, 0.07) 100%);
+  border: 1px solid rgba(107, 206, 255, 0.28);
+  border-radius: 16px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.proCard:active {
+  opacity: 0.75;
+}
+
+.proCardLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.proCardIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(107, 206, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.proCardText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.proCardTitle {
+  font-size: var(--text-title-size);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.proCardSub {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text-muted);
+}
