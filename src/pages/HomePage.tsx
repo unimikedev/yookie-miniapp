@@ -103,6 +103,15 @@ const ChevronRight = () => (
   </svg>
 )
 
+const HeartIconLarge = () => (
+  <svg width="22" height="20" viewBox="0 0 20 18" fill="none">
+    <path
+      d="M10 17.5C9.7 17.5 9.4 17.4 9.14 17.2L1.5 10.5C0.53 9.58 0 8.33 0 7C0 4.24 2.24 2 5 2C6.9 2 8.57 3.11 9.4 4.7C9.54 4.88 9.76 5 10 5C10.24 5 10.46 4.88 10.6 4.7C11.43 3.11 13.1 2 15 2C17.76 2 20 4.24 20 7C20 8.33 19.47 9.58 18.5 10.5L10.86 17.2C10.6 17.4 10.3 17.5 10 17.5Z"
+      fill="rgba(255,255,255,0.9)"
+    />
+  </svg>
+)
+
 /**
  * TypingPlaceholder — animated placeholder that types different service keywords
  */
@@ -167,24 +176,25 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
 
-  // Marquee: scrollable div with slow JS auto-scroll for hint
-  const marqueeRef = useRef<HTMLDivElement>(null)
+  // Marquee: callback ref fires when element mounts with full layout — guarantees scrollWidth is valid
   const marqueeRafRef = useRef<number | null>(null)
   const marqueePausedRef = useRef(false)
 
-  useEffect(() => {
-    const el = marqueeRef.current
+  const handleMarqueeRef = useCallback((el: HTMLDivElement | null) => {
+    if (marqueeRafRef.current) {
+      cancelAnimationFrame(marqueeRafRef.current)
+      marqueeRafRef.current = null
+    }
     if (!el) return
     const tick = () => {
       if (!marqueePausedRef.current) {
-        el.scrollLeft += 0.4
+        el.scrollLeft += 0.8
         const half = el.scrollWidth / 2
         if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
       }
       marqueeRafRef.current = requestAnimationFrame(tick)
     }
     marqueeRafRef.current = requestAnimationFrame(tick)
-    return () => { if (marqueeRafRef.current) cancelAnimationFrame(marqueeRafRef.current) }
   }, [])
 
   const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
@@ -472,6 +482,17 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.stickyHeader}>
+        <header className={styles.blueHeader}>
+          <div className={styles.logoBlock}>
+            <img src="/logo.svg" alt="Yookie" className={`${styles.logoImage} ${styles.logoWhite}`} />
+            <span className={`${styles.logoSub} ${styles.logoSubWhite}`}>Маркетплейс оффлайн услуг</span>
+          </div>
+          <button className={styles.headerBtnBlue} onClick={() => navigate('/favorites')} aria-label="Избранное">
+            <HeartIconLarge />
+          </button>
+        </header>
+      </div>
       <div className={styles.mainContent}>
         {/* Search — inline with dropdown */}
         <div className={styles.searchWrap}>
@@ -543,7 +564,7 @@ export default function HomePage() {
 
         {/* Category chips — scrollable row, JS auto-scrolls slowly to hint scrollability */}
         <div
-          ref={marqueeRef}
+          ref={handleMarqueeRef}
           className={styles.catMarqueeWrap}
           onTouchStart={handleMarqueeTouchStart}
           onTouchEnd={handleMarqueeTouchEnd}

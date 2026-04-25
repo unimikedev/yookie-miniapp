@@ -2,35 +2,33 @@
    HomePage — Figma frame "Главная" 184:6540
    ══════════════════════════════════════════════════════════ */
 
+/* Self-contained scroll container — bypasses overflow-x:clip containing-block bug in WebKit */
 .page {
-  position: relative;
-  min-height: 100dvh;
-  background: transparent;
-  /* safe area (TG header) + our header height */
-  padding-top: calc(var(--safe-area-top, 64px) + 56px);
-  padding-bottom: calc(var(--safe-area-bottom) + 16px);
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-bg);
 }
 
-/* ── Blue gradient — fixed, extends well below our header into the white card ── */
-.topGradient {
-  position: fixed;
+/* Sticky gradient area: contains safe-area padding + header + overlap zone */
+.stickyHeader {
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  /* covers TG safe zone + our header + 56px overlap onto white card */
-  height: calc(var(--safe-area-top, 64px) + 56px + 56px);
+  z-index: 20;
+  padding-top: var(--safe-area-top, 64px);
+  padding-bottom: 32px;
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
-  z-index: 0;
   pointer-events: none;
 }
 
-/* ── Blue header — fixed right below the Telegram safe area ── */
+.stickyHeader > * {
+  pointer-events: auto;
+}
+
+/* Blue header — normal flow inside stickyHeader (not fixed) */
 .blueHeader {
-  position: fixed;
-  top: var(--safe-area-top, 64px);
-  left: 0;
-  right: 0;
-  z-index: 5;
   height: 56px;
   display: flex;
   align-items: center;
@@ -93,24 +91,26 @@
   opacity: 0.7;
 }
 
-/* ── Main content — white card with rounded top corners ── */
+/* White card — overlaps the gradient's bottom padding by 32px */
 .mainContent {
   position: relative;
   z-index: 2;
   background: var(--color-bg);
   border-radius: 32px 32px 0 0;
+  margin-top: -32px;
   padding-top: 16px;
   width: 100%;
-  min-height: calc(100dvh - var(--safe-area-top, 64px) - 56px);
+  min-height: calc(100dvh - var(--safe-area-top, 64px) - 56px + 32px);
 }
 
-/* ── Search — sticky, pins below both the TG safe area AND our header ── */
+/* ── Search — sticky, pins below the stickyHeader ── */
 .searchWrap {
   position: sticky;
   top: calc(var(--safe-area-top, 64px) + 56px);
   z-index: 10;
   padding: 4px 16px 8px;
   border-radius: 32px 32px 0 0;
+  background: var(--color-bg);
 }
 
 .searchBox {

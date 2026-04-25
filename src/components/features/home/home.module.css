@@ -320,6 +320,28 @@
   white-space: nowrap;
 }
 
+.nearbyNewBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background: rgba(107, 206, 255, 0.18);
+  color: var(--color-accent);
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+}
+
+.masterNewBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background: rgba(107, 206, 255, 0.18);
+  color: var(--color-accent);
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+}
+
 .nearbyPrice {
   display: inline-flex;
   align-items: center;

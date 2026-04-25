@@ -136,11 +136,14 @@ export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardP
       <div className={styles.masterBody}>
         <div className={styles.masterTop}>
           <span className={styles.masterName}>{name}</span>
-          {isVisitedItem && (
+          {isVisitedItem && item.rating > 0 && (
             <span className={styles.masterRating}>
               <StarIcon />
               {item.rating.toFixed(1)}
             </span>
+          )}
+          {isVisitedItem && !(item.rating > 0) && (
+            <span className={styles.masterNewBadge}>Новое</span>
           )}
         </div>
         <span className={styles.masterMeta}>
@@ -148,11 +151,15 @@ export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardP
         </span>
         {!isVisitedItem && (item as PopularMasterCard).priceFrom && (
           <span className={styles.masterPriceRow}>
-            <span className={styles.masterRatingSmall}>
-              <StarIcon />
-              {item.rating.toFixed(1)}
-            </span>
-            <span className={styles.masterPriceSeparator}>•</span>
+            {item.rating > 0 && (
+              <>
+                <span className={styles.masterRatingSmall}>
+                  <StarIcon />
+                  {item.rating.toFixed(1)}
+                </span>
+                <span className={styles.masterPriceSeparator}>•</span>
+              </>
+            )}
             <span className={styles.masterPrice}>от {Math.round((item as PopularMasterCard).priceFrom / 1000)} тыс.</span>
           </span>
         )}
@@ -197,8 +204,14 @@ export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
               {item.formatLabel ?? item.categoryLabel} · до {item.openUntil ?? '00:00'}
             </span>
             <div className={styles.nearbyRatingRow}>
-              <StarIcon />
-              <span>{item.rating > 0 ? item.rating.toFixed(1) : '—'}</span>
+              {item.rating > 0 ? (
+                <>
+                  <StarIcon />
+                  <span>{item.rating.toFixed(1)}</span>
+                </>
+              ) : (
+                <span className={styles.nearbyNewBadge}>Новое</span>
+              )}
               {formatDistance(item.distanceMeters) && (
                 <><span> · </span><span className={styles.nearbyDistance}>{formatDistance(item.distanceMeters)}</span></>
               )}
