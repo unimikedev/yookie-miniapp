@@ -470,7 +470,7 @@ export default function HomePage() {
     let accum = 0
     const tick = () => {
       if (!marqueePausedRef.current) {
-        accum += 0.5
+        accum += 0.25
         const px = Math.floor(accum)
         if (px >= 1) {
           accum -= px
@@ -498,7 +498,9 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.stickyHeader}>
+      {/* Gradient block — scrolls normally with page, no sticky */}
+      <div className={styles.gradientBlock}>
+        <div className={styles.safeAreaSpacer} />
         <header className={styles.blueHeader}>
           <div className={styles.logoBlock}>
             <img src="/logo.svg" alt="Yookie" className={`${styles.logoImage} ${styles.logoWhite}`} />
@@ -509,9 +511,12 @@ export default function HomePage() {
           </button>
         </header>
       </div>
-      <div className={styles.mainContent}>
-        {/* Search — inline with dropdown */}
-        <div className={styles.searchWrap}>
+
+      {/* White card — overlaps gradient, contains ONLY sticky searchbar */}
+      <div className={styles.mainCard}>
+        {/* Sticky zone: safe-area spacer + searchbar pins together at top */}
+        <div className={styles.searchSticky}>
+          <div className={styles.safeAreaSpacer} />
           <div className={styles.searchBox}>
             <form className={styles.searchInputWrap} onSubmit={handleSearchSubmit}>
               <span className={styles.searchIcon}><SearchIcon /></span>
@@ -576,7 +581,7 @@ export default function HomePage() {
               </div>
             )}
           </div>
-        </div>
+        </div>{/* end searchSticky */}
 
         {/* Category chips — scrollable row, JS auto-scrolls slowly to hint scrollability */}
         <div
@@ -744,7 +749,7 @@ export default function HomePage() {
             </>
           )}
         </div>
-      </div>
+      </div>{/* end mainCard */}
       <CitySelector open={citySelectorOpen} onClose={() => setCitySelectorOpen(false)} />
     </div>
   )
