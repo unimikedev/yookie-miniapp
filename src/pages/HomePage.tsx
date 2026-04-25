@@ -176,26 +176,9 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
 
-  // Marquee: callback ref fires when element mounts with full layout — guarantees scrollWidth is valid
+  const marqueeRef = useRef<HTMLDivElement>(null)
   const marqueeRafRef = useRef<number | null>(null)
   const marqueePausedRef = useRef(false)
-
-  const handleMarqueeRef = useCallback((el: HTMLDivElement | null) => {
-    if (marqueeRafRef.current) {
-      cancelAnimationFrame(marqueeRafRef.current)
-      marqueeRafRef.current = null
-    }
-    if (!el) return
-    const tick = () => {
-      if (!marqueePausedRef.current) {
-        el.scrollLeft += 0.8
-        const half = el.scrollWidth / 2
-        if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
-      }
-      marqueeRafRef.current = requestAnimationFrame(tick)
-    }
-    marqueeRafRef.current = requestAnimationFrame(tick)
-  }, [])
 
   const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
   const handleMarqueeTouchEnd = () => { setTimeout(() => { marqueePausedRef.current = false }, 1500) }
@@ -473,6 +456,39 @@ export default function HomePage() {
 
   const filteredData = getFilteredData()
   const hasVisitedData = effectiveVisited && effectiveVisited.length > 0
+  const isDataReady = filteredData !== null
+
+  // Marquee: useEffect fires after DOM commit + layout, ensuring scrollWidth is valid.
+  // Dep [isDataReady] re-runs when filteredData first becomes available (loading → loaded).
+  useEffect(() => {
+    const el = marqueeRef.current
+    if (!el) return
+    if (marqueeRafRef.current !== null) {
+      cancelAnimationFrame(marqueeRafRef.current)
+      marqueeRafRef.current = null
+    }
+    let accum = 0
+    const tick = () => {
+      if (!marqueePausedRef.current) {
+        accum += 0.5
+        const px = Math.floor(accum)
+        if (px >= 1) {
+          accum -= px
+          el.scrollLeft += px
+          const half = el.scrollWidth / 2
+          if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
+        }
+      }
+      marqueeRafRef.current = requestAnimationFrame(tick)
+    }
+    marqueeRafRef.current = requestAnimationFrame(tick)
+    return () => {
+      if (marqueeRafRef.current !== null) {
+        cancelAnimationFrame(marqueeRafRef.current)
+        marqueeRafRef.current = null
+      }
+    }
+  }, [isDataReady])
 
   if (!filteredData && !effectiveVisitedLoading) {
     return <div className={styles.page}><p>Loading...</p></div>
@@ -564,7 +580,7 @@ export default function HomePage() {
 
         {/* Category chips — scrollable row, JS auto-scrolls slowly to hint scrollability */}
         <div
-          ref={handleMarqueeRef}
+          ref={marqueeRef}
           className={styles.catMarqueeWrap}
           onTouchStart={handleMarqueeTouchStart}
           onTouchEnd={handleMarqueeTouchEnd}

@@ -12,11 +12,8 @@
   background: var(--color-bg);
 }
 
-/* Sticky gradient area: contains safe-area padding + header + overlap zone */
+/* Gradient area — scrolls with page, safe-area padding + overlap zone */
 .stickyHeader {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   padding-top: var(--safe-area-top, 64px);
   padding-bottom: 32px;
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
@@ -103,10 +100,10 @@
   min-height: calc(100dvh - var(--safe-area-top, 64px) - 56px + 32px);
 }
 
-/* ── Search — sticky, pins below the stickyHeader ── */
+/* ── Search — sticky, pins at safe-area-top when header scrolls away ── */
 .searchWrap {
   position: sticky;
-  top: calc(var(--safe-area-top, 64px) + 56px);
+  top: var(--safe-area-top, 0px);
   z-index: 10;
   padding: 4px 16px 8px;
   border-radius: 32px 32px 0 0;
@@ -125,18 +122,17 @@
   height: 56px;
   padding: 0 16px;
   padding-right: calc(16px + 100px);
-  background: var(--color-surface);
-  border: 2px solid var(--color-accent);
+  background: #fff;
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-3xl);
-  transition: background 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   width: 100%;
   min-width: 0;
-  box-shadow: 0 0 8px rgba(107, 206, 255, 0.15);
 }
 
 .searchInputWrap:focus-within {
-  background: var(--color-surface-elevated);
-  box-shadow: 0 0 12px rgba(107, 206, 255, 0.25);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(107, 206, 255, 0.15);
 }
 
 .searchInputContainer {
@@ -431,7 +427,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding-top: 20px; /* increased from 10px — more air after categories */
+  padding-top: 16px;
   padding-bottom: 120px; /* space for floating pill nav */
 }
 

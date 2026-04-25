@@ -664,8 +664,8 @@
 }
 
 .filterChip[data-active="true"] {
-  background: var(--color-accent);
-  color: var(--color-bg);
+  background: transparent;
+  color: var(--color-accent);
   border-color: var(--color-accent);
   font-weight: var(--text-caption-weight);
 }
@@ -678,7 +678,7 @@
 }
 
 .filterChip[data-active="true"] .filterChipIcon {
-  color: var(--color-bg);
+  color: var(--color-accent);
 }
 
 /* ── Horizontal scroll row ───────────────────────────────── */
