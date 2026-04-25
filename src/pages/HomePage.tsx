@@ -176,12 +176,16 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
 
-  const marqueeRef = useRef<HTMLDivElement>(null)
-  const marqueeRafRef = useRef<number | null>(null)
-  const marqueePausedRef = useRef(false)
+  const [marqueePaused, setMarqueePaused] = useState(false)
+  const marqueePauseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
-  const handleMarqueeTouchEnd = () => { setTimeout(() => { marqueePausedRef.current = false }, 1500) }
+  const handleMarqueeTouchStart = () => {
+    if (marqueePauseTimer.current) clearTimeout(marqueePauseTimer.current)
+    setMarqueePaused(true)
+  }
+  const handleMarqueeTouchEnd = () => {
+    marqueePauseTimer.current = setTimeout(() => setMarqueePaused(false), 1500)
+  }
 
   // Infinite feed state
   const [feedFilter, setFeedFilter] = useState<FeedFilterKey>('new_places')
@@ -456,39 +460,6 @@ export default function HomePage() {
 
   const filteredData = getFilteredData()
   const hasVisitedData = effectiveVisited && effectiveVisited.length > 0
-  const isDataReady = filteredData !== null
-
-  // Marquee: useEffect fires after DOM commit + layout, ensuring scrollWidth is valid.
-  // Dep [isDataReady] re-runs when filteredData first becomes available (loading → loaded).
-  useEffect(() => {
-    const el = marqueeRef.current
-    if (!el) return
-    if (marqueeRafRef.current !== null) {
-      cancelAnimationFrame(marqueeRafRef.current)
-      marqueeRafRef.current = null
-    }
-    let accum = 0
-    const tick = () => {
-      if (!marqueePausedRef.current) {
-        accum += 0.25
-        const px = Math.floor(accum)
-        if (px >= 1) {
-          accum -= px
-          el.scrollLeft += px
-          const half = el.scrollWidth / 2
-          if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
-        }
-      }
-      marqueeRafRef.current = requestAnimationFrame(tick)
-    }
-    marqueeRafRef.current = requestAnimationFrame(tick)
-    return () => {
-      if (marqueeRafRef.current !== null) {
-        cancelAnimationFrame(marqueeRafRef.current)
-        marqueeRafRef.current = null
-      }
-    }
-  }, [isDataReady])
 
   if (!filteredData && !effectiveVisitedLoading) {
     return <div className={styles.page}><p>Loading...</p></div>
@@ -582,22 +553,23 @@ export default function HomePage() {
           </div>
         </div>{/* end searchSticky */}
 
-        {/* Category chips — scrollable row, JS auto-scrolls slowly to hint scrollability */}
+        {/* Category chips — CSS marquee animation, pauses on touch */}
         <div
-          ref={marqueeRef}
           className={styles.catMarqueeWrap}
           onTouchStart={handleMarqueeTouchStart}
           onTouchEnd={handleMarqueeTouchEnd}
         >
-          {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
-            <HomeCategoryChip
-              key={`${cat.key}-${idx}`}
-              label={cat.label}
-              iconSrc={cat.icon}
-              onClick={() => handleCategoryClick(cat.key)}
-              active={selectedCategory === cat.key}
-            />
-          ))}
+          <div className={`${styles.catMarqueeTrack}${marqueePaused ? ' ' + styles.paused : ''}`}>
+            {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
+              <HomeCategoryChip
+                key={`${cat.key}-${idx}`}
+                label={cat.label}
+                iconSrc={cat.icon}
+                onClick={() => handleCategoryClick(cat.key)}
+                active={selectedCategory === cat.key}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Sections */}
