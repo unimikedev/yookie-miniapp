@@ -92,47 +92,6 @@ export default function ProviderDetailPage() {
     }
   }, [])
 
-  // Resolved coords/address via Yandex geocoder (syncs address ↔ coordinates)
-  const [resolvedLat, setResolvedLat] = useState<number | null>(null)
-  const [resolvedLng, setResolvedLng] = useState<number | null>(null)
-  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!business) return
-    const hasCoords = business.lat != null && business.lng != null &&
-      (business.lat !== 0 || business.lng !== 0)
-    const hasAddress = !!business.address?.trim()
-
-    setResolvedLat(hasCoords ? business.lat! : null)
-    setResolvedLng(hasCoords ? business.lng! : null)
-    setResolvedAddress(hasAddress ? business.address! : null)
-
-    const ymaps = (window as any).ymaps
-    if (!ymaps) return
-
-    ymaps.ready(() => {
-      if (hasAddress && !hasCoords) {
-        ymaps.geocode(`Ташкент, ${business.address}`, { results: 1 })
-          .then((res: any) => {
-            const obj = res.geoObjects.get(0)
-            if (!obj) return
-            const [lat, lng] = obj.geometry.getCoordinates()
-            setResolvedLat(lat)
-            setResolvedLng(lng)
-          })
-          .catch(() => {})
-      } else if (hasCoords && !hasAddress) {
-        ymaps.geocode([business.lat!, business.lng!], { results: 1 })
-          .then((res: any) => {
-            const obj = res.geoObjects.get(0)
-            if (!obj) return
-            setResolvedAddress(obj.getAddressLine?.() ?? null)
-          })
-          .catch(() => {})
-      }
-    })
-  }, [business?.id])
-
   // Use clientPhone (pre-filled from authStore on mount, but always editable)
   const effectivePhone = getCleanPhone(clientPhone)
 
@@ -190,6 +149,47 @@ export default function ProviderDetailPage() {
   useEffect(() => {
     if (business) setBusiness(business)
   }, [business])
+
+  // Resolved coords/address via Yandex geocoder (syncs address ↔ coordinates)
+  const [resolvedLat, setResolvedLat] = useState<number | null>(null)
+  const [resolvedLng, setResolvedLng] = useState<number | null>(null)
+  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!business) return
+    const hasCoords = business.lat != null && business.lng != null &&
+      (business.lat !== 0 || business.lng !== 0)
+    const hasAddress = !!business.address?.trim()
+
+    setResolvedLat(hasCoords ? business.lat! : null)
+    setResolvedLng(hasCoords ? business.lng! : null)
+    setResolvedAddress(hasAddress ? business.address! : null)
+
+    const ymaps = (window as any).ymaps
+    if (!ymaps) return
+
+    ymaps.ready(() => {
+      if (hasAddress && !hasCoords) {
+        ymaps.geocode(`Ташкент, ${business.address}`, { results: 1 })
+          .then((res: any) => {
+            const obj = res.geoObjects.get(0)
+            if (!obj) return
+            const [lat, lng] = obj.geometry.getCoordinates()
+            setResolvedLat(lat)
+            setResolvedLng(lng)
+          })
+          .catch(() => {})
+      } else if (hasCoords && !hasAddress) {
+        ymaps.geocode([business.lat!, business.lng!], { results: 1 })
+          .then((res: any) => {
+            const obj = res.geoObjects.get(0)
+            if (!obj) return
+            setResolvedAddress(obj.getAddressLine?.() ?? null)
+          })
+          .catch(() => {})
+      }
+    })
+  }, [business?.id])
 
   // ── Auto-select solo master for individual providers ────────────
   useEffect(() => {
