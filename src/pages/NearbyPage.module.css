@@ -49,7 +49,7 @@
 .searchRow {
   pointer-events: auto;
   background: rgba(24, 25, 27, 0.4);
-  padding: calc(10px + var(--safe-area-top-quarter)) 16px 10px 16px;
+  padding: calc(18px + var(--safe-area-top-quarter)) 16px 10px 16px;
 }
 
 .searchBox {
@@ -107,9 +107,9 @@
 .filtersRow {
   pointer-events: auto;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
-  padding: 8px 16px 8px;
+  padding: 6px 16px 8px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -364,7 +364,7 @@
 .resultsCount {
   position: absolute;
   left: 16px;
-  bottom: calc(178px + var(--safe-area-bottom-half));
+  bottom: calc(204px + var(--safe-area-bottom-half));
   z-index: 10;
   padding: 6px 12px;
   background: var(--color-bg);
@@ -392,13 +392,38 @@
   gap: 12px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  scroll-padding-left: 16px;
   scrollbar-width: none;
-  padding: 12px 16px 12px 0;
+  padding: 12px 16px;
   pointer-events: auto;
 }
 
 .carousel::-webkit-scrollbar {
   display: none;
+}
+
+/* ─── Skeleton Card (matches NearbyCard compact shape) ──────────────────── */
+
+.skeletonCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: calc(60vw - 24px);
+  max-width: 280px;
+  padding: 14px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.skeletonBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* ─── Nearby Card Wrapper (replaces mapCard in carousel) ────────────────── */

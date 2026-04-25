@@ -34,10 +34,10 @@
   animation: slideInFromLeft 0.22s ease-out;
 }
 
-/* N/N counter — top-right pill */
+/* N/N counter — bottom-right, aligned with dots pager */
 .counter {
   position: absolute;
-  top: 14px;
+  bottom: 48px;
   right: 14px;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(6px);

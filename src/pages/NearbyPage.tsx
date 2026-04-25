@@ -22,8 +22,7 @@ import type { NearbyBusinessCard } from '@/lib/api/home'
 import { useThemeStore } from '@/stores/themeStore'
 import { Skeleton } from '@/shared/ui'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
-import { NearbyCard, HomeCategoryChip } from '@/components/features/home/HomeCards'
-import { CATEGORIES } from '@/shared/constants'
+import { NearbyCard } from '@/components/features/home/HomeCards'
 import styles from './NearbyPage.module.css'
 
 /* ── Yandex Maps global ─────────────────────────────────────────────────── */
@@ -47,9 +46,6 @@ const PRICE_RANGE_DATA = [
   { min: 300000, max: undefined },
 ] as const
 
-const CATEGORY_FILTER_KEYS: (CategoryEnum | 'all')[] = [
-  'all', 'hair', 'barber', 'nail', 'brow_lash', 'spa_massage', 'makeup', 'cosmetology',
-]
 
 /* ── SVG Icons ──────────────────────────────────────────────────────────── */
 
@@ -89,6 +85,12 @@ const WalkIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="5" r="2" stroke="currentColor" strokeWidth="1.5" />
     <path d="M10 10L8 22M14 10L16 22M10 10H14M9 16H15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
+const CloseIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+    <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 )
 
@@ -513,20 +515,19 @@ export default function NearbyPage() {
               {t('nearby.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
             </span>
           </button>
-          <button
-            className={`${styles.filterPill} ${selectedCategory === 'all' ? styles.filterPillActive : ''}`}
-            onClick={() => setSelectedCategory('all')}
-          >
-            <span className={styles.filterPillLabel}>{t('common.all')}</span>
-          </button>
-          {CATEGORIES.filter(cat => (CATEGORY_FILTER_KEYS as string[]).includes(cat.key)).map(cat => (
-            <HomeCategoryChip
+          {CATEGORY_FILTERS.map((cat) => (
+            <button
               key={cat.key}
-              label={t(`categories.${cat.key}`)}
-              iconSrc={cat.icon}
-              onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
-              active={selectedCategory === cat.key}
-            />
+              className={`${styles.filterPill} ${selectedCategory === cat.key ? styles.filterPillActive : ''}`}
+              onClick={() => setSelectedCategory(cat.key)}
+            >
+              <span className={styles.filterPillLabel}>{cat.label}</span>
+              {selectedCategory === cat.key && cat.key !== 'all' && (
+                <span className={styles.filterCloseIcon} onClick={(e) => { e.stopPropagation(); setSelectedCategory('all') }}>
+                  <CloseIcon />
+                </span>
+              )}
+            </button>
           ))}
         </div>
 
@@ -626,8 +627,13 @@ export default function NearbyPage() {
         <div className={styles.carouselLayer}>
           <div className={styles.carousel}>
             {[1, 2, 3].map(i => (
-              <div key={i} className={styles.mapCard}>
-                <Skeleton variant="rect" height={120} />
+              <div key={i} className={styles.skeletonCard}>
+                <Skeleton variant="rect" width={64} height={64} />
+                <div className={styles.skeletonBody}>
+                  <Skeleton variant="rect" height={14} />
+                  <Skeleton variant="rect" height={12} width="60%" />
+                  <Skeleton variant="rect" height={12} width="40%" />
+                </div>
               </div>
             ))}
           </div>
