@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useCityStore } from '@/stores/cityStore'
 import { fetchClientStats } from '@/lib/api/clients'
 import CitySelector from '@/components/features/CitySelector'
+import LanguageSwitcher from '@/components/features/LanguageSwitcher'
 import styles from './AccountPage.module.css'
 
 const SUPPORT_URL = 'https://t.me/yookie_bot'
@@ -86,6 +88,7 @@ const IconLogout = () => (
 
 export default function AccountPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const platform = usePlatform()
   const themeStore = useThemeStore()
   const authStore = useAuthStore()
@@ -123,13 +126,13 @@ export default function AccountPage() {
                 <div className={styles.avatarFallback}>?</div>
               </div>
             </div>
-            <h1 className={styles.userName}>Вы не авторизованы</h1>
-            <p className={styles.userSub}>Войдите, чтобы записываться, смотреть историю и управлять профилем</p>
+            <h1 className={styles.userName}>{t('account.guestTitle')}</h1>
+            <p className={styles.userSub}>{t('account.guestSubtitle')}</p>
             <button
               className={styles.loginCTA}
               onClick={() => navigate('/auth?return=/account')}
             >
-              Войти / Зарегистрироваться
+              {t('account.loginCTA')}
             </button>
           </div>
 
@@ -137,7 +140,7 @@ export default function AccountPage() {
             <button className={styles.menuItem} onClick={() => setCitySelectorOpen(true)}>
               <div className={styles.menuItemLeft}>
                 <div className={styles.menuIconWrap}><IconCity /></div>
-                <span className={styles.menuLabel}>Город</span>
+                <span className={styles.menuLabel}>{t('account.city')}</span>
               </div>
               <div className={styles.menuItemRight}>
                 <span className={styles.menuHint}>{city.name}</span>
@@ -147,7 +150,7 @@ export default function AccountPage() {
             <button className={styles.menuItem} onClick={() => window.open(SUPPORT_URL, '_blank')}>
               <div className={styles.menuItemLeft}>
                 <div className={styles.menuIconWrap}><IconSupport /></div>
-                <span className={styles.menuLabel}>Поддержка</span>
+                <span className={styles.menuLabel}>{t('account.support')}</span>
               </div>
               <div className={styles.menuItemRight}><ChevronRight /></div>
             </button>
@@ -156,10 +159,10 @@ export default function AccountPage() {
                 <div className={styles.menuIconWrap}>
                   {themeStore.theme === 'light' ? <IconSun /> : <IconMoon />}
                 </div>
-                <span className={styles.menuLabel}>Тема</span>
+                <span className={styles.menuLabel}>{t('account.theme')}</span>
               </div>
               <div className={styles.menuItemRight}>
-                <span className={styles.menuHint}>{themeStore.theme === 'light' ? 'Светлая' : 'Тёмная'}</span>
+                <span className={styles.menuHint}>{themeStore.theme === 'light' ? t('account.themeLight') : t('account.themeDark')}</span>
                 <ChevronRight />
               </div>
             </button>
@@ -187,63 +190,54 @@ export default function AccountPage() {
               }
             </div>
           </div>
-          <h1 className={styles.userName}>{displayName || 'Профиль'}</h1>
+          <h1 className={styles.userName}>{displayName || t('account.profile')}</h1>
           {user?.username && <p className={styles.userPhone}>@{user.username}</p>}
-          <p className={styles.userSub}>Спасибо, что с нами уже {stats.joinDays || '—'} дней</p>
+          <p className={styles.userSub}>{t('account.thankYou', { days: stats.joinDays || '—' })}</p>
         </div>
 
         {/* Menu list — card style per design spec */}
         <div className={styles.menuList}>
 
-          {/* Мои записи */}
           <button className={styles.menuItem} onClick={() => navigate('/my-bookings')}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconBookings /></div>
-              <span className={styles.menuLabel}>Мои записи</span>
+              <span className={styles.menuLabel}>{t('account.myBookings')}</span>
             </div>
-            <div className={styles.menuItemRight}>
-              <ChevronRight />
-            </div>
+            <div className={styles.menuItemRight}><ChevronRight /></div>
           </button>
 
-          {/* Избранное */}
           <button className={styles.menuItem} onClick={() => navigate('/favorites')}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconFavorite /></div>
-              <span className={styles.menuLabel}>Избранное</span>
+              <span className={styles.menuLabel}>{t('account.favorites')}</span>
             </div>
-            <div className={styles.menuItemRight}>
-              <ChevronRight />
-            </div>
+            <div className={styles.menuItemRight}><ChevronRight /></div>
           </button>
 
-          {/* Промокоды */}
           <button className={`${styles.menuItem} ${styles.menuItemDisabled}`} onClick={() => {}}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconPromo /></div>
-              <span className={styles.menuLabel}>Промокоды</span>
+              <span className={styles.menuLabel}>{t('account.promo')}</span>
             </div>
             <div className={styles.menuItemRight}>
-              <span className={styles.menuHint}>Скоро</span>
+              <span className={styles.menuHint}>{t('common.soon')}</span>
             </div>
           </button>
 
-          {/* Способы оплаты */}
           <button className={`${styles.menuItem} ${styles.menuItemDisabled}`} onClick={() => {}}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconPayment /></div>
-              <span className={styles.menuLabel}>Способы оплаты</span>
+              <span className={styles.menuLabel}>{t('account.payments')}</span>
             </div>
             <div className={styles.menuItemRight}>
-              <span className={styles.menuHint}>Скоро</span>
+              <span className={styles.menuHint}>{t('common.soon')}</span>
             </div>
           </button>
 
-          {/* Город */}
           <button className={styles.menuItem} onClick={() => setCitySelectorOpen(true)}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconCity /></div>
-              <span className={styles.menuLabel}>Город</span>
+              <span className={styles.menuLabel}>{t('account.city')}</span>
             </div>
             <div className={styles.menuItemRight}>
               <span className={styles.menuHint}>{city.name}</span>
@@ -251,26 +245,20 @@ export default function AccountPage() {
             </div>
           </button>
 
-          {/* Поддержка */}
           <button className={styles.menuItem} onClick={() => window.open(SUPPORT_URL, '_blank')}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconSupport /></div>
-              <span className={styles.menuLabel}>Поддержка</span>
+              <span className={styles.menuLabel}>{t('account.support')}</span>
             </div>
-            <div className={styles.menuItemRight}>
-              <ChevronRight />
-            </div>
+            <div className={styles.menuItemRight}><ChevronRight /></div>
           </button>
 
-          {/* Настройки / Редактировать профиль */}
           <button className={styles.menuItem} onClick={() => navigate('/profile/edit')}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconSettings /></div>
-              <span className={styles.menuLabel}>Настройки</span>
+              <span className={styles.menuLabel}>{t('account.settings')}</span>
             </div>
-            <div className={styles.menuItemRight}>
-              <ChevronRight />
-            </div>
+            <div className={styles.menuItemRight}><ChevronRight /></div>
           </button>
 
         </div>
@@ -278,40 +266,42 @@ export default function AccountPage() {
         {/* Secondary section: Pro + theme + logout */}
         <div className={styles.menuList}>
 
-          {/* Yookie Pro */}
           <button className={styles.menuItem} onClick={() => navigate('/pro')}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconPro /></div>
-              <span className={styles.menuLabel}>Yookie Pro</span>
+              <span className={styles.menuLabel}>{t('account.yookiePro')}</span>
             </div>
-            <div className={styles.menuItemRight}>
-              <ChevronRight />
-            </div>
+            <div className={styles.menuItemRight}><ChevronRight /></div>
           </button>
 
-          {/* Theme Toggle */}
           <button className={styles.menuItem} onClick={() => themeStore.toggle()}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}>
                 {themeStore.theme === 'light' ? <IconSun /> : <IconMoon />}
               </div>
-              <span className={styles.menuLabel}>Тема</span>
+              <span className={styles.menuLabel}>{t('account.theme')}</span>
             </div>
             <div className={styles.menuItemRight}>
-              <span className={styles.menuHint}>{themeStore.theme === 'light' ? 'Светлая' : 'Тёмная'}</span>
+              <span className={styles.menuHint}>{themeStore.theme === 'light' ? t('account.themeLight') : t('account.themeDark')}</span>
               <ChevronRight />
             </div>
           </button>
 
-          {/* Logout */}
+          <div className={styles.menuItem}>
+            <div className={styles.menuItemLeft}>
+              <span className={styles.menuLabel}>{t('account.language')}</span>
+            </div>
+            <div className={styles.menuItemRight}>
+              <LanguageSwitcher compact />
+            </div>
+          </div>
+
           <button className={styles.menuItem} onClick={() => { authStore.logout(); navigate('/') }}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconLogout /></div>
-              <span className={`${styles.menuLabel} ${styles.menuLabelDanger}`}>Выйти</span>
+              <span className={`${styles.menuLabel} ${styles.menuLabelDanger}`}>{t('account.logout')}</span>
             </div>
-            <div className={styles.menuItemRight}>
-              <ChevronRight />
-            </div>
+            <div className={styles.menuItemRight}><ChevronRight /></div>
           </button>
 
         </div>

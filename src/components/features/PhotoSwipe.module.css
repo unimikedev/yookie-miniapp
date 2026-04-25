@@ -52,10 +52,10 @@
   letter-spacing: 0.3px;
 }
 
-/* Dots — centered, 16px from bottom so they sit above the hero edge */
+/* Dots — centered, 48px from bottom */
 .dots {
   position: absolute;
-  bottom: 16px;
+  bottom: 48px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;

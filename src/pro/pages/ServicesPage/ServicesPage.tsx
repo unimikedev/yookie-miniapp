@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listServices, listStaff, upsertService, deleteService, updateMasterServices, reorderService } from '@/pro/api';
@@ -18,6 +19,7 @@ const EMPTY: ServiceInput = { name: '', price: 0, duration_min: 30, category: ''
 
 export default function ServicesPage() {
   const { merchantId } = useMerchantStore();
+  const { t } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
   const [staff, setStaff] = useState<Master[]>([]);
   const [editing, setEditing] = useState<ServiceInput | null>(null);
@@ -80,13 +82,13 @@ export default function ServicesPage() {
     setSaveError(null);
     try {
       await upsertService(merchantId, editing);
-      const msg = editing.id ? 'Услуга обновлена' : 'Услуга добавлена';
+      const msg = editing.id ? t('pro.services.saved') : t('pro.services.added');
       setEditing(null);
       emit({ type: 'service.changed', merchantId });
       load();
       showToast(msg);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Ошибка сохранения');
+      setSaveError(err instanceof Error ? err.message : t('pro.services.saveError'));
     } finally {
       setSaving(false);
     }
@@ -98,9 +100,9 @@ export default function ServicesPage() {
       await deleteService(merchantId, id);
       emit({ type: 'service.changed', merchantId });
       load();
-      showToast('Услуга удалена');
+      showToast(t('pro.services.deleted'));
     } catch {
-      showToast('Не удалось удалить');
+      showToast(t('pro.services.deleteError'));
     }
   };
 
@@ -140,14 +142,14 @@ export default function ServicesPage() {
   const actions = <button className={styles.addBtn} onClick={openAdd}>+</button>;
 
   return (
-    <ProLayout title="Услуги" actions={actions}>
+    <ProLayout title={t('pro.services.title')} actions={actions}>
       {/* Category filter — L2 underline tabs */}
       {categories.length > 1 && (
         <div className={styles.catFilter}>
           <button
             className={`${styles.catTab} ${activeCategory === null ? styles.catTabActive : ''}`}
             onClick={() => setActiveCategory(null)}
-          >Все</button>
+          >{t('common.all')}</button>
           {categories.map(cat => (
             <button
               key={cat}
@@ -163,7 +165,7 @@ export default function ServicesPage() {
         <div className={styles.searchWrap}>
           <input
             className={styles.searchInput}
-            placeholder="Поиск услуги…"
+            placeholder={t('pro.services.searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -176,7 +178,7 @@ export default function ServicesPage() {
         <div className={styles.form}>
           <input
             className={styles.input}
-            placeholder="Название *"
+            placeholder={`${t('pro.services.name')} *`}
             value={editing.name}
             onChange={e => setEditing({ ...editing, name: e.target.value })}
             autoFocus
@@ -184,7 +186,7 @@ export default function ServicesPage() {
           <input
             className={styles.input}
             list="svc-categories"
-            placeholder="Категория"
+            placeholder={t('pro.services.category')}
             value={editing.category ?? ''}
             onChange={e => setEditing({ ...editing, category: e.target.value })}
           />
@@ -193,7 +195,7 @@ export default function ServicesPage() {
           </datalist>
           <textarea
             className={styles.input}
-            placeholder="Описание (необязательно)"
+            placeholder={t('pro.services.descriptionPlaceholder')}
             rows={2}
             value={editing.description ?? ''}
             onChange={e => setEditing({ ...editing, description: e.target.value })}
@@ -203,23 +205,23 @@ export default function ServicesPage() {
             <input
               className={styles.input}
               type="number"
-              placeholder="Цена (сўм)"
+              placeholder={t('pro.services.pricePlaceholder')}
               value={editing.price || ''}
               onChange={e => setEditing({ ...editing, price: Number(e.target.value) })}
             />
             <input
               className={styles.input}
               type="number"
-              placeholder="Мин."
+              placeholder={t('pro.services.durationLabel')}
               value={editing.duration_min || ''}
               onChange={e => setEditing({ ...editing, duration_min: Number(e.target.value) })}
             />
           </div>
           {saveError && <p className={styles.formError}>{saveError}</p>}
           <div className={styles.formActions}>
-            <button className={styles.cancelBtn} onClick={() => { setEditing(null); setSaveError(null); }}>Отмена</button>
+            <button className={styles.cancelBtn} onClick={() => { setEditing(null); setSaveError(null); }}>{t('common.cancel')}</button>
             <button className={styles.saveBtn} onClick={handleSave} disabled={saving || !editing.name.trim()}>
-              {saving ? '…' : 'Сохранить'}
+              {saving ? '…' : t('pro.services.saveBtn')}
             </button>
           </div>
         </div>
@@ -230,13 +232,13 @@ export default function ServicesPage() {
         {services.length === 0 ? (
           <div className={styles.emptyState}>
             <span className={styles.emptyIcon}>✂️</span>
-            <p className={styles.emptyTitle}>Нет услуг</p>
-            <p className={styles.emptyText}>Добавьте первую услугу — она появится в профиле и будет доступна для записи</p>
-            <button className={styles.emptyAddBtn} onClick={openAdd}>+ Добавить услугу</button>
+            <p className={styles.emptyTitle}>{t('pro.services.noServices')}</p>
+            <p className={styles.emptyText}>{t('pro.services.noServicesFirstDesc')}</p>
+            <button className={styles.emptyAddBtn} onClick={openAdd}>+ {t('pro.services.add')}</button>
           </div>
         ) : filtered.length === 0 ? (
           <p className={styles.empty}>
-            {search ? 'Ничего не найдено' : 'Нет услуг в этой категории'}
+            {search ? t('common.notFound') : t('pro.services.noCategory')}
           </p>
         ) : (
           filtered.map(s => {
@@ -258,14 +260,14 @@ export default function ServicesPage() {
                       <span className={styles.cardName}>{s.name}</span>
                       {s.category?.trim() && <span className={styles.cardCat}>{s.category}</span>}
                     </div>
-                    <span className={styles.cardMeta}>{s.duration_min} мин · {s.price.toLocaleString('ru')} сўм</span>
+                    <span className={styles.cardMeta}>{s.duration_min} {t('common.min')} · {s.price.toLocaleString('ru')} {t('common.currency')}</span>
                   </div>
                   <div className={styles.cardActions}>
                     {staff.length > 0 && (
                       <button
                         className={`${styles.mastersBtn} ${isExpanded ? styles.mastersBtnActive : ''}`}
                         onClick={() => setExpandedServiceId(isExpanded ? null : s.id)}
-                        title="Назначить мастеров"
+                        title={t('pro.services.masterAssignTitle')}
                       >👤</button>
                     )}
                     <button className={styles.editBtn} onClick={() => { setEditing({ ...s }); setSaveError(null); }}>✎</button>
@@ -275,7 +277,7 @@ export default function ServicesPage() {
 
                 {isExpanded && (
                   <div className={styles.masterAssign}>
-                    <p className={styles.masterAssignTitle}>Кто оказывает эту услугу</p>
+                    <p className={styles.masterAssignTitle}>{t('pro.services.masterAssignTitle')}</p>
                     <div className={styles.masterAssignList}>
                       {staff.map(m => {
                         const isOn = masterServiceMap.get(m.id)?.has(s.id) ?? false;

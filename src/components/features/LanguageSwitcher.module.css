@@ -1,0 +1,36 @@
+.wrap {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.btn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Gilroy', sans-serif;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn:active {
+  opacity: 0.7;
+}
+
+.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.compact .btn {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11px;
+}

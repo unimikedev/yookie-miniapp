@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useHomeData } from '@/hooks/useHomeData'
 import { useVisitedMasters } from '@/hooks/useVisitedMasters'
 import { useFavoritesStore } from '@/stores/favoritesStore'
@@ -40,27 +41,9 @@ interface SearchResultItem {
   masterId?: string
 }
 
-const TYPING_WORDS = ['барбера', 'мастера', 'стилиста', 'тату мастера', 'бровиста', 'маникюр', 'массаж']
-const TYPING_PLACEHOLDER = 'Найти '
-
-const FILTER_CHIPS: HomeFilterChip[] = [
-  { key: 'sort', label: '', icon: 'arrows' },
-  { key: 'new_places', label: 'Новые места' },
-  { key: 'popular', label: 'Популярные' },
-  { key: 'top_rated', label: 'Топ рейтинг' },
-  { key: 'promo', label: 'Акции' },
-  { key: 'nearby', label: 'Рядом' },
-  { key: 'available', label: 'Свободен' },
-]
-
 type FeedFilterKey = 'new_places' | 'popular' | 'top_rated'
 const FEED_CHIPS = new Set<string>(['new_places', 'popular', 'top_rated'])
 const FEED_LIMIT = 10
-const FEED_TITLES: Record<FeedFilterKey, string> = {
-  new_places: 'Новые места',
-  popular: 'Популярные',
-  top_rated: 'Топ рейтинг',
-}
 const FEED_SORTS: Record<FeedFilterKey, 'popular' | 'rating' | undefined> = {
   new_places: undefined,
   popular: 'popular',
@@ -116,12 +99,14 @@ const HeartIconLarge = () => (
  * TypingPlaceholder — animated placeholder that types different service keywords
  */
 function TypingPlaceholder() {
+  const { t } = useTranslation()
+  const words = t('home.typingWords', { returnObjects: true }) as string[]
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [currentCharIndex, setCurrentCharIndex] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
-    const currentWord = TYPING_WORDS[currentWordIndex]
+    const currentWord = words[currentWordIndex] ?? ''
     const timeout = setTimeout(() => {
       if (!isDeleting) {
         if (currentCharIndex < currentWord.length) {
@@ -134,14 +119,14 @@ function TypingPlaceholder() {
           setCurrentCharIndex(currentCharIndex - 1)
         } else {
           setIsDeleting(false)
-          setCurrentWordIndex((currentWordIndex + 1) % TYPING_WORDS.length)
+          setCurrentWordIndex((currentWordIndex + 1) % words.length)
         }
       }
     }, isDeleting ? 80 : 120)
     return () => clearTimeout(timeout)
-  }, [currentCharIndex, currentWordIndex, isDeleting])
+  }, [currentCharIndex, currentWordIndex, isDeleting, words])
 
-  const currentWord = TYPING_WORDS[currentWordIndex]
+  const currentWord = words[currentWordIndex] ?? ''
   const typedText = currentWord.substring(0, currentCharIndex)
 
   return (
@@ -154,6 +139,7 @@ function TypingPlaceholder() {
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { data, isLoading, error } = useHomeData()
   const { visited: apiVisited, isLoading: visitedLoading } = useVisitedMasters()
   const { toggle, isFavorite } = useFavoritesStore()
@@ -166,12 +152,28 @@ export default function HomePage() {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
         <div className="mb-4 text-4xl">📡</div>
-        <h3 className="text-lg font-bold mb-2">Нет соединения</h3>
-        <p className="text-sm text-gray-500">Показываем сохраненные данные. Некоторые функции могут быть недоступны.</p>
+        <h3 className="text-lg font-bold mb-2">{t('offline.title')}</h3>
+        <p className="text-sm text-gray-500">{t('offline.description')}</p>
       </div>
     )
   }
-  
+
+  const FILTER_CHIPS: HomeFilterChip[] = [
+    { key: 'sort', label: '', icon: 'arrows' },
+    { key: 'new_places', label: t('home.filterNew') },
+    { key: 'popular', label: t('home.filterPopular') },
+    { key: 'top_rated', label: t('home.filterTopRated') },
+    { key: 'promo', label: t('home.filterPromo') },
+    { key: 'nearby', label: t('home.filterNearby') },
+    { key: 'available', label: t('home.filterAvailable') },
+  ]
+
+  const FEED_TITLES: Record<FeedFilterKey, string> = {
+    new_places: t('home.filterNew'),
+    popular: t('home.filterPopular'),
+    top_rated: t('home.filterTopRated'),
+  }
+
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['new_places']))
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
@@ -272,7 +274,7 @@ export default function HomePage() {
           type: 'category',
           id: `cat-${cat.key}`,
           name: cat.label,
-          meta: 'Категория',
+          meta: t('categories.category'),
           iconSrc: cat.icon,
         })
       }
@@ -515,7 +517,7 @@ export default function HomePage() {
         <header className={styles.blueHeader}>
           <div className={styles.logoBlock}>
             <img src="/logo.svg" alt="Yookie" className={`${styles.logoImage} ${styles.logoWhite}`} />
-            <span className={`${styles.logoSub} ${styles.logoSubWhite}`}>Маркетплейс оффлайн услуг</span>
+            <span className={`${styles.logoSub} ${styles.logoSubWhite}`}>{t('home.subtitle')}</span>
           </div>
           <button className={styles.headerBtnBlue} onClick={() => navigate('/favorites')} aria-label="Избранное">
             <HeartIconLarge />
@@ -543,7 +545,7 @@ export default function HomePage() {
                 />
                 {!searchQuery && !searchFocused && (
                   <div className={styles.searchPlaceholderOverlay}>
-                    <span className={styles.searchPlaceholderStatic}>{TYPING_PLACEHOLDER}</span>
+                    <span className={styles.searchPlaceholderStatic}>{t('home.searchPlaceholder')}</span>
                     <span className={styles.searchPlaceholderTyped}><TypingPlaceholder /></span>
                   </div>
                 )}
@@ -570,12 +572,12 @@ export default function HomePage() {
                   </div>
                 ) : searchResults.length > 0 ? (
                   <>
-                    {catResults.length > 0 && <><div className={styles.searchDropdownHeader}>Категории</div>{catResults.map(renderSearchItem)}</>}
-                    {bizResults.length > 0 && <><div className={styles.searchDropdownHeader}>Заведения</div>{bizResults.map(renderSearchItem)}</>}
-                    {masterResults.length > 0 && <><div className={styles.searchDropdownHeader}>Мастера</div>{masterResults.map(renderSearchItem)}</>}
+                    {catResults.length > 0 && <><div className={styles.searchDropdownHeader}>{t('home.searchCategories')}</div>{catResults.map(renderSearchItem)}</>}
+                    {bizResults.length > 0 && <><div className={styles.searchDropdownHeader}>{t('home.searchBusinesses')}</div>{bizResults.map(renderSearchItem)}</>}
+                    {masterResults.length > 0 && <><div className={styles.searchDropdownHeader}>{t('home.searchMasters')}</div>{masterResults.map(renderSearchItem)}</>}
                   </>
                 ) : (
-                  <div className={styles.searchEmpty}>Ничего не найдено</div>
+                  <div className={styles.searchEmpty}>{t('home.noResults')}</div>
                 )}
               </div>
             )}
@@ -608,7 +610,7 @@ export default function HomePage() {
               <SectionHeader
                 title={CATEGORIES.find(c => c.key === selectedCategory)?.label || ''}
                 onMoreClick={() => setSelectedCategory(null)}
-                moreLabel="Сбросить"
+                moreLabel={t('home.resetFilter')}
               />
               {isLoading || !data ? (
                 <div className={styles.skeleton}><Skeleton variant="rect" height={246} /></div>
@@ -620,7 +622,7 @@ export default function HomePage() {
                 ]
 
                 if (allCatItems.length === 0) {
-                  return <p className={styles.emptySection}>Ничего не найдено в этой категории</p>
+                  return <p className={styles.emptySection}>{t('home.noResults')}</p>
                 }
 
                 return (
@@ -674,7 +676,7 @@ export default function HomePage() {
               {/* Вы посещали — horizontal carousel */}
               {hasVisitedData && (
                 <section className={styles.sectionInner}>
-                  <SectionHeader title="Вы посещали" onMoreClick={() => navigate('/my-bookings')} />
+                  <SectionHeader title={t('home.sectionVisited')} onMoreClick={() => navigate('/my-bookings')} />
                   {effectiveVisitedLoading ? (
                     <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>
                   ) : (
@@ -693,7 +695,7 @@ export default function HomePage() {
 
               {/* Рядом с вами */}
               <section className={styles.sectionInner}>
-                <SectionHeader title="Рядом с вами" onMoreClick={() => navigate('/search')} />
+                <SectionHeader title={t('home.sectionNearby')} onMoreClick={() => navigate('/search')} />
                 {isLoading || !data ? (
                   <div className={styles.skeleton}><Skeleton variant="rect" height={104} /></div>
                 ) : (
@@ -707,7 +709,7 @@ export default function HomePage() {
 
               {/* Доступные специалисты — uses unified MasterCard */}
               <section className={styles.sectionInner}>
-                <SectionHeader title="Доступные специалисты" onMoreClick={() => navigate('/search')} />
+                <SectionHeader title={t('home.sectionMasters')} onMoreClick={() => navigate('/search')} />
                 {isLoading || !data ? (
                   <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>
                 ) : (
@@ -736,7 +738,7 @@ export default function HomePage() {
                     />
                   ))}
                   {feedItems.length === 0 && !feedLoading && (
-                    <p className={styles.emptySection}>Нет заведений</p>
+                    <p className={styles.emptySection}>{t('home.noBusinesses')}</p>
                   )}
                   {feedLoading && (
                     <div className={styles.skeleton}><Skeleton variant="rect" height={120} /></div>

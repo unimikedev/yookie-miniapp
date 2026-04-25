@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listBookings, listStaff, listServices, listClients, createBooking, updateBookingStatus, rescheduleBooking } from '@/pro/api';
@@ -11,14 +12,6 @@ import { ExportButton } from './ExportButton';
 import styles from './BookingsBoardPage.module.css';
 
 type ViewMode = 'timeline' | 'list';
-
-const STATUS_LABELS: Record<string, string> = {
-  pending:   'Ожидает',
-  confirmed: 'Подтверждена',
-  cancelled: 'Отменена',
-  completed: 'Завершена',
-  no_show:   'Не явился',
-};
 
 const START_HOUR = 8;
 const END_HOUR   = 21;
@@ -54,6 +47,7 @@ function isValidPhone(phone: string): boolean {
 
 export default function BookingsBoardPage() {
   const { merchantId, role, masterId: myMasterId } = useMerchantStore();
+  const { t } = useTranslation();
   const [bookings, setBookings]           = useState<Booking[]>([]);
   const [staff, setStaff]                 = useState<Master[]>([]);
   const [services, setServices]           = useState<Service[]>([]);
@@ -142,7 +136,7 @@ export default function BookingsBoardPage() {
         startsAt: newStart.toISOString(),
         masterId: staffId !== booking.master_id ? staffId : undefined,
       });
-      showToast('Запись перенесена');
+      showToast(t('pro.bookings.toastRescheduled'));
     } catch {
       setBookings(prev);
     }
@@ -157,10 +151,10 @@ export default function BookingsBoardPage() {
 
   const handleCreateBooking = async () => {
     if (!merchantId || !slotTarget) return;
-    if (!form.clientName.trim())  { setSaveError('Введите имя клиента'); return; }
-    if (!form.clientPhone.trim()) { setSaveError('Введите телефон'); return; }
-    if (!isValidPhone(form.clientPhone)) { setSaveError('Формат: +998 90 123-45-67'); return; }
-    if (!form.serviceId)          { setSaveError('Выберите услугу'); return; }
+    if (!form.clientName.trim())  { setSaveError(t('pro.bookings.errorName')); return; }
+    if (!form.clientPhone.trim()) { setSaveError(t('pro.bookings.errorPhone')); return; }
+    if (!isValidPhone(form.clientPhone)) { setSaveError(t('pro.bookings.errorPhoneFormat')); return; }
+    if (!form.serviceId)          { setSaveError(t('pro.bookings.errorService')); return; }
 
     setSaving(true); setSaveError(null);
     try {
@@ -176,9 +170,9 @@ export default function BookingsBoardPage() {
       });
       setSlotTarget(null);
       load();
-      showToast('Запись создана');
+      showToast(t('pro.bookings.toastCreated'));
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Ошибка');
+      setSaveError(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setSaving(false);
     }
@@ -192,14 +186,14 @@ export default function BookingsBoardPage() {
       setSelectedBooking(null);
       load();
       const msgs: Partial<Record<BookingStatus, string>> = {
-        confirmed: 'Запись подтверждена',
-        cancelled: 'Запись отменена',
-        completed: 'Визит завершён',
-        no_show:   'Клиент не явился',
+        confirmed: t('pro.bookings.toastConfirmed'),
+        cancelled: t('pro.bookings.toastCancelled'),
+        completed: t('pro.bookings.toastCompleted'),
+        no_show:   t('pro.bookings.toastNoShow'),
       };
       if (msgs[status]) showToast(msgs[status]!);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Ошибка');
+      setActionError(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -238,14 +232,14 @@ export default function BookingsBoardPage() {
   );
 
   return (
-    <ProLayout title="Записи" actions={actions}>
+    <ProLayout title={t('pro.bookings.title')} actions={actions}>
 
       {/* Date navigation */}
       <div className={styles.dateNav}>
         <button className={styles.dateArrow} onClick={prevDay}>‹</button>
         <div className={styles.dateLabelWrap}>
           <span className={styles.dateLabel} style={{ textTransform: 'capitalize' }}>{dateLabel}</span>
-          {!isToday && <button className={styles.todayBtn} onClick={goToday}>Сегодня</button>}
+          {!isToday && <button className={styles.todayBtn} onClick={goToday}>{t('common.today')}</button>}
         </div>
         <button className={styles.dateArrow} onClick={nextDay}>›</button>
       </div>
@@ -270,16 +264,16 @@ export default function BookingsBoardPage() {
       {/* Stats bar */}
       {dayCounts.total > 0 && (
         <div className={styles.statsBar}>
-          <span className={styles.statItem}><span className={styles.statDot} style={{ background: 'var(--color-accent)' }} />{dayCounts.total} {dayCounts.total === 1 ? 'запись' : 'записей'}</span>
-          {dayCounts.pending > 0   && <span className={styles.statItem}><span className={styles.statDot} style={{ background: '#FBBF24' }} />{dayCounts.pending} ожидает</span>}
-          {dayCounts.confirmed > 0 && <span className={styles.statItem}><span className={styles.statDot} style={{ background: '#34D399' }} />{dayCounts.confirmed} подтверждено</span>}
+          <span className={styles.statItem}><span className={styles.statDot} style={{ background: 'var(--color-accent)' }} />{t('pro.bookings.totalCount', { count: dayCounts.total })}</span>
+          {dayCounts.pending > 0   && <span className={styles.statItem}><span className={styles.statDot} style={{ background: '#FBBF24' }} />{dayCounts.pending} {t('pro.bookings.statPending')}</span>}
+          {dayCounts.confirmed > 0 && <span className={styles.statItem}><span className={styles.statDot} style={{ background: '#34D399' }} />{dayCounts.confirmed} {t('pro.bookings.statConfirmed')}</span>}
         </div>
       )}
 
       {/* Master filter chips — hidden for staff (they only see their own column) */}
       {role !== 'staff' && staff.length > 1 && (
         <div className={styles.masterFilter}>
-          <button className={`${styles.masterChip} ${selectedMasterId === null ? styles.masterChipActive : ''}`} onClick={() => setSelectedMasterId(null)}>Все</button>
+          <button className={`${styles.masterChip} ${selectedMasterId === null ? styles.masterChipActive : ''}`} onClick={() => setSelectedMasterId(null)}>{t('common.all')}</button>
           {staff.map(s => (
             <button
               key={s.id}
@@ -313,13 +307,13 @@ export default function BookingsBoardPage() {
       {toast && <Toast key={toast.key} message={toast.msg} onDone={() => setToast(null)} />}
 
       {/* New booking sheet */}
-      <BottomSheet open={slotTarget !== null} onClose={() => setSlotTarget(null)} title="Новая запись">
+      <BottomSheet open={slotTarget !== null} onClose={() => setSlotTarget(null)} title={t('pro.bookings.newBookingTitle')}>
         {slotTarget && (
           <div className={styles.bookingForm}>
             <p className={styles.bookingFormMeta}>
               {String(slotTarget.hour).padStart(2, '0')}:{String(slotTarget.minute).padStart(2, '0')} · {slotTarget.staffName}
             </p>
-            <input className={styles.formInput} placeholder="Имя клиента" value={form.clientName}
+            <input className={styles.formInput} placeholder={t('pro.bookings.formClientName')} value={form.clientName}
               onChange={e => setForm(f => ({ ...f, clientName: e.target.value }))} autoComplete="off" />
             <input className={styles.formInput} type="tel" placeholder="+998 90 000 00 00" value={form.clientPhone}
               onChange={e => setForm(f => ({ ...f, clientPhone: e.target.value }))} maxLength={17} />
@@ -330,37 +324,39 @@ export default function BookingsBoardPage() {
               </button>
             )}
 
-            <p className={styles.servicePickerLabel}>Услуга</p>
+            <p className={styles.servicePickerLabel}>{t('pro.bookings.servicePickerLabel')}</p>
             <div className={styles.servicePickerList}>
-              {services.length === 0 && <p className={styles.servicePickerEmpty}>Нет услуг — добавьте в разделе «Услуги»</p>}
+              {services.length === 0 && <p className={styles.servicePickerEmpty}>{t('pro.bookings.noServicesHint')}</p>}
               {services.map(s => (
                 <button key={s.id} type="button"
                   className={`${styles.serviceOption} ${form.serviceId === s.id ? styles.serviceOptionSelected : ''}`}
                   onClick={() => setForm(f => ({ ...f, serviceId: s.id }))}>
                   <span className={styles.serviceOptionName}>{s.name}</span>
-                  <span className={styles.serviceOptionMeta}>{s.duration_min} мин · {s.price.toLocaleString('ru')} сўм</span>
+                  <span className={styles.serviceOptionMeta}>{s.duration_min} {t('common.min')} · {s.price.toLocaleString('ru')} {t('common.currency')}</span>
                 </button>
               ))}
             </div>
 
-            <textarea className={styles.formInput} placeholder="Заметки (необязательно)" rows={2}
+            <textarea className={styles.formInput} placeholder={t('pro.bookings.notesPlaceholder')} rows={2}
               value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
             {saveError && <p className={styles.formError}>{saveError}</p>}
             <Button fullWidth loading={saving}
               disabled={!form.clientName.trim() || !form.clientPhone.trim() || !form.serviceId}
-              onClick={handleCreateBooking}>Записать</Button>
+              onClick={handleCreateBooking}>{t('pro.bookings.confirmBookingBtn')}</Button>
           </div>
         )}
       </BottomSheet>
 
       {/* Booking detail sheet */}
-      <BottomSheet open={selectedBooking !== null} onClose={() => { setSelectedBooking(null); setActionError(null); }} title="Запись">
+      <BottomSheet open={selectedBooking !== null} onClose={() => { setSelectedBooking(null); setActionError(null); }} title={t('pro.bookings.bookingDetailTitle')}>
         {selectedBooking && (
           <div className={styles.bookingDetail}>
             <div className={styles.detailHeader}>
               <div className={styles.detailTime}>{fmt(selectedBooking.starts_at)} — {fmt(selectedBooking.ends_at)}</div>
               <span className={`${styles.detailStatusBadge} ${styles[`badge-${selectedBooking.status}`]}`}>
-                {selectedBooking.status === 'pending' && selectedBooking.rescheduled ? '↻ Перенос' : STATUS_LABELS[selectedBooking.status]}
+                {selectedBooking.status === 'pending' && selectedBooking.rescheduled
+                  ? t('pro.bookings.badgeRescheduled')
+                  : ({ pending: t('pro.bookings.badgePending'), confirmed: t('pro.bookings.badgeConfirmed'), cancelled: t('pro.bookings.badgeCancelled'), completed: t('pro.bookings.badgeCompleted'), no_show: t('pro.bookings.badgeNoShow') } as Record<string, string>)[selectedBooking.status] ?? selectedBooking.status}
               </span>
             </div>
 
@@ -382,30 +378,30 @@ export default function BookingsBoardPage() {
                 <div className={styles.detailCardContent}>
                   <span className={styles.detailCardMain}>{selectedBooking.services?.name ?? '—'}</span>
                   {selectedBooking.services?.price && (
-                    <span className={styles.detailCardSub}>{Number(selectedBooking.services.price).toLocaleString('ru')} сўм</span>
+                    <span className={styles.detailCardSub}>{Number(selectedBooking.services.price).toLocaleString('ru')} {t('common.currency')}</span>
                   )}
                 </div>
               </div>
             </div>
 
             {selectedBooking.status === 'pending' && selectedBooking.rescheduled && (
-              <p className={styles.rescheduleHint}>Клиент запросил перенос. Подтвердите новое время или отмените.</p>
+              <p className={styles.rescheduleHint}>{t('pro.bookings.rescheduleHint')}</p>
             )}
             {selectedBooking.notes && <div className={styles.detailNotes}>💬 {selectedBooking.notes}</div>}
             {actionError && <p className={styles.formError}>{actionError}</p>}
 
             <div className={styles.detailActions}>
               {selectedBooking.status === 'pending' && (
-                <Button fullWidth loading={actionLoading} onClick={() => handleBookingAction('confirmed')}>✓ Подтвердить</Button>
+                <Button fullWidth loading={actionLoading} onClick={() => handleBookingAction('confirmed')}>{t('pro.bookings.confirmActionBtn')}</Button>
               )}
               {selectedBooking.status === 'confirmed' && (
                 <div className={styles.quickStatusRow}>
-                  <button className={styles.arrivedBtn} disabled={actionLoading} onClick={() => handleBookingAction('completed')}>✓ Пришёл</button>
-                  <button className={styles.noShowActionBtn} disabled={actionLoading} onClick={() => handleBookingAction('no_show')}>✗ Не явился</button>
+                  <button className={styles.arrivedBtn} disabled={actionLoading} onClick={() => handleBookingAction('completed')}>{t('pro.bookings.arrivedBtn')}</button>
+                  <button className={styles.noShowActionBtn} disabled={actionLoading} onClick={() => handleBookingAction('no_show')}>{t('pro.bookings.noShowActionBtn')}</button>
                 </div>
               )}
               {(selectedBooking.status === 'pending' || selectedBooking.status === 'confirmed') && (
-                <button className={styles.cancelActionBtn} disabled={actionLoading} onClick={() => handleBookingAction('cancelled')}>Отменить запись</button>
+                <button className={styles.cancelActionBtn} disabled={actionLoading} onClick={() => handleBookingAction('cancelled')}>{t('pro.bookings.cancelActionBtn')}</button>
               )}
             </div>
           </div>
@@ -432,6 +428,7 @@ interface TimelineProps {
 }
 
 function TimelineView({ hours, staff, bookings, isToday, dragging, dragOverStaffId, onDragStart, onDragOverStaff, onDrop, onSlotClick, onBookingClick }: TimelineProps) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [nowMin, setNowMin] = useState(() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); });
 
@@ -463,7 +460,7 @@ function TimelineView({ hours, staff, bookings, isToday, dragging, dragOverStaff
     return (
       <div className={styles.emptyDay}>
         <span className={styles.emptyDayIcon}>👤</span>
-        <p className={styles.emptyDayText}>Добавьте мастеров чтобы вести расписание</p>
+        <p className={styles.emptyDayText}>{t('pro.bookings.noStaffTimeline')}</p>
       </div>
     );
   }
@@ -505,7 +502,7 @@ function TimelineView({ hours, staff, bookings, isToday, dragging, dragOverStaff
                     <div className={styles.halfHourLine} style={{ top: SLOT_H / 2 }} />
                   </div>
                 ))}
-                <div className={styles.colHint}>+ Запись</div>
+                <div className={styles.colHint}>{t('pro.bookings.addHint')}</div>
                 {colBookings.map(b => (
                   <BookingCard key={b.id} booking={b} isDragging={dragging === b.id}
                     onDragStart={() => onDragStart(b.id)} onClick={() => onBookingClick(b)} />
@@ -527,6 +524,7 @@ function TimelineView({ hours, staff, bookings, isToday, dragging, dragOverStaff
 
 /* ── Booking Card ─────────────────────────────────────────────────────────── */
 function BookingCard({ booking, isDragging, onDragStart, onClick }: { booking: Booking; isDragging: boolean; onDragStart: () => void; onClick: () => void }) {
+  const { t } = useTranslation();
   const startMin    = toMin(booking.starts_at);
   const endMin      = toMin(booking.ends_at);
   const durationMin = endMin - startMin;
@@ -546,13 +544,14 @@ function BookingCard({ booking, isDragging, onDragStart, onClick }: { booking: B
     >
       {!isTiny    && <span className={styles.cardTime}>{fmt(booking.starts_at)}</span>}
       {!isCompact && <span className={styles.cardClient}>{booking.clients?.name ?? '—'}</span>}
-      {!isCompact && <span className={styles.cardService}>{isReschedule ? '↻ Перенос' : (booking.services?.name ?? '—')}</span>}
+      {!isCompact && <span className={styles.cardService}>{isReschedule ? t('pro.bookings.badgeRescheduled') : (booking.services?.name ?? '—')}</span>}
     </div>
   );
 }
 
 /* ── Agenda list view ─────────────────────────────────────────────────────── */
 function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; staff: Master[]; onBookingClick: (b: Booking) => void }) {
+  const { t } = useTranslation();
   const sorted   = [...bookings].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
   const staffMap = new Map(staff.map(s => [s.id, s.name]));
 
@@ -560,7 +559,7 @@ function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; st
     return (
       <div className={styles.emptyDay}>
         <span className={styles.emptyDayIcon}>📋</span>
-        <p className={styles.emptyDayText}>Нет записей на этот день</p>
+        <p className={styles.emptyDayText}>{t('pro.bookings.noDayBookings')}</p>
       </div>
     );
   }
@@ -579,7 +578,7 @@ function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; st
             </div>
             <div className={styles.agendaInfo}>
               <span className={styles.agendaClient}>{b.clients?.name ?? '—'}</span>
-              <span className={styles.agendaService}>{isReschedule ? '↻ Запрос на перенос' : (b.services?.name ?? '—')}</span>
+              <span className={styles.agendaService}>{isReschedule ? t('pro.bookings.rescheduledRequest') : (b.services?.name ?? '—')}</span>
               <span className={styles.agendaMaster}>{staffMap.get(b.master_id) ?? ''}</span>
             </div>
             <span className={`${styles.agendaStatusDot} ${styles[`dot-${b.status}`]}`} />

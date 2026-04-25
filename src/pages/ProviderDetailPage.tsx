@@ -10,6 +10,7 @@
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Skeleton, EmptyState, Badge, Rating } from '@/shared/ui'
 import {
   ServiceCard,
@@ -35,7 +36,7 @@ import { formatMasterName } from '@/lib/utils/name'
 import { toLocalYMD } from '@/lib/utils/date'
 import styles from './ProviderDetailPage.module.css'
 
-const TABS = ['Услуги', 'Мастера', 'Отзывы', 'О нас']
+const TAB_KEYS = ['provider.tabServices', 'provider.tabMasters', 'provider.tabReviews', 'provider.tabAbout']
 
 interface ReviewItem {
   id: string
@@ -57,6 +58,7 @@ function formatDate(dateStr: string): string {
 export default function ProviderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [activeTab, setActiveTab] = useState(0)
   const [reviews, setReviews] = useState<ReviewItem[]>([])
@@ -261,20 +263,19 @@ export default function ProviderDetailPage() {
   const handleConfirmBooking = async () => {
     // Validate name (no digits)
     if (!clientName.trim()) {
-      setBookingError('Введите ваше имя')
+      setBookingError(t('provider.errorName'))
       return
     }
     if (/\d/.test(clientName)) {
-      setBookingError('Имя не должно содержать цифр')
+      setBookingError(t('provider.errorNameDigits'))
       return
     }
-    // Validate phone
     if (!effectivePhone || effectivePhone.length < 10) {
-      setBookingError('Введите номер телефона')
+      setBookingError(t('provider.errorPhone'))
       return
     }
     if (!authStore.isAuthenticated && !isPhoneComplete(clientPhone)) {
-      setBookingError('Введите полный номер телефона (+998 XX XXX-XX-XX)')
+      setBookingError(t('provider.errorPhoneFull'))
       return
     }
     if (!business || !selectedSlot) return
@@ -301,7 +302,7 @@ export default function ProviderDetailPage() {
         const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[]
         if (failures.length > 0) {
           const err = failures[0].reason
-          throw err instanceof Error ? err : new Error('Ошибка при создании одной из записей')
+          throw err instanceof Error ? err : new Error(t('provider.errorBooking'))
         }
       } else {
         const svc = selectedServices[0]
@@ -317,7 +318,7 @@ export default function ProviderDetailPage() {
 
       navigate('/my-bookings')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Ошибка при создании записи'
+      const message = err instanceof Error ? err.message : t('provider.errorBookingGeneral')
       setBookingError(message)
       if (/занято|Conflict|409/i.test(message)) {
         setSelectedSlot(null)
@@ -456,7 +457,7 @@ export default function ProviderDetailPage() {
     : null
   const soloMasterPhotos = soloMasterPhoto ? [soloMasterPhoto] : []
 
-  const tabs = TABS
+  const tabs = TAB_KEYS.map(k => t(k))
 
   // ── Error state ─────────────────────────────────────────────────
   if (error) {
@@ -471,11 +472,11 @@ export default function ProviderDetailPage() {
               <circle cx="24" cy="34" r="1.5" fill="#6B7280" />
             </svg>
           </div>
-          <h2 className={styles.errorTitle}>Не удалось загрузить</h2>
-          <p className={styles.errorDescription}>Информация недоступна. Попробуйте позже.</p>
+          <h2 className={styles.errorTitle}>{t('provider.loadFailed')}</h2>
+          <p className={styles.errorDescription}>{t('provider.loadFailedDesc')}</p>
           <div className={styles.errorActions}>
-            <button className={styles.errorPrimaryBtn} onClick={() => navigate('/')}>На главную</button>
-            <button className={styles.errorSecondaryBtn} onClick={() => navigate(-1)}>Назад</button>
+            <button className={styles.errorPrimaryBtn} onClick={() => navigate('/')}>{t('provider.goHome')}</button>
+            <button className={styles.errorSecondaryBtn} onClick={() => navigate(-1)}>{t('common.back')}</button>
           </div>
         </div>
       </div>
@@ -532,10 +533,10 @@ export default function ProviderDetailPage() {
                     </svg>
                   </span>
                 ) : (
-                  <span className={styles.infoRatingNew}>Новое</span>
+                  <span className={styles.infoRatingNew}>{t('common.new')}</span>
                 )}
                 {(business.rating != null && Number(business.rating) > 0) && (
-                  <span className={styles.infoRatingCount}> · {(business as any).review_count ?? 0} отзывов</span>
+                  <span className={styles.infoRatingCount}> · {t('common.reviews', { count: (business as any).review_count ?? 0 })}</span>
                 )}
                 <span className={styles.infoDot}> · </span>
                 {!isIndividual && business.category && (
@@ -562,7 +563,7 @@ export default function ProviderDetailPage() {
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                   <path d="M7 0C3.13 0 0 3.13 0 7C0 12.25 7 14 7 14S14 12.25 14 7C14 3.13 10.87 0 7 0ZM7 9.5C5.62 9.5 4.5 8.38 4.5 7C4.5 5.62 5.62 4.5 7 4.5C8.38 4.5 9.5 5.62 9.5 7C9.5 8.38 8.38 9.5 7 9.5Z" fill="currentColor"/>
                 </svg>
-                На карте
+                {t('provider.showOnMap')}
               </button>
             </div>
           )}
@@ -572,7 +573,7 @@ export default function ProviderDetailPage() {
                 <circle cx="7" cy="7" r="6" stroke="#6B7280" strokeWidth="1.4" />
                 <path d="M7 3.5V7L9.5 9" stroke="#6B7280" strokeWidth="1.4" strokeLinecap="round" />
               </svg>
-              <span>Сегодня: {todayHours}</span>
+              <span>{t('provider.workingToday', { hours: todayHours })}</span>
             </div>
           )}
           {isIndividual && soloMaster?.bio && (
@@ -596,13 +597,13 @@ export default function ProviderDetailPage() {
             {/* Services list */}
             <section className={styles.section} ref={servicesRef}>
               <div className={styles.sectionHead}>
-                <h2 className={styles.sectionTitle}>Услуги</h2>
+                <h2 className={styles.sectionTitle}>{t('provider.sectionServices')}</h2>
               </div>
 
               {/* Active master filter indicator — set from Мастера tab */}
               {masterFilter && (
                 <div className={styles.masterActiveFilterBar}>
-                  <span>Мастер: {formatMasterName(masters.find(m => m.id === masterFilter)?.name ?? '')}</span>
+                  <span>{t('provider.masterFilter', { name: formatMasterName(masters.find(m => m.id === masterFilter)?.name ?? '') })}</span>
                   <button className={styles.masterActiveFilterClear} onClick={() => setMasterFilter(null)}>✕</button>
                 </div>
               )}
@@ -614,7 +615,7 @@ export default function ProviderDetailPage() {
                     className={`${styles.serviceCatTab} ${activeServiceCat === null ? styles.serviceCatTabActive : ''}`}
                     onClick={() => setActiveServiceCat(null)}
                   >
-                    Все
+                    {t('provider.allCategories')}
                   </button>
                   {serviceCategories.map(cat => (
                     <button
@@ -633,7 +634,7 @@ export default function ProviderDetailPage() {
                 <div className={styles.serviceSearchWrap}>
                   <input
                     className={styles.serviceSearchInput}
-                    placeholder="Поиск услуги…"
+                    placeholder={t('provider.searchService')}
                     value={serviceSearch}
                     onChange={e => setServiceSearch(e.target.value)}
                   />
@@ -678,9 +679,9 @@ export default function ProviderDetailPage() {
                   })}
                 </div>
               ) : services.length === 0 ? (
-                <EmptyState title="Услуги не найдены" description="Услуги ещё не добавлены" compact />
+                <EmptyState title={t('provider.servicesNotAdded')} compact />
               ) : (
-                <EmptyState title="Ничего не найдено" description="Попробуйте другой запрос" compact />
+                <EmptyState title={t('provider.servicesNotFound')} compact />
               )}
             </section>
 
@@ -688,7 +689,7 @@ export default function ProviderDetailPage() {
             {hasServices && (
               <div ref={timeSlotsRef}>
                 <section className={styles.section} ref={dateRef}>
-                  <h2 className={styles.sectionTitle}>Выберите дату</h2>
+                  <h2 className={styles.sectionTitle}>{t('provider.selectDate')}</h2>
                   <div className={styles.dateRow}>
                     {Array.from({ length: 7 }).map((_, i) => {
                       const d = new Date()
@@ -712,11 +713,11 @@ export default function ProviderDetailPage() {
                 </section>
 
                 <section className={styles.section}>
-                  <h2 className={styles.sectionTitle}>Выберите время</h2>
+                  <h2 className={styles.sectionTitle}>{t('provider.selectTime')}</h2>
                   {!activeMasterId ? (
                     <EmptyState
-                      title="Выберите мастера"
-                      description="Выберите специалиста для каждой услуги"
+                      title={t('provider.selectMaster')}
+                      description={t('provider.selectMasterDesc')}
                       compact
                     />
                   ) : slotsLoading ? (
@@ -745,8 +746,8 @@ export default function ProviderDetailPage() {
                     </div>
                   ) : (
                     <EmptyState
-                      title="Нет времени"
-                      description="На эту дату нет свободного времени"
+                      title={t('provider.noSlots')}
+                      description={t('provider.noSlotsDesc')}
                       compact
                     />
                   )}
@@ -757,13 +758,13 @@ export default function ProviderDetailPage() {
             {/* Confirmation */}
             {canBook && (
               <div ref={confirmationRef} className={styles.confirmationSection}>
-                <h2 className={styles.confirmationTitle}>Подтверждение записи</h2>
+                <h2 className={styles.confirmationTitle}>{t('provider.confirmation')}</h2>
 
                 {/* Client info — 16px side padding */}
                 <div className={styles.confirmationForm}>
                   <input
                     className={styles.confirmationInput}
-                    placeholder="Ваше имя"
+                    placeholder={t('provider.yourName')}
                     value={clientName}
                     onChange={(e) => setClientName(stripDigits(e.target.value))}
                   />
@@ -789,7 +790,7 @@ export default function ProviderDetailPage() {
                           <div className={styles.confirmationServiceName}>{s.service.name}</div>
                           <div className={styles.confirmationServiceMaster}>{masterName}</div>
                         </div>
-                        <div className={styles.confirmationServicePrice}>{s.service.price.toLocaleString('ru')} сўм</div>
+                        <div className={styles.confirmationServicePrice}>{s.service.price.toLocaleString('ru')} {t('common.currency')}</div>
                       </div>
                     )
                   })}
@@ -799,9 +800,9 @@ export default function ProviderDetailPage() {
                     </span>
                   </div>
                   <div className={styles.confirmationTotal}>
-                    <span>Итого:</span>
+                    <span>{t('provider.total')}</span>
                     <span className={styles.confirmationTotalPrice}>
-                      {selectedServices.reduce((sum, s) => sum + s.service.price, 0).toLocaleString('ru')} сўм
+                      {selectedServices.reduce((sum, s) => sum + s.service.price, 0).toLocaleString('ru')} {t('common.currency')}
                     </span>
                   </div>
                 </div>
@@ -817,7 +818,7 @@ export default function ProviderDetailPage() {
         {activeTab === 1 && (
           <section className={styles.section}>
             <div className={styles.sectionHead}>
-              <h2 className={styles.sectionTitle}>Специалисты</h2>
+              <h2 className={styles.sectionTitle}>{t('provider.sectionSpecialists')}</h2>
             </div>
             {isLoading ? (
               <div className={styles.skeletonList}>
@@ -851,13 +852,13 @@ export default function ProviderDetailPage() {
                       className={styles.masterRowBtn}
                       onClick={() => { setMasterFilter(master.id); setActiveTab(0) }}
                     >
-                      Услуги
+                      {t('provider.services_btn')}
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <EmptyState title="Мастера не найдены" description="Специалисты ещё не добавлены" compact />
+              <EmptyState title={t('provider.mastersNotFound')} description={t('provider.mastersNotAdded')} compact />
             )}
           </section>
         )}
@@ -866,7 +867,7 @@ export default function ProviderDetailPage() {
         {activeTab === 2 && (
           <section className={`${styles.section} ${styles.reviewsSection}`}>
             <div className={styles.sectionHead}>
-              <h2 className={styles.sectionTitle}>Отзывы</h2>
+              <h2 className={styles.sectionTitle}>{t('provider.sectionReviews')}</h2>
             </div>
             {reviewsLoading ? (
               <div className={styles.skeletonList}>
@@ -885,7 +886,7 @@ export default function ProviderDetailPage() {
                 ))}
               </div>
             ) : (
-              <EmptyState title="Отзывов пока нет" description="Будьте первым, кто оставит отзыв" compact />
+              <EmptyState title={t('provider.noReviews')} description={t('provider.noReviewsDesc')} compact />
             )}
           </section>
         )}
@@ -893,23 +894,23 @@ export default function ProviderDetailPage() {
         {/* ── О нас tab (index 3) ──────────────────────────────── */}
         {activeTab === 3 && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>О нас</h2>
+            <h2 className={styles.sectionTitle}>{t('provider.sectionAbout')}</h2>
             <p className={styles.aboutText}>
-              {business?.description ?? 'Мы предлагаем широкий спектр beauty-услуг высочайшего качества. Наши мастера — профессионалы с многолетним опытом. Приходите и убедитесь сами!'}
+              {business?.description ?? t('provider.aboutFallback')}
             </p>
 
             <div className={styles.infoCardsRow}>
               {todayHours && (
                 <InfoCard
                   icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M10 5V10L13 13" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" /></svg>}
-                  label="Работает до"
+                  label={t('provider.workingUntil')}
                   value={todayHours.split('-')[1]?.trim()}
                 />
               )}
               <InfoCard
                 icon={<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#6BCEFF" strokeWidth="1.5" /><path d="M7 10L9 12L13 8" stroke="#6BCEFF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                label="Занятость"
-                value="Есть слоты"
+                label={t('provider.availability')}
+                value={t('common.online')}
               />
             </div>
 
@@ -935,16 +936,16 @@ export default function ProviderDetailPage() {
       <StickyCTA
         label={
           bookingLoading
-            ? 'Отправка...'
+            ? t('provider.ctaSending')
             : canBook
-              ? 'Записаться'
+              ? t('provider.ctaBook')
               : hasServices && allAssigned && !hasTime
-                ? 'Выбрать время'
+                ? t('provider.ctaSelectTime')
                 : hasServices && allAssigned && !selectedDate
-                  ? 'Выбрать дату'
+                  ? t('provider.ctaSelectDate')
                   : hasServices && !allAssigned
-                    ? 'Выбрать мастера'
-                    : 'Выбрать услугу'
+                    ? t('provider.ctaSelectMaster')
+                    : t('provider.ctaSelectService')
         }
         onClick={handleCTAClick}
         disabled={bookingLoading}

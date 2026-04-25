@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -11,20 +12,9 @@ import { useMerchantProfileValidation, getOnboardingSteps, type OnboardingStep }
 import type { Business, CategoryEnum } from '@/lib/api/types';
 import styles from './MerchantSettingsPage.module.css';
 
-const CATEGORIES: { value: CategoryEnum; label: string }[] = [
-  { value: 'hair', label: 'Волосы' },
-  { value: 'nail', label: 'Ногти' },
-  { value: 'brow_lash', label: 'Брови и ресницы' },
-  { value: 'makeup', label: 'Макияж' },
-  { value: 'spa_massage', label: 'СПА и массаж' },
-  { value: 'epilation', label: 'Эпиляция' },
-  { value: 'cosmetology', label: 'Косметология' },
-  { value: 'barber', label: 'Барбершоп' },
-  { value: 'tattoo', label: 'Тату' },
-  { value: 'piercing', label: 'Пирсинг' },
-  { value: 'yoga', label: 'Йога' },
-  { value: 'fitness', label: 'Фитнес' },
-  { value: 'other', label: 'Другое' },
+const CATEGORY_VALUES: CategoryEnum[] = [
+  'hair', 'nail', 'brow_lash', 'makeup', 'spa_massage', 'epilation',
+  'cosmetology', 'barber', 'tattoo', 'piercing', 'yoga', 'fitness', 'other',
 ];
 
 const CITY_COORDS: Record<string, [number, number]> = {
@@ -54,6 +44,7 @@ interface MapPickerProps {
 }
 
 function MapPickerOverlay({ initialCenter, onConfirm, onClose }: MapPickerProps) {
+  const { t } = useTranslation();
   const mapRef = useRef<HTMLDivElement>(null);
   const ymapRef = useRef<any>(null);
 
@@ -88,14 +79,14 @@ function MapPickerOverlay({ initialCenter, onConfirm, onClose }: MapPickerProps)
     <div className={styles.mapPickerOverlay}>
       <div className={styles.mapPickerTopBar}>
         <button className={styles.mapPickerClose} onClick={onClose}>✕</button>
-        <span className={styles.mapPickerTitle}>Поставьте метку</span>
+        <span className={styles.mapPickerTitle}>{t('pro.settings.mapPickerTitle')}</span>
         <div style={{ width: 32 }} />
       </div>
       <div ref={mapRef} className={styles.mapPickerMap} />
       <div className={styles.mapPickerPin}>📍</div>
-      <div className={styles.mapPickerHint}>Переместите карту, чтобы поставить метку в нужном месте</div>
+      <div className={styles.mapPickerHint}>{t('pro.settings.mapPickerHint')}</div>
       <button className={styles.mapPickerConfirmBtn} onClick={handleConfirm}>
-        Подтвердить место
+        {t('pro.settings.mapPickerConfirm')}
       </button>
     </div>
   );
@@ -113,6 +104,7 @@ interface UrlsEditorProps {
 }
 
 function InstagramPostUrlsEditor({ urls, input, onInputChange, onAdd, onRemove }: UrlsEditorProps) {
+  const { t } = useTranslation();
   const isValid = IG_POST_RE.test(input)
   const atMax = urls.length >= 6
 
@@ -126,7 +118,7 @@ function InstagramPostUrlsEditor({ urls, input, onInputChange, onAdd, onRemove }
   return (
     <div className={styles.fieldGroup}>
       <label className={styles.fieldLabel}>
-        Посты для галереи
+        {t('pro.settings.igPostsLabel')}
         <span className={styles.fieldBadge}>{urls.length}/6</span>
       </label>
 
@@ -164,7 +156,7 @@ function InstagramPostUrlsEditor({ urls, input, onInputChange, onAdd, onRemove }
       )}
 
       <p className={styles.fieldHint}>
-        Вставьте ссылку на публичный пост или Reel — клиенты увидят реальные работы
+        {t('pro.settings.igPostsHint')}
       </p>
     </div>
   )
@@ -173,6 +165,7 @@ function InstagramPostUrlsEditor({ urls, input, onInputChange, onAdd, onRemove }
 /* ── Join existing business ─────────────────────────────────── */
 function JoinBusiness({ onBack }: { onBack: () => void }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const merchantStore = useMerchantStore();
   const [input, setInput] = useState('');
   const [preview, setPreview] = useState<{ businessName: string; role: string; masterId?: string | null } | null>(null);
@@ -192,15 +185,15 @@ function JoinBusiness({ onBack }: { onBack: () => void }) {
   const handleLookup = async () => {
     setError(null);
     const tok = parseToken(input);
-    if (!tok) { setError('Вставьте ссылку-приглашение или код'); return; }
+    if (!tok) { setError(t('pro.onboarding.joinErrInvalidLink')); return; }
     setLookingUp(true);
     try {
       const info = await getInviteInfo(tok);
-      if (!info.valid) { setError(info.reason ?? 'Приглашение недействительно'); return; }
+      if (!info.valid) { setError(info.reason ?? t('pro.onboarding.joinErrInvalid')); return; }
       setToken(tok);
-      setPreview({ businessName: info.businessName ?? 'Бизнес', role: info.role ?? 'staff', masterId: info.masterId });
+      setPreview({ businessName: info.businessName ?? t('pro.onboarding.createTitle'), role: info.role ?? 'staff', masterId: info.masterId });
     } catch {
-      setError('Не удалось проверить приглашение');
+      setError(t('pro.onboarding.joinErrLookup'));
     } finally {
       setLookingUp(false);
     }
@@ -227,7 +220,7 @@ function JoinBusiness({ onBack }: { onBack: () => void }) {
       merchantStore.enterProMode();
       navigate('/pro', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось принять приглашение');
+      setError(err instanceof Error ? err.message : t('pro.onboarding.joinErrAccept'));
     } finally {
       setAccepting(false);
     }
@@ -236,35 +229,35 @@ function JoinBusiness({ onBack }: { onBack: () => void }) {
   return (
     <div className={styles.joinPage}>
       <div className={styles.joinHeader}>
-        <button className={styles.joinBackBtn} onClick={onBack} aria-label="Назад">
+        <button className={styles.joinBackBtn} onClick={onBack} aria-label={t('common.back')}>
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <path d="M12 4L6 10L12 16" />
           </svg>
         </button>
-        <span className={styles.joinHeaderTitle}>Подключиться к бизнесу</span>
+        <span className={styles.joinHeaderTitle}>{t('pro.onboarding.joinTitle')}</span>
       </div>
 
       <div className={styles.joinBody}>
         <p className={styles.joinInstruction}>
-          Вставьте ссылку-приглашение, которую вам отправил владелец бизнеса.
+          {t('pro.onboarding.joinInstruction')}
         </p>
 
         <div>
           <div className={styles.joinInputRow}>
             <input
               className={styles.joinInput}
-              placeholder="Ссылка или код приглашения"
+              placeholder={t('pro.onboarding.joinPlaceholder')}
               value={input}
               onChange={e => { setInput(e.target.value); setPreview(null); setToken(''); setError(null); }}
               onKeyDown={e => e.key === 'Enter' && !lookingUp && handleLookup()}
               autoFocus
             />
             <button className={styles.joinLookupBtn} onClick={handleLookup} disabled={lookingUp || !input.trim()}>
-              {lookingUp ? '…' : 'Найти'}
+              {lookingUp ? '…' : t('pro.onboarding.joinLookupBtn')}
             </button>
           </div>
           <p className={styles.joinHint}>
-            Формат: ссылка вида t.me/yookie_bot?startapp=inv_… или 32-значный код
+            {t('pro.onboarding.joinHint')}
           </p>
         </div>
 
@@ -274,10 +267,10 @@ function JoinBusiness({ onBack }: { onBack: () => void }) {
           <div className={styles.joinPreviewCard}>
             <span className={styles.joinPreviewBizName}>{preview.businessName}</span>
             <span className={styles.joinPreviewRole}>
-              {preview.role === 'staff' ? 'Сотрудник' : preview.role}
+              {preview.role === 'staff' ? t('pro.onboarding.joinRoleStaff') : preview.role}
             </span>
             <button className={styles.joinAcceptBtn} onClick={handleAccept} disabled={accepting}>
-              {accepting ? 'Подключение…' : 'Присоединиться'}
+              {accepting ? t('pro.onboarding.joinConnecting') : t('pro.onboarding.joinAcceptBtn')}
             </button>
           </div>
         )}
@@ -288,6 +281,7 @@ function JoinBusiness({ onBack }: { onBack: () => void }) {
 
 /* ── Onboarding choice screen ───────────────────────────────── */
 function OnboardingChoice({ onCreateNew, onJoin }: { onCreateNew: () => void; onJoin: () => void }) {
+  const { t } = useTranslation();
   return (
     <div className={styles.onboardingPage}>
       <div className={styles.onboardingLogo}>Y</div>
@@ -295,7 +289,7 @@ function OnboardingChoice({ onCreateNew, onJoin }: { onCreateNew: () => void; on
       <div className={styles.onboardingHeadline}>
         <h1 className={styles.onboardingTitle}>Yookie Pro</h1>
         <p className={styles.onboardingSubtitle}>
-          Управляйте записями, сотрудниками и расписанием
+          {t('pro.onboarding.subtitle')}
         </p>
       </div>
 
@@ -303,8 +297,8 @@ function OnboardingChoice({ onCreateNew, onJoin }: { onCreateNew: () => void; on
         <button className={`${styles.choiceCard} ${styles.choiceCardPrimary}`} onClick={onCreateNew}>
           <div className={styles.choiceIcon}>🏢</div>
           <div className={styles.choiceBody}>
-            <span className={styles.choiceTitle}>Создать бизнес</span>
-            <p className={styles.choiceDesc}>Зарегистрируйте своё заведение и начните принимать записи</p>
+            <span className={styles.choiceTitle}>{t('pro.onboarding.createTitle')}</span>
+            <p className={styles.choiceDesc}>{t('pro.onboarding.createDesc')}</p>
           </div>
           <span className={styles.choiceArrow}>›</span>
         </button>
@@ -312,8 +306,8 @@ function OnboardingChoice({ onCreateNew, onJoin }: { onCreateNew: () => void; on
         <button className={styles.choiceCard} onClick={onJoin}>
           <div className={styles.choiceIcon}>🔗</div>
           <div className={styles.choiceBody}>
-            <span className={styles.choiceTitle}>Подключиться к бизнесу</span>
-            <p className={styles.choiceDesc}>Есть ссылка-приглашение от владельца — войдите как сотрудник</p>
+            <span className={styles.choiceTitle}>{t('pro.onboarding.joinTitle')}</span>
+            <p className={styles.choiceDesc}>{t('pro.onboarding.joinDesc')}</p>
           </div>
           <span className={styles.choiceArrow}>›</span>
         </button>
@@ -325,6 +319,7 @@ function OnboardingChoice({ onCreateNew, onJoin }: { onCreateNew: () => void; on
 /* ── Wizard (new business) ──────────────────────────────────────── */
 function BusinessWizard({ onBack }: { onBack?: () => void }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { setMerchantId, setRole, setMasterId } = useMerchantStore();
 
   const TOTAL_STEPS = 4;
@@ -387,7 +382,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
     });
     if (!res.ok) {
       const json = await res.json().catch(() => ({}));
-      throw new Error((json as { message?: string }).message || 'Ошибка загрузки фото');
+      throw new Error((json as { message?: string }).message || t('pro.settings.uploadError'));
     }
     const json = await res.json() as { url: string };
     return json.url;
@@ -402,7 +397,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
       const url = await uploadImage(file);
       setPhotoUrls(prev => [...prev, url]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка загрузки');
+      setError(err instanceof Error ? err.message : t('pro.settings.uploadError'));
     } finally {
       setPhotoUploading(false);
       if (photoInputRef.current) photoInputRef.current.value = '';
@@ -439,7 +434,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
   const handleNext = () => {
     setError(null);
     if (step === 2) {
-      if (!name.trim()) { setError('Введите название заведения'); return; }
+      if (!name.trim()) { setError(t('pro.onboarding.wizardErrName')); return; }
     }
     setStep(s => s + 1);
   };
@@ -452,14 +447,14 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
 
   const handleCreate = async () => {
     if (creatingRef.current) return;
-    if (!name.trim()) { setStep(2); setError('Введите название'); return; }
+    if (!name.trim()) { setStep(2); setError(t('pro.onboarding.wizardErrName2')); return; }
     
     // Check validation before allowing business creation
     // Critical fields: name (checked above), services, staff, schedule
     // Photo is optional
     const hasCriticalIssues = validationErrors.filter(e => !e.includes('фото')).length > 0;
     if (hasCriticalIssues && createdBusinessId) {
-      setError('Заполните все обязательные поля: услуги, мастера и график работы');
+      setError(t('pro.onboarding.wizardErrCritical'));
       return;
     }
     
@@ -495,7 +490,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
       });
       if (!createRes.ok) {
         const errJson = await createRes.json().catch(() => ({}));
-        throw new Error((errJson as { message?: string }).message || 'Ошибка создания заведения');
+        throw new Error((errJson as { message?: string }).message || t('pro.onboarding.wizardErrCreateVenue'));
       }
       const { data: newBiz, token: newToken } = await createRes.json() as { data: Business; token?: string };
 
@@ -527,7 +522,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         );
         const staffFailed = staffResults.filter(r => r.status === 'rejected').length;
         if (staffFailed > 0) {
-          setError(`Заведение создано, но ${staffFailed} сотр. не сохранились. Добавьте их в настройках.`);
+          setError(t('pro.onboarding.wizardErrStaffPartial', { count: staffFailed }));
           setSaving(false);
           setMerchantId(newBiz.id);
           navigate('/pro');
@@ -537,7 +532,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
 
       navigate('/pro');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания');
+      setError(err instanceof Error ? err.message : t('pro.onboarding.wizardErrCreate'));
     } finally {
       setSaving(false);
       creatingRef.current = false;
@@ -556,7 +551,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
 
       {/* Wizard header with progress */}
       <div className={styles.wizardHeader}>
-        <button className={styles.wizardBackBtn} onClick={handleBack} aria-label="Назад">
+        <button className={styles.wizardBackBtn} onClick={handleBack} aria-label={t('common.back')}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M12 4L6 10L12 16" />
           </svg>
@@ -578,8 +573,8 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         {step === 1 && (
           <div className={styles.stepBody}>
             <div className={styles.stepHeadline}>
-              <h1 className={styles.stepTitle}>Как вы работаете?</h1>
-              <p className={styles.stepSubtitle}>Это определит структуру вашего кабинета</p>
+              <h1 className={styles.stepTitle}>{t('pro.onboarding.wizardStep1Title')}</h1>
+              <p className={styles.stepSubtitle}>{t('pro.onboarding.wizardStep1Subtitle')}</p>
             </div>
 
             <div className={styles.providerChoices}>
@@ -589,8 +584,8 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
               >
                 <span className={styles.providerIcon}>🙋</span>
                 <div className={styles.providerBody}>
-                  <span className={styles.providerTitle}>Я работаю один</span>
-                  <p className={styles.providerDesc}>Вы сами принимаете клиентов — расписание и услуги для вас лично</p>
+                  <span className={styles.providerTitle}>{t('pro.onboarding.wizardIndividualTitle')}</span>
+                  <p className={styles.providerDesc}>{t('pro.onboarding.wizardIndividualDesc')}</p>
                 </div>
                 {providerType === 'individual' && <span className={styles.providerCheck}>✓</span>}
               </button>
@@ -601,8 +596,8 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
               >
                 <span className={styles.providerIcon}>🏢</span>
                 <div className={styles.providerBody}>
-                  <span className={styles.providerTitle}>У меня команда</span>
-                  <p className={styles.providerDesc}>Несколько мастеров или сотрудников — у каждого своё расписание</p>
+                  <span className={styles.providerTitle}>{t('pro.onboarding.wizardTeamTitle')}</span>
+                  <p className={styles.providerDesc}>{t('pro.onboarding.wizardTeamDesc')}</p>
                 </div>
                 {providerType === 'business' && <span className={styles.providerCheck}>✓</span>}
               </button>
@@ -614,42 +609,42 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         {step === 2 && (
           <div className={styles.stepBody}>
             <div className={styles.stepHeadline}>
-              <h1 className={styles.stepTitle}>Расскажите о бизнесе</h1>
-              <p className={styles.stepSubtitle}>Эта информация поможет клиентам найти и выбрать вас</p>
+              <h1 className={styles.stepTitle}>{t('pro.onboarding.wizardStep2Title')}</h1>
+              <p className={styles.stepSubtitle}>{t('pro.onboarding.wizardStep2Subtitle')}</p>
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Название <span className={styles.required}>*</span></label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardNameLabel')} <span className={styles.required}>*</span></label>
               <input
                 className={styles.fieldInput}
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Студия красоты, барбершоп…"
+                placeholder={t('pro.onboarding.wizardNamePlaceholder')}
                 autoFocus
               />
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Категория <span className={styles.required}>*</span></label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardCategoryLabel')} <span className={styles.required}>*</span></label>
               <select
                 className={styles.fieldInput}
                 value={category}
                 onChange={e => setCategory(e.target.value as CategoryEnum)}
               >
-                {CATEGORIES.map(c => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                {CATEGORY_VALUES.map(v => (
+                  <option key={v} value={v}>{t(`categories.${v}`)}</option>
                 ))}
               </select>
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Описание</label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardDescLabel')}</label>
               <textarea
                 className={styles.fieldTextarea}
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 rows={3}
-                placeholder="Несколько слов о вашем заведении — стиль, атмосфера, особенности…"
+                placeholder={t('pro.onboarding.wizardDescPlaceholder')}
               />
             </div>
           </div>
@@ -659,12 +654,12 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         {step === 3 && (
           <div className={styles.stepBody}>
             <div className={styles.stepHeadline}>
-              <h1 className={styles.stepTitle}>Как вас найти?</h1>
-              <p className={styles.stepSubtitle}>Укажите адрес и контакты для связи с клиентами</p>
+              <h1 className={styles.stepTitle}>{t('pro.onboarding.wizardStep3Title')}</h1>
+              <p className={styles.stepSubtitle}>{t('pro.onboarding.wizardStep3Subtitle')}</p>
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Город</label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardCityLabel')}</label>
               <select
                 className={styles.fieldInput}
                 value={city}
@@ -677,32 +672,32 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Адрес</label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardAddressLabel')}</label>
               <div className={styles.addressRow}>
                 <input
                   className={`${styles.fieldInput} ${styles.addressInput}`}
                   value={address}
                   onChange={e => setAddress(e.target.value)}
-                  placeholder="ул. Примерная, 1"
+                  placeholder={t('pro.onboarding.wizardAddressPlaceholder')}
                 />
                 <button
                   className={styles.mapPinBtn}
                   type="button"
                   onClick={() => setShowMapPicker(true)}
-                  title="Поставить пин на карте"
+                  title={t('pro.settings.mapPickerTitle')}
                 >
                   {lat !== null ? '📍✓' : '📍'}
                 </button>
               </div>
               {lat !== null && (
                 <span className={styles.coordsHint}>
-                  Координаты: {lat.toFixed(5)}, {lng?.toFixed(5)}
+                  {lat.toFixed(5)}, {lng?.toFixed(5)}
                 </span>
               )}
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Телефон</label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardPhoneLabel')}</label>
               <input
                 className={styles.fieldInput}
                 type="tel"
@@ -714,13 +709,13 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
             </div>
 
             <div className={styles.sectionDivider}>
-              <span className={styles.sectionDividerLabel}>Портфолио и контакты</span>
+              <span className={styles.sectionDividerLabel}>{t('pro.onboarding.wizardPortfolioSection')}</span>
             </div>
 
             <div className={styles.fieldGroup}>
               <label className={styles.fieldLabel}>
                 Instagram
-                <span className={styles.fieldBadge}>Портфолио</span>
+                <span className={styles.fieldBadge}>{t('pro.onboarding.wizardIgBadge')}</span>
               </label>
               <div className={styles.socialInput}>
                 <span className={styles.socialPrefix}>@</span>
@@ -732,7 +727,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
                 />
               </div>
               <p className={styles.fieldHint}>
-                Добавьте ссылки на посты — они появятся в профиле как галерея работ
+                {t('pro.settings.instagramHint')}
               </p>
             </div>
 
@@ -748,7 +743,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
             )}
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Telegram</label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardTelegramLabel')}</label>
               <div className={styles.socialInput}>
                 <span className={styles.socialPrefix}>@</span>
                 <input
@@ -766,14 +761,14 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         {step === 4 && (
           <div className={styles.stepBody}>
             <div className={styles.stepHeadline}>
-              <h1 className={styles.stepTitle}>Фото и команда</h1>
-              <p className={styles.stepSubtitle}>Привлекательные фото повышают конверсию записей</p>
+              <h1 className={styles.stepTitle}>{t('pro.onboarding.wizardStep4Title')}</h1>
+              <p className={styles.stepSubtitle}>{t('pro.onboarding.wizardStep4Subtitle')}</p>
             </div>
 
             {/* Onboarding checklist */}
             <div className={styles.onboardingChecklist}>
               <div className={styles.checklistHeader}>
-                <h3 className={styles.checklistTitle}>Готовность к запуску</h3>
+                <h3 className={styles.checklistTitle}>{t('pro.onboarding.wizardLaunchReadiness')}</h3>
                 <span className={styles.checklistProgress}>{completionPercentage}%</span>
               </div>
               {onboardingSteps.map((step) => (
@@ -792,23 +787,23 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
               ))}
               {!isValidated && (
                 <p className={styles.checklistWarning}>
-                  ⚠️ Заполните все обязательные пункты для публикации в B2C
+                  {t('pro.onboarding.wizardLaunchWarning')}
                 </p>
               )}
             </div>
 
             {/* Photo upload */}
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Фотографии заведения</label>
+              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardPhotosLabel')}</label>
               <div className={styles.photoGrid}>
                 {photoUrls.map((url, i) => (
                   <div key={url} className={styles.photoThumb}>
-                    <img src={url} alt={`Фото ${i + 1}`} className={styles.photoThumbImg} />
+                    <img src={url} alt={`${i + 1}`} className={styles.photoThumbImg} />
                     <button
                       className={styles.photoRemove}
                       onClick={() => setPhotoUrls(prev => prev.filter((_, j) => j !== i))}
                     >✕</button>
-                    {i === 0 && <span className={styles.photoPrimary}>Главное</span>}
+                    {i === 0 && <span className={styles.photoPrimary}>{t('pro.settings.primaryPhoto')}</span>}
                   </div>
                 ))}
                 <button
@@ -817,7 +812,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
                   disabled={photoUploading}
                 >
                   <span className={styles.photoAddIcon}>{photoUploading ? '…' : '+'}</span>
-                  <span className={styles.photoAddLabel}>{photoUploading ? 'Загрузка…' : 'Добавить фото'}</span>
+                  <span className={styles.photoAddLabel}>{photoUploading ? t('pro.onboarding.uploadingPhoto') : t('pro.onboarding.uploadPhotoBtn')}</span>
                 </button>
               </div>
               <input
@@ -831,7 +826,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
 
             {/* Staff */}
             <div className={styles.sectionDivider}>
-              <span className={styles.sectionDividerLabel}>Мастера</span>
+              <span className={styles.sectionDividerLabel}>{t('pro.onboarding.wizardMastersSection')}</span>
             </div>
 
             {pendingStaff.length > 0 && (
@@ -846,7 +841,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
                     </div>
                     <div className={styles.staffInfo}>
                       <span className={styles.staffName}>{s.name}</span>
-                      <span className={styles.staffSpec}>{s.specialization || 'Мастер'}</span>
+                      <span className={styles.staffSpec}>{s.specialization || t('pro.onboarding.wizardMasterDefault')}</span>
                     </div>
                     <button
                       className={styles.staffRemove}
@@ -877,14 +872,14 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
                   <div className={styles.staffFormFields}>
                     <input
                       className={styles.fieldInput}
-                      placeholder="Имя мастера *"
+                      placeholder={t('pro.onboarding.wizardMasterNamePlaceholder')}
                       value={staffName}
                       onChange={e => setStaffName(e.target.value)}
                       autoFocus
                     />
                     <input
                       className={styles.fieldInput}
-                      placeholder="Специализация"
+                      placeholder={t('pro.onboarding.wizardMasterSpecPlaceholder')}
                       value={staffSpec}
                       onChange={e => setStaffSpec(e.target.value)}
                     />
@@ -892,21 +887,21 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
                 </div>
                 <div className={styles.staffFormActions}>
                   <button className={styles.staffCancelBtn} onClick={() => { setStaffFormOpen(false); setStaffName(''); setStaffSpec(''); setStaffPhotoUrl(undefined); }}>
-                    Отмена
+                    {t('pro.onboarding.wizardCancelMaster')}
                   </button>
                   <button className={styles.staffSaveBtn} onClick={handleAddStaff} disabled={!staffName.trim()}>
-                    Добавить
+                    {t('pro.onboarding.wizardSaveMaster')}
                   </button>
                 </div>
               </div>
             ) : (
               <button className={styles.addStaffBtn} onClick={() => setStaffFormOpen(true)}>
-                <span>+</span> Добавить мастера
+                {t('pro.onboarding.wizardAddMaster')}
               </button>
             )}
 
             <p className={styles.staffSkipHint}>
-              Мастеров можно добавить позже в разделе «Сотрудники»
+              {t('pro.onboarding.wizardMasterSkipHint')}
             </p>
           </div>
         )}
@@ -923,7 +918,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
             onClick={() => navigate('/pro/preview')}
             type="button"
           >
-            👁️ Как видят клиенты
+            {t('pro.onboarding.wizardPreviewBtn')}
           </button>
         </div>
       )}
@@ -935,14 +930,14 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
           onClick={step < TOTAL_STEPS ? handleNext : handleCreate}
           disabled={saving || photoUploading}
         >
-          {saving ? 'Создание…' : step < TOTAL_STEPS ? 'Далее' : 'Создать бизнес'}
+          {saving ? t('pro.onboarding.wizardCreating') : step < TOTAL_STEPS ? t('pro.onboarding.wizardNextBtn') : t('pro.onboarding.wizardCreateBtn')}
         </button>
         <button
           className={styles.wizardSkipBtn}
           onClick={handleCreate}
           disabled={saving || photoUploading}
         >
-          {step <= 2 ? 'Создать сейчас →' : 'Пропустить →'}
+          {step <= 2 ? t('pro.onboarding.wizardSkipNow') : t('pro.onboarding.wizardSkip')}
         </button>
       </div>
     </div>
@@ -988,6 +983,7 @@ export default function MerchantSettingsPage({ forceNew }: { forceNew?: boolean 
 
 function BusinessEditForm({ merchantId }: { merchantId: string }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { setMerchantId } = useMerchantStore();
 
   const [name, setName] = useState('');
@@ -1042,7 +1038,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: fd,
     });
-    if (!res.ok) throw new Error('Ошибка загрузки');
+    if (!res.ok) throw new Error(t('pro.settings.uploadError'));
     const json = await res.json() as { url: string };
     return json.url;
   };
@@ -1056,7 +1052,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       const url = await uploadImage(file);
       setPhotoUrls(prev => [...prev, url]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка загрузки');
+      setError(err instanceof Error ? err.message : t('pro.settings.uploadError'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -1064,7 +1060,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Удалить заведение?')) return;
+    if (!window.confirm(t('pro.settings.deleteConfirm'))) return;
     setSaving(true);
     try {
       await api.delete<{ success: boolean }>(`/businesses/${merchantId}`);
@@ -1077,14 +1073,14 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       } catch { /* noop */ }
       navigate('/pro');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка удаления');
+      setError(err instanceof Error ? err.message : t('pro.settings.deleteError'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleSave = async () => {
-    if (!name.trim()) { setError('Введите название'); return; }
+    if (!name.trim()) { setError(t('pro.settings.errName')); return; }
     setSaving(true);
     setError(null);
     try {
@@ -1105,7 +1101,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       };
       await api.patch<{ data: Business }>(`/businesses/${merchantId}`, body);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка сохранения');
+      setError(err instanceof Error ? err.message : t('pro.services.saveError'));
     } finally {
       setSaving(false);
     }
@@ -1114,7 +1110,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   const mapCenter: [number, number] = lat && lng ? [lat, lng] : CITY_COORDS[city] ?? [41.2995, 69.2401];
 
   return (
-    <ProLayout title="Профиль">
+    <ProLayout title={t('pro.settings.profileTitle')}>
       {showMapPicker && (
         <MapPickerOverlay
           initialCenter={mapCenter}
@@ -1125,18 +1121,18 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
 
       {/* Photos */}
       <div className={styles.fieldGroup}>
-        <label className={styles.fieldLabel}>Фотографии</label>
+        <label className={styles.fieldLabel}>{t('pro.settings.photos')}</label>
         <div className={styles.photoGrid}>
           {photoUrls.map((url, i) => (
             <div key={url} className={styles.photoThumb}>
-              <img src={url} alt={`Фото ${i + 1}`} className={styles.photoThumbImg} />
+              <img src={url} alt={`${i + 1}`} className={styles.photoThumbImg} />
               <button className={styles.photoRemove} onClick={() => setPhotoUrls(prev => prev.filter((_, j) => j !== i))}>✕</button>
-              {i === 0 && <span className={styles.photoPrimary}>Главное</span>}
+              {i === 0 && <span className={styles.photoPrimary}>{t('pro.settings.primaryPhoto')}</span>}
             </div>
           ))}
           <button className={styles.photoAddBtn} onClick={() => fileInputRef.current?.click()} disabled={uploading}>
             <span className={styles.photoAddIcon}>{uploading ? '…' : '+'}</span>
-            <span className={styles.photoAddLabel}>{uploading ? 'Загрузка…' : 'Добавить'}</span>
+            <span className={styles.photoAddLabel}>{uploading ? t('pro.onboarding.uploadingPhoto') : t('pro.settings.addPhoto')}</span>
           </button>
         </div>
         <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className={styles.fileInput} onChange={handlePhotoAdd} />
@@ -1144,60 +1140,60 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
 
       <div className={styles.form}>
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Название *</label>
-          <input className={styles.fieldInput} value={name} onChange={e => setName(e.target.value)} placeholder="Студия красоты…" />
+          <label className={styles.fieldLabel}>{t('pro.settings.businessName')} *</label>
+          <input className={styles.fieldInput} value={name} onChange={e => setName(e.target.value)} placeholder={t('pro.settings.namePlaceholder')} />
         </div>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Категория</label>
+          <label className={styles.fieldLabel}>{t('pro.settings.category')}</label>
           <select className={styles.fieldInput} value={category} onChange={e => setCategory(e.target.value as CategoryEnum)}>
-            {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            {CATEGORY_VALUES.map(v => <option key={v} value={v}>{t(`categories.${v}`)}</option>)}
           </select>
         </div>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Описание</label>
-          <textarea className={styles.fieldTextarea} value={description} onChange={e => setDescription(e.target.value)} rows={3} placeholder="Несколько слов о заведении…" />
+          <label className={styles.fieldLabel}>{t('pro.settings.description')}</label>
+          <textarea className={styles.fieldTextarea} value={description} onChange={e => setDescription(e.target.value)} rows={3} placeholder={t('pro.settings.descriptionPlaceholder')} />
         </div>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Город</label>
+          <label className={styles.fieldLabel}>{t('pro.onboarding.wizardCityLabel')}</label>
           <select className={styles.fieldInput} value={city} onChange={e => setCity(e.target.value)}>
             {UZBEKISTAN_CITIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Адрес</label>
+          <label className={styles.fieldLabel}>{t('pro.settings.address')}</label>
           <div className={styles.addressRow}>
-            <input className={`${styles.fieldInput} ${styles.addressInput}`} value={address} onChange={e => setAddress(e.target.value)} placeholder="ул. Примерная, 1" />
-            <button className={styles.mapPinBtn} type="button" onClick={() => setShowMapPicker(true)} title="Поставить пин на карте">
+            <input className={`${styles.fieldInput} ${styles.addressInput}`} value={address} onChange={e => setAddress(e.target.value)} placeholder={t('pro.settings.addressPlaceholder')} />
+            <button className={styles.mapPinBtn} type="button" onClick={() => setShowMapPicker(true)} title={t('pro.settings.mapPickerTitle')}>
               {lat !== null ? '📍✓' : '📍'}
             </button>
           </div>
-          {lat !== null && <span className={styles.coordsHint}>Координаты: {lat.toFixed(5)}, {lng?.toFixed(5)}</span>}
+          {lat !== null && <span className={styles.coordsHint}>{lat.toFixed(5)}, {lng?.toFixed(5)}</span>}
         </div>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Телефон</label>
+          <label className={styles.fieldLabel}>{t('pro.settings.phone')}</label>
           <input className={styles.fieldInput} type="tel" inputMode="tel" value={phone} onChange={e => setPhone(formatPhoneMask(e.target.value))} placeholder="+998 XX XXX-XX-XX" />
         </div>
 
         <div className={styles.sectionDivider}>
-          <span className={styles.sectionDividerLabel}>Портфолио и контакты</span>
+          <span className={styles.sectionDividerLabel}>{t('pro.settings.portfolioSection')}</span>
         </div>
 
         <div className={styles.fieldGroup}>
           <label className={styles.fieldLabel}>
             Instagram
-            <span className={styles.fieldBadge}>Портфолио</span>
+            <span className={styles.fieldBadge}>{t('pro.onboarding.wizardIgBadge')}</span>
           </label>
           <div className={styles.socialInput}>
             <span className={styles.socialPrefix}>@</span>
             <input className={`${styles.fieldInput} ${styles.socialField}`} value={instagram} onChange={e => setInstagram(e.target.value.replace(/^@/, ''))} placeholder="username" />
           </div>
           <p className={styles.fieldHint}>
-            Добавьте ссылки на посты — они появятся в профиле как галерея работ
+            {t('pro.settings.instagramHint')}
           </p>
         </div>
 
@@ -1212,7 +1208,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
         )}
 
         <div className={styles.fieldGroup}>
-          <label className={styles.fieldLabel}>Telegram</label>
+          <label className={styles.fieldLabel}>{t('pro.settings.telegram')}</label>
           <div className={styles.socialInput}>
             <span className={styles.socialPrefix}>@</span>
             <input className={`${styles.fieldInput} ${styles.socialField}`} value={telegramUsername} onChange={e => setTelegramUsername(e.target.value.replace(/^@/, ''))} placeholder="username" />
@@ -1223,11 +1219,11 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       {error && <p className={styles.error}>{error}</p>}
 
       <button className={styles.saveBtn} onClick={handleSave} disabled={saving || uploading}>
-        {saving ? 'Сохранение…' : 'Сохранить'}
+        {saving ? t('pro.settings.saving') : t('pro.settings.save')}
       </button>
 
       <button className={styles.deleteBtn} onClick={handleDelete} disabled={saving}>
-        Удалить заведение
+        {t('pro.settings.deleteBtn')}
       </button>
     </ProLayout>
   );

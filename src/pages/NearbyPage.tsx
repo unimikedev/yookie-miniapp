@@ -14,6 +14,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useGeolocation } from '@/hooks/useGeolocation'
 import { fetchNearbyBusinesses, fetchRoute } from '@/lib/api/businesses'
 import { CATEGORY_LABELS } from '@/lib/api/types'
@@ -37,22 +38,15 @@ const DEBOUNCE_MS = 400
 const DEFAULT_RADIUS_KM = 15
 const DEFAULT_ZOOM = 14
 
-const PRICE_RANGES = [
-  { label: 'Любая', min: undefined, max: undefined },
-  { label: 'до 100к', min: undefined, max: 100000 },
-  { label: '100–300к', min: 100000, max: 300000 },
-  { label: '300к+', min: 300000, max: undefined },
+const PRICE_RANGE_DATA = [
+  { min: undefined, max: undefined },
+  { min: undefined, max: 100000 },
+  { min: 100000, max: 300000 },
+  { min: 300000, max: undefined },
 ] as const
 
-const CATEGORY_FILTERS: { key: CategoryEnum | 'all'; label: string }[] = [
-  { key: 'all', label: 'Все' },
-  { key: 'hair', label: 'Волосы' },
-  { key: 'barber', label: 'Барбер' },
-  { key: 'nail', label: 'Ногти' },
-  { key: 'brow_lash', label: 'Брови' },
-  { key: 'spa_massage', label: 'СПА' },
-  { key: 'makeup', label: 'Макияж' },
-  { key: 'cosmetology', label: 'Косметология' },
+const CATEGORY_FILTER_KEYS: (CategoryEnum | 'all')[] = [
+  'all', 'hair', 'barber', 'nail', 'brow_lash', 'spa_massage', 'makeup', 'cosmetology',
 ]
 
 /* ── SVG Icons ──────────────────────────────────────────────────────────── */
@@ -173,7 +167,26 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function NearbyPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { theme } = useThemeStore()
+
+  const PRICE_RANGES = [
+    { label: t('nearby.anyPrice'), min: undefined, max: undefined },
+    { label: t('nearby.priceBelow100'), min: undefined, max: 100000 },
+    { label: t('nearby.price100to300'), min: 100000, max: 300000 },
+    { label: t('nearby.priceAbove300'), min: 300000, max: undefined },
+  ] as const
+
+  const CATEGORY_FILTERS: { key: CategoryEnum | 'all'; label: string }[] = [
+    { key: 'all', label: t('common.all') },
+    { key: 'hair', label: t('nearbyFilters.hair') },
+    { key: 'barber', label: t('nearbyFilters.barber') },
+    { key: 'nail', label: t('nearbyFilters.nail') },
+    { key: 'brow_lash', label: t('nearbyFilters.brow_lash') },
+    { key: 'spa_massage', label: t('nearbyFilters.spa_massage') },
+    { key: 'makeup', label: t('nearbyFilters.makeup') },
+    { key: 'cosmetology', label: t('nearbyFilters.cosmetology') },
+  ]
   const { effectivePosition, position, permission, isLoading: geoLoading, requestPosition } = useGeolocation()
 
   // Map refs
@@ -209,7 +222,7 @@ export default function NearbyPage() {
     const load = async () => {
       setDataLoading(true)
       try {
-        const priceRange = PRICE_RANGES[selectedPriceRange]
+        const priceRange = PRICE_RANGE_DATA[selectedPriceRange]
         const res = await fetchNearbyBusinesses({
           lat: effectivePosition.lat,
           lng: effectivePosition.lng,
@@ -484,7 +497,7 @@ export default function NearbyPage() {
             <input
               className={styles.searchInput}
               type="text"
-              placeholder="Поиск салонов и услуг..."
+              placeholder={t('nearby.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -504,7 +517,7 @@ export default function NearbyPage() {
           >
             <span className={styles.filterIcon}><FilterIcon /></span>
             <span className={styles.filterPillLabel}>
-              Фильтры{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
+              {t('nearby.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
             </span>
           </button>
 
@@ -528,7 +541,7 @@ export default function NearbyPage() {
         {showFilters && (
           <div className={styles.filterPanel}>
             <div className={styles.filterSection}>
-              <span className={styles.filterSectionTitle}>Цена</span>
+              <span className={styles.filterSectionTitle}>{t('nearby.price')}</span>
               <div className={styles.filterOptions}>
                 {PRICE_RANGES.map((range, i) => (
                   <button
@@ -543,7 +556,7 @@ export default function NearbyPage() {
             </div>
 
             <div className={styles.filterSection}>
-              <span className={styles.filterSectionTitle}>Рейтинг</span>
+              <span className={styles.filterSectionTitle}>{t('nearby.rating')}</span>
               <div className={styles.filterOptions}>
                 {[undefined, 4.0, 4.5, 4.8].map((r, i) => (
                   <button
@@ -551,7 +564,7 @@ export default function NearbyPage() {
                     className={`${styles.filterOption} ${minRating === r ? styles.filterOptionActive : ''}`}
                     onClick={() => setMinRating(r)}
                   >
-                    {r ? `${r}+` : 'Любой'}
+                    {r ? `${r}+` : t('nearby.anyRating')}
                   </button>
                 ))}
               </div>
@@ -567,7 +580,7 @@ export default function NearbyPage() {
                   setShowFilters(false)
                 }}
               >
-                Сбросить фильтры
+                {t('nearby.clearFilters')}
               </button>
             )}
           </div>
@@ -603,7 +616,7 @@ export default function NearbyPage() {
       {/* Geolocation permission banner */}
       {permission === 'denied' && (
         <div className={styles.geoBanner}>
-          <span>Геолокация отключена. Показываем салоны в центре города.</span>
+          <span>{t('nearby.geoDisabled')}</span>
         </div>
       )}
 
@@ -611,7 +624,7 @@ export default function NearbyPage() {
       {(dataLoading || geoLoading) && (
         <div className={styles.loadingIndicator}>
           <div className={styles.loadingDot} />
-          <span>{geoLoading ? 'Определяем местоположение...' : 'Загрузка...'}</span>
+          <span>{geoLoading ? t('nearby.loadingGeo') : t('nearby.loadingData')}</span>
         </div>
       )}
 
@@ -631,7 +644,7 @@ export default function NearbyPage() {
       {/* Results count */}
       {!dataLoading && businesses.length > 0 && (
         <div className={styles.resultsCount}>
-          {businesses.length} {businesses.length === 1 ? 'салон' : businesses.length < 5 ? 'салона' : 'салонов'} рядом
+          {t('nearby.salons', { count: businesses.length })}
         </div>
       )}
 
@@ -689,8 +702,8 @@ export default function NearbyPage() {
             <div className={styles.emptyCard}>
               <span className={styles.emptyCardText}>
                 {searchQuery || activeFilterCount > 0
-                  ? 'Ничего не найдено. Попробуйте изменить фильтры.'
-                  : 'Салонов рядом не найдено'}
+                  ? t('nearby.noResults')
+                  : t('nearby.noNearby')}
               </span>
             </div>
           )}

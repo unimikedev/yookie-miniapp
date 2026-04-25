@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import styles from './BottomNav.module.css'
 
 export interface BottomNavProps {
@@ -9,7 +10,7 @@ export interface BottomNavProps {
 const tabs = [
   {
     key: 'home',
-    label: 'Главная',
+    label: 'nav.home',
     path: '/',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -19,7 +20,7 @@ const tabs = [
   },
   {
     key: 'nearby',
-    label: 'Рядом',
+    label: 'nav.nearby',
     path: '/nearby',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -29,7 +30,7 @@ const tabs = [
   },
   {
     key: 'bookings',
-    label: 'Записи',
+    label: 'nav.bookings',
     path: '/my-bookings',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -39,7 +40,7 @@ const tabs = [
   },
   {
     key: 'menu',
-    label: 'Меню',
+    label: 'nav.menu',
     path: '/account',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -52,6 +53,7 @@ const tabs = [
 export function BottomNav({ className }: BottomNavProps) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation()
 
   const getActive = (path: string) => {
     if (path === '/') return location.pathname === '/'
@@ -68,10 +70,10 @@ export function BottomNav({ className }: BottomNavProps) {
               key={tab.key}
               className={`${styles.tab} ${active ? styles.tabActive : ''}`}
               onClick={() => navigate(tab.path)}
-              aria-label={tab.label}
+              aria-label={t(tab.label)}
             >
               <span className={styles.icon}>{tab.icon(active)}</span>
-              <span className={`${styles.label} ${active ? styles.labelVisible : ''}`}>{tab.label}</span>
+              <span className={`${styles.label} ${active ? styles.labelVisible : ''}`}>{t(tab.label)}</span>
             </button>
           )
         })}

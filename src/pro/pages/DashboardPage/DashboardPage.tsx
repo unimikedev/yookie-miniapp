@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listBookings, listPendingBookings, listStaff, updateBookingStatus, listActivity, patchBusiness } from '@/pro/api';
@@ -11,12 +12,12 @@ import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
 import styles from './DashboardPage.module.css';
 
-const STATUS_LABELS: Record<string, string> = {
-  pending:   'Ожидает',
-  confirmed: 'Подтверждена',
-  cancelled: 'Отменена',
-  completed: 'Завершена',
-  no_show:   'Не явился',
+const STATUS_KEY_MAP: Record<string, string> = {
+  pending:   'pro.bookings.statusPending',
+  confirmed: 'pro.bookings.statusConfirmed',
+  cancelled: 'pro.bookings.statusCancelled',
+  completed: 'pro.bookings.statusCompleted',
+  no_show:   'pro.bookings.statusNoShow',
 };
 
 function fmt(iso: string) {
@@ -33,6 +34,7 @@ function isoDate(d: Date): string {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { merchantId } = useMerchantStore();
   const tgSyncDone = useRef(false);
 
@@ -121,7 +123,7 @@ export default function DashboardPage() {
       loadPending();
       loadBookings();
       loadActivity();
-      showToast(status === 'confirmed' ? 'Запись подтверждена' : 'Запись отклонена');
+      showToast(status === 'confirmed' ? t('pro.dashboard.toastConfirmed') : t('pro.dashboard.toastDeclined'));
     } finally {
       setActionId(null);
     }
@@ -137,10 +139,10 @@ export default function DashboardPage() {
       loadPending();
       loadActivity();
       const toastMsg: Record<BookingStatus, string> = {
-        confirmed: 'Запись подтверждена',
-        cancelled: 'Запись отменена',
-        completed: 'Визит завершён',
-        no_show:   'Клиент не явился',
+        confirmed: t('pro.dashboard.toastConfirmed'),
+        cancelled: t('pro.bookings.cancel'),
+        completed: t('pro.dashboard.toastCompleted'),
+        no_show:   t('pro.dashboard.toastNoShow'),
         pending:   '',
       };
       if (toastMsg[status]) showToast(toastMsg[status]);
@@ -157,7 +159,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <ProLayout title="Расписание">
+    <ProLayout title={t('pro.dashboard.title')}>
 
       {/* ── Date navigation ── */}
       <div className={styles.dateNav}>
@@ -166,11 +168,11 @@ export default function DashboardPage() {
           <span className={styles.dateLabel} style={{ textTransform: 'capitalize' }}>{dateLabel}</span>
           <button className={styles.dateArrow} onClick={nextDay}>›</button>
           {!isToday && (
-            <button className={styles.todayBtn} onClick={goToToday}>Сегодня</button>
+            <button className={styles.todayBtn} onClick={goToToday}>{t('pro.dashboard.today')}</button>
           )}
         </div>
         <button className={styles.newBookingBtn} onClick={() => navigate('/pro/bookings?new=1')}>
-          + Запись
+          {t('pro.dashboard.newBooking')}
         </button>
       </div>
 
@@ -178,7 +180,7 @@ export default function DashboardPage() {
       {pending.length > 0 && (
         <section className={styles.pendingSection}>
           <h2 className={styles.pendingTitle}>
-            Ожидают подтверждения
+            {t('pro.dashboard.pendingTitle')}
             <span className={styles.pendingBadge}>{pending.length}</span>
           </h2>
           {pending.map((b) => {
@@ -194,7 +196,7 @@ export default function DashboardPage() {
                 )}
               </div>
               {b.rescheduled && (
-                <span className={styles.rescheduledBadge}>↻ Перезапись</span>
+                <span className={styles.rescheduledBadge}>↻ {t('pro.dashboard.rescheduleNotice')}</span>
               )}
               <div className={styles.pendingClient}>
                 <span className={styles.pendingClientName}>{b.clients?.name ?? '—'}</span>
@@ -216,14 +218,14 @@ export default function DashboardPage() {
                   disabled={actionId === b.id}
                   onClick={() => handlePendingAction(b.id, 'confirmed')}
                 >
-                  {actionId === b.id ? '…' : '✓ Подтвердить'}
+                  {actionId === b.id ? '…' : `✓ ${t('pro.dashboard.confirm')}`}
                 </button>
                 <button
                   className={styles.declineBtn}
                   disabled={actionId === b.id}
                   onClick={() => handlePendingAction(b.id, 'cancelled')}
                 >
-                  Отклонить
+                  {t('pro.dashboard.decline')}
                 </button>
               </div>
             </div>
@@ -235,7 +237,7 @@ export default function DashboardPage() {
       {/* ── Day schedule ── */}
       <section className={styles.scheduleSection}>
         <div className={styles.scheduleTitleRow}>
-          <h3 className={styles.sectionTitle}>{isToday ? 'Сегодня' : 'Записи'}</h3>
+          <h3 className={styles.sectionTitle}>{isToday ? t('pro.dashboard.today') : t('pro.bookings.title')}</h3>
           {bookings.length > 0 && (
             <span className={styles.countBadge}>{bookings.length}</span>
           )}
@@ -243,9 +245,9 @@ export default function DashboardPage() {
 
         {sortedBookings.length === 0 ? (
           <div className={styles.emptyDay}>
-            <span>Нет записей на этот день</span>
+            <span>{t('pro.dashboard.noBookingsDesc')}</span>
             <button className={styles.emptyAddBtn} onClick={() => navigate('/pro/bookings?new=1')}>
-              Добавить запись →
+              {t('pro.dashboard.addBooking')} →
             </button>
           </div>
         ) : (
@@ -263,9 +265,9 @@ export default function DashboardPage() {
       {/* ── Activity feed ── */}
       {activity.length > 0 && (
         <section className={styles.activitySection}>
-          <h3 className={styles.sectionTitle}>Последние события</h3>
+          <h3 className={styles.sectionTitle}>{t('pro.dashboard.activityTitle')}</h3>
           {activity.slice(0, 5).map((ev) => {
-            const info = activityInfo(ev);
+            const info = activityInfo(ev, t);
             return (
               <div key={ev.id} className={`${styles.activityRow} ${styles[`activity-${info.tone}`]}`}>
                 <span className={styles.activityIcon}>{info.icon}</span>
@@ -279,7 +281,7 @@ export default function DashboardPage() {
                     <span className={styles.activityReason}>«{ev.cancel_reason}»</span>
                   )}
                 </div>
-                <span className={styles.activityTime}>{relativeTime(ev.updated_at)}</span>
+                <span className={styles.activityTime}>{relativeTime(ev.updated_at, t)}</span>
               </div>
             );
           })}
@@ -288,10 +290,10 @@ export default function DashboardPage() {
 
       {/* ── Quick links ── */}
       <section className={styles.links}>
-        <LinkRow label="Услуги"             onClick={() => navigate('/pro/services')} />
-        <LinkRow label="Сотрудники"         onClick={() => navigate('/pro/staff')} />
-        <LinkRow label="Клиенты"            onClick={() => navigate('/pro/clients')} />
-        <LinkRow label="Профиль заведения"  onClick={() => navigate('/pro/settings')} />
+        <LinkRow label={t('pro.more.services')}      onClick={() => navigate('/pro/services')} />
+        <LinkRow label={t('pro.more.staff')}         onClick={() => navigate('/pro/staff')} />
+        <LinkRow label={t('pro.clients.title')}      onClick={() => navigate('/pro/clients')} />
+        <LinkRow label={t('pro.more.profileSettings')} onClick={() => navigate('/pro/settings')} />
       </section>
 
       {toast && (
@@ -302,7 +304,7 @@ export default function DashboardPage() {
       <BottomSheet
         open={selectedBooking !== null}
         onClose={() => setSelectedBooking(null)}
-        title="Запись"
+        title={t('pro.dashboard.booking')}
       >
         {selectedBooking && (
           <div className={styles.detailSheet}>
@@ -310,36 +312,36 @@ export default function DashboardPage() {
               {fmt(selectedBooking.starts_at)} — {fmt(selectedBooking.ends_at)}
               <span className={`${styles.detailStatusBadge} ${styles[`statusBadge-${selectedBooking.status}`]}`}>
                 {selectedBooking.status === 'pending' && selectedBooking.rescheduled
-                  ? '↻ Перенос'
-                  : (STATUS_LABELS[selectedBooking.status] ?? selectedBooking.status)}
+                  ? `↻ ${t('pro.dashboard.rescheduleNotice')}`
+                  : (STATUS_KEY_MAP[selectedBooking.status] ? t(STATUS_KEY_MAP[selectedBooking.status]) : selectedBooking.status)}
               </span>
             </p>
 
             <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Клиент</span>
+              <span className={styles.detailLabel}>{t('pro.dashboard.client')}</span>
               <span className={styles.detailValue}>{selectedBooking.clients?.name ?? '—'}</span>
             </div>
             {selectedBooking.clients?.phone && (
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Телефон</span>
+                <span className={styles.detailLabel}>{t('pro.dashboard.phone')}</span>
                 <a href={`tel:${selectedBooking.clients.phone}`} className={styles.detailPhone}>
                   📞 {selectedBooking.clients.phone}
                 </a>
               </div>
             )}
             <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Услуга</span>
+              <span className={styles.detailLabel}>{t('pro.dashboard.service')}</span>
               <span className={styles.detailValue}>{selectedBooking.services?.name ?? '—'}</span>
             </div>
             {staffMap.get(selectedBooking.master_id) && (
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Мастер</span>
+                <span className={styles.detailLabel}>{t('pro.dashboard.master')}</span>
                 <span className={styles.detailValue}>{staffMap.get(selectedBooking.master_id)}</span>
               </div>
             )}
             {selectedBooking.notes && (
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Заметки</span>
+                <span className={styles.detailLabel}>{t('pro.dashboard.notes')}</span>
                 <span className={styles.detailValue}>{selectedBooking.notes}</span>
               </div>
             )}
@@ -347,7 +349,7 @@ export default function DashboardPage() {
             <div className={styles.detailActions}>
               {selectedBooking.status === 'pending' && (
                 <Button fullWidth loading={actionLoading} onClick={() => handleBookingAction('confirmed')}>
-                  ✓ Подтвердить
+                  ✓ {t('pro.dashboard.confirm')}
                 </Button>
               )}
               {selectedBooking.status === 'confirmed' && (
@@ -357,14 +359,14 @@ export default function DashboardPage() {
                     disabled={actionLoading}
                     onClick={() => handleBookingAction('completed')}
                   >
-                    ✓ Пришёл
+                    ✓ {t('pro.dashboard.arrived')}
                   </button>
                   <button
                     className={styles.noShowBtn}
                     disabled={actionLoading}
                     onClick={() => handleBookingAction('no_show')}
                   >
-                    ✗ Не явился
+                    ✗ {t('pro.dashboard.noShow')}
                   </button>
                 </div>
               )}
@@ -374,7 +376,7 @@ export default function DashboardPage() {
                   disabled={actionLoading}
                   onClick={() => handleBookingAction('cancelled')}
                 >
-                  Отменить запись
+                  {t('pro.dashboard.cancelBooking')}
                 </button>
               )}
             </div>
@@ -396,6 +398,7 @@ function TodayRow({
   masterName?: string;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
   const isReschedule = booking.status === 'pending' && booking.rescheduled;
   const shortLabel: Record<string, string> = {
     pending:   isReschedule ? '↻' : '⏳',
@@ -414,7 +417,7 @@ function TodayRow({
       <div className={styles.todayInfo}>
         <span className={styles.todayClient}>{booking.clients?.name ?? '—'}</span>
         <span className={styles.todayMeta}>
-          {isReschedule ? '↻ Запрос на перенос' : (booking.services?.name ?? '—')}
+          {isReschedule ? `↻ ${t('pro.dashboard.rescheduleRequest')}` : (booking.services?.name ?? '—')}
           {masterName ? ` · ${masterName}` : ''}
         </span>
       </div>
@@ -427,35 +430,35 @@ function TodayRow({
 
 type Tone = 'new' | 'confirmed' | 'cancelled' | 'completed' | 'noshow' | 'rescheduled';
 
-function activityInfo(ev: ActivityEvent): { icon: string; label: string; tone: Tone } {
+function activityInfo(ev: ActivityEvent, t: (key: string) => string): { icon: string; label: string; tone: Tone } {
   const isRescheduled =
     ev.status === 'pending' &&
     Math.abs(new Date(ev.updated_at).getTime() - new Date(ev.created_at).getTime()) > 60_000;
 
-  if (isRescheduled) return { icon: '↻', label: 'Клиент перенёс запись', tone: 'rescheduled' };
+  if (isRescheduled) return { icon: '↻', label: t('pro.dashboard.activityRescheduled'), tone: 'rescheduled' };
   switch (ev.status) {
-    case 'pending':   return { icon: '●', label: 'Новая запись', tone: 'new' };
-    case 'confirmed': return { icon: '✓', label: 'Запись подтверждена', tone: 'confirmed' };
+    case 'pending':   return { icon: '●', label: t('pro.dashboard.activityNew'), tone: 'new' };
+    case 'confirmed': return { icon: '✓', label: t('pro.dashboard.activityConfirmed'), tone: 'confirmed' };
     case 'cancelled': return {
       icon: '✕',
-      label: ev.cancelled_by === 'client' ? 'Клиент отменил запись' : 'Запись отменена',
+      label: ev.cancelled_by === 'client' ? t('pro.dashboard.activityCancelledByClient') : t('pro.dashboard.activityCancelled'),
       tone: 'cancelled',
     };
-    case 'completed': return { icon: '✓', label: 'Визит завершён', tone: 'completed' };
-    case 'no_show':   return { icon: '!', label: 'Клиент не явился', tone: 'noshow' };
+    case 'completed': return { icon: '✓', label: t('pro.dashboard.activityCompleted'), tone: 'completed' };
+    case 'no_show':   return { icon: '!', label: t('pro.dashboard.activityNoShow'), tone: 'noshow' };
     default:          return { icon: '·', label: ev.status, tone: 'new' };
   }
 }
 
-function relativeTime(iso: string): string {
+function relativeTime(iso: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const min  = Math.floor(diff / 60_000);
-  if (min < 1)  return 'только что';
-  if (min < 60) return `${min} мин назад`;
+  if (min < 1)  return t('pro.dashboard.justNow');
+  if (min < 60) return t('pro.dashboard.minutesAgo', { min });
   const h = Math.floor(min / 60);
-  if (h < 24)   return `${h} ч назад`;
+  if (h < 24)   return t('pro.dashboard.hoursAgo', { h });
   const d = Math.floor(h / 24);
-  return d === 1 ? 'вчера' : `${d} д назад`;
+  return d === 1 ? t('pro.dashboard.yesterday') : t('pro.dashboard.daysAgo', { d });
 }
 
 function LinkRow({ label, onClick }: { label: string; onClick: () => void }) {

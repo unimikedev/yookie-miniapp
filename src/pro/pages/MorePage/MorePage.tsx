@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
@@ -12,6 +13,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
 export default function MorePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { merchantId } = useMerchantStore();
   const { leaveWithoutResigning, logout, loading: exitLoading, error: exitError } = useBusinessExit();
 
@@ -70,22 +72,22 @@ export default function MorePage() {
   };
 
   const items = [
-    { label: 'График работы',       path: '/pro/schedule' },
-    { label: 'Услуги',              path: '/pro/services' },
-    { label: 'Сотрудники',          path: '/pro/staff' },
-    { label: 'Профиль заведения',   path: '/pro/settings' },
-    { label: 'Предпросмотр',        path: '/pro/preview' },
-    { label: 'Мои бизнесы',         path: '/pro/select' },
+    { label: t('pro.more.schedule'),        path: '/pro/schedule' },
+    { label: t('pro.more.services'),        path: '/pro/services' },
+    { label: t('pro.more.staff'),           path: '/pro/staff' },
+    { label: t('pro.more.profileSettings'), path: '/pro/settings' },
+    { label: t('pro.more.preview'),         path: '/pro/preview' },
+    { label: t('pro.more.myBusinesses'),    path: '/pro/select' },
   ];
 
   return (
-    <ProLayout title="Ещё">
+    <ProLayout title={t('pro.more.title')}>
       <div className={styles.list}>
         {shareLink && (
           <div className={styles.shareCard}>
-            <p className={styles.shareTitle}>Ссылка на ваш салон</p>
+            <p className={styles.shareTitle}>{t('pro.more.shareTitle')}</p>
             <p className={styles.shareHint}>
-              Клиент перейдёт прямо на вашу страницу в Yookie
+              {t('pro.more.shareHint')}
             </p>
 
             <div className={styles.linkBox}>
@@ -94,10 +96,10 @@ export default function MorePage() {
 
             <div className={styles.shareActions}>
               <button className={styles.copyBtn} onClick={handleCopy}>
-                {copied ? 'Скопировано!' : 'Скопировать'}
+                {copied ? t('pro.more.copied') : t('pro.more.copy')}
               </button>
               <button className={styles.tgBtn} onClick={handleTelegramShare}>
-                Поделиться
+                {t('pro.more.shareVia')}
               </button>
             </div>
 
@@ -105,7 +107,7 @@ export default function MorePage() {
               className={styles.qrToggle}
               onClick={() => setQrVisible((v) => !v)}
             >
-              {qrVisible ? 'Скрыть QR-код' : 'Показать QR-код'}
+              {qrVisible ? t('pro.more.hideQr') : t('pro.more.showQr')}
             </button>
 
             {qrVisible && (
@@ -117,7 +119,7 @@ export default function MorePage() {
                   fgColor="var(--color-text)"
                   level="M"
                 />
-                <p className={styles.qrHint}>Распечатайте и разместите у стойки</p>
+                <p className={styles.qrHint}>{t('pro.more.qrHint')}</p>
               </div>
             )}
 
@@ -128,12 +130,12 @@ export default function MorePage() {
               onClick={handleBroadcast}
               disabled={broadcasting}
             >
-              {broadcasting ? 'Отправка...' : '📣 Уведомить клиентов в Telegram'}
+              {broadcasting ? t('pro.more.broadcasting') : `📣 ${t('pro.more.broadcastBtn')}`}
             </button>
 
             {broadcastResult && (
               <p className={styles.broadcastResult}>
-                Отправлено: {broadcastResult.sent} из {broadcastResult.total} клиентов
+                {t('pro.more.broadcastResult', { sent: broadcastResult.sent, total: broadcastResult.total })}
               </p>
             )}
           </div>
@@ -154,7 +156,7 @@ export default function MorePage() {
           className={styles.addBusinessBtn}
           onClick={() => navigate('/pro/new-business')}
         >
-          + Добавить ещё бизнес
+          {t('pro.more.addBusiness')}
         </button>
 
         <div className={styles.accountSection}>
@@ -164,14 +166,14 @@ export default function MorePage() {
             onClick={() => merchantId && leaveWithoutResigning(merchantId)}
             disabled={exitLoading}
           >
-            Выйти из бизнеса
+            {t('pro.more.leaveBusiness')}
           </button>
           <button
             className={styles.logoutBtn}
             onClick={logout}
             disabled={exitLoading}
           >
-            Выйти из аккаунта
+            {t('pro.more.logoutBtn')}
           </button>
         </div>
       </div>

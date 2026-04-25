@@ -2,6 +2,7 @@
  * City Store
  * Manages selected city/region (persisted to localStorage)
  * Filters all business queries by city.
+ * For Tashkent: optional district sub-filter (soft priority, not strict exclusion).
  */
 
 import { create } from 'zustand';
@@ -11,6 +12,11 @@ export interface City {
   name: string;
   lat: number;
   lng: number;
+}
+
+export interface TashkentDistrict {
+  id: string;
+  name: string;
 }
 
 export const UZBEKISTAN_CITIES: City[] = [
@@ -33,21 +39,54 @@ export const UZBEKISTAN_CITIES: City[] = [
   { id: 'Angren', name: 'Ангрен', lat: 41.0167, lng: 70.1333 },
 ]
 
+export const TASHKENT_DISTRICTS: TashkentDistrict[] = [
+  { id: 'almazar', name: 'Алмазарский' },
+  { id: 'bektemir', name: 'Бектемирский' },
+  { id: 'mirobod', name: 'Мирабадский' },
+  { id: 'mirzo_ulugbek', name: 'Мирзо-Улугбекский' },
+  { id: 'sergeli', name: 'Сергелийский' },
+  { id: 'uchtepa', name: 'Учтепинский' },
+  { id: 'chilonzor', name: 'Чиланзарский' },
+  { id: 'shaykhontohur', name: 'Шайхантаурский' },
+  { id: 'yunusabad', name: 'Юнусабадский' },
+  { id: 'yakkasaray', name: 'Яккасарайский' },
+  { id: 'yashnobod', name: 'Яшнободский' },
+]
+
 const STORAGE_KEY = 'yookie_city'
+const DISTRICT_KEY = 'yookie_district'
 const DEFAULT_CITY = UZBEKISTAN_CITIES[0] // Ташкент
 
 interface CityState {
   city: City;
+  district: TashkentDistrict | null;
   setCity: (city: City) => void;
+  setDistrict: (district: TashkentDistrict | null) => void;
   loadFromStorage: () => void;
 }
 
 export const useCityStore = create<CityState>((set) => ({
   city: DEFAULT_CITY,
+  district: null,
 
   setCity: (city: City) => {
     applyCity(city);
-    set({ city });
+    // Clear district when switching to a non-Tashkent city
+    if (city.id !== 'Tashkent') {
+      try { localStorage.removeItem(DISTRICT_KEY) } catch {}
+    }
+    set({ city, district: null });
+  },
+
+  setDistrict: (district: TashkentDistrict | null) => {
+    try {
+      if (district) {
+        localStorage.setItem(DISTRICT_KEY, JSON.stringify(district));
+      } else {
+        localStorage.removeItem(DISTRICT_KEY);
+      }
+    } catch {}
+    set({ district });
   },
 
   loadFromStorage: () => {
@@ -58,7 +97,17 @@ export const useCityStore = create<CityState>((set) => ({
         const found = UZBEKISTAN_CITIES.find(c => c.id === parsed.id);
         if (found) {
           applyCity(found);
-          set({ city: found });
+          let district: TashkentDistrict | null = null;
+          if (found.id === 'Tashkent') {
+            try {
+              const ds = localStorage.getItem(DISTRICT_KEY);
+              if (ds) {
+                const pd = JSON.parse(ds) as TashkentDistrict;
+                district = TASHKENT_DISTRICTS.find(d => d.id === pd.id) ?? null;
+              }
+            } catch {}
+          }
+          set({ city: found, district });
           return;
         }
       }

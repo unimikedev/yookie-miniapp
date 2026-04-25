@@ -1,9 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App'
-// Eager import: themeStore runs loadFromStorage at module init,
-// applying the persisted theme before first paint.
 import '@/stores/themeStore'
+import '@/i18n'
 
 const root = document.getElementById('root')
 if (!root) {

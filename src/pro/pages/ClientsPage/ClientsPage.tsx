@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listClients, listBookings } from '@/pro/api';
@@ -8,6 +9,7 @@ import styles from './ClientsPage.module.css';
 
 export default function ClientsPage() {
   const { merchantId } = useMerchantStore();
+  const { t } = useTranslation();
   const [clients, setClients] = useState<Client[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -46,11 +48,11 @@ export default function ClientsPage() {
       .sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
 
   return (
-    <ProLayout title="Клиенты">
+    <ProLayout title={t('pro.clients.title')}>
       <div className={styles.pageHeader}>
         <input
           className={styles.search}
-          placeholder={searchPresets.clients.placeholder}
+          placeholder={t('pro.clients.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -58,20 +60,20 @@ export default function ClientsPage() {
 
       {totalItems > 0 && (
         <div className={styles.resultsInfo}>
-          {hasResults 
-            ? `Найдено ${resultsCount} из ${totalItems}` 
-            : 'Ничего не найдено'}
+          {hasResults
+            ? `${resultsCount} / ${totalItems}`
+            : t('common.notFound')}
         </div>
       )}
 
       <div className={styles.list}>
         {filtered.length === 0 && totalItems > 0 ? (
           <div className={styles.emptyState}>
-            Нет клиентов по вашему запросу
+            {t('common.notFound')}
           </div>
         ) : filtered.length === 0 && totalItems === 0 ? (
           <div className={styles.emptyState}>
-            Клиенты появятся после первых записей
+            {t('pro.clients.noClientsDesc')}
           </div>
         ) : (
           filtered.map((c) => {
@@ -95,7 +97,7 @@ export default function ClientsPage() {
               {isOpen && (
                 <div className={styles.history}>
                   {hist.length === 0 && (
-                    <span className={styles.histEmpty}>Нет записей</span>
+                    <span className={styles.histEmpty}>{t('pro.bookings.noBookings')}</span>
                   )}
                   {hist.map((b) => (
                     <div key={b.id} className={styles.histRow}>

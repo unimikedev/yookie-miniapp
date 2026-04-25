@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useBookings } from '@/hooks/useBookings'
 import { LoadingState } from '@/components/ui'
 import { cancelBooking, rescheduleBooking } from '@/lib/api/bookings'
@@ -31,16 +32,17 @@ const ClockIcon = () => (
   </svg>
 )
 
-const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  pending:   { label: 'ОЖИДАЕТ',   className: 'statusPending' },
-  confirmed: { label: 'ПОДТВЕРЖДЕНО', className: 'statusConfirmed' },
-  completed: { label: 'ЗАВЕРШЕНО',  className: 'statusCompleted' },
-  cancelled: { label: 'ОТМЕНЕНО',  className: 'statusCancelled' },
-  no_show:   { label: 'НЕ ПРИШЁЛ', className: 'statusCancelled' },
+const STATUS_KEY_MAP: Record<string, { key: string; className: string }> = {
+  pending:   { key: 'bookings.statusPending',   className: 'statusPending' },
+  confirmed: { key: 'bookings.statusConfirmed', className: 'statusConfirmed' },
+  completed: { key: 'bookings.statusCompleted', className: 'statusCompleted' },
+  cancelled: { key: 'bookings.statusCancelled', className: 'statusCancelled' },
+  no_show:   { key: 'bookings.statusNoShow',    className: 'statusCancelled' },
 }
 
 export default function MyBookingsPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [tab, setTab] = useState<'active' | 'completed'>('active')
   const { bookings, isLoading, error, refetch } = useBookings()
 
@@ -109,7 +111,7 @@ export default function MyBookingsPage() {
       group.forEach(b => syncBookingCancellationToMerchant(b.id, merchantId))
       refetch()
     } catch {
-      setCancelError('Не удалось отменить запись. Попробуйте позже.')
+      setCancelError(t('bookings.cancelError'))
     } finally {
       setCancelLoading(null)
     }
@@ -151,7 +153,7 @@ export default function MyBookingsPage() {
       closeOverlay()
       refetch()
     } catch (err) {
-      setRescheduleError(err instanceof Error ? err.message : 'Ошибка при переносе')
+      setRescheduleError(err instanceof Error ? err.message : t('bookings.rescheduleError'))
     } finally {
       setRescheduleLoading(false)
     }
@@ -196,10 +198,10 @@ export default function MyBookingsPage() {
       <div className={styles.content}>
         <div className={styles.tabs}>
           <button className={`${styles.tabBtn} ${tab === 'active' ? styles.tabActive : ''}`} onClick={() => setTab('active')}>
-            Активные
+            {t('bookings.tabActive')}
           </button>
           <button className={`${styles.tabBtn} ${tab === 'completed' ? styles.tabActive : ''}`} onClick={() => setTab('completed')}>
-            Завершенные
+            {t('bookings.tabCompleted')}
           </button>
         </div>
 
@@ -209,18 +211,18 @@ export default function MyBookingsPage() {
           hasData={tab === 'active' ? activeGroups.length > 0 : pastGroups.length > 0}
           skeletonType="list"
           count={3}
-          emptyTitle={tab === 'active' ? 'Нет активных записей' : 'Нет завершенных записей'}
-          emptyDescription={tab === 'active' ? 'Запишитесь к мастеру прямо сейчас' : 'Ваши завершенные записи появятся здесь'}
-          emptyAction={tab === 'active' ? <button className={styles.actionBtn} onClick={() => navigate('/')}>Найти мастера</button> : undefined}
+          emptyTitle={tab === 'active' ? t('bookings.noActive') : t('bookings.noCompleted')}
+          emptyDescription={tab === 'active' ? t('bookings.noActiveDesc') : t('bookings.noCompletedDesc')}
+          emptyAction={tab === 'active' ? <button className={styles.actionBtn} onClick={() => navigate('/')}>{t('bookings.findMaster')}</button> : undefined}
         >
           {tab === 'active' ? (
             <>
-                <p className={styles.sectionLabel}>Активные ({activeGroups.length})</p>
+                <p className={styles.sectionLabel}>{t('bookings.sectionActive', { count: activeGroups.length })}</p>
                 {activeGroups.map((group, gi) => {
                   const first = group[0]
-                  const st = STATUS_LABELS[first.status] ?? { label: first.status.toUpperCase(), className: 'statusPending' }
-                  const businessName = (first.businesses as { name?: string } | null)?.name || 'Заведение'
-                  const masterName = formatMasterName((first.masters as { name?: string } | null)?.name || 'Мастер')
+                  const st = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusPending' }
+                  const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
+                  const masterName = formatMasterName((first.masters as { name?: string } | null)?.name || t('bookings.master'))
                   const businessCategory = (first.businesses as { category?: string } | null)?.category
                   const bizLogo = businessCategory ? getMockBusinessImage(businessCategory, first.business_id) : null
                   const isCancelling = cancelLoading === first.id
@@ -245,13 +247,13 @@ export default function MyBookingsPage() {
                             <span className={styles.businessName}>{businessName}</span>
                             <div className={styles.badgeRow}>
                               {first.rescheduled && (
-                                <span className={`${styles.statusBadge} ${styles.statusRescheduled}`}>Перезапись</span>
+                                <span className={`${styles.statusBadge} ${styles.statusRescheduled}`}>{t('bookings.statusRescheduled')}</span>
                               )}
-                              <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.label}</span>
+                              <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.key ? t(st.key) : first.status.toUpperCase()}</span>
                             </div>
                           </div>
                           {group.length > 1 && (
-                            <span className={styles.serviceCountBadge}>{group.length} услуги</span>
+                            <span className={styles.serviceCountBadge}>{t('bookings.services_count', { count: group.length })}</span>
                           )}
                         </div>
                       </div>
@@ -259,13 +261,13 @@ export default function MyBookingsPage() {
                       {/* Services list */}
                       <div className={styles.servicesList}>
                         {group.map((b) => {
-                          const serviceName = (b.services as { name?: string } | null)?.name || 'Услуга'
+                          const serviceName = (b.services as { name?: string } | null)?.name || t('bookings.service')
                           const serviceDuration = (b.services as { duration_min?: number } | null)?.duration_min
-                          const masterForService = (b.masters as { name?: string } | null)?.name || 'Мастер'
+                          const masterForService = (b.masters as { name?: string } | null)?.name || t('bookings.master')
                           return (
                             <div key={b.id} className={styles.serviceRow}>
                               <span className={styles.serviceName}>{serviceName}</span>
-                              <span className={styles.serviceDuration}>{serviceDuration ?? '?'} мин</span>
+                              <span className={styles.serviceDuration}>{serviceDuration ?? '?'} {t('bookings.min')}</span>
                               <span className={styles.serviceMaster}>{masterForService}</span>
                             </div>
                           )
@@ -279,7 +281,7 @@ export default function MyBookingsPage() {
                         </div>
                         <div className={styles.metaRow}>
                           <ClockIcon />
-                          <span>{timeRange} • {totalDuration} мин</span>
+                          <span>{timeRange} • {totalDuration} {t('bookings.min')}</span>
                         </div>
                         <div className={styles.metaRow}>
                           <PersonIcon />
@@ -290,15 +292,15 @@ export default function MyBookingsPage() {
                             <rect x="2" y="4" width="20" height="16" rx="2" />
                             <path d="M2 10h20" />
                           </svg>
-                          <span className={styles.totalPrice}>{totalPrice.toLocaleString('ru')} сўм</span>
+                          <span className={styles.totalPrice}>{totalPrice.toLocaleString('ru')} {t('common.currency')}</span>
                         </div>
                       </div>
 
                       {/* Total price */}
                       <div className={styles.totalPriceRow}>
-                        <span className={styles.totalLabel}>Итого:</span>
+                        <span className={styles.totalLabel}>{t('bookings.total')}</span>
                         <span className={styles.totalValue}>
-                          {totalPrice.toLocaleString('ru')} сўм
+                          {totalPrice.toLocaleString('ru')} {t('common.currency')}
                         </span>
                       </div>
 
@@ -312,14 +314,14 @@ export default function MyBookingsPage() {
                           disabled={isCancelling || rescheduleLoading}
                           onClick={() => handleCancelGroup(group)}
                         >
-                          {isCancelling ? 'Отмена...' : 'Отменить'}
+                          {isCancelling ? t('bookings.cancelLoading') : t('bookings.cancelBtn')}
                         </button>
                         <button
                           className={styles.btnSecondary}
                           disabled={rescheduleLoading}
                           onClick={() => handleRescheduleOpen(group)}
                         >
-                          Перенести
+                          {t('bookings.reschedule')}
                         </button>
                         <a
                           className={styles.btnCalendar}
@@ -327,7 +329,7 @@ export default function MyBookingsPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          + Календарь
+                          {t('bookings.calendar')}
                         </a>
                       </div>
                     </div>
@@ -336,14 +338,14 @@ export default function MyBookingsPage() {
               </>
           ) : (
             <>
-              <p className={styles.sectionLabel}>Прошедшие ({pastGroups.length})</p>
+              <p className={styles.sectionLabel}>{t('bookings.sectionPast', { count: pastGroups.length })}</p>
               <div className={styles.pastList}>
                 {pastGroups.map((group, gi) => {
                     const first = group[0]
-                    const st = STATUS_LABELS[first.status] ?? { label: first.status.toUpperCase(), className: 'statusCancelled' }
-                    const businessName = (first.businesses as { name?: string } | null)?.name || 'Заведение'
+                    const st = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusCancelled' }
+                    const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
                     const totalPrice = group.reduce((sum, b) => sum + ((b.services as { price?: number } | null)?.price ?? 0), 0)
-                    const serviceNames = group.map(b => (b.services as { name?: string } | null)?.name ?? 'Услуга').join(', ')
+                    const serviceNames = group.map(b => (b.services as { name?: string } | null)?.name ?? t('bookings.service')).join(', ')
                     return (
                       <div key={`pg-${gi}`} className={styles.pastRow}>
                         <div className={styles.pastLogo} />
@@ -353,17 +355,17 @@ export default function MyBookingsPage() {
                             {formatDate(first.starts_at)}
                           </span>
                           <span className={styles.pastServices}>{serviceNames}</span>
-                          <span className={styles.pastPrice}>{totalPrice.toLocaleString('ru')} сўм</span>
+                          <span className={styles.pastPrice}>{totalPrice.toLocaleString('ru')} {t('common.currency')}</span>
                         </div>
                         {first.status === 'completed' ? (
                           <button
                             className={styles.reviewBtn}
                             onClick={() => setReviewBooking(first)}
                           >
-                            Отзыв
+                            {t('bookings.review')}
                           </button>
                         ) : (
-                          <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.label}</span>
+                          <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.key ? t(st.key) : first.status.toUpperCase()}</span>
                         )}
                       </div>
                     )
@@ -390,7 +392,7 @@ export default function MyBookingsPage() {
       {reviewSuccess && (
         <div className={styles.reviewSuccess}>
           <span className={styles.reviewSuccessIcon}>✓</span>
-          <span>Отзыв успешно отправлен!</span>
+          <span>{t('bookings.reviewSuccess')}</span>
         </div>
       )}
 

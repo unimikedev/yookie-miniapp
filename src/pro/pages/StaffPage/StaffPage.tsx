@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -23,14 +24,15 @@ const EMPTY: StaffInput = { name: '', specialization: '' };
 
 type Tab = 'users' | 'masters';
 
-const ROLE_LABELS: Record<string, string> = {
-  owner: 'Владелец',
-  admin: 'Администратор',
-  staff: 'Сотрудник',
-};
-
 export default function StaffPage() {
   const { merchantId, role: myRole } = useMerchantStore();
+  const { t } = useTranslation();
+
+  const ROLE_LABELS: Record<string, string> = {
+    owner: t('pro.staff.roleOwner'),
+    admin: t('pro.staff.roleAdmin'),
+    staff: t('pro.staff.roleStaff'),
+  };
   const myUserId = useAuthStore((s) => s.user?.id);
   const [tab, setTab] = useState<Tab>('users');
 
@@ -84,7 +86,7 @@ export default function StaffPage() {
     });
     if (!res.ok) {
       const json = await res.json().catch(() => ({}));
-      throw new Error((json as { message?: string }).message || 'Ошибка загрузки фото');
+      throw new Error((json as { message?: string }).message || t('pro.staff.uploadError'));
     }
     const json = await res.json() as { url: string };
     return json.url;
@@ -117,7 +119,7 @@ export default function StaffPage() {
       setSelectedServiceIds([]);
       loadAll();
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Ошибка при сохранении');
+      setSaveError(err instanceof Error ? err.message : t('pro.staff.saveError'));
     } finally {
       setSaving(false);
     }
@@ -131,7 +133,7 @@ export default function StaffPage() {
       emit({ type: 'staff.changed', merchantId });
       loadAll();
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Не удалось удалить мастера');
+      setDeleteError(err instanceof Error ? err.message : t('pro.staff.deleteError'));
     }
   };
 
@@ -170,7 +172,7 @@ export default function StaffPage() {
 
   const handleRevoke = async (userId: string) => {
     if (!merchantId) return;
-    const ok = window.confirm('Удалить пользователя из бизнеса? Его профиль мастера станет виртуальным.');
+    const ok = window.confirm(t('pro.staff.confirmDelete'));
     if (!ok) return;
     setRevoking(userId);
     try {
@@ -193,20 +195,20 @@ export default function StaffPage() {
   ) : null;
 
   return (
-    <ProLayout title="Сотрудники" actions={addMasterBtn ?? undefined}>
+    <ProLayout title={t('pro.staff.title')} actions={addMasterBtn ?? undefined}>
       {/* Tabs */}
       <div className={styles.tabs}>
         <button
           className={`${styles.tab} ${tab === 'users' ? styles.tabActive : ''}`}
           onClick={() => setTab('users')}
         >
-          Пользователи
+          {t('pro.staff.tabUsers')}
         </button>
         <button
           className={`${styles.tab} ${tab === 'masters' ? styles.tabActive : ''}`}
           onClick={() => setTab('masters')}
         >
-          Мастера
+          {t('pro.staff.tabMasters')}
         </button>
       </div>
 
@@ -215,7 +217,7 @@ export default function StaffPage() {
         <div className={styles.list}>
           {realUsers.length === 0 && (
             <p className={styles.emptyHint}>
-              Здесь появятся пользователи, принявшие приглашение.
+              {t('pro.staff.noUsers')}
             </p>
           )}
           {realUsers.map((m) => {
@@ -288,7 +290,7 @@ export default function StaffPage() {
                   onClick={() => photoRef.current?.click()}
                   disabled={uploading}
                 >
-                  {uploading ? 'Загрузка…' : editing.photo_url ? 'Сменить фото' : 'Добавить фото'}
+                  {uploading ? t('pro.staff.uploading') : editing.photo_url ? t('pro.staff.changePhoto') : t('pro.staff.uploadPhoto')}
                 </button>
                 <input
                   ref={photoRef}
@@ -301,20 +303,20 @@ export default function StaffPage() {
 
               <input
                 className={styles.input}
-                placeholder="Имя"
+                placeholder={t('pro.staff.name')}
                 value={editing.name}
                 onChange={(e) => setEditing({ ...editing, name: e.target.value })}
               />
               <input
                 className={styles.input}
-                placeholder="Специализация"
+                placeholder={t('pro.staff.specialization')}
                 value={editing.specialization}
                 onChange={(e) => setEditing({ ...editing, specialization: e.target.value })}
               />
 
               {services.length > 0 && (
                 <div className={styles.servicesPicker}>
-                  <p className={styles.servicesLabel}>Услуги мастера</p>
+                  <p className={styles.servicesLabel}>{t('pro.staff.servicesLabel')}</p>
                   {services.map((svc) => (
                     <label key={svc.id} className={styles.serviceCheckbox}>
                       <input
@@ -329,7 +331,7 @@ export default function StaffPage() {
                         }
                       />
                       <span>{svc.name}</span>
-                      <span className={styles.servicePrice}>{svc.price.toLocaleString()} сум</span>
+                      <span className={styles.servicePrice}>{svc.price.toLocaleString()} {t('common.currency')}</span>
                     </label>
                   ))}
                 </div>
@@ -338,10 +340,10 @@ export default function StaffPage() {
               {saveError && <p className={styles.errorMsg}>{saveError}</p>}
               <div className={styles.formActions}>
                 <button className={styles.cancelBtn} onClick={() => { setEditing(null); setSelectedServiceIds([]); }}>
-                  Отмена
+                  {t('common.cancel')}
                 </button>
                 <button className={styles.saveBtn} onClick={handleSave} disabled={saving || !editing.name}>
-                  {saving ? '…' : 'Сохранить'}
+                  {saving ? '…' : t('common.save')}
                 </button>
               </div>
             </div>
@@ -352,7 +354,7 @@ export default function StaffPage() {
           <div className={styles.list}>
             {virtualMasters.length === 0 && !editing && (
               <p className={styles.emptyHint}>
-                Добавьте виртуального мастера — нажмите + в правом верхнем углу.
+                {t('pro.staff.noMasters')}
               </p>
             )}
             {virtualMasters.map((s) => {
@@ -399,7 +401,7 @@ export default function StaffPage() {
                         className={styles.copyBtn}
                         onClick={() => handleCopyLink(link, s.id)}
                       >
-                        {copiedLink === s.id ? '✓' : 'Копировать'}
+                        {copiedLink === s.id ? t('pro.staff.linkCopied') : t('pro.staff.copyLink')}
                       </button>
                     </div>
                   )}

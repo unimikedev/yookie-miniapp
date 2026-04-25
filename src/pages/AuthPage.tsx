@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/authStore'
 import { requestOtp } from '@/lib/api/auth'
 import styles from './AuthPage.module.css'
@@ -12,6 +13,7 @@ const OTP_RESEND_SECONDS = 60
 
 export default function AuthPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const authStore = useAuthStore()
   const returnTo = searchParams.get('return') || '/account'
@@ -46,7 +48,7 @@ export default function AuthPage() {
       await authStore.googleLogin(response.credential)
       navigate(returnTo, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка входа через Google')
+      setError(err instanceof Error ? err.message : t('auth.errorGoogle'))
     } finally {
       setIsLoading(false)
     }
@@ -115,7 +117,7 @@ export default function AuthPage() {
   const handleRequestOtp = async () => {
     const digits = phone.replace(/\D/g, '')
     if (digits.length < 12) {
-      setError('Введите полный номер телефона')
+      setError(t('auth.errorPhone'))
       return
     }
 
@@ -137,7 +139,7 @@ export default function AuthPage() {
       await requestOtp(phone, telegramId)
       setScreen('otp')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка при отправке кода')
+      setError(err instanceof Error ? err.message : t('auth.errorSend'))
     } finally {
       setIsLoading(false)
     }
@@ -168,7 +170,7 @@ export default function AuthPage() {
 
   const submitOtp = async (code: string) => {
     if (code.length < 6) {
-      setError('Введите 6-значный код')
+      setError(t('auth.errorCode'))
       return
     }
     // Dev shortcut: 000000 → instant test login — only in dev builds
@@ -183,7 +185,7 @@ export default function AuthPage() {
       await authStore.login(phone, code)
       navigate(returnTo, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Неверный код')
+      setError(err instanceof Error ? err.message : t('auth.errorLogin'))
       setOtp(['', '', '', '', '', ''])
       otpRefs[0].current?.focus()
     } finally {
@@ -220,7 +222,7 @@ export default function AuthPage() {
       await requestOtp(phone, telegramId)
       setCountdown(OTP_RESEND_SECONDS)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка при отправке кода')
+      setError(err instanceof Error ? err.message : t('auth.errorSend'))
     } finally {
       setIsLoading(false)
     }
@@ -235,7 +237,7 @@ export default function AuthPage() {
           if (screen === 'otp') { setScreen('phone'); setOtp(['', '', '', '', '', '']); setError(null) }
           else navigate(-1)
         }}
-        aria-label="Назад"
+        aria-label={t('common.back')}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M12 4L6 10L12 16" />
@@ -251,8 +253,8 @@ export default function AuthPage() {
       {screen === 'phone' ? (
         /* ── Phone screen ── */
         <div className={styles.content}>
-          <h1 className={styles.title}>Вход в аккаунт</h1>
-          <p className={styles.subtitle}>Введите номер телефона для входа или регистрации</p>
+          <h1 className={styles.title}>{t('auth.title')}</h1>
+          <p className={styles.subtitle}>{t('auth.subtitle')}</p>
 
           <div className={styles.phoneField}>
             <div className={styles.flagPrefix}>
@@ -262,7 +264,7 @@ export default function AuthPage() {
             <input
               className={styles.phoneInput}
               type="tel"
-              placeholder="90 123 45 67"
+              placeholder={t('auth.phonePlaceholder')}
               value={phone.replace(/^\+998/, '')}
               onChange={e => {
                 const raw = e.target.value.replace(/\D/g, '').slice(0, 9)
@@ -281,30 +283,30 @@ export default function AuthPage() {
             onClick={handleRequestOtp}
             disabled={isLoading}
           >
-            {isLoading ? 'Отправка...' : 'Получить код →'}
+            {isLoading ? t('common.sending') : t('auth.getCode')}
           </button>
 
           <div className={styles.divider}>
             <span className={styles.dividerLine} />
-            <span className={styles.dividerText}>или</span>
+            <span className={styles.dividerText}>{t('common.or')}</span>
             <span className={styles.dividerLine} />
           </div>
 
           <div ref={googleBtnRef} className={styles.googleBtn} />
 
           <p className={styles.agreement}>
-            Продолжая, вы соглашаетесь с{' '}
-            <a href="https://t.me/yookie_bot" target="_blank" rel="noopener noreferrer" className={styles.link}>условиями использования</a>
+            {t('auth.agree')}{' '}
+            <a href="https://t.me/yookie_bot" target="_blank" rel="noopener noreferrer" className={styles.link}>{t('auth.terms')}</a>
           </p>
         </div>
       ) : (
         /* ── OTP screen ── */
         <div className={styles.content}>
-          <h1 className={styles.title}>Введите код</h1>
+          <h1 className={styles.title}>{t('auth.otpTitle')}</h1>
           <p className={styles.subtitle}>
             {otpViaTelegram
-              ? <>Код отправлен в <strong>Telegram</strong> на номер <strong>{phone}</strong></>
-              : <>Мы отправили 6-значный код на <strong>{phone}</strong></>
+              ? <>{t('auth.otpSubtitleTelegramPre')} <strong>Telegram</strong> {t('auth.otpSubtitleAt')} <strong>{phone}</strong></>
+              : <>{t('auth.otpSubtitleSmsPre')} <strong>{phone}</strong></>
             }
           </p>
 
@@ -333,11 +335,11 @@ export default function AuthPage() {
           <div className={styles.resendRow}>
             {countdown > 0 ? (
               <p className={styles.resendTimer}>
-                Отправить снова через <strong>{countdown}с</strong>
+                {t('auth.resendTimer', { seconds: countdown })}
               </p>
             ) : (
               <button className={styles.resendBtn} onClick={handleResend} disabled={isLoading}>
-                Отправить снова
+                {t('auth.resend')}
               </button>
             )}
           </div>
@@ -353,7 +355,7 @@ export default function AuthPage() {
                   else if (key !== '') handleNumpad(key)
                 }}
                 disabled={key === '' || isLoading}
-                aria-label={key === '⌫' ? 'Удалить' : key}
+                aria-label={key === '⌫' ? t('common.delete') : key}
               >
                 {key === '⌫' ? (
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -369,7 +371,7 @@ export default function AuthPage() {
             onClick={() => submitOtp(otp.join(''))}
             disabled={isLoading || otp.some(d => !d)}
           >
-            {isLoading ? 'Проверка...' : 'Подтвердить'}
+            {isLoading ? t('common.checking') : t('auth.confirm')}
           </button>
         </div>
       )}
