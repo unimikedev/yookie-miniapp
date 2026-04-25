@@ -23,7 +23,7 @@
   pointer-events: auto;
 }
 
-/* Safe-area spacer — used inside gradientBlock AND searchSticky */
+/* Safe-area spacer — used only inside gradientBlock */
 .safeAreaSpacer {
   height: var(--safe-area-top, 64px);
 }
@@ -102,14 +102,13 @@
   min-height: 100dvh;
 }
 
-/* ── ONLY sticky element: safe-area spacer + searchbar, pins at top:0 ── */
+/* ── ONLY sticky element: just the searchbar row, pins below Telegram UI ── */
 .searchSticky {
   position: sticky;
-  top: 0;
+  top: var(--safe-area-top, 0px);
   z-index: 10;
   background: var(--color-bg);
-  border-radius: 32px 32px 0 0;
-  padding-bottom: 8px;
+  padding: 4px 16px 8px;
 }
 
 .searchBox {
@@ -124,7 +123,7 @@
   height: 56px;
   padding: 0 16px;
   padding-right: calc(16px + 100px);
-  background: #fff;
+  background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-3xl);
   transition: border-color 0.15s, box-shadow 0.15s;

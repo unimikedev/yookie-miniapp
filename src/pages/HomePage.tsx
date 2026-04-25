@@ -514,9 +514,8 @@ export default function HomePage() {
 
       {/* White card — overlaps gradient, contains ONLY sticky searchbar */}
       <div className={styles.mainCard}>
-        {/* Sticky zone: safe-area spacer + searchbar pins together at top */}
+        {/* Sticky zone: only the searchbar row, no spacer inside */}
         <div className={styles.searchSticky}>
-          <div className={styles.safeAreaSpacer} />
           <div className={styles.searchBox}>
             <form className={styles.searchInputWrap} onSubmit={handleSearchSubmit}>
               <span className={styles.searchIcon}><SearchIcon /></span>
