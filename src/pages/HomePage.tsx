@@ -157,7 +157,7 @@ export default function HomePage() {
   const { data, isLoading, error } = useHomeData()
   const { visited: apiVisited, isLoading: visitedLoading } = useVisitedMasters()
   const { toggle, isFavorite } = useFavoritesStore()
-  const { city } = useCityStore()
+  const { city, district } = useCityStore()
   const authStore = useAuthStore()
   const { isOnline } = useOfflineMode()
 
@@ -238,7 +238,7 @@ export default function HomePage() {
             type: 'business',
             id: b.id,
             name: b.name,
-            meta: b.category || '',
+            meta: CATEGORY_LABELS[b.category as CategoryEnum] || b.category || '',
             iconSrc: CATEGORY_ICONS[b.category as keyof typeof CATEGORY_ICONS] || '/categories/cosmetology.png',
             businessId: b.id,
           })
@@ -384,7 +384,15 @@ export default function HomePage() {
       try {
         const res = await fetchBusinesses({ city: city.id, limit: FEED_LIMIT, offset: 0, sort: FEED_SORTS[feedFilter] })
         if (cancelled) return
-        const items = (res.data ?? []).map(toFeedCard)
+        let raw = res.data ?? []
+        if (district) {
+          const dKey = district.name.replace(/ский$/, '').toLowerCase()
+          raw = [
+            ...raw.filter(b => (b.address ?? '').toLowerCase().includes(dKey)),
+            ...raw.filter(b => !(b.address ?? '').toLowerCase().includes(dKey)),
+          ]
+        }
+        const items = raw.map(toFeedCard)
         setFeedItems(items)
         setFeedOffset(items.length)
         setFeedHasMore(items.length >= FEED_LIMIT)
@@ -395,7 +403,7 @@ export default function HomePage() {
       }
     })()
     return () => { cancelled = true }
-  }, [feedFilter, city.id])
+  }, [feedFilter, city.id, district?.id])
 
   // ── Feed: update mutable ref so IntersectionObserver always gets fresh state ──
   loadMoreFeedRef.current = () => {
@@ -472,6 +480,27 @@ export default function HomePage() {
   const filteredData = getFilteredData()
   const hasVisitedData = effectiveVisited && effectiveVisited.length > 0
 
+  const catResults = searchResults.filter(r => r.type === 'category')
+  const bizResults = searchResults.filter(r => r.type === 'business')
+  const masterResults = searchResults.filter(r => r.type === 'master')
+
+  const renderSearchItem = (item: SearchResultItem) => (
+    <button
+      key={item.id}
+      className={styles.searchResultItem}
+      onMouseDown={(e) => { e.preventDefault(); handleSearchSelect(item) }}
+    >
+      <span className={styles.searchResultIcon}>
+        <img src={item.iconSrc} alt="" className={styles.searchResultImage} />
+      </span>
+      <div className={styles.searchResultInfo}>
+        <span className={styles.searchResultName}>{item.name}</span>
+        <span className={styles.searchResultMeta}>{item.meta}</span>
+      </div>
+      <span className={styles.searchResultArrow}><ChevronRight /></span>
+    </button>
+  )
+
   if (!filteredData && !effectiveVisitedLoading) {
     return <div className={styles.page}><p>Loading...</p></div>
   }
@@ -525,7 +554,7 @@ export default function HomePage() {
                 onClick={(e) => { e.stopPropagation(); setCitySelectorOpen(true); }}
                 aria-label="Смена города"
               >
-                <span>{city.name}</span>
+                <span>{district ? district.name : city.name}</span>
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                   <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -540,22 +569,11 @@ export default function HomePage() {
                     <Skeleton variant="rect" height={48} />
                   </div>
                 ) : searchResults.length > 0 ? (
-                  searchResults.map((item) => (
-                    <button
-                      key={item.id}
-                      className={styles.searchResultItem}
-                      onMouseDown={(e) => { e.preventDefault(); handleSearchSelect(item); }}
-                    >
-                      <span className={styles.searchResultIcon}>
-                        <img src={item.iconSrc} alt="" className={styles.searchResultImage} />
-                      </span>
-                      <div className={styles.searchResultInfo}>
-                        <span className={styles.searchResultName}>{item.name}</span>
-                        <span className={styles.searchResultMeta}>{item.meta}</span>
-                      </div>
-                      <span className={styles.searchResultArrow}><ChevronRight /></span>
-                    </button>
-                  ))
+                  <>
+                    {catResults.length > 0 && <><div className={styles.searchDropdownHeader}>Категории</div>{catResults.map(renderSearchItem)}</>}
+                    {bizResults.length > 0 && <><div className={styles.searchDropdownHeader}>Заведения</div>{bizResults.map(renderSearchItem)}</>}
+                    {masterResults.length > 0 && <><div className={styles.searchDropdownHeader}>Мастера</div>{masterResults.map(renderSearchItem)}</>}
+                  </>
                 ) : (
                   <div className={styles.searchEmpty}>Ничего не найдено</div>
                 )}

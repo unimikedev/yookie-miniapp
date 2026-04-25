@@ -147,3 +147,41 @@
   font-size: 14px;
   color: var(--color-text-muted);
 }
+
+/* Back button — districts sub-screen */
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 20px;
+  background: var(--color-surface-elevated);
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Gilroy', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.backBtn:active {
+  background: var(--color-border);
+}
+
+/* Hint text below the districts header */
+.districtHint {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* District label inside city list item */
+.cityDistrict {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
