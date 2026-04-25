@@ -83,13 +83,14 @@ export default function ProviderDetailPage() {
 
   const authStore = useAuthStore()
 
-  // Pre-fill client info from auth store
-  const [clientName, setClientName] = useState('')
+  // Pre-fill client info from auth store or Telegram
+  const [clientName, setClientName] = useState(() =>
+    authStore.name || (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.first_name || ''
+  )
   const [clientPhone, setClientPhone] = useState('')
 
   useEffect(() => {
     if (authStore.isAuthenticated) {
-      if (authStore.name && !clientName) setClientName(authStore.name)
       if (authStore.phone && !clientPhone) setClientPhone(authStore.phone)
     }
   }, [])

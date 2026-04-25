@@ -56,11 +56,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 48px;
+  height: 56px;
   padding: 0 16px;
   background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 24px;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-3xl);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
@@ -79,7 +79,8 @@
   background: transparent;
   outline: none;
   font-family: var(--font-family);
-  font-size: var(--text-body-size);
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
   color: var(--color-text);
   min-width: 0;
 }
@@ -106,8 +107,9 @@
 .filtersRow {
   pointer-events: auto;
   display: flex;
+  align-items: flex-start;
   gap: 8px;
-  padding: 0 16px 8px;
+  padding: 8px 16px 8px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -397,6 +399,25 @@
 
 .carousel::-webkit-scrollbar {
   display: none;
+}
+
+/* ─── Nearby Card Wrapper (replaces mapCard in carousel) ────────────────── */
+
+.nearbyCardWrap {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  border-radius: 24px;
+}
+
+.nearbyCardWrap:active {
+  opacity: 0.85;
+}
+
+.nearbyCardWrapActive > * {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 2px 12px rgba(107, 206, 255, 0.25);
 }
 
 /* ─── Map Card ───────────────────────────────────────────────────────────── */

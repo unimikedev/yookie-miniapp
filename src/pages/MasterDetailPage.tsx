@@ -46,8 +46,12 @@ export default function MasterDetailPage() {
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [reviewsLoading, setReviewsLoading] = useState(false)
 
+  const authStore = useAuthStore()
+
   // Confirmation state
-  const [clientName, setClientName] = useState('')
+  const [clientName, setClientName] = useState(() =>
+    authStore.name || (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.first_name || ''
+  )
   const [clientPhone, setClientPhone] = useState('')
   const [bookingLoading, setBookingLoading] = useState(false)
   const [bookingError, setBookingError] = useState<string | null>(null)
@@ -56,13 +60,10 @@ export default function MasterDetailPage() {
   const dateRef = useRef<HTMLDivElement>(null)
   const servicesRef = useRef<HTMLDivElement>(null)
 
-  const authStore = useAuthStore()
-
-  // Pre-fill client info from auth store (only on mount)
+  // Pre-fill phone from auth store (only on mount)
   useEffect(() => {
-    if (authStore.isAuthenticated) {
-      if (authStore.name && !clientName) setClientName(authStore.name)
-      if (authStore.phone && !clientPhone) setClientPhone(authStore.phone)
+    if (authStore.isAuthenticated && authStore.phone && !clientPhone) {
+      setClientPhone(authStore.phone)
     }
   }, [])
 

@@ -349,14 +349,7 @@ export function PopularStudioCardView({
           <HeartIcon filled={isFavorite} size={20} />
         </button>
         {allPhotos.length > 1 && (
-          <div className={styles.psDots}>
-            {allPhotos.map((_, idx) => (
-              <span
-                key={idx}
-                className={`${styles.psDot} ${idx === currentPhoto ? styles.psDotActive : ''}`}
-              />
-            ))}
-          </div>
+          <div className={styles.psPhotoCounter}>{currentPhoto + 1}/{allPhotos.length}</div>
         )}
       </div>
       <div className={styles.psBody}>

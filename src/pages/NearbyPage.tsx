@@ -17,11 +17,13 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useGeolocation } from '@/hooks/useGeolocation'
 import { fetchNearbyBusinesses, fetchRoute } from '@/lib/api/businesses'
-import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { NearbyBusinessResult, CategoryEnum, RouteResult } from '@/lib/api/types'
+import type { NearbyBusinessCard } from '@/lib/api/home'
 import { useThemeStore } from '@/stores/themeStore'
 import { Skeleton } from '@/shared/ui'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
+import { NearbyCard, HomeCategoryChip } from '@/components/features/home/HomeCards'
+import { CATEGORIES } from '@/shared/constants'
 import styles from './NearbyPage.module.css'
 
 /* ── Yandex Maps global ─────────────────────────────────────────────────── */
@@ -90,25 +92,6 @@ const WalkIcon = () => (
   </svg>
 )
 
-const StarIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <path d="M6 0.5L7.76 4.06L11.7 4.64L8.85 7.42L9.53 11.34L6 9.5L2.47 11.34L3.15 7.42L0.3 4.64L4.24 4.06L6 0.5Z" fill="#FBBF24" />
-  </svg>
-)
-
-const TagIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-    <path d="M1.33 8.53L7.47 2.39C7.72 2.14 8.06 2 8.41 2H13.33C13.7 2 14 2.3 14 2.67V7.59C14 7.94 13.86 8.28 13.61 8.53L7.47 14.67C6.95 15.19 6.11 15.19 5.59 14.67L1.33 10.41C0.81 9.89 0.81 9.05 1.33 8.53Z" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="11" cy="5" r="0.8" fill="#9CA3AF" />
-  </svg>
-)
-
-const CloseIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-    <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-)
-
 const NavigateIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
     <path d="M3 11L22 2L13 21L11 13L3 11Z" fill="currentColor" />
@@ -123,11 +106,6 @@ function formatPrice(price: number): string {
   return `${price}`
 }
 
-function formatPriceFrom(price: number): string {
-  if (price >= 1000) return `от ${Math.round(price / 1000)} тыс.`
-  return `от ${price}`
-}
-
 function formatDistance(km: number | null): string {
   if (km === null) return ''
   if (km < 1) return `${Math.round(km * 1000)} м`
@@ -138,6 +116,21 @@ function formatDuration(min: number | null): string {
   if (min === null) return ''
   if (min < 60) return `${min} мин`
   return `${Math.floor(min / 60)} ч ${min % 60} мин`
+}
+
+function toNearbyCard(biz: NearbyBusinessResult): NearbyBusinessCard {
+  return {
+    id: biz.id,
+    providerType: 'business',
+    name: biz.name,
+    category: biz.category as CategoryEnum,
+    categoryLabel: '',
+    distanceMeters: biz.distance_km !== null ? Math.round(biz.distance_km * 1000) : 0,
+    priceFrom: biz.min_price || 0,
+    rating: biz.rating || 0,
+    photoUrl: (biz as any).photo_url || getMockBusinessImage(biz.category, biz.id),
+    businessId: biz.id,
+  }
 }
 
 /* ── Map theme ──────────────────────────────────────────────────────────── */
@@ -509,7 +502,7 @@ export default function NearbyPage() {
           </div>
         </div>
 
-        {/* Category filter pills */}
+        {/* Category filter row */}
         <div className={styles.filtersRow}>
           <button
             className={`${styles.filterPill} ${activeFilterCount > 0 ? styles.filterPillActive : ''}`}
@@ -520,20 +513,20 @@ export default function NearbyPage() {
               {t('nearby.filters')}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
             </span>
           </button>
-
-          {CATEGORY_FILTERS.map((cat) => (
-            <button
+          <button
+            className={`${styles.filterPill} ${selectedCategory === 'all' ? styles.filterPillActive : ''}`}
+            onClick={() => setSelectedCategory('all')}
+          >
+            <span className={styles.filterPillLabel}>{t('common.all')}</span>
+          </button>
+          {CATEGORIES.filter(cat => (CATEGORY_FILTER_KEYS as string[]).includes(cat.key)).map(cat => (
+            <HomeCategoryChip
               key={cat.key}
-              className={`${styles.filterPill} ${selectedCategory === cat.key ? styles.filterPillActive : ''}`}
-              onClick={() => setSelectedCategory(cat.key)}
-            >
-              <span className={styles.filterPillLabel}>{cat.label}</span>
-              {selectedCategory === cat.key && cat.key !== 'all' && (
-                <span className={styles.filterCloseIcon} onClick={(e) => { e.stopPropagation(); setSelectedCategory('all') }}>
-                  <CloseIcon />
-                </span>
-              )}
-            </button>
+              label={t(`categories.${cat.key}`)}
+              iconSrc={cat.icon}
+              onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
+              active={selectedCategory === cat.key}
+            />
           ))}
         </div>
 
@@ -653,47 +646,14 @@ export default function NearbyPage() {
         <div className={styles.carousel} ref={carouselRef}>
           {businesses.map((biz, index) => {
             const isActive = index === activeCardIndex
-            const photoUrl = (biz as any).photo_url || getMockBusinessImage(biz.category, biz.id)
             return (
               <div
                 key={biz.id}
-                className={`${styles.mapCard} ${isActive ? styles.mapCardActive : ''}`}
+                className={`${styles.nearbyCardWrap} ${isActive ? styles.nearbyCardWrapActive : ''}`}
                 onClick={() => handleCardClick(biz, index)}
-                role="button"
-                tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && handleCardClick(biz, index)}
               >
-                <div className={styles.mapCardImage}>
-                  {photoUrl ? (
-                    <img src={photoUrl} alt={biz.name} loading="lazy" />
-                  ) : (
-                    <div className={styles.mapCardImageFallback} />
-                  )}
-                </div>
-                <div className={styles.mapCardBody}>
-                  <div className={styles.mapCardTitleRow}>
-                    <span className={styles.mapCardTitle}>{biz.name}</span>
-                    <div className={styles.mapCardRating}>
-                      <StarIcon />
-                      <span className={styles.mapCardRatingText}>{biz.rating?.toFixed(1) || '—'}</span>
-                    </div>
-                  </div>
-                  <div className={styles.mapCardMeta}>
-                    <span className={styles.mapCardSubtitle}>
-                      {CATEGORY_LABELS[biz.category] || biz.category}
-                      {biz.distance_km !== null && ` • ${formatDistance(biz.distance_km)}`}
-                    </span>
-                    {biz.min_price > 0 && (
-                      <div className={styles.mapCardPriceRow}>
-                        <span className={styles.mapCardPriceIcon}><TagIcon /></span>
-                        <span className={styles.mapCardPriceText}>{formatPriceFrom(biz.min_price)}</span>
-                      </div>
-                    )}
-                  </div>
-                  {isActive && biz.address && (
-                    <div className={styles.mapCardAddress}>{biz.address}</div>
-                  )}
-                </div>
+                <NearbyCard item={toNearbyCard(biz)} compact />
               </div>
             )
           })}
