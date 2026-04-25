@@ -176,16 +176,27 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryEnum | null>(null)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
 
-  const [marqueePaused, setMarqueePaused] = useState(false)
-  const marqueePauseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const marqueeRef = useRef<HTMLDivElement>(null)
+  const marqueeRafRef = useRef<number | null>(null)
+  const marqueePausedRef = useRef(false)
 
-  const handleMarqueeTouchStart = () => {
-    if (marqueePauseTimer.current) clearTimeout(marqueePauseTimer.current)
-    setMarqueePaused(true)
-  }
-  const handleMarqueeTouchEnd = () => {
-    marqueePauseTimer.current = setTimeout(() => setMarqueePaused(false), 1500)
-  }
+  const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
+  const handleMarqueeTouchEnd = () => { setTimeout(() => { marqueePausedRef.current = false }, 1500) }
+
+  useEffect(() => {
+    const el = marqueeRef.current
+    if (!el) return
+    const tick = () => {
+      if (!marqueePausedRef.current) {
+        el.scrollLeft += 0.3
+        const half = el.scrollWidth / 2
+        if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
+      }
+      marqueeRafRef.current = requestAnimationFrame(tick)
+    }
+    marqueeRafRef.current = requestAnimationFrame(tick)
+    return () => { if (marqueeRafRef.current) cancelAnimationFrame(marqueeRafRef.current) }
+  }, [])
 
   // Infinite feed state
   const [feedFilter, setFeedFilter] = useState<FeedFilterKey>('new_places')
@@ -553,23 +564,22 @@ export default function HomePage() {
           </div>
         </div>{/* end searchSticky */}
 
-        {/* Category chips — CSS marquee animation, pauses on touch */}
+        {/* Category chips — RAF auto-scroll + native swipe */}
         <div
+          ref={marqueeRef}
           className={styles.catMarqueeWrap}
           onTouchStart={handleMarqueeTouchStart}
           onTouchEnd={handleMarqueeTouchEnd}
         >
-          <div className={`${styles.catMarqueeTrack}${marqueePaused ? ' ' + styles.paused : ''}`}>
-            {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
-              <HomeCategoryChip
-                key={`${cat.key}-${idx}`}
-                label={cat.label}
-                iconSrc={cat.icon}
-                onClick={() => handleCategoryClick(cat.key)}
-                active={selectedCategory === cat.key}
-              />
-            ))}
-          </div>
+          {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
+            <HomeCategoryChip
+              key={`${cat.key}-${idx}`}
+              label={cat.label}
+              iconSrc={cat.icon}
+              onClick={() => handleCategoryClick(cat.key)}
+              active={selectedCategory === cat.key}
+            />
+          ))}
         </div>
 
         {/* Sections */}

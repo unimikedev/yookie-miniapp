@@ -664,7 +664,7 @@
 }
 
 .filterChip[data-active="true"] {
-  background: #ffffff;
+  background: var(--color-surface);
   color: var(--color-accent);
   border-color: var(--color-accent);
   font-weight: var(--text-caption-weight);
