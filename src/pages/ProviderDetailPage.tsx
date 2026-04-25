@@ -92,6 +92,47 @@ export default function ProviderDetailPage() {
     }
   }, [])
 
+  // Resolved coords/address via Yandex geocoder (syncs address ↔ coordinates)
+  const [resolvedLat, setResolvedLat] = useState<number | null>(null)
+  const [resolvedLng, setResolvedLng] = useState<number | null>(null)
+  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!business) return
+    const hasCoords = business.lat != null && business.lng != null &&
+      (business.lat !== 0 || business.lng !== 0)
+    const hasAddress = !!business.address?.trim()
+
+    setResolvedLat(hasCoords ? business.lat! : null)
+    setResolvedLng(hasCoords ? business.lng! : null)
+    setResolvedAddress(hasAddress ? business.address! : null)
+
+    const ymaps = (window as any).ymaps
+    if (!ymaps) return
+
+    ymaps.ready(() => {
+      if (hasAddress && !hasCoords) {
+        ymaps.geocode(`Ташкент, ${business.address}`, { results: 1 })
+          .then((res: any) => {
+            const obj = res.geoObjects.get(0)
+            if (!obj) return
+            const [lat, lng] = obj.geometry.getCoordinates()
+            setResolvedLat(lat)
+            setResolvedLng(lng)
+          })
+          .catch(() => {})
+      } else if (hasCoords && !hasAddress) {
+        ymaps.geocode([business.lat!, business.lng!], { results: 1 })
+          .then((res: any) => {
+            const obj = res.geoObjects.get(0)
+            if (!obj) return
+            setResolvedAddress(obj.getAddressLine?.() ?? null)
+          })
+          .catch(() => {})
+      }
+    })
+  }, [business?.id])
+
   // Use clientPhone (pre-filled from authStore on mount, but always editable)
   const effectivePhone = getCleanPhone(clientPhone)
 
@@ -197,9 +238,16 @@ export default function ProviderDetailPage() {
     setSelectedSlot(null)
   }
 
-  // Per-service master selection — only affects THIS service
+  // Per-service master selection — if chosen master can serve all selected services, lock all to them
   const handleMasterSelectForService = (serviceId: string, masterId: string) => {
-    assignMasterToService(serviceId, masterId)
+    const canDoAll = selectedServices.every(svc =>
+      mastersForService(svc.service.id).some(m => m.id === masterId)
+    )
+    if (canDoAll) {
+      selectedServices.forEach(svc => assignMasterToService(svc.service.id, masterId))
+    } else {
+      assignMasterToService(serviceId, masterId)
+    }
     setSelectedSlot(null)
   }
 
@@ -500,15 +548,15 @@ export default function ProviderDetailPage() {
             </div>
             {id && <FavoriteButton businessId={id} />}
           </div>
-          {business.address && (
+          {(business.address || resolvedAddress) && (
             <div className={styles.infoAddress}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M7 0C4.24 0 2 2.24 2 5C2 8.5 7 14 7 14S12 8.5 12 5C12 2.24 9.76 0 7 0ZM7 7C5.9 7 5 6.1 5 5C5 3.9 5.9 3 7 3C8.1 3 9 3.9 9 5C9 6.1 8.1 7 7 7Z" fill="#6B7280" />
               </svg>
-              <span>{business.address}</span>
+              <span>{resolvedAddress ?? business.address}</span>
               <button className={styles.showOnMapBtn} onClick={() => {
-                const lat = business.lat ?? 0
-                const lng = business.lng ?? 0
+                const lat = resolvedLat ?? business.lat ?? 0
+                const lng = resolvedLng ?? business.lng ?? 0
                 window.open(`https://yandex.com/maps/?pt=${lng},${lat}&z=16&l=map`, '_blank')
               }}>
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">

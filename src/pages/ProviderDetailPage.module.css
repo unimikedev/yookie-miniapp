@@ -344,7 +344,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 8px 0 4px;
+  padding: 6px 0;
 }
 
 .masterChipRow::-webkit-scrollbar {
@@ -988,7 +988,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 8px 12px;
   background: var(--color-surface);
   border-radius: var(--radius-2xl);
 }
