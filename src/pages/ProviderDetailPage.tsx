@@ -92,10 +92,8 @@ export default function ProviderDetailPage() {
     }
   }, [])
 
-  // Use auth phone for booking creation when authenticated
-  const effectivePhone = authStore.isAuthenticated && authStore.phone
-    ? getCleanPhone(authStore.phone)
-    : getCleanPhone(clientPhone)
+  // Use clientPhone (pre-filled from authStore on mount, but always editable)
+  const effectivePhone = getCleanPhone(clientPhone)
 
   const location = useLocation();
   const { business, masters, services, isLoading, error } = useBusiness(id)
@@ -727,7 +725,6 @@ export default function ProviderDetailPage() {
                     value={clientPhone}
                     onChange={(e) => setClientPhone(formatPhoneMask(e.target.value))}
                     type="tel"
-                    disabled={authStore.isAuthenticated}
                   />
                 </div>
 

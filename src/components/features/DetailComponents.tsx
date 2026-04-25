@@ -5,7 +5,6 @@
 
 import React from 'react'
 import type { Service, Master } from '@/lib/api/types'
-import { getMockMasterImage } from '@/lib/utils/mockImages'
 import { formatMasterName } from '@/lib/utils/name'
 import styles from './DetailComponents.module.css'
 
@@ -166,7 +165,7 @@ export interface MasterChipProps {
 }
 
 export function MasterChip({ master, selected, onClick }: MasterChipProps) {
-  const photoUrl = master.photo_url ?? getMockMasterImage(master.id)
+  const photoUrl = master.photo_url ?? null
 
   return (
     <button

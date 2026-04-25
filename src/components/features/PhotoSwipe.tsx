@@ -64,12 +64,6 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
 
   const slideClass = slideDir === 'right' ? styles.slideRight : slideDir === 'left' ? styles.slideLeft : ''
 
-  // Show up to 3 thumbnail previews (excluding current photo)
-  const thumbIndices = photos
-    .map((_, i) => i)
-    .filter(i => i !== current)
-    .slice(0, 3)
-
   return (
     <div
       className={`${styles.swipeWrap} ${className ?? ''}`}
@@ -80,23 +74,19 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
     >
       <img key={current} src={photos[current]} alt={alt} className={`${styles.photo} ${slideClass}`} />
 
-      {/* N/N counter */}
+      {/* N/N counter — top-right */}
       <div className={styles.counter}>{current + 1}/{photos.length}</div>
 
-      {/* Thumbnail strip — bottom-right, overlapping container */}
-      <div className={styles.thumbnails}>
-        {thumbIndices.map(i => (
-          <img
+      {/* Dots pager — centered bottom */}
+      <div className={styles.dots}>
+        {photos.map((_, i) => (
+          <button
             key={i}
-            src={photos[i]}
-            alt={`${alt ?? ''} ${i + 1}`}
-            className={`${styles.thumbnail} ${i === current ? styles.thumbnailActive : ''}`}
+            className={`${styles.dot} ${i === current ? styles.dotActive : ''}`}
             onClick={(e) => { e.stopPropagation(); goTo(i) }}
+            aria-label={`Фото ${i + 1}`}
           />
         ))}
-        {photos.length > 4 && (
-          <div className={styles.thumbnailMore}>+{photos.length - 4}</div>
-        )}
       </div>
     </div>
   )
