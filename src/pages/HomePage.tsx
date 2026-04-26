@@ -687,6 +687,7 @@ export default function HomePage() {
                           key={v.id}
                           item={v}
                           onClick={() => navigate(`/business/${v.businessId}`)}
+                          nearbyStyle
                         />
                       ))}
                     </HScroll>

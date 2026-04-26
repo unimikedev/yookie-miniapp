@@ -131,6 +131,13 @@ export function MasterCard({ item, onClick, showLastVisit = false, nearbyStyle =
     : [(item as PopularMasterCard).specialization, (item as PopularMasterCard).businessName]
         .filter(Boolean).join(' · ')
 
+  // Visited → show visit date in bottom row; Popular → show price
+  const bottomLabel = isVisitedItem
+    ? ((item as VisitedMasterCard).lastVisitDate || null)
+    : ((item as PopularMasterCard).priceFrom
+        ? t('home.priceFrom', { price: Math.round((item as PopularMasterCard).priceFrom / 1000) })
+        : null)
+
   return (
     <div className={`${styles.masterCard} ${nearbyStyle ? styles.masterCardNearby : ''}`} onClick={onClick} role="button" tabIndex={0}>
       <div className={styles.masterPhotoWrap} aria-hidden="true">
@@ -141,20 +148,12 @@ export function MasterCard({ item, onClick, showLastVisit = false, nearbyStyle =
       <div className={styles.masterBody}>
         <div className={styles.masterTop}>
           <span className={styles.masterName}>{name}</span>
-          {isVisitedItem && item.rating > 0 && (
-            <span className={styles.masterRating}>
-              <StarIcon />
-              {item.rating.toFixed(1)}
-            </span>
-          )}
-          {isVisitedItem && !(item.rating > 0) && (
+          {!(item.rating > 0) && isVisitedItem && (
             <span className={styles.masterNewBadge}>{t('common.new')}</span>
           )}
         </div>
-        <span className={styles.masterMeta}>
-          {specialization}
-        </span>
-        {!isVisitedItem && (item as PopularMasterCard).priceFrom && (
+        <span className={styles.masterMeta}>{specialization}</span>
+        {bottomLabel && (
           <span className={styles.masterPriceRow}>
             {item.rating > 0 && (
               <>
@@ -165,7 +164,7 @@ export function MasterCard({ item, onClick, showLastVisit = false, nearbyStyle =
                 <span className={styles.masterPriceSeparator}>•</span>
               </>
             )}
-            <span className={styles.masterPrice}>{t('home.priceFrom', { price: Math.round((item as PopularMasterCard).priceFrom / 1000) })}</span>
+            <span className={styles.masterPrice}>{bottomLabel}</span>
           </span>
         )}
       </div>
