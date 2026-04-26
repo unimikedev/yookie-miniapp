@@ -132,6 +132,20 @@
   display: block;
 }
 
+.masterInitials {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
 .masterBody {
   flex: 1;
   min-width: 0;

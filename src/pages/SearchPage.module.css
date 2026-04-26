@@ -8,7 +8,7 @@
 
 .searchHeader {
   position: sticky;
-  top: 60px;
+  top: var(--safe-area-top);
   z-index: 40;
   background: var(--color-bg);
   padding: 16px 16px 0;

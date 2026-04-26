@@ -114,6 +114,12 @@ export function HomeCategoryChip({ label, iconSrc, onClick, active = false }: Ho
   )
 }
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return name.slice(0, 2).toUpperCase()
+}
+
 /* ── MasterCard — unified master card (visited & popular) ─────────────────────────── */
 export interface MasterCardProps {
   item: VisitedMasterCard | PopularMasterCard
@@ -142,8 +148,20 @@ export function MasterCard({ item, onClick, showLastVisit = false, nearbyStyle =
     <div className={`${styles.masterCard} ${nearbyStyle ? styles.masterCardNearby : ''}`} onClick={onClick} role="button" tabIndex={0}>
       <div className={styles.masterPhotoWrap} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.masterPhoto} src={item.photoUrl} alt="" />
+          <img
+            className={styles.masterPhoto}
+            src={item.photoUrl}
+            alt=""
+            onError={(e) => {
+              e.currentTarget.style.display = 'none'
+              const sib = e.currentTarget.nextElementSibling as HTMLElement | null
+              if (sib) sib.style.display = 'flex'
+            }}
+          />
         )}
+        <span className={styles.masterInitials} style={item.photoUrl ? { display: 'none' } : undefined}>
+          {getInitials(name)}
+        </span>
       </div>
       <div className={styles.masterBody}>
         <div className={styles.masterTop}>
