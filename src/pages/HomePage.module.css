@@ -15,7 +15,7 @@
 /* ── Gradient block: logo + safe-area, scrolls normally (NO sticky/fixed) ── */
 .gradientBlock {
   background: linear-gradient(180deg, rgba(107, 206, 255, 0.5) 0%, rgba(74, 163, 206, 0.5) 100%);
-  padding-bottom: 56px; /* overlap zone for mainCard */
+  padding-bottom: 48px; /* overlap zone for mainCard */
   pointer-events: none;
 }
 
@@ -25,7 +25,7 @@
 
 /* Safe-area spacer — used only inside gradientBlock */
 .safeAreaSpacer {
-  height: calc(var(--safe-area-top, 64px) - 16px);
+  height: calc(var(--safe-area-top, 64px) - 24px);
 }
 
 /* Blue header row: logo + heart */
@@ -107,7 +107,7 @@
   position: sticky;
   top: var(--safe-area-top, 0px);
   z-index: 10;
-  padding: 8px 16px 8px;
+  padding: 16px 16px 8px;
 }
 
 .searchBox {

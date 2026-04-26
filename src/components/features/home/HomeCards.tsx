@@ -201,6 +201,8 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
     }
 
     const closingSoon = isClosingSoon(item.openUntil)
+    const allPhotos = [item.photoUrl, ...(item.photos || [])].filter(Boolean) as string[]
+    const [photoIdx, setPhotoIdx] = useState(0)
 
     return (
       <div
@@ -210,8 +212,8 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
         tabIndex={0}
       >
         <div className={styles.nearbyHomePhoto} aria-hidden="true">
-          {item.photoUrl && (
-            <img className={styles.nearbyHomePhotoImg} src={item.photoUrl} alt="" />
+          {allPhotos[photoIdx] && (
+            <img className={styles.nearbyHomePhotoImg} src={allPhotos[photoIdx]} alt="" />
           )}
           <div className={styles.nearbyHomeBadges}>
             {nb.isPopular && <span className={styles.nearbyHomeBadge}>Популярное</span>}
@@ -222,6 +224,24 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
               </span>
             )}
           </div>
+          {allPhotos.length > 1 && (
+            <>
+              {photoIdx > 0 && (
+                <button
+                  className={`${styles.nearbyPhotoArrow} ${styles.nearbyPhotoArrowLeft}`}
+                  onClick={(e) => { e.stopPropagation(); setPhotoIdx(i => i - 1) }}
+                  aria-label="Предыдущее фото"
+                >‹</button>
+              )}
+              {photoIdx < allPhotos.length - 1 && (
+                <button
+                  className={`${styles.nearbyPhotoArrow} ${styles.nearbyPhotoArrowRight}`}
+                  onClick={(e) => { e.stopPropagation(); setPhotoIdx(i => i + 1) }}
+                  aria-label="Следующее фото"
+                >›</button>
+              )}
+            </>
+          )}
         </div>
         <div className={styles.nearbyHomeBody}>
           <span className={styles.nearbyHomeName}>{item.name}</span>
@@ -422,7 +442,11 @@ export function PopularStudioCardView({
           <HeartIcon filled={isFavorite} size={20} />
         </button>
         {allPhotos.length > 1 && (
-          <div className={styles.psPhotoCounter}>{currentPhoto + 1}/{allPhotos.length}</div>
+          <div className={styles.psDots}>
+            {allPhotos.map((_, i) => (
+              <span key={i} className={`${styles.psDot} ${i === currentPhoto ? styles.psDotActive : ''}`} />
+            ))}
+          </div>
         )}
       </div>
       <div className={styles.psBody}>

@@ -356,7 +356,7 @@
 /* ── Popular studio card — dots pager ───────────────────────── */
 .psDots {
   position: absolute;
-  bottom: 12px;
+  bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -400,8 +400,9 @@
 .nearbyCardHome {
   display: flex;
   flex-direction: column;
-  width: 187px;
-  min-width: 187px;
+  width: fit-content;
+  min-width: 168px;
+  max-width: 187px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 20px;
@@ -489,6 +490,42 @@
 
 .nearbyHomeDistance {
   color: var(--color-text-secondary);
+}
+
+/* ── NearbyCard photo carousel arrows ──────────────────────── */
+.nearbyPhotoArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.40);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nearbyPhotoArrow:active {
+  opacity: 0.7;
+}
+
+.nearbyPhotoArrowLeft {
+  left: 6px;
+}
+
+.nearbyPhotoArrowRight {
+  right: 6px;
 }
 
 /* ── MasterCard — nearby variant: 64px thumb, 12px radius, 24px card radius ──── */
