@@ -243,21 +243,11 @@ export default function MyBookingsPage() {
 
                   return (
                     <div key={`ag-${gi}`} className={styles.bookingCard}>
-                      {/* Header: logo + name + verified + status */}
+                      {/* Header: name + status */}
                       <div className={styles.cardTop}>
-                        {bizLogo
-                          ? <img className={styles.businessLogo} src={bizLogo} alt={businessName} />
-                          : <div className={styles.businessLogo} />
-                        }
                         <div className={styles.cardInfo}>
                           <div className={styles.cardNameRow}>
                             <span className={styles.businessName}>{businessName}</span>
-                            {first.status === 'confirmed' && (
-                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <circle cx="8" cy="8" r="8" fill="#22C55E" />
-                                <path d="M4.5 8L7 10.5L11.5 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            )}
                             <div className={styles.badgeRow}>
                               {first.rescheduled && (
                                 <span className={`${styles.statusBadge} ${styles.statusRescheduled}`}>{t('bookings.statusRescheduled')}</span>

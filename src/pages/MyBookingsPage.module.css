@@ -129,6 +129,11 @@
   line-height: var(--text-h3-lh);
   letter-spacing: var(--text-h3-ls);
   color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .serviceName {
@@ -356,7 +361,7 @@
   justify-content: center;
   padding: 14px;
   background: rgba(107, 206, 255, 0.12);
-  border-radius: var(--radius-3xl);
+  border-radius: 12px;
   font-size: var(--text-button-sm-size);
   font-weight: var(--text-button-sm-weight);
   color: var(--color-accent);
@@ -373,7 +378,7 @@
   flex: 1;
   padding: 12px;
   background: var(--color-surface-elevated);
-  border-radius: var(--radius-3xl);
+  border-radius: 12px;
   font-size: var(--text-button-sm-size);
   font-weight: var(--text-button-sm-weight);
   color: var(--color-text);
@@ -385,7 +390,7 @@
   flex: 1;
   padding: 12px;
   background: rgba(248, 113, 113, 0.12);
-  border-radius: var(--radius-3xl);
+  border-radius: 12px;
   font-size: var(--text-button-sm-size);
   font-weight: var(--text-button-sm-weight);
   color: #F87171;

@@ -25,7 +25,7 @@
 
 /* Safe-area spacer — used only inside gradientBlock */
 .safeAreaSpacer {
-  height: calc(var(--safe-area-top, 64px) - 12px);
+  height: calc(var(--safe-area-top, 64px) - 4px);
 }
 
 /* Blue header row: logo + heart */
