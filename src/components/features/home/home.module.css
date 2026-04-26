@@ -396,6 +396,114 @@
   letter-spacing: 0.3px;
 }
 
+/* ── NearbyCard — home vertical card ────────────────────────── */
+.nearbyCardHome {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  min-width: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.nearbyHomePhoto {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+
+.nearbyHomePhotoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nearbyHomeBadges {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nearbyHomeBadge {
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nearbyHomeBody {
+  padding: 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nearbyHomeName {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.25;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  letter-spacing: var(--text-title-ls);
+}
+
+.nearbyHomeCategory {
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-body-weight);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nearbyHomeFooter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text);
+}
+
+.nearbyHomeDot {
+  color: var(--color-text-muted);
+}
+
+.nearbyHomeDistance {
+  color: var(--color-text-secondary);
+}
+
+/* ── MasterCard — nearby variant: 64px thumb, 12px radius, 24px card radius ──── */
+.masterCardNearby {
+  border-radius: 24px;
+  max-width: 280px;
+}
+
+.masterCardNearby .masterPhotoWrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+
 /* ── Popular master horizontal card uses unified masterCard styles ────────────────── */
 
 /* ── Popular studio large card 358×246 ───────────────────── */

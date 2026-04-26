@@ -119,9 +119,10 @@ export interface MasterCardProps {
   item: VisitedMasterCard | PopularMasterCard
   onClick?: () => void
   showLastVisit?: boolean
+  nearbyStyle?: boolean
 }
 
-export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardProps) {
+export function MasterCard({ item, onClick, showLastVisit = false, nearbyStyle = false }: MasterCardProps) {
   const { t } = useTranslation()
   const isVisitedItem = 'masterName' in item
   const name = isVisitedItem ? formatMasterName((item as VisitedMasterCard).masterName) : (item as PopularMasterCard).name
@@ -131,7 +132,7 @@ export function MasterCard({ item, onClick, showLastVisit = false }: MasterCardP
         .filter(Boolean).join(' · ')
 
   return (
-    <div className={styles.masterCard} onClick={onClick} role="button" tabIndex={0}>
+    <div className={`${styles.masterCard} ${nearbyStyle ? styles.masterCardNearby : ''}`} onClick={onClick} role="button" tabIndex={0}>
       <div className={styles.masterPhotoWrap} aria-hidden="true">
         {item.photoUrl && (
           <img className={styles.masterPhoto} src={item.photoUrl} alt="" />
@@ -177,11 +178,62 @@ export interface NearbyCardProps {
   item: NearbyBusinessCard
   onClick?: () => void
   compact?: boolean
+  homeVertical?: boolean
 }
 
-export function NearbyCard({ item, onClick, compact }: NearbyCardProps) {
+export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardProps) {
   const { t } = useTranslation()
   const categoryLabel = t(`categories.${item.category}`)
+
+  if (homeVertical) {
+    const distance = formatDistance(item.distanceMeters)
+    return (
+      <div
+        className={styles.nearbyCardHome}
+        onClick={onClick}
+        role="button"
+        tabIndex={0}
+      >
+        <div className={styles.nearbyHomePhoto} aria-hidden="true">
+          {item.photoUrl && (
+            <img className={styles.nearbyHomePhotoImg} src={item.photoUrl} alt="" />
+          )}
+          <div className={styles.nearbyHomeBadges}>
+            {categoryLabel && <span className={styles.nearbyHomeBadge}>{categoryLabel}</span>}
+            {item.openUntil && <span className={styles.nearbyHomeBadge}>до {item.openUntil}</span>}
+          </div>
+        </div>
+        <div className={styles.nearbyHomeBody}>
+          <span className={styles.nearbyHomeName}>{item.name}</span>
+          <div className={styles.nearbyHomeFooter}>
+            {item.rating > 0 ? (
+              <>
+                <StarIcon />
+                <span>{item.rating.toFixed(1)}</span>
+                {distance && (
+                  <>
+                    <span className={styles.nearbyHomeDot}>•</span>
+                    <span className={styles.nearbyHomeDistance}>{distance}</span>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <span className={styles.nearbyNewBadge}>{t('common.new')}</span>
+                {distance && (
+                  <>
+                    <span className={styles.nearbyHomeDot}>•</span>
+                    <span className={styles.nearbyHomeDistance}>{distance}</span>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className={`${styles.nearbyCard} ${compact ? styles.nearbyCardCompact : ''}`}

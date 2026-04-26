@@ -63,13 +63,139 @@
 }
 
 .summaryCard {
-  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(107, 206, 255, 0.05) 100%);
-  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  border-radius: var(--radius-3xl);
   border: 1px solid var(--color-border);
-  padding: 16px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* ── Business name + count ───────────────────────────────── */
+.summaryBizName {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  color: var(--color-text);
+  line-height: var(--text-h3-lh);
+}
+
+.summaryCount {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+/* ── Master groups ───────────────────────────────────────── */
+.summaryMasterList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summaryMasterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summaryMasterHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summaryMasterName {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  color: var(--color-text);
+}
+
+.summarySpecBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(107, 206, 255, 0.15);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.summaryServiceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.summaryServiceName {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  color: var(--color-text-secondary);
+  flex: 1;
+  min-width: 0;
+}
+
+.summaryServicePrice {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-text);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Date + time ─────────────────────────────────────────── */
+.summaryDateTime {
+  font-size: var(--text-body-size);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+/* ── Total ───────────────────────────────────────────────── */
+.summaryTotal {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-accent);
+  line-height: 1.2;
+}
+
+/* ── Input fields inside card ────────────────────────────── */
+.summaryInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summaryInput {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  font-size: var(--text-body-size);
+  font-family: inherit;
+  outline: none;
+  transition: background 0.15s;
+  box-sizing: border-box;
+}
+
+.summaryInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.summaryInput:focus {
+  background: var(--color-surface-elevated);
+  box-shadow: 0 0 0 1.5px var(--color-accent);
+}
+
+.summaryInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .summaryHeader {

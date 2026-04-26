@@ -702,7 +702,7 @@ export default function HomePage() {
                 ) : (
                   <HScroll snap className="contentReveal">
                     {fd.nearby.map((n) => (
-                      <NearbyCard key={n.id} item={n} onClick={() => navigate(`/business/${n.businessId}`)} compact />
+                      <NearbyCard key={n.id} item={n} onClick={() => navigate(`/business/${n.businessId}`)} homeVertical />
                     ))}
                   </HScroll>
                 )}
@@ -716,7 +716,7 @@ export default function HomePage() {
                 ) : (
                   <HScroll snap autoScroll className="contentReveal">
                     {fd.popularMasters.map((m) => (
-                      <MasterCard key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`)} />
+                      <MasterCard key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`)} nearbyStyle />
                     ))}
                   </HScroll>
                 )}

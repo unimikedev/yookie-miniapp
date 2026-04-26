@@ -222,21 +222,28 @@ export default function MyBookingsPage() {
                   const first = group[0]
                   const st = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusPending' }
                   const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
-                  const masterName = formatMasterName((first.masters as { name?: string } | null)?.name || t('bookings.master'))
                   const businessCategory = (first.businesses as { category?: string } | null)?.category
                   const bizLogo = businessCategory ? getMockBusinessImage(businessCategory, first.business_id) : null
                   const isCancelling = cancelLoading === first.id
                   const timeRange = formatTimeRange(first.starts_at, first.ends_at)
 
-                  // Sum up all services in the group
                   const totalPrice = group.reduce((sum, b) => sum + ((b.services as { price?: number } | null)?.price ?? 0), 0)
-                  const totalDuration = group.reduce((sum, b) => {
-                    const dur = (b.services as { duration_min?: number } | null)?.duration_min ?? 0
-                    return sum + (dur || Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60000))
-                  }, 0)
+
+                  // Group services by master
+                  const masterGroups = new Map<string, { name: string; specialization: string; items: typeof group }>()
+                  for (const b of group) {
+                    const mid = b.master_id || '_'
+                    const mName = formatMasterName((b.masters as { name?: string } | null)?.name || '')
+                    const mSpec = (b.masters as { specialization?: string } | null)?.specialization || ''
+                    if (!masterGroups.has(mid)) masterGroups.set(mid, { name: mName, specialization: mSpec, items: [] })
+                    masterGroups.get(mid)!.items.push(b)
+                  }
+
+                  const fmtDuration = (min: number) => min >= 60 ? `${Math.floor(min / 60)} час` : `${min} мин`
 
                   return (
                     <div key={`ag-${gi}`} className={styles.bookingCard}>
+                      {/* Header: logo + name + verified + status */}
                       <div className={styles.cardTop}>
                         {bizLogo
                           ? <img className={styles.businessLogo} src={bizLogo} alt={businessName} />
@@ -245,6 +252,12 @@ export default function MyBookingsPage() {
                         <div className={styles.cardInfo}>
                           <div className={styles.cardNameRow}>
                             <span className={styles.businessName}>{businessName}</span>
+                            {first.status === 'confirmed' && (
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <circle cx="8" cy="8" r="8" fill="#22C55E" />
+                                <path d="M4.5 8L7 10.5L11.5 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
                             <div className={styles.badgeRow}>
                               {first.rescheduled && (
                                 <span className={`${styles.statusBadge} ${styles.statusRescheduled}`}>{t('bookings.statusRescheduled')}</span>
@@ -252,79 +265,72 @@ export default function MyBookingsPage() {
                               <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.key ? t(st.key) : first.status.toUpperCase()}</span>
                             </div>
                           </div>
-                          {group.length > 1 && (
-                            <span className={styles.serviceCountBadge}>{t('bookings.services_count', { count: group.length })}</span>
-                          )}
+                          <span className={styles.serviceCountBadge}>{t('bookings.services_count', { count: group.length })}</span>
                         </div>
                       </div>
 
-                      {/* Services list */}
-                      <div className={styles.servicesList}>
-                        {group.map((b) => {
-                          const serviceName = (b.services as { name?: string } | null)?.name || t('bookings.service')
-                          const serviceDuration = (b.services as { duration_min?: number } | null)?.duration_min
-                          const masterForService = (b.masters as { name?: string } | null)?.name || t('bookings.master')
-                          return (
-                            <div key={b.id} className={styles.serviceRow}>
-                              <span className={styles.serviceName}>{serviceName}</span>
-                              <span className={styles.serviceDuration}>{serviceDuration ?? '?'} {t('bookings.min')}</span>
-                              <span className={styles.serviceMaster}>{masterForService}</span>
+                      {/* Services grouped by master */}
+                      <div className={styles.masterGroupsList}>
+                        {Array.from(masterGroups.values()).map((mg, mi) => (
+                          <div key={mi} className={styles.masterGroup}>
+                            <div className={styles.masterGroupHeader}>
+                              <span className={styles.masterGroupName}>{mg.name}</span>
+                              {mg.specialization && (
+                                <span className={styles.masterSpecBadge}>{mg.specialization}</span>
+                              )}
                             </div>
-                          )
-                        })}
+                            {mg.items.map((b) => {
+                              const svcName = (b.services as { name?: string } | null)?.name || t('bookings.service')
+                              const svcDur = (b.services as { duration_min?: number } | null)?.duration_min
+                              const svcPrice = (b.services as { price?: number } | null)?.price ?? 0
+                              return (
+                                <div key={b.id} className={styles.masterServiceRow}>
+                                  <span className={styles.masterServiceName}>
+                                    {svcName}{svcDur ? ` ~ ${fmtDuration(svcDur)}` : ''}
+                                  </span>
+                                  <span className={styles.masterServicePrice}>{svcPrice.toLocaleString('ru')} {t('common.currency')}</span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ))}
                       </div>
 
-                      <div className={styles.cardMeta}>
-                        <div className={styles.metaRow}>
-                          <CalendarIcon />
-                          <span>{formatDate(first.starts_at)}</span>
-                        </div>
-                        <div className={styles.metaRow}>
-                          <ClockIcon />
-                          <span>{timeRange} • {totalDuration} {t('bookings.min')}</span>
-                        </div>
-                        <div className={styles.metaRow}>
-                          <PersonIcon />
-                          <span>{masterName}</span>
-                        </div>
-                        <div className={styles.metaRow}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2" />
-                            <path d="M2 10h20" />
-                          </svg>
-                          <span className={styles.totalPrice}>{totalPrice.toLocaleString('ru')} {t('common.currency')}</span>
-                        </div>
+                      {/* Date + time */}
+                      <div className={styles.bookingDateTime}>
+                        {formatDate(first.starts_at)} • {timeRange}
                       </div>
 
-                      {/* Total price */}
-                      <div className={styles.totalPriceRow}>
-                        <span className={styles.totalLabel}>{t('bookings.total')}</span>
-                        <span className={styles.totalValue}>
-                          {totalPrice.toLocaleString('ru')} {t('common.currency')}
-                        </span>
+                      {/* Total */}
+                      <div className={styles.bookingTotal}>
+                        {totalPrice.toLocaleString('ru')} {t('common.currency')}
                       </div>
 
                       {cancelError && <div className={styles.cancelError}>{cancelError}</div>}
                       {rescheduleError && rescheduleBookingId === first.id && (
                         <div className={styles.cancelError}>{rescheduleError}</div>
                       )}
-                      <div className={styles.cardActions}>
-                        <button
-                          className={styles.btnCancel}
-                          disabled={isCancelling || rescheduleLoading}
-                          onClick={() => handleCancelGroup(group)}
-                        >
-                          {isCancelling ? t('bookings.cancelLoading') : t('bookings.cancelBtn')}
-                        </button>
-                        <button
-                          className={styles.btnSecondary}
-                          disabled={rescheduleLoading}
-                          onClick={() => handleRescheduleOpen(group)}
-                        >
-                          {t('bookings.reschedule')}
-                        </button>
+
+                      {/* Actions: row1 reschedule+cancel, row2 calendar */}
+                      <div className={styles.cardActionsCol}>
+                        <div className={styles.cardActionsRow}>
+                          <button
+                            className={styles.btnSecondary}
+                            disabled={rescheduleLoading}
+                            onClick={() => handleRescheduleOpen(group)}
+                          >
+                            {t('bookings.reschedule')}
+                          </button>
+                          <button
+                            className={styles.btnCancel}
+                            disabled={isCancelling || rescheduleLoading}
+                            onClick={() => handleCancelGroup(group)}
+                          >
+                            {isCancelling ? t('bookings.cancelLoading') : t('bookings.cancelBtn')}
+                          </button>
+                        </div>
                         <a
-                          className={styles.btnCalendar}
+                          className={styles.btnCalendarFull}
                           href={buildGoogleCalendarUrl(group)}
                           target="_blank"
                           rel="noopener noreferrer"

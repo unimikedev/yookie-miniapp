@@ -217,78 +217,91 @@ export default function BookingFlowPage() {
       </div>
 
       <div className={styles.content}>
+        {/* Summary card — unified with input fields */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Данные записи</h2>
-          <div className={styles.summaryCard}>
-            <div className={styles.summaryHeader}>
-              <div>
-                <h3 className={styles.businessName}>{bookingStore.selectedBusiness?.name}</h3>
-                {servicesToShow.length > 1 && (
-                  <p className={styles.serviceCount}>{servicesToShow.length} услуги</p>
-                )}
-                {servicesToShow.map((item) => (
-                  <p key={item.service.id} className={styles.serviceName}>
-                    {item.service.name}
-                    {item.masterId && bookingStore.selectedBusiness && (
-                      <span className={styles.serviceMaster}>
-                        {' '}(мастер: {masters?.find(m => m.id === item.masterId)?.name || '—'})
-                      </span>
-                    )}
-                  </p>
-                ))}
-              </div>
-              <div className={styles.priceTag}>{totalPrice.toLocaleString('ru')} сўм</div>
-            </div>
+          {(() => {
+            // Group services by master
+            const mGroups = new Map<string, { name: string; specialization: string; services: typeof servicesToShow }>()
+            for (const item of servicesToShow) {
+              const mid = item.masterId || '_'
+              const master = masters?.find(m => m.id === item.masterId)
+              const mName = master?.name || '—'
+              const mSpec = master?.specialization || ''
+              if (!mGroups.has(mid)) mGroups.set(mid, { name: mName, specialization: mSpec, services: [] })
+              mGroups.get(mid)!.services.push(item)
+            }
 
-            <div className={styles.detailsGrid}>
-              {servicesToShow.length === 1 && servicesToShow[0].masterId && (
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Мастер</span>
-                  <span className={styles.detailValue}>
-                    {masters?.find(m => m.id === servicesToShow[0].masterId)?.name || '—'}
-                  </span>
+            const fmtDur = (min: number) => min >= 60 ? `${Math.floor(min / 60)} час` : `${min} мин`
+            const shortDate = bookingStore.selectedDate
+              ? new Date(bookingStore.selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+              : ''
+            const slot = bookingStore.selectedSlot
+            const endTime = slot?.end ? ` - ~${slot.end}` : ''
+            const dateTimeStr = `${shortDate} • ${slot?.start ?? ''}${endTime}`
+
+            return (
+              <div className={styles.summaryCard}>
+                {/* Business name + count */}
+                <div>
+                  <h3 className={styles.summaryBizName}>{bookingStore.selectedBusiness?.name}</h3>
+                  <p className={styles.summaryCount}>{servicesToShow.length} {servicesToShow.length === 1 ? 'услуга' : 'услуги'}</p>
                 </div>
-              )}
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Дата</span>
-                <span className={styles.detailValue}>{formatDate(bookingStore.selectedDate!)}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Время</span>
-                <span className={styles.detailValue}>{bookingStore.selectedSlot?.start}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Длительность</span>
-                <span className={styles.detailValue}>~{totalDuration} мин</span>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Ваши данные</h2>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Имя</label>
-            <input
-              type="text"
-              className={styles.input}
-              placeholder="Введите ваше имя"
-              value={clientName}
-              onChange={(e) => setClientName(stripDigits(e.target.value))}
-              disabled={isLoading}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Номер телефона</label>
-            <input
-              type="tel"
-              className={styles.input}
-              placeholder="+998 XX XXX-XX-XX"
-              value={clientPhone}
-              onChange={(e) => setClientPhone(formatPhoneMask(e.target.value))}
-              disabled={isLoading || authStore.isAuthenticated}
-            />
-          </div>
+                {/* Master groups */}
+                <div className={styles.summaryMasterList}>
+                  {Array.from(mGroups.values()).map((mg, mi) => (
+                    <div key={mi} className={styles.summaryMasterGroup}>
+                      <div className={styles.summaryMasterHeader}>
+                        <span className={styles.summaryMasterName}>{mg.name}</span>
+                        {mg.specialization && (
+                          <span className={styles.summarySpecBadge}>{mg.specialization}</span>
+                        )}
+                      </div>
+                      {mg.services.map((item) => {
+                        const dur = item.service.duration_min
+                        return (
+                          <div key={item.service.id} className={styles.summaryServiceRow}>
+                            <span className={styles.summaryServiceName}>
+                              {item.service.name}{dur ? ` ~ ${fmtDur(dur)}` : ''}
+                            </span>
+                            <span className={styles.summaryServicePrice}>
+                              {(item.service.price || 0).toLocaleString('ru')} {'сум'}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Date + time */}
+                <div className={styles.summaryDateTime}>{dateTimeStr}</div>
+
+                {/* Total */}
+                <div className={styles.summaryTotal}>{totalPrice.toLocaleString('ru')} сум</div>
+
+                {/* Input fields */}
+                <div className={styles.summaryInputs}>
+                  <input
+                    type="text"
+                    className={styles.summaryInput}
+                    placeholder="Имя"
+                    value={clientName}
+                    onChange={(e) => setClientName(stripDigits(e.target.value))}
+                    disabled={isLoading}
+                  />
+                  <input
+                    type="tel"
+                    className={styles.summaryInput}
+                    placeholder="+998 (XX) XXX-XX-XX"
+                    value={clientPhone}
+                    onChange={(e) => setClientPhone(formatPhoneMask(e.target.value))}
+                    disabled={isLoading || authStore.isAuthenticated}
+                  />
+                </div>
+              </div>
+            )
+          })()}
         </section>
 
         <section className={styles.section}>
