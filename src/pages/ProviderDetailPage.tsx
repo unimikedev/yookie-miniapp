@@ -284,10 +284,12 @@ export default function ProviderDetailPage() {
 
     setBookingLoading(true)
     setBookingError(null)
+
+    let bookedList: import('@/lib/api/types').Booking[] = []
+    let bookingSuccess = false
+
     try {
       const startsAt = selectedSlot.id ?? `${selectedDate}T${selectedSlot.start}:00`
-
-      let bookedList: import('@/lib/api/types').Booking[]
 
       if (selectedServices.length > 1) {
         bookedList = await createBookingBatch({
@@ -313,9 +315,7 @@ export default function ProviderDetailPage() {
         bookedList = [booking]
       }
 
-      bookedList.forEach((b) => syncBookingToMerchant(b))
-
-      navigate('/my-bookings')
+      bookingSuccess = true
     } catch (err) {
       const message = err instanceof Error ? err.message : t('provider.errorBookingGeneral')
       setBookingError(message)
@@ -328,6 +328,10 @@ export default function ProviderDetailPage() {
       }, 100)
     } finally {
       setBookingLoading(false)
+      if (bookingSuccess) {
+        bookedList.forEach((b) => syncBookingToMerchant(b))
+        navigate('/my-bookings')
+      }
     }
   }
 

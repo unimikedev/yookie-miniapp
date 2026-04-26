@@ -222,8 +222,8 @@ export default function MyBookingsPage() {
                   const first = group[0]
                   const st = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusPending' }
                   const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
-                  const businessCategory = (first.businesses as { category?: string } | null)?.category
-                  const bizLogo = businessCategory ? getMockBusinessImage(businessCategory, first.business_id) : null
+                  const biz = first.businesses as { category?: string; logo_url?: string; cover_photo_url?: string } | null
+                  const bizLogo = biz?.logo_url ?? biz?.cover_photo_url ?? (biz?.category ? getMockBusinessImage(biz.category, first.business_id) : null)
                   const isCancelling = cancelLoading === first.id
                   const timeRange = formatTimeRange(first.starts_at, first.ends_at)
 

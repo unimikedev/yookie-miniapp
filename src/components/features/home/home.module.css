@@ -400,8 +400,8 @@
 .nearbyCardHome {
   display: flex;
   flex-direction: column;
-  width: 170px;
-  min-width: 170px;
+  width: 187px;
+  min-width: 187px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 20px;
@@ -447,7 +447,7 @@
 }
 
 .nearbyHomeBody {
-  padding: 8px 12px 10px;
+  padding: 8px 12px 12px;
   display: flex;
   flex-direction: column;
   gap: 3px;

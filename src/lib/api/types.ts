@@ -149,7 +149,7 @@ export interface Booking {
   created_at?: string;
   updated_at?: string;
   // Populated when fetched with ?include=relations
-  businesses?: { id: string; name: string; address?: string; phone?: string; category?: string };
+  businesses?: { id: string; name: string; address?: string; phone?: string; category?: string; logo_url?: string; cover_photo_url?: string };
   masters?: { id: string; name: string; photo_url?: string };
   services?: { id: string; name: string; price?: number; duration_min?: number };
   clients?: { id: string; name: string; phone: string; telegram_id?: number };

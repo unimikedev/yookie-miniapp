@@ -355,11 +355,11 @@
   align-items: center;
   justify-content: center;
   padding: 14px;
-  background: var(--color-accent);
+  background: rgba(107, 206, 255, 0.12);
   border-radius: var(--radius-3xl);
   font-size: var(--text-button-sm-size);
   font-weight: var(--text-button-sm-weight);
-  color: var(--color-bg);
+  color: var(--color-accent);
   text-decoration: none;
   text-align: center;
   transition: opacity 0.15s;
@@ -384,11 +384,11 @@
 .btnCancel {
   flex: 1;
   padding: 12px;
-  background: #F87171;
+  background: rgba(248, 113, 113, 0.12);
   border-radius: var(--radius-3xl);
   font-size: var(--text-button-sm-size);
   font-weight: var(--text-button-sm-weight);
-  color: #fff;
+  color: #F87171;
   text-align: center;
   transition: opacity 0.15s;
 }
