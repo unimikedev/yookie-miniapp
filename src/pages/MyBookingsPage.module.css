@@ -403,6 +403,46 @@
   opacity: 0.8;
 }
 
+.btnCalendarHalf {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 8px;
+  background: rgba(107, 206, 255, 0.12);
+  border-radius: 12px;
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  color: var(--color-accent);
+  text-decoration: none;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.btnCalendarHalf:active {
+  opacity: 0.8;
+}
+
+.btnMapHalf {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 8px;
+  background: rgba(52, 199, 89, 0.10);
+  border-radius: 12px;
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  color: #34C759;
+  text-decoration: none;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.btnMapHalf:active {
+  opacity: 0.8;
+}
+
 .btnSecondary {
   flex: 1;
   padding: 12px;

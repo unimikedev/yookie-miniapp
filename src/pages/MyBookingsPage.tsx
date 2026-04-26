@@ -168,6 +168,17 @@ export default function MyBookingsPage() {
     }
   }
 
+  const buildMapUrl = (group: typeof bookings): string | null => {
+    const biz = group[0].businesses as { lat?: number | null; lng?: number | null; address?: string | null } | null
+    if (biz?.lat != null && biz?.lng != null) {
+      return `https://yandex.com/maps/?pt=${biz.lng},${biz.lat}&z=17&l=map`
+    }
+    if (biz?.address) {
+      return `https://yandex.com/maps/?text=${encodeURIComponent(biz.address)}`
+    }
+    return null
+  }
+
   const buildGoogleCalendarUrl = (group: typeof bookings) => {
     const first = group[0]
     const businessName = (first.businesses as { name?: string } | null)?.name ?? 'Запись'
@@ -333,7 +344,7 @@ export default function MyBookingsPage() {
                         <div className={styles.cancelError}>{rescheduleError}</div>
                       )}
 
-                      {/* Actions: row1 reschedule+cancel, row2 calendar */}
+                      {/* Actions: row1 reschedule+cancel, row2 calendar+map */}
                       <div className={styles.cardActionsCol}>
                         <div className={styles.cardActionsRow}>
                           <button
@@ -351,14 +362,26 @@ export default function MyBookingsPage() {
                             {isCancelling ? t('bookings.cancelLoading') : t('bookings.cancelBtn')}
                           </button>
                         </div>
-                        <a
-                          className={styles.btnCalendarFull}
-                          href={buildGoogleCalendarUrl(group)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {t('bookings.calendar')}
-                        </a>
+                        <div className={styles.cardActionsRow}>
+                          <a
+                            className={styles.btnCalendarHalf}
+                            href={buildGoogleCalendarUrl(group)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {t('bookings.calendar')}
+                          </a>
+                          {buildMapUrl(group) && (
+                            <a
+                              className={styles.btnMapHalf}
+                              href={buildMapUrl(group)!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Показать на карте
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
