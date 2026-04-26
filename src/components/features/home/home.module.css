@@ -400,8 +400,8 @@
 .nearbyCardHome {
   display: flex;
   flex-direction: column;
-  width: 200px;
-  min-width: 200px;
+  width: 170px;
+  min-width: 170px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 20px;

@@ -187,6 +187,21 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
 
   if (homeVertical) {
     const distance = formatDistance(item.distanceMeters)
+    const nb = item as any
+
+    // Closing-soon logic: show "Скоро закрывается" if closing within 60 min
+    const isClosingSoon = (openUntil?: string): boolean => {
+      if (!openUntil) return false
+      const [hh, mm] = openUntil.split(':').map(Number)
+      const now = new Date()
+      const close = new Date()
+      close.setHours(hh, mm, 0, 0)
+      const diff = close.getTime() - now.getTime()
+      return diff > 0 && diff <= 60 * 60 * 1000
+    }
+
+    const closingSoon = isClosingSoon(item.openUntil)
+
     return (
       <div
         className={styles.nearbyCardHome}
@@ -199,12 +214,18 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
             <img className={styles.nearbyHomePhotoImg} src={item.photoUrl} alt="" />
           )}
           <div className={styles.nearbyHomeBadges}>
-            {categoryLabel && <span className={styles.nearbyHomeBadge}>{categoryLabel}</span>}
-            {item.openUntil && <span className={styles.nearbyHomeBadge}>до {item.openUntil}</span>}
+            {nb.isPopular && <span className={styles.nearbyHomeBadge}>Популярное</span>}
+            {nb.hasPromo && <span className={styles.nearbyHomeBadge}>Акция</span>}
+            {item.openUntil && (
+              <span className={styles.nearbyHomeBadge}>
+                {closingSoon ? 'Скоро закрывается' : `до ${item.openUntil}`}
+              </span>
+            )}
           </div>
         </div>
         <div className={styles.nearbyHomeBody}>
           <span className={styles.nearbyHomeName}>{item.name}</span>
+          <span className={styles.nearbyHomeCategory}>{categoryLabel}</span>
           <div className={styles.nearbyHomeFooter}>
             {item.rating > 0 ? (
               <>
