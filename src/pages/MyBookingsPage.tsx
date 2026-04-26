@@ -56,6 +56,7 @@ export default function MyBookingsPage() {
   const [rescheduleBookingId, setRescheduleBookingId] = useState<string | null>(null)
   const [rescheduleLoading, setRescheduleLoading] = useState(false)
   const [rescheduleError, setRescheduleError] = useState<string | null>(null)
+  const [rescheduleSuccess, setRescheduleSuccess] = useState(false)
   const authStore = useAuthStore()
   const { close: closeOverlay } = useOverlayStore()
 
@@ -151,6 +152,8 @@ export default function MyBookingsPage() {
       setRescheduleGroupIds([])
       closeOverlay()
       refetch()
+      setRescheduleSuccess(true)
+      setTimeout(() => setRescheduleSuccess(false), 3500)
     } catch (err) {
       setRescheduleError(err instanceof Error ? err.message : t('bookings.rescheduleError'))
     } finally {
@@ -421,9 +424,17 @@ export default function MyBookingsPage() {
         </div>
       )}
 
+      {rescheduleSuccess && (
+        <div className={styles.reviewSuccess}>
+          <span className={styles.reviewSuccessIcon}>✓</span>
+          <span>Запись перенесена! Ожидает подтверждения мастера.</span>
+        </div>
+      )}
+
       <RescheduleBottomSheet
         open={!!rescheduleBookingId && !!rescheduleBookingData}
-        onClose={() => { setRescheduleBookingId(null); setRescheduleGroupIds([]); }}
+        onClose={() => { setRescheduleBookingId(null); setRescheduleGroupIds([]); setRescheduleError(null); }}
+        error={rescheduleError}
         businessId={rescheduleBookingData?.business_id ?? ''}
         masterId={rescheduleBookingData?.master_id ?? ''}
         currentStartsAt={rescheduleBookingData?.starts_at ?? ''}

@@ -13,6 +13,7 @@ interface RescheduleBottomSheetProps {
   currentStartsAt: string
   onConfirm: (newStartsAt: string, newMasterId: string) => void
   loading?: boolean
+  error?: string | null
   serviceId?: string
   serviceDurationMin?: number
 }
@@ -25,6 +26,7 @@ export default function RescheduleBottomSheet({
   currentStartsAt,
   onConfirm,
   loading = false,
+  error,
   serviceId,
   serviceDurationMin,
 }: RescheduleBottomSheetProps) {
@@ -193,6 +195,7 @@ export default function RescheduleBottomSheet({
 
         {/* Sticky confirm button */}
         <div className={styles.stickyFooter}>
+          {error && <p className={styles.errorMsg}>{error}</p>}
           <button
             className={`${styles.confirmBtn} ${!canConfirm ? styles.confirmBtnDisabled : ''}`}
             onClick={canConfirm ? handleConfirm : undefined}
