@@ -25,7 +25,8 @@ import { useBusiness } from '@/hooks/useBusiness'
 import { useSlots } from '@/hooks/useSlots'
 import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
-import { createBooking } from '@/lib/api/bookings'
+import { createBooking, createBookingBatch } from '@/lib/api/bookings'
+import { syncBookingToMerchant } from '@/lib/syncBookingToMerchant'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
@@ -286,28 +287,22 @@ export default function ProviderDetailPage() {
     try {
       const startsAt = selectedSlot.id ?? `${selectedDate}T${selectedSlot.start}:00`
 
-      // Create a separate booking for each selected service (parallel masters)
+      let bookedList: import('@/lib/api/types').Booking[]
+
       if (selectedServices.length > 1) {
-        const results = await Promise.allSettled(
-          selectedServices.map((svc) =>
-            createBooking({
-              businessId: business.id,
-              masterId: svc.masterId!,
-              serviceId: svc.service.id,
-              startsAt,
-              clientPhone: effectivePhone,
-              clientName,
-            })
-          )
-        )
-        const failures = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[]
-        if (failures.length > 0) {
-          const err = failures[0].reason
-          throw err instanceof Error ? err : new Error(t('provider.errorBooking'))
-        }
+        bookedList = await createBookingBatch({
+          businessId: business.id,
+          startsAt,
+          clientPhone: effectivePhone,
+          clientName,
+          services: selectedServices.map((svc) => ({
+            serviceId: svc.service.id,
+            masterId: svc.masterId!,
+          })),
+        })
       } else {
         const svc = selectedServices[0]
-        await createBooking({
+        const booking = await createBooking({
           businessId: business.id,
           masterId: svc.masterId!,
           serviceId: svc.service.id,
@@ -315,7 +310,10 @@ export default function ProviderDetailPage() {
           clientPhone: effectivePhone,
           clientName,
         })
+        bookedList = [booking]
       }
+
+      bookedList.forEach((b) => syncBookingToMerchant(b))
 
       navigate('/my-bookings')
     } catch (err) {
