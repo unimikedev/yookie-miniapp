@@ -109,6 +109,15 @@ function toNearby(b: Business, userPos: { lat: number; lng: number } | null): Ne
     rating: b.rating ?? 0,
     photoUrl: b.photo_url ?? getMockBusinessImage(b.category, b.id),
     businessId: b.id,
+    photos: (() => {
+      const primary = b.photo_url ?? getMockBusinessImage(b.category, b.id)
+      const seen = new Set<string>()
+      const all: string[] = []
+      for (const p of [primary, ...(b.photo_urls ?? [])]) {
+        if (p && !seen.has(p)) { seen.add(p); all.push(p) }
+      }
+      return all.length > 1 ? all.slice(1) : undefined
+    })(),
   };
 }
 
@@ -154,12 +163,26 @@ function toPopularStudio(b: Business): PopularStudioCard {
   };
 }
 
+// Module-level position cache — persists across component remounts so Telegram's
+// native location confirm only fires once per session (or after 10 min TTL).
+let _cachedPos: { lat: number; lng: number } | null = null
+let _cacheTs = 0
+const GEO_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+
 /** Get user GPS position (one-shot, non-blocking). Returns null on denial/error. */
 function getUserPosition(): Promise<{ lat: number; lng: number } | null> {
   return new Promise((resolve) => {
+    if (_cachedPos && Date.now() - _cacheTs < GEO_CACHE_TTL) {
+      resolve(_cachedPos)
+      return
+    }
     if (!navigator.geolocation) { resolve(null); return; }
     navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) => {
+        _cachedPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        _cacheTs = Date.now()
+        resolve(_cachedPos)
+      },
       () => resolve(null),
       { timeout: 5000, maximumAge: 60000 }
     );

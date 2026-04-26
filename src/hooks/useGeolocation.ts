@@ -38,6 +38,12 @@ const GEO_OPTIONS: PositionOptions = {
   maximumAge: 300000, // Cache for 5 minutes
 }
 
+// Module-level cache shared across all useGeolocation instances.
+// Prevents re-firing the Telegram native location dialog on every remount.
+let _geoCache: GeoPosition | null = null
+let _geoCacheTs = 0
+const GEO_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+
 export function useGeolocation(autoRequest = true): UseGeolocationResult {
   const [position, setPosition] = useState<GeoPosition | null>(null)
   const [permission, setPermission] = useState<GeoPermission>('prompt')
@@ -71,6 +77,13 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
       return
     }
 
+    // Return cached position if fresh enough — avoids re-firing Telegram's confirm dialog
+    if (_geoCache && Date.now() - _geoCacheTs < GEO_CACHE_TTL) {
+      setPosition(_geoCache)
+      setPermission('granted')
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
@@ -81,6 +94,8 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
           lng: pos.coords.longitude,
           accuracy: pos.coords.accuracy,
         }
+        _geoCache = geo
+        _geoCacheTs = Date.now()
         setPosition(geo)
         setPermission('granted')
         setIsLoading(false)
