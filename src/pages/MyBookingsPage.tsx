@@ -5,7 +5,6 @@ import { useBookings } from '@/hooks/useBookings'
 import { LoadingState } from '@/components/ui'
 import { cancelBooking, rescheduleBooking } from '@/lib/api/bookings'
 import { syncBookingCancellationToMerchant, syncBookingRescheduleToMerchant } from '@/lib/syncBookingToMerchant'
-import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import { formatMasterName } from '@/lib/utils/name'
 import ReviewForm from '@/components/features/ReviewForm'
 import RescheduleBottomSheet from '@/components/features/RescheduleBottomSheet'
@@ -66,22 +65,22 @@ export default function MyBookingsPage() {
   };
   const phone = authStore.phone || getFallbackPhone() || '+998'
 
-  const active = bookings.filter(b => b.status === 'pending' || b.status === 'confirmed')
-  const past   = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled' || b.status === 'no_show')
-
-  // Group bookings by business_id + starts_at (same session = multiple services)
+  // Group by booking_group_id when present; fallback to business_id+starts_at for legacy rows
   const groupBookings = (list: typeof bookings) => {
     const groups: Map<string, typeof bookings> = new Map()
     for (const b of list) {
-      const key = `${b.business_id}__${b.starts_at}`
+      const key = b.booking_group_id ?? `${b.business_id}__${b.starts_at}`
       if (!groups.has(key)) groups.set(key, [])
       groups.get(key)!.push(b)
     }
     return Array.from(groups.values())
   }
 
-  const activeGroups = groupBookings(active)
-  const pastGroups = groupBookings(past)
+  const allGroups = groupBookings(bookings)
+  // Active: at least one booking in the group is still open (handles partial cancellations)
+  const activeGroups = allGroups.filter(g => g.some(b => b.status === 'pending' || b.status === 'confirmed'))
+  // Past: every booking in the group has reached a terminal state
+  const pastGroups = allGroups.filter(g => g.every(b => b.status === 'completed' || b.status === 'cancelled' || b.status === 'no_show'))
 
   const formatDate = (iso: string) => {
     const d = new Date(iso)
@@ -220,12 +219,30 @@ export default function MyBookingsPage() {
                 <p className={styles.sectionLabel}>{t('bookings.sectionActive', { count: activeGroups.length })}</p>
                 {activeGroups.map((group, gi) => {
                   const first = group[0]
-                  const st = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusPending' }
                   const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
-                  const biz = first.businesses as { category?: string; logo_url?: string; cover_photo_url?: string } | null
-                  const bizLogo = biz?.logo_url ?? biz?.cover_photo_url ?? (biz?.category ? getMockBusinessImage(biz.category, first.business_id) : null)
                   const isCancelling = cancelLoading === first.id
                   const timeRange = formatTimeRange(first.starts_at, first.ends_at)
+                  // Aggregate status across all masters in this booking group
+                  const gn = group.length
+                  const gConfirmed = group.filter(b => b.status === 'confirmed').length
+                  const gCancelled = group.filter(b => b.status === 'cancelled' || b.status === 'no_show').length
+                  let aggregateLabel: string
+                  let aggClass: string
+                  if (gn === 1) {
+                    const st0 = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusPending' }
+                    aggregateLabel = st0.key ? t(st0.key) : first.status
+                    aggClass = st0.className
+                  } else if (gCancelled > 0 && gCancelled === gn) {
+                    aggregateLabel = 'Отменено'; aggClass = 'statusCancelled'
+                  } else if (gCancelled > 0) {
+                    aggregateLabel = `${gCancelled} отменено`; aggClass = 'statusCancelled'
+                  } else if (gConfirmed === gn) {
+                    aggregateLabel = `Подтверждено ${gConfirmed}/${gn}`; aggClass = 'statusConfirmed'
+                  } else if (gConfirmed > 0) {
+                    aggregateLabel = `Подтверждено ${gConfirmed}/${gn}`; aggClass = 'statusPending'
+                  } else {
+                    aggregateLabel = 'Ожидает'; aggClass = 'statusPending'
+                  }
 
                   const totalPrice = group.reduce((sum, b) => sum + ((b.services as { price?: number } | null)?.price ?? 0), 0)
 
@@ -252,7 +269,7 @@ export default function MyBookingsPage() {
                               {first.rescheduled && (
                                 <span className={`${styles.statusBadge} ${styles.statusRescheduled}`}>{t('bookings.statusRescheduled')}</span>
                               )}
-                              <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.key ? t(st.key) : first.status.toUpperCase()}</span>
+                              <span className={`${styles.statusBadge} ${styles[aggClass as keyof typeof styles]}`}>{aggregateLabel}</span>
                             </div>
                           </div>
                           <span className={styles.serviceCountBadge}>{t('bookings.services_count', { count: group.length })}</span>
@@ -261,29 +278,41 @@ export default function MyBookingsPage() {
 
                       {/* Services grouped by master */}
                       <div className={styles.masterGroupsList}>
-                        {Array.from(masterGroups.values()).map((mg, mi) => (
-                          <div key={mi} className={styles.masterGroup}>
-                            <div className={styles.masterGroupHeader}>
-                              <span className={styles.masterGroupName}>{mg.name}</span>
-                              {mg.specialization && (
-                                <span className={styles.masterSpecBadge}>{mg.specialization}</span>
-                              )}
-                            </div>
-                            {mg.items.map((b) => {
-                              const svcName = (b.services as { name?: string } | null)?.name || t('bookings.service')
-                              const svcDur = (b.services as { duration_min?: number } | null)?.duration_min
-                              const svcPrice = (b.services as { price?: number } | null)?.price ?? 0
-                              return (
-                                <div key={b.id} className={styles.masterServiceRow}>
-                                  <span className={styles.masterServiceName}>
-                                    {svcName}{svcDur ? ` ~ ${fmtDuration(svcDur)}` : ''}
+                        {Array.from(masterGroups.values()).map((mg, mi) => {
+                          // Per-master status only shown when there are multiple masters
+                          const ms = masterGroups.size > 1
+                            ? (mg.items.some(b => b.status === 'cancelled' || b.status === 'no_show') ? 'cancelled'
+                              : mg.items.some(b => b.status === 'pending') ? 'pending' : 'confirmed')
+                            : null
+                          return (
+                            <div key={mi} className={styles.masterGroup}>
+                              <div className={styles.masterGroupHeader}>
+                                <span className={styles.masterGroupName}>{mg.name}</span>
+                                {mg.specialization && (
+                                  <span className={styles.masterSpecBadge}>{mg.specialization}</span>
+                                )}
+                                {ms && (
+                                  <span className={`${styles.masterStatusBadge} ${ms === 'confirmed' ? styles.masterStatusConfirmed : ms === 'cancelled' ? styles.masterStatusCancelled : styles.masterStatusPending}`}>
+                                    {ms === 'confirmed' ? 'Подтв.' : ms === 'cancelled' ? 'Отменено' : 'Ожидает'}
                                   </span>
-                                  <span className={styles.masterServicePrice}>{svcPrice.toLocaleString('ru')} {t('common.currency')}</span>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        ))}
+                                )}
+                              </div>
+                              {mg.items.map((b) => {
+                                const svcName = (b.services as { name?: string } | null)?.name || t('bookings.service')
+                                const svcDur = (b.services as { duration_min?: number } | null)?.duration_min
+                                const svcPrice = (b.services as { price?: number } | null)?.price ?? 0
+                                return (
+                                  <div key={b.id} className={styles.masterServiceRow}>
+                                    <span className={styles.masterServiceName}>
+                                      {svcName}{svcDur ? ` ~ ${fmtDuration(svcDur)}` : ''}
+                                    </span>
+                                    <span className={styles.masterServicePrice}>{svcPrice.toLocaleString('ru')} {t('common.currency')}</span>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )
+                        })}
                       </div>
 
                       {/* Date + time */}

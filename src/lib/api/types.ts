@@ -146,6 +146,8 @@ export interface Booking {
   price: number;
   notes?: string;
   rescheduled?: boolean; // true если запись была перенесена
+  /** Links all bookings created in one session (batch or single). Enables reliable group display. */
+  booking_group_id?: string;
   created_at?: string;
   updated_at?: string;
   // Populated when fetched with ?include=relations
