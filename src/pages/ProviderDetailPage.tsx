@@ -761,50 +761,86 @@ export default function ProviderDetailPage() {
               <div ref={confirmationRef} className={styles.confirmationSection}>
                 <h2 className={styles.confirmationTitle}>{t('provider.confirmation')}</h2>
 
-                {/* Client info — 16px side padding */}
-                <div className={styles.confirmationForm}>
-                  <input
-                    className={styles.confirmationInput}
-                    placeholder={t('provider.yourName')}
-                    value={clientName}
-                    onChange={(e) => setClientName(stripDigits(e.target.value))}
-                  />
-                  <input
-                    className={styles.confirmationInput}
-                    placeholder="+998 XX XXX-XX-XX"
-                    value={clientPhone}
-                    onChange={(e) => setClientPhone(formatPhoneMask(e.target.value))}
-                    type="tel"
-                  />
-                </div>
-
-                {/* Summary — 16px side padding */}
+                {/* Unified summary card with inputs */}
                 <div className={styles.confirmationSummary}>
-                  <div className={styles.confirmationBusiness}>{business?.name}</div>
-                  {selectedServices.map((s) => {
-                    const masterName = isIndividual && soloMaster
-                      ? formatMasterName(soloMaster.name)
-                      : formatMasterName(masters.find(m => m.id === s.masterId)?.name ?? '—')
+                  {/* Business name + count */}
+                  <div>
+                    <div className={styles.confirmationBusiness}>{business?.name}</div>
+                    <div className={styles.confirmationCount}>
+                      {selectedServices.length} {selectedServices.length === 1 ? 'услуга' : 'услуги'}
+                    </div>
+                  </div>
+
+                  {/* Master groups */}
+                  {(() => {
+                    const mGroups = new Map<string, { name: string; specialization: string; services: typeof selectedServices }>()
+                    for (const item of selectedServices) {
+                      const mid = item.masterId || '_'
+                      const master = isIndividual && soloMaster
+                        ? soloMaster
+                        : masters.find(m => m.id === item.masterId)
+                      const mName = master?.name ? formatMasterName(master.name) : '—'
+                      const mSpec = master?.specialization || ''
+                      if (!mGroups.has(mid)) mGroups.set(mid, { name: mName, specialization: mSpec, services: [] })
+                      mGroups.get(mid)!.services.push(item)
+                    }
+                    const fmtDur = (min: number) => min >= 60 ? `${Math.floor(min / 60)} час` : `${min} мин`
                     return (
-                      <div key={s.service.id} className={styles.confirmationService}>
-                        <div className={styles.confirmationServiceLeft}>
-                          <div className={styles.confirmationServiceName}>{s.service.name}</div>
-                          <div className={styles.confirmationServiceMaster}>{masterName}</div>
-                        </div>
-                        <div className={styles.confirmationServicePrice}>{s.service.price.toLocaleString('ru')} {t('common.currency')}</div>
+                      <div className={styles.confirmationMasterList}>
+                        {Array.from(mGroups.values()).map((mg, mi) => (
+                          <div key={mi} className={styles.confirmationMasterGroup}>
+                            <div className={styles.confirmationMasterHeader}>
+                              <span className={styles.confirmationMasterName}>{mg.name}</span>
+                              {mg.specialization && (
+                                <span className={styles.confirmationSpecBadge}>{mg.specialization}</span>
+                              )}
+                            </div>
+                            {mg.services.map((item) => {
+                              const dur = item.service.duration_min
+                              return (
+                                <div key={item.service.id} className={styles.confirmationServiceRow}>
+                                  <span className={styles.confirmationServiceName}>
+                                    {item.service.name}{dur ? ` ~ ${fmtDur(dur)}` : ''}
+                                  </span>
+                                  <span className={styles.confirmationServicePrice}>
+                                    {item.service.price.toLocaleString('ru')} {t('common.currency')}
+                                  </span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ))}
                       </div>
                     )
-                  })}
+                  })()}
+
+                  {/* Date + time */}
                   <div className={styles.confirmationDateTime}>
-                    <span className={styles.confirmationDetailLabel}>
-                      {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} в {selectedSlot?.start}
-                    </span>
+                    {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} • {selectedSlot?.start}
                   </div>
-                  <div className={styles.confirmationTotal}>
-                    <span>{t('provider.total')}</span>
-                    <span className={styles.confirmationTotalPrice}>
-                      {selectedServices.reduce((sum, s) => sum + s.service.price, 0).toLocaleString('ru')} {t('common.currency')}
-                    </span>
+
+                  {/* Total */}
+                  <div className={styles.confirmationTotalValue}>
+                    {selectedServices.reduce((sum, s) => sum + s.service.price, 0).toLocaleString('ru')} {t('common.currency')}
+                  </div>
+
+                  {/* Input fields */}
+                  <div className={styles.confirmationInputs}>
+                    <input
+                      className={styles.confirmationInput}
+                      placeholder={t('provider.yourName')}
+                      value={clientName}
+                      onChange={(e) => setClientName(stripDigits(e.target.value))}
+                      disabled={bookingLoading}
+                    />
+                    <input
+                      className={styles.confirmationInput}
+                      placeholder="+998 XX XXX-XX-XX"
+                      value={clientPhone}
+                      onChange={(e) => setClientPhone(formatPhoneMask(e.target.value))}
+                      type="tel"
+                      disabled={bookingLoading || authStore.isAuthenticated}
+                    />
                   </div>
                 </div>
 

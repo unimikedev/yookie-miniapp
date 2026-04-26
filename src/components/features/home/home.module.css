@@ -458,10 +458,9 @@
   font-weight: 800;
   color: var(--color-text);
   line-height: 1.25;
+  white-space: nowrap;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
   letter-spacing: var(--text-title-ls);
 }
 

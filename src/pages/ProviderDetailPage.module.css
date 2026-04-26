@@ -538,121 +538,130 @@
 }
 
 .confirmationSummary {
+  background: var(--color-surface);
+  border-radius: var(--radius-3xl);
+  border: 1px solid var(--color-border);
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 16px;
-  background: var(--color-surface-elevated);
-  border-radius: var(--radius-2xl);
+  gap: 16px;
 }
 
 .confirmationBusiness {
-  font-size: var(--text-title-size);
-  font-weight: var(--text-title-weight);
-  line-height: var(--text-title-lh);
-  letter-spacing: var(--text-title-ls);
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
   color: var(--color-text);
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-border);
+  line-height: var(--text-h3-lh);
 }
 
-.confirmationService {
+.confirmationCount {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.confirmationMasterList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.confirmationMasterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confirmationMasterHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirmationMasterName {
+  font-size: var(--text-h3-size);
+  font-weight: var(--text-h3-weight);
+  color: var(--color-text);
+}
+
+.confirmationSpecBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(107, 206, 255, 0.15);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-size: var(--text-caption-xs-size);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.confirmationServiceRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--color-border);
+  gap: 8px;
 }
 
-.confirmationService:last-of-type {
-  border-bottom: none;
-}
-
-.confirmationServiceLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.confirmationServiceName {
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  color: var(--color-text-secondary);
   flex: 1;
   min-width: 0;
 }
 
-.confirmationServiceName {
-  font-size: 15px;
-  font-weight: var(--text-body-weight);
-  color: var(--color-text);
-}
-
-.confirmationServiceMaster {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
 .confirmationServicePrice {
-  font-size: 15px;
-  font-weight: var(--text-title-weight);
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-caption-weight);
   color: var(--color-text);
-  white-space: nowrap;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .confirmationDateTime {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0;
-}
-
-.confirmationDetailLabel {
   font-size: var(--text-body-size);
-  font-weight: var(--text-body-weight);
-  line-height: var(--text-body-lh);
-  letter-spacing: var(--text-body-ls);
+  font-weight: 700;
   color: var(--color-text);
-  text-align: center;
+  line-height: 1.4;
 }
 
-.confirmationTotal {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--text-title-size);
-  font-weight: var(--text-title-weight);
-  line-height: var(--text-title-lh);
-  letter-spacing: var(--text-title-ls);
-  color: var(--color-text);
-  padding-top: 8px;
-  border-top: 1px solid var(--color-border);
-  margin-top: 4px;
-}
-
-.confirmationTotalPrice {
+.confirmationTotalValue {
+  font-size: 22px;
+  font-weight: 800;
   color: var(--color-accent);
-  font-weight: var(--text-h1-weight);
+  line-height: 1.2;
 }
 
-.confirmationForm {
+.confirmationInputs {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 .confirmationInput {
+  width: 100%;
   padding: 14px 16px;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-2xl);
+  background: var(--color-surface-elevated);
   color: var(--color-text);
-  font-size: var(--text-title-size);
-  font-weight: var(--text-title-weight);
-  line-height: var(--text-title-lh);
-  letter-spacing: var(--text-title-ls);
-  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+  font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: background 0.15s;
+  box-sizing: border-box;
 }
 
 .confirmationInput:focus {
-  border-color: var(--color-accent);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 0 0 1.5px var(--color-accent);
+}
+
+.confirmationInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .confirmationInput::placeholder {
