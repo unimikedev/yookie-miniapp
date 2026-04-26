@@ -495,15 +495,6 @@
   opacity: 0.7;
 }
 
-.pastList {
-  display: flex;
-  flex-direction: column;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-3xl);
-  overflow: hidden;
-}
-
 .cancelError {
   color: #FF6B6B;
   font: var(--text-body-sm);
@@ -511,69 +502,201 @@
   text-align: center;
 }
 
-.pastRow {
+/* ── Past booking cards ───────────────────────────────── */
+
+.pastCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-3xl);
+  overflow: hidden;
+}
+
+.pastCardHeader {
+  width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  padding: 0 16px;
-  height: 72px;
-  border-top: 1px solid var(--color-border);
+  padding: 14px 16px;
+  text-align: left;
+  background: transparent;
+  transition: background 0.15s;
 }
 
-.pastRow:first-child {
-  border-top: none;
-}
-
-.pastLogo {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-2xl);
+.pastCardHeader:active {
   background: var(--color-surface-elevated);
-  flex-shrink: 0;
 }
 
-.pastInfo {
+.pastCardLeft {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
-.pastName {
+.pastCardBiz {
   font-size: var(--text-title-size);
   font-weight: var(--text-title-weight);
   color: var(--color-text);
 }
 
-.pastMeta {
+.pastCardDate {
   font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
   color: var(--color-text-secondary);
 }
 
-.pastServices {
-  font-size: var(--text-caption-xs-size);
+.pastCardServices {
+  font-size: var(--text-caption-xs-size, 11px);
   color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.pastPrice {
+.pastCardRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pastCardPrice {
   font-size: var(--text-body-sm-size);
-  font-weight: var(--text-caption-weight);
+  font-weight: 600;
   color: var(--color-accent);
 }
 
-.repeatBtn {
-  padding: 8px 16px;
+.pastCardChevron {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 0.2s;
+  display: block;
+}
+
+.pastCardChevronOpen {
+  transform: rotate(-90deg);
+}
+
+.pastCardBody {
+  border-top: 1px solid var(--color-border-subtle);
+  padding: 12px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pastCardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pastCardRowName {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-secondary);
+  flex: 1;
+  min-width: 0;
+}
+
+.pastCardRowPrice {
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.pastCardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.pastCardRebook {
+  flex: 1;
+  padding: 10px;
   background: var(--color-accent);
-  border-radius: var(--radius-3xl);
+  border-radius: var(--radius-2xl);
   font-size: var(--text-button-sm-size);
   font-weight: var(--text-button-sm-weight);
   color: var(--color-bg);
-  flex-shrink: 0;
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.pastCardRebook:active {
+  opacity: 0.8;
+}
+
+/* ── Cancel confirmation modal ───────────────────────── */
+
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 400;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0 calc(16px + var(--safe-area-bottom-half, 0px));
+}
+
+.confirmModal {
+  width: 100%;
+  background: var(--color-surface);
+  border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirmTitle {
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.confirmText {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.confirmNo {
+  flex: 1;
+  padding: 13px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-2xl);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  color: var(--color-text);
+  transition: opacity 0.15s;
+}
+
+.confirmYes {
+  flex: 1;
+  padding: 13px;
+  background: rgba(248, 113, 113, 0.15);
+  border-radius: var(--radius-2xl);
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  color: #F87171;
+  transition: opacity 0.15s;
+}
+
+.confirmNo:active,
+.confirmYes:active {
+  opacity: 0.7;
 }
 
 .reviewBtn {

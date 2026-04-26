@@ -57,6 +57,8 @@ export default function MyBookingsPage() {
   const [rescheduleLoading, setRescheduleLoading] = useState(false)
   const [rescheduleError, setRescheduleError] = useState<string | null>(null)
   const [rescheduleSuccess, setRescheduleSuccess] = useState(false)
+  const [cancelConfirmGroup, setCancelConfirmGroup] = useState<typeof bookings | null>(null)
+  const [expandedPastId, setExpandedPastId] = useState<string | null>(null)
   const authStore = useAuthStore()
   const { close: closeOverlay } = useOverlayStore()
 
@@ -357,31 +359,33 @@ export default function MyBookingsPage() {
                           <button
                             className={styles.btnCancel}
                             disabled={isCancelling || rescheduleLoading}
-                            onClick={() => handleCancelGroup(group)}
+                            onClick={() => setCancelConfirmGroup(group)}
                           >
                             {isCancelling ? t('bookings.cancelLoading') : t('bookings.cancelBtn')}
                           </button>
                         </div>
-                        <div className={styles.cardActionsRow}>
-                          <a
-                            className={styles.btnCalendarHalf}
-                            href={buildGoogleCalendarUrl(group)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {t('bookings.calendar')}
-                          </a>
-                          {buildMapUrl(group) && (
+                        {group.every(b => b.status === 'confirmed') && (
+                          <div className={styles.cardActionsRow}>
                             <a
-                              className={styles.btnMapHalf}
-                              href={buildMapUrl(group)!}
+                              className={styles.btnCalendarHalf}
+                              href={buildGoogleCalendarUrl(group)}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              Показать на карте
+                              {t('bookings.calendar')}
                             </a>
-                          )}
-                        </div>
+                            {buildMapUrl(group) && (
+                              <a
+                                className={styles.btnMapHalf}
+                                href={buildMapUrl(group)!}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Показать на карте
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )
@@ -390,38 +394,67 @@ export default function MyBookingsPage() {
           ) : (
             <>
               <p className={styles.sectionLabel}>{t('bookings.sectionPast', { count: pastGroups.length })}</p>
-              <div className={styles.pastList}>
-                {pastGroups.map((group, gi) => {
-                    const first = group[0]
-                    const st = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusCancelled' }
-                    const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
-                    const totalPrice = group.reduce((sum, b) => sum + ((b.services as { price?: number } | null)?.price ?? 0), 0)
-                    const serviceNames = group.map(b => (b.services as { name?: string } | null)?.name ?? t('bookings.service')).join(', ')
-                    return (
-                      <div key={`pg-${gi}`} className={styles.pastRow}>
-                        <div className={styles.pastLogo} />
-                        <div className={styles.pastInfo}>
-                          <span className={styles.pastName}>{businessName}</span>
-                          <span className={styles.pastMeta}>
-                            {formatDate(first.starts_at)}
-                          </span>
-                          <span className={styles.pastServices}>{serviceNames}</span>
-                          <span className={styles.pastPrice}>{totalPrice.toLocaleString('ru')} {t('common.currency')}</span>
-                        </div>
-                        {first.status === 'completed' ? (
-                          <button
-                            className={styles.reviewBtn}
-                            onClick={() => setReviewBooking(first)}
-                          >
-                            {t('bookings.review')}
-                          </button>
-                        ) : (
-                          <span className={`${styles.statusBadge} ${styles[st.className]}`}>{st.key ? t(st.key) : first.status.toUpperCase()}</span>
-                        )}
+              {pastGroups.map((group, gi) => {
+                const first = group[0]
+                const st = STATUS_KEY_MAP[first.status] ?? { key: '', className: 'statusCancelled' }
+                const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
+                const totalPrice = group.reduce((sum, b) => sum + ((b.services as { price?: number } | null)?.price ?? 0), 0)
+                const serviceNames = group.map(b => (b.services as { name?: string } | null)?.name ?? t('bookings.service')).filter(Boolean).join(' • ')
+                const groupKey = first.booking_group_id ?? first.id
+                const isExpanded = expandedPastId === groupKey
+                const isCompleted = group.every(b => b.status === 'completed')
+
+                return (
+                  <div key={`pg-${gi}`} className={styles.pastCard}>
+                    <button
+                      className={styles.pastCardHeader}
+                      onClick={() => setExpandedPastId(isExpanded ? null : groupKey)}
+                    >
+                      <div className={styles.pastCardLeft}>
+                        <span className={styles.pastCardBiz}>{businessName}</span>
+                        <span className={styles.pastCardDate}>{formatDate(first.starts_at)} • {new Date(first.starts_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className={styles.pastCardServices}>{serviceNames}</span>
                       </div>
-                    )
-                })}
-              </div>
+                      <div className={styles.pastCardRight}>
+                        <span className={`${styles.statusBadge} ${styles[st.className as keyof typeof styles]}`}>{st.key ? t(st.key) : first.status}</span>
+                        <span className={styles.pastCardPrice}>{totalPrice.toLocaleString('ru')} {t('common.currency')}</span>
+                        <span className={`${styles.pastCardChevron} ${isExpanded ? styles.pastCardChevronOpen : ''}`}>›</span>
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className={styles.pastCardBody}>
+                        {group.map(b => {
+                          const svc = b.services as { name?: string; duration_min?: number; price?: number } | null
+                          const mst = b.masters as { name?: string } | null
+                          return (
+                            <div key={b.id} className={styles.pastCardRow}>
+                              <span className={styles.pastCardRowName}>{svc?.name ?? '—'}{mst?.name ? ` · ${mst.name}` : ''}</span>
+                              <span className={styles.pastCardRowPrice}>{(svc?.price ?? 0).toLocaleString('ru')} {t('common.currency')}</span>
+                            </div>
+                          )
+                        })}
+                        <div className={styles.pastCardActions}>
+                          <button
+                            className={styles.pastCardRebook}
+                            onClick={() => navigate(`/business/${first.business_id}`)}
+                          >
+                            Записаться снова
+                          </button>
+                          {isCompleted && (
+                            <button
+                              className={styles.reviewBtn}
+                              onClick={() => setReviewBooking(first)}
+                            >
+                              {t('bookings.review')}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </>
           )}
         </LoadingState>
@@ -451,6 +484,28 @@ export default function MyBookingsPage() {
         <div className={styles.reviewSuccess}>
           <span className={styles.reviewSuccessIcon}>✓</span>
           <span>Запись перенесена! Ожидает подтверждения мастера.</span>
+        </div>
+      )}
+
+      {cancelConfirmGroup && (
+        <div className={styles.confirmOverlay} onClick={() => setCancelConfirmGroup(null)}>
+          <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
+            <p className={styles.confirmTitle}>Отменить запись?</p>
+            <p className={styles.confirmText}>
+              {(cancelConfirmGroup[0].businesses as { name?: string } | null)?.name ?? 'Запись'} · {formatDate(cancelConfirmGroup[0].starts_at)}
+            </p>
+            <div className={styles.confirmButtons}>
+              <button className={styles.confirmNo} onClick={() => setCancelConfirmGroup(null)}>
+                Нет
+              </button>
+              <button
+                className={styles.confirmYes}
+                onClick={() => { handleCancelGroup(cancelConfirmGroup); setCancelConfirmGroup(null) }}
+              >
+                Да, отменить
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
