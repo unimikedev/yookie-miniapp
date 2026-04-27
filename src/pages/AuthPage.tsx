@@ -8,6 +8,7 @@ import styles from './AuthPage.module.css'
 const GOOGLE_CLIENT_ID = '133260309518-kqgcacogqjrcmjbb8lh5k36el9mgth0a.apps.googleusercontent.com'
 
 type Screen = 'phone' | 'otp'
+type ContactState = 'idle' | 'requesting' | 'ready' | 'declined'
 
 const OTP_RESEND_SECONDS = 60
 
@@ -24,6 +25,7 @@ export default function AuthPage() {
   const [countdown, setCountdown] = useState(OTP_RESEND_SECONDS)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [contactState, setContactState] = useState<ContactState>('idle')
 
   const otpRefs = [
     useRef<HTMLInputElement>(null),
@@ -39,6 +41,25 @@ export default function AuthPage() {
   useEffect(() => {
     if (authStore.isAuthenticated) navigate(returnTo, { replace: true })
   }, [authStore.isAuthenticated])
+
+  // Request Telegram contact on mount to get verified phone
+  useEffect(() => {
+    const tg = (window as any).Telegram?.WebApp
+    if (!tg?.requestContact) return
+    setContactState('requesting')
+    tg.requestContact((ok: boolean) => {
+      if (ok) {
+        const raw = tg.initDataUnsafe?.contact?.phone_number as string | undefined
+        if (raw) {
+          const digits = raw.replace(/\D/g, '')
+          setPhone('+' + (digits.startsWith('998') ? digits : '998' + digits))
+        }
+        setContactState('ready')
+      } else {
+        setContactState('declined')
+      }
+    })
+  }, [])
 
   // Google Sign-In callback
   const handleGoogleCallback = useCallback(async (response: { credential: string }) => {
@@ -254,7 +275,13 @@ export default function AuthPage() {
         /* ── Phone screen ── */
         <div className={styles.content}>
           <h1 className={styles.title}>{t('auth.title')}</h1>
-          <p className={styles.subtitle}>{t('auth.subtitle')}</p>
+          <p className={styles.subtitle}>
+            {contactState === 'requesting'
+              ? 'Запрашиваем ваш номер из Telegram...'
+              : contactState === 'ready'
+              ? 'Номер подтверждён Telegram. Нажмите «Получить код».'
+              : t('auth.subtitle')}
+          </p>
 
           <div className={styles.phoneField}>
             <div className={styles.flagPrefix}>
@@ -264,15 +291,17 @@ export default function AuthPage() {
             <input
               className={styles.phoneInput}
               type="tel"
-              placeholder={t('auth.phonePlaceholder')}
+              placeholder={contactState === 'requesting' ? '...' : t('auth.phonePlaceholder')}
               value={phone.replace(/^\+998/, '')}
               onChange={e => {
+                if (contactState === 'ready') return
                 const raw = e.target.value.replace(/\D/g, '').slice(0, 9)
                 setPhone(`+998${raw}`)
                 setError(null)
               }}
-              disabled={isLoading}
-              autoFocus
+              disabled={isLoading || contactState === 'requesting'}
+              readOnly={contactState === 'ready'}
+              autoFocus={contactState === 'idle' || contactState === 'declined'}
             />
           </div>
 
@@ -281,7 +310,7 @@ export default function AuthPage() {
           <button
             className={styles.primaryBtn}
             onClick={handleRequestOtp}
-            disabled={isLoading}
+            disabled={isLoading || contactState === 'requesting'}
           >
             {isLoading ? t('common.sending') : t('auth.getCode')}
           </button>
