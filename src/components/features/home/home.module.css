@@ -429,6 +429,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
+  min-height: 126px;
   background: var(--color-surface-elevated);
   overflow: hidden;
 }
@@ -570,8 +571,8 @@
 .psCoverWrap {
   position: relative;
   width: 100%;
-  /* Reduced height by ~20%: from 246 to ~197 (aspect-ratio 358/197) */
   aspect-ratio: 358 / 197;
+  min-height: 160px;
   background: var(--color-surface-elevated);
   overflow: hidden;
 }

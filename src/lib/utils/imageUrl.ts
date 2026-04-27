@@ -1,12 +1,10 @@
 /**
- * Image URL optimizer — wraps Supabase Storage images with Transform API params.
- * For images NOT in Supabase Storage (external CDNs, mocks), returns the URL as-is.
- *
- * Supabase Transform format:
- * https://<ref>.supabase.co/storage/v1/render/image/public/<bucket>/<path>?width=N&quality=N&format=webp
+ * Image URL optimizer.
+ * Images are already resized + converted to WebP by sharp on upload, so the
+ * raw Supabase /object/public/ URL is served directly.
+ * Supabase Transform API (/render/image/public/) requires a Pro plan —
+ * re-enable if the project is upgraded.
  */
-
-const SUPABASE_OBJECT_RE = /^(https?:\/\/[^/]+\.supabase\.co\/storage\/v1)\/object\/public\/(.+)$/
 
 export interface ImageTransformOptions {
   width: number
@@ -17,25 +15,9 @@ export interface ImageTransformOptions {
 
 export function getOptimizedUrl(
   url: string | null | undefined,
-  opts: ImageTransformOptions
+  _opts: ImageTransformOptions
 ): string {
-  if (!url) return ''
-  const match = url.match(SUPABASE_OBJECT_RE)
-  if (!match) return url  // external or mock — return unchanged
-
-  const [, base, pathAndQuery] = match
-  // Strip any existing query params from the path
-  const path = pathAndQuery.split('?')[0]
-
-  const params = new URLSearchParams({
-    width: String(opts.width),
-    quality: String(opts.quality ?? 82),
-    format: 'webp',
-    resize: opts.resize ?? 'cover',
-  })
-  if (opts.height) params.set('height', String(opts.height))
-
-  return `${base}/render/image/public/${path}?${params}`
+  return url ?? ''
 }
 
 // Preset helpers — use these instead of calling getOptimizedUrl directly
