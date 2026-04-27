@@ -822,6 +822,37 @@
   margin: 4px 0 0;
 }
 
+/* ── Segmented control ───────────────────────────────────────── */
+
+.segmentedControl {
+  display: flex;
+  gap: 8px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.segmentBtn {
+  flex: 1;
+  padding: 10px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--text-caption-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.segmentBtnActive {
+  background: var(--color-bg);
+  color: var(--color-accent);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
 /* ── Save / delete (edit mode) ───────────────────────────────── */
 
 .saveBtn {

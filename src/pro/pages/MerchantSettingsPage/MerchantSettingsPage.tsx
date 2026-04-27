@@ -1001,6 +1001,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [showMapPicker, setShowMapPicker] = useState(false);
+  const [defaultApp, setDefaultApp] = useState<'b2c' | 'pro'>('b2c');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1025,6 +1026,8 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
           else if (b.photo_url) setPhotoUrls([b.photo_url]);
           setLat((b as any).lat ?? null);
           setLng((b as any).lng ?? null);
+          const cfg = (b as any).notification_config as { default_app?: string } | null;
+          setDefaultApp(cfg?.default_app === 'pro' ? 'pro' : 'b2c');
         }
       })
       .catch(() => {});
@@ -1099,6 +1102,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
         photo_url: photoUrls[0] || null,
         photo_urls: photoUrls,
         is_active: true,
+        notification_config: { default_app: defaultApp },
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };
       await api.patch<{ data: Business }>(`/businesses/${merchantId}`, body);
@@ -1215,6 +1219,33 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
             <span className={styles.socialPrefix}>@</span>
             <input className={`${styles.fieldInput} ${styles.socialField}`} value={telegramUsername} onChange={e => setTelegramUsername(e.target.value.replace(/^@/, ''))} placeholder="username" />
           </div>
+        </div>
+      </div>
+
+      <div className={styles.sectionDivider}>
+        <span className={styles.sectionDividerLabel}>Настройки бота</span>
+      </div>
+
+      <div className={styles.fieldGroup}>
+        <label className={styles.fieldLabel}>Приложение по умолчанию</label>
+        <p className={styles.fieldHint}>
+          При открытии Yookie через Telegram вы будете попадать в выбранный раздел.
+        </p>
+        <div className={styles.segmentedControl}>
+          <button
+            type="button"
+            className={`${styles.segmentBtn} ${defaultApp === 'b2c' ? styles.segmentBtnActive : ''}`}
+            onClick={() => setDefaultApp('b2c')}
+          >
+            📱 Клиентский
+          </button>
+          <button
+            type="button"
+            className={`${styles.segmentBtn} ${defaultApp === 'pro' ? styles.segmentBtnActive : ''}`}
+            onClick={() => setDefaultApp('pro')}
+          >
+            🚀 Yookie Pro
+          </button>
         </div>
       </div>
 
