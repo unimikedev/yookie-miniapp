@@ -75,6 +75,7 @@ export default function MorePage() {
     { label: t('pro.more.schedule'),        path: '/pro/schedule' },
     { label: t('pro.more.services'),        path: '/pro/services' },
     { label: t('pro.more.staff'),           path: '/pro/staff' },
+    { label: 'Галерея',                     path: '/pro/gallery' },
     { label: t('pro.more.profileSettings'), path: '/pro/settings' },
     { label: t('pro.more.preview'),         path: '/pro/preview' },
     { label: t('pro.more.myBusinesses'),    path: '/pro/select' },

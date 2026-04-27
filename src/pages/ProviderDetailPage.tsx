@@ -31,6 +31,9 @@ import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
 import { getMockBusinessImage, getMockMasterImage } from '@/lib/utils/mockImages'
 import { PhotoSwipe, FavoriteButton, InstagramGallery } from '@/components/features'
+import GalleryModal from '@/components/features/GalleryModal/GalleryModal'
+import type { GalleryPhoto } from '@/components/features/GalleryModal/GalleryModal'
+import { PORTFOLIO_IMAGES } from '@/lib/utils/mockImages'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
@@ -67,6 +70,9 @@ export default function ProviderDetailPage() {
   const [activeServiceCat, setActiveServiceCat] = useState<string | null>(null)
   const [serviceSearch, setServiceSearch] = useState('')
   const [masterFilter, setMasterFilter] = useState<string | null>(null)
+  const [galleryOpen, setGalleryOpen] = useState(false)
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([])
+  const [galleryTab, setGalleryTab] = useState<'salon' | 'portfolio'>('salon')
 
   // Swipe-back gesture refs
   const swipeStartX = useRef(0)
@@ -194,6 +200,21 @@ export default function ProviderDetailPage() {
       }
     })
   }, [business?.id])
+
+  // ── Fetch gallery photos ────────────────────────────────────────
+  useEffect(() => {
+    if (!id) return
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'
+    fetch(`${API_BASE}/businesses/${id}/photos`)
+      .then(r => r.json())
+      .then(res => {
+        const raw = res.data ?? []
+        if (raw.length > 0) {
+          setGalleryPhotos(raw)
+        }
+      })
+      .catch(() => {})
+  }, [id])
 
   // ── Auto-select solo master for individual providers ────────────
   useEffect(() => {
@@ -501,7 +522,33 @@ export default function ProviderDetailPage() {
       }}
     >
       {/* Hero: business cover OR individual master photo */}
-      <div className={styles.coverWrap}>
+      <div
+        className={styles.coverWrap}
+        onClick={() => {
+          if (!isLoading && !isIndividual) {
+            const hasGallery = galleryPhotos.length > 0
+            if (!hasGallery) {
+              // synthesize mock photos so gallery can open
+              const mockSalon = coverPhotos.map((url, i) => ({
+                id: `mock-salon-${i}`,
+                url,
+                type: 'salon' as const,
+                master_id: null,
+              }))
+              const mockPortfolio = PORTFOLIO_IMAGES.map((url, i) => ({
+                id: `mock-portfolio-${i}`,
+                url,
+                type: 'portfolio' as const,
+                master_id: masters[i % Math.max(masters.length, 1)]?.id ?? null,
+              }))
+              setGalleryPhotos([...mockSalon, ...mockPortfolio])
+            }
+            setGalleryTab('salon')
+            setGalleryOpen(true)
+          }
+        }}
+        style={!isLoading && !isIndividual ? { cursor: 'pointer' } : undefined}
+      >
         {isLoading ? (
           <div className={styles.coverSkeleton} />
         ) : isIndividual && soloMaster && soloMasterPhotos.length > 0 ? (
@@ -515,7 +562,28 @@ export default function ProviderDetailPage() {
             )}
           </div>
         )}
+        {/* Gallery hint badge */}
+        {!isLoading && !isIndividual && (
+          <div className={styles.galleryHint}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+              <circle cx="8.5" cy="10.5" r="1.5" fill="currentColor" />
+              <path d="M3 16L7 12L11 16L15 11L21 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Галерея
+          </div>
+        )}
       </div>
+
+      {/* Gallery modal */}
+      {galleryOpen && (
+        <GalleryModal
+          photos={galleryPhotos}
+          masters={masters}
+          initialTab={galleryTab}
+          onClose={() => setGalleryOpen(false)}
+        />
+      )}
 
       {/* Info block */}
       {!isLoading && business && (

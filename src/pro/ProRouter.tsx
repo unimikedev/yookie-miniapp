@@ -10,6 +10,7 @@ import MerchantSettingsPage from '@/pro/pages/MerchantSettingsPage/MerchantSetti
 import MerchantPreviewPage from '@/pro/pages/MerchantPreviewPage/MerchantPreviewPage';
 import MorePage from '@/pro/pages/MorePage/MorePage';
 import BusinessSelectorPage from '@/pro/pages/BusinessSelectorPage/BusinessSelectorPage';
+import GalleryPage from '@/pro/pages/GalleryPage/GalleryPage';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listMyBusinesses, switchBusiness } from '@/pro/api';
 import { useAuthStore } from '@/stores/authStore';
@@ -92,6 +93,7 @@ export function ProRouter() {
       <Route path="preview" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
       <Route path="more" element={<RequireOwner><MorePage /></RequireOwner>} />
       <Route path="my-profile" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
+      <Route path="gallery" element={<RequireOwner><GalleryPage /></RequireOwner>} />
       <Route path="*" element={<Navigate to="/pro" replace />} />
     </Routes>
   );

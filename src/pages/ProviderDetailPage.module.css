@@ -146,6 +146,25 @@
   animation: shimmer-bg 2.25s ease-in-out infinite;
 }
 
+/* ── Gallery hint badge (overlay on cover) ─────────────── */
+.galleryHint {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
 @keyframes shimmer-bg {
   0% { background-color: var(--color-skeleton-base, #1F2937); }
   50% { background-color: var(--color-skeleton-highlight, #374151); }
