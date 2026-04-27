@@ -146,23 +146,25 @@
   animation: shimmer-bg 2.25s ease-in-out infinite;
 }
 
-/* ── Gallery hint badge (overlay on cover) ─────────────── */
+/* ── Gallery hint badge (overlay on cover, bottom-left) ── */
 .galleryHint {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: 10px;
+  left: 10px;
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border-radius: 20px;
-  color: #fff;
-  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
   font-weight: 500;
+  letter-spacing: 0.01em;
   pointer-events: none;
+  line-height: 1;
 }
 
 @keyframes shimmer-bg {

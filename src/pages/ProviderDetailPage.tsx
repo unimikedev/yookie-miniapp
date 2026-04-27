@@ -566,12 +566,12 @@ export default function ProviderDetailPage() {
         {/* Gallery hint badge */}
         {!isLoading && !isIndividual && (
           <div className={styles.galleryHint}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2.2" />
               <circle cx="8.5" cy="10.5" r="1.5" fill="currentColor" />
               <path d="M3 16L7 12L11 16L15 11L21 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Галерея
+            Смотреть все
           </div>
         )}
       </div>
