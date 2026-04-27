@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import { verifyOtp, loginWithGoogle } from '../lib/api/auth';
+import { verifyOtp, loginWithGoogle, loginWithTelegramContact } from '../lib/api/auth';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 
 export interface AuthUser {
@@ -34,6 +34,7 @@ interface AuthState {
 interface AuthActions {
   login: (phone: string, code: string) => Promise<void>;
   googleLogin: (credential: string) => Promise<void>;
+  telegramContactLogin: (phone: string, initData: string) => Promise<void>;
   devLogin: () => void;
   logout: () => void;
   setPhone: (phone: string) => void;
@@ -85,6 +86,37 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
       });
 
       // Propagate businessId to merchant store so Pro section has a valid merchantId
+      if ((user as AuthUser).businessId) {
+        useMerchantStore.getState().setMerchantId((user as AuthUser).businessId!);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Login failed';
+      set({ error: message, isLoading: false, initStatus: 'error' });
+      throw error;
+    }
+  },
+
+  telegramContactLogin: async (phone: string, initData: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const tg = (window as any).Telegram?.WebApp
+      const name = [tg?.initDataUnsafe?.user?.first_name, tg?.initDataUnsafe?.user?.last_name]
+        .filter(Boolean).join(' ') || undefined
+      const response = await loginWithTelegramContact(phone, initData, name);
+      const { token, user } = response;
+      try {
+        localStorage.setItem(STORAGE_KEY, token);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      } catch { /* noop */ }
+      set({
+        token,
+        user: user as AuthUser,
+        phone: user.phone,
+        name: user.name,
+        isAuthenticated: true,
+        isLoading: false,
+        initStatus: 'ready',
+      });
       if ((user as AuthUser).businessId) {
         useMerchantStore.getState().setMerchantId((user as AuthUser).businessId!);
       }
