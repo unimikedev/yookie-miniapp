@@ -310,7 +310,9 @@ export default function HomePage() {
       return
     }
     if (item.type === 'master' && item.businessId) {
-      navigate(`/business/${item.businessId}`)
+      navigate(`/business/${item.businessId}`, {
+        state: { fromDeepLink: true, highlightMaster: item.masterId },
+      })
       return
     }
   }
@@ -686,7 +688,9 @@ export default function HomePage() {
                         <MasterCard
                           key={v.id}
                           item={v}
-                          onClick={() => navigate(`/business/${v.businessId}`)}
+                          onClick={() => navigate(`/business/${v.businessId}`, {
+                            state: { fromDeepLink: true, highlightMaster: v.masterId },
+                          })}
                           nearbyStyle
                         />
                       ))}
@@ -717,7 +721,9 @@ export default function HomePage() {
                 ) : (
                   <HScroll snap autoScroll className="contentReveal">
                     {fd.popularMasters.map((m) => (
-                      <MasterCard key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`)} nearbyStyle />
+                      <MasterCard key={m.id} item={m} onClick={() => navigate(`/business/${m.businessId}`, {
+                        state: { fromDeepLink: true, highlightMaster: m.masterId },
+                      })} nearbyStyle />
                     ))}
                   </HScroll>
                 )}

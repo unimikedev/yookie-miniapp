@@ -149,7 +149,7 @@
 /* ── Gallery hint badge (overlay on cover, bottom-left) ── */
 .galleryHint {
   position: absolute;
-  bottom: 10px;
+  bottom: 48px;
   left: 10px;
   /* Reset the coverWrap > * override */
   width: auto !important;
@@ -193,6 +193,30 @@
   justify-content: space-between;
   gap: 12px;
   padding: 16px;
+}
+
+.infoActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.shareBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.shareBtn:active {
+  opacity: 0.6;
 }
 
 .infoTitleWrap {
