@@ -39,9 +39,16 @@ function RequireOwner({ children }: { children: React.ReactNode }) {
 function ProIndex() {
   const navigate = useNavigate();
   const { merchantId, setMerchantId, setRole, setMasterId } = useMerchantStore();
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const initStatus = useAuthStore(s => s.initStatus);
   const [checking, setChecking] = useState(!merchantId);
 
   useEffect(() => {
+    if (initStatus === 'idle' || initStatus === 'loading') return;
+    if (!isAuthenticated) {
+      navigate('/auth?return=/pro', { replace: true });
+      return;
+    }
     if (merchantId) return; // already in a business, show dashboard
     setChecking(true);
     listMyBusinesses()
@@ -71,9 +78,9 @@ function ProIndex() {
         }
       })
       .catch(() => navigate('/pro/settings', { replace: true }));
-  }, []);
+  }, [initStatus, isAuthenticated]);
 
-  if (checking) return <LoadingState variant="skeleton" />;
+  if (initStatus === 'idle' || initStatus === 'loading') return <LoadingState variant="skeleton" />;
   if (!merchantId) return <LoadingState variant="skeleton" />;
   return <RequireOwner><DashboardPage /></RequireOwner>;
 }
