@@ -212,19 +212,21 @@
 
 .otpRow {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   justify-content: center;
   margin-bottom: 16px;
 }
 
 .otpBox {
-  width: 60px;
-  height: 68px;
+  flex: 1;
+  min-width: 0;
+  max-width: 52px;
+  height: 58px;
   border-radius: var(--radius-xl);
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   text-align: center;
-  font-size: var(--text-h1-size);
+  font-size: var(--text-h2-size, 24px);
   font-weight: 800;
   color: var(--color-text);
   caret-color: var(--color-accent);
