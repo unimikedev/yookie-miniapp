@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Master } from '@/lib/api/types'
+import { galleryFullUrl, galleryThumbUrl } from '@/lib/utils/imageUrl'
 import styles from './GalleryModal.module.css'
 
 export interface GalleryPhoto {
@@ -168,7 +169,7 @@ export default function GalleryModal({
         ) : (
           <img
             key={currentPhoto?.url}
-            src={currentPhoto?.url}
+            src={galleryFullUrl(currentPhoto?.url)}
             alt=""
             className={styles.photo}
             onClick={e => e.stopPropagation()}
@@ -185,7 +186,7 @@ export default function GalleryModal({
               className={`${styles.thumb} ${i === currentIdx ? styles.thumbActive : ''}`}
               onClick={e => { e.stopPropagation(); setCurrentIdx(i) }}
             >
-              <img src={p.url} alt="" />
+              <img src={galleryThumbUrl(p.url)} alt="" />
             </button>
           ))}
         </div>

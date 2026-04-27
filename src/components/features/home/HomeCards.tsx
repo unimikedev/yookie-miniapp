@@ -14,6 +14,7 @@ import type {
   HomeFilterChip,
 } from '@/lib/api/home'
 import { formatMasterName } from '@/lib/utils/name'
+import { cardAvatarUrl, cardCoverUrl } from '@/lib/utils/imageUrl'
 
 /* ── formatters ─────────────────────────────────────────── */
 const formatDistance = (m: number): string => {
@@ -150,7 +151,7 @@ export function MasterCard({ item, onClick, showLastVisit = false, nearbyStyle =
         {item.photoUrl && (
           <img
             className={styles.masterPhoto}
-            src={item.photoUrl}
+            src={cardAvatarUrl(item.photoUrl)}
             alt=""
             onError={(e) => {
               e.currentTarget.style.display = 'none'
@@ -230,7 +231,7 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
       >
         <div className={styles.nearbyHomePhoto} aria-hidden="true">
           {allPhotos[photoIdx] && (
-            <img className={styles.nearbyHomePhotoImg} src={allPhotos[photoIdx]} alt="" />
+            <img className={styles.nearbyHomePhotoImg} src={cardCoverUrl(allPhotos[photoIdx])} alt="" />
           )}
           <div className={styles.nearbyHomeBadges}>
             {nb.isPopular && <span className={styles.nearbyHomeBadge}>Популярное</span>}
@@ -301,7 +302,7 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
     >
       <div className={styles.nearbyThumb} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.nearbyThumbImg} src={item.photoUrl} alt="" />
+          <img className={styles.nearbyThumbImg} src={cardCoverUrl(item.photoUrl)} alt="" />
         )}
       </div>
       <div className={styles.nearbyInfo}>
@@ -365,7 +366,7 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
     >
       <div className={styles.masterPhotoWrap} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.masterPhoto} src={item.photoUrl} alt="" />
+          <img className={styles.masterPhoto} src={cardAvatarUrl(item.photoUrl)} alt="" />
         )}
       </div>
       <div className={styles.masterBody}>
@@ -446,7 +447,7 @@ export function PopularStudioCardView({
         onTouchEnd={handleTouchEnd}
       >
         {allPhotos[currentPhoto] && (
-          <img key={currentPhoto} className={`${styles.psCover} ${slideClass}`} src={allPhotos[currentPhoto]} alt={item.name} />
+          <img key={currentPhoto} className={`${styles.psCover} ${slideClass}`} src={cardCoverUrl(allPhotos[currentPhoto])} alt={item.name} />
         )}
         <button
           className={styles.psFav}

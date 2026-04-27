@@ -34,6 +34,7 @@ import { PhotoSwipe, FavoriteButton, InstagramGallery } from '@/components/featu
 import GalleryModal from '@/components/features/GalleryModal/GalleryModal'
 import type { GalleryPhoto } from '@/components/features/GalleryModal/GalleryModal'
 import { PORTFOLIO_IMAGES } from '@/lib/utils/mockImages'
+import { heroCoverUrl, cardAvatarUrl } from '@/lib/utils/imageUrl'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
@@ -468,16 +469,16 @@ export default function ProviderDetailPage() {
     const seen = new Set<string>()
     const result: string[] = []
     for (const p of [business.photo_url, ...(business.photo_urls ?? [])]) {
-      if (p && !seen.has(p)) { seen.add(p); result.push(p) }
+      if (p && !seen.has(p)) { seen.add(p); result.push(heroCoverUrl(p)) }
     }
     if (result.length === 0) {
       const mock = getMockBusinessImage(business.category, business.id)
-      if (mock) result.push(mock)
+      if (mock) result.push(mock) // mocks are local, no transform needed
     }
     return result
   }, [business])
   const soloMasterPhoto = soloMaster
-    ? (soloMaster.photo_url ?? getMockMasterImage(soloMaster.id))
+    ? (soloMaster.photo_url ? cardAvatarUrl(soloMaster.photo_url) : getMockMasterImage(soloMaster.id))
     : null
   const soloMasterPhotos = soloMasterPhoto ? [soloMasterPhoto] : []
 
@@ -937,7 +938,7 @@ export default function ProviderDetailPage() {
                   <div key={master.id} className={styles.masterRow}>
                     <div className={styles.masterRowPhoto}>
                       {master.photo_url
-                        ? <img src={master.photo_url} alt={master.name} />
+                        ? <img src={cardAvatarUrl(master.photo_url)} alt={master.name} />
                         : <span className={styles.masterRowPhotoFallback}>{master.name.charAt(0)}</span>
                       }
                     </div>

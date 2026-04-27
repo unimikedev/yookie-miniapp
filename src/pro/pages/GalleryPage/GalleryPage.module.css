@@ -167,38 +167,54 @@
   color: var(--color-accent);
 }
 
-/* ── Add photo form ── */
-.form {
+/* ── Hidden file input ── */
+.hiddenInput {
+  display: none;
+}
+
+/* ── Upload preview modal ── */
+.uploadModal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--safe-area-bottom) 0 0;
+}
+
+.uploadCard {
+  width: 100%;
+  background: var(--color-surface);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 16px calc(24px + var(--safe-area-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.uploadPreview {
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: var(--color-surface-elevated);
+}
+
+.uploadMeta {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px;
-  background: var(--color-surface);
-  border-radius: 14px;
-  border: 1px solid var(--color-border);
 }
 
-.input {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  font-family: var(--font-family);
-  font-size: 14px;
+.uploadLabel {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--color-text);
-  outline: none;
 }
 
-.input:focus {
-  border-color: var(--color-accent);
-}
-
-.input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.select {
+.uploadSelect {
   width: 100%;
   padding: 10px 12px;
   background: var(--color-surface-elevated);
@@ -212,10 +228,33 @@
   cursor: pointer;
 }
 
-.select:focus {
-  border-color: var(--color-accent);
+.uploadActions {
+  display: flex;
+  gap: 8px;
 }
 
+.uploadHint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.uploadSpinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Form actions ── */
 .formActions {
   display: flex;
   gap: 8px;

@@ -39,6 +39,8 @@ export interface NearbyBusinessCard {
   formatLabel?: string;
   /** Open until time in HH:mm format, e.g. "00:00" */
   openUntil?: string;
+  /** Additional photos for the photo carousel */
+  photos?: string[];
 }
 
 export interface PopularMasterCard {

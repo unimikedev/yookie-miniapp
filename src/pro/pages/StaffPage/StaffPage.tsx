@@ -78,6 +78,7 @@ export default function StaffPage() {
   const uploadPhoto = async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append('image', file);
+    fd.append('variant', 'avatar');
     const token = localStorage.getItem('yookie_auth_token');
     const res = await fetch(`${API_BASE}/businesses/upload-image`, {
       method: 'POST',

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Business, CATEGORY_LABELS } from '@/lib/api/types'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
+import { cardCoverUrl } from '@/lib/utils/imageUrl'
 import { FavoriteButton } from './FavoriteButton'
 import styles from './BusinessCard.module.css'
 
@@ -16,7 +17,8 @@ const STAR_SVG = (
 )
 
 export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick }) => {
-  const image = business.photo_url ?? getMockBusinessImage(business.category, business.id)
+  const rawImage = business.photo_url ?? getMockBusinessImage(business.category, business.id)
+  const image = business.photo_url ? cardCoverUrl(rawImage) : rawImage
   const categoryLabel = CATEGORY_LABELS[business.category] ?? business.category
 
   return (

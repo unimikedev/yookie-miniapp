@@ -371,9 +371,10 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
     ? [lat, lng]
     : CITY_COORDS[city] ?? [41.2995, 69.2401];
 
-  const uploadImage = async (file: File): Promise<string> => {
+  const uploadImage = async (file: File, variant: 'cover' | 'avatar' = 'cover'): Promise<string> => {
     const fd = new FormData();
     fd.append('image', file);
+    fd.append('variant', variant);
     const token = localStorage.getItem('yookie_auth_token');
     const res = await fetch(`${API_BASE}/businesses/upload-image`, {
       method: 'POST',
@@ -409,7 +410,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
     if (!file) return;
     setStaffPhotoUploading(true);
     try {
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, 'avatar');
       setStaffPhotoUrl(url);
     } catch {
       // non-critical
@@ -1029,9 +1030,10 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       .catch(() => {});
   }, [merchantId]);
 
-  const uploadImage = async (file: File): Promise<string> => {
+  const uploadImage = async (file: File, variant: 'cover' | 'avatar' = 'cover'): Promise<string> => {
     const fd = new FormData();
     fd.append('image', file);
+    fd.append('variant', variant);
     const token = localStorage.getItem('yookie_auth_token');
     const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/businesses/upload-image`, {
       method: 'POST',
