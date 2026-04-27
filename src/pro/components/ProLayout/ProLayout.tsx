@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+const TAB_PATHS = ['/pro', '/pro/bookings', '/pro/clients', '/pro/more', '/pro/schedule', '/pro/my-profile'];
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useAuthStore } from '@/stores/authStore';
 import { listMyBusinesses } from '@/pro/api';
@@ -36,6 +38,10 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
 
   // Show back button on any Pro sub-page (not the dashboard root)
   const isSubPage = location.pathname !== '/pro';
+
+  // Auto-hide bottom nav on non-tab pages (2nd-level screens like settings, services, staff)
+  const isTabPage = TAB_PATHS.includes(location.pathname);
+  const shouldHideNav = hideNav || !isTabPage;
 
   useEffect(() => {
     if (!auth.isAuthenticated) {
@@ -115,11 +121,11 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
         </div>
       </header>
 
-      <main className={`${styles.main} ${hideNav ? '' : styles.withNav}`}>
+      <main className={`${styles.main} ${shouldHideNav ? '' : styles.withNav}`}>
         {children}
       </main>
 
-      {!hideNav && <ProBottomNav />}
+      {!shouldHideNav && <ProBottomNav />}
     </div>
   );
 }

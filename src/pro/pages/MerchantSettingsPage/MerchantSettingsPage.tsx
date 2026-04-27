@@ -10,6 +10,7 @@ import { UZBEKISTAN_CITIES } from '@/stores/cityStore';
 import { formatPhoneMask } from '@/lib/utils/phone';
 import { useMerchantProfileValidation, getOnboardingSteps, type OnboardingStep } from '@/hooks/useMerchantProfileValidation';
 import type { Business, CategoryEnum } from '@/lib/api/types';
+import { Toast } from '@/components/ui/Toast';
 import styles from './MerchantSettingsPage.module.css';
 
 const CATEGORY_VALUES: CategoryEnum[] = [
@@ -986,6 +987,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { setMerchantId } = useMerchantStore();
+  const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -1106,8 +1108,13 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };
       await api.patch<{ data: Business }>(`/businesses/${merchantId}`, body);
+      setToast({ msg: 'Сохранено', key: Date.now() });
+      setTimeout(() => navigate('/pro/more', { replace: true }), 1200);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('pro.services.saveError'));
+      console.error('[settings save]', err);
+      const msg = err instanceof Error ? err.message : t('pro.services.saveError');
+      const status = (err as any)?.statusCode;
+      setError(status ? `[${status}] ${msg}` : msg);
     } finally {
       setSaving(false);
     }
@@ -1258,6 +1265,8 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       <button className={styles.deleteBtn} onClick={handleDelete} disabled={saving}>
         {t('pro.settings.deleteBtn')}
       </button>
+
+      {toast && <Toast key={toast.key} message={toast.msg} onDone={() => setToast(null)} />}
     </ProLayout>
   );
 }
