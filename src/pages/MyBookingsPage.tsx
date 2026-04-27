@@ -6,6 +6,7 @@ import { LoadingState } from '@/components/ui'
 import { cancelBooking, rescheduleBooking } from '@/lib/api/bookings'
 import { syncBookingCancellationToMerchant, syncBookingRescheduleToMerchant } from '@/lib/syncBookingToMerchant'
 import { formatMasterName } from '@/lib/utils/name'
+import { formatRelativeDate } from '@/lib/utils/date'
 import ReviewForm from '@/components/features/ReviewForm'
 import RescheduleBottomSheet from '@/components/features/RescheduleBottomSheet'
 import { useAuthStore } from '@/stores/authStore'
@@ -412,7 +413,7 @@ export default function MyBookingsPage() {
                     >
                       <div className={styles.pastCardLeft}>
                         <span className={styles.pastCardBiz}>{businessName}</span>
-                        <span className={styles.pastCardDate}>{formatDate(first.starts_at)} • {new Date(first.starts_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className={styles.pastCardDate}>{formatRelativeDate(first.starts_at)} • {new Date(first.starts_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
                         <span className={styles.pastCardServices}>{serviceNames}</span>
                       </div>
                       <div className={styles.pastCardRight}>

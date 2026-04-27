@@ -38,7 +38,7 @@ import { heroCoverUrl, cardAvatarUrl } from '@/lib/utils/imageUrl'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
-import { toLocalYMD } from '@/lib/utils/date'
+import { toLocalYMD, formatRelativeDate } from '@/lib/utils/date'
 import styles from './ProviderDetailPage.module.css'
 
 const TAB_KEYS = ['provider.tabServices', 'provider.tabMasters', 'provider.tabReviews', 'provider.tabAbout']
@@ -53,8 +53,7 @@ interface ReviewItem {
 
 function formatDate(dateStr: string): string {
   try {
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })
+    return formatRelativeDate(dateStr)
   } catch {
     return dateStr
   }

@@ -18,7 +18,7 @@ import { FavoriteButton } from '@/components/features'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { TELEGRAM_BOT_URL } from '@/shared/constants'
-import { toLocalYMD } from '@/lib/utils/date'
+import { toLocalYMD, formatRelativeDate } from '@/lib/utils/date'
 import styles from './MasterDetailPage.module.css'
 
 interface ReviewItem {
@@ -31,8 +31,7 @@ interface ReviewItem {
 
 function formatDate(dateStr: string): string {
   try {
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })
+    return formatRelativeDate(dateStr)
   } catch {
     return dateStr
   }

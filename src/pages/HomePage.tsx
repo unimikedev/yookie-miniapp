@@ -27,6 +27,7 @@ import type { CategoryEnum, Business } from '@/lib/api/types'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { HomeFilterChip, PopularStudioCard } from '@/lib/api/home'
 import { CATEGORIES, CATEGORY_ICONS } from '@/shared/constants'
+import { formatRelativeDate } from '@/lib/utils/date'
 import { fetchBusinesses } from '@/lib/api/businesses'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import styles from './HomePage.module.css'
@@ -343,9 +344,7 @@ export default function HomePage() {
           businessId: vb.businessId,
           masterId: m.id,
           providerType: 'business' as const,
-          lastVisitDate: vb.lastVisitAt
-            ? new Date(vb.lastVisitAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })
-            : '',
+          lastVisitDate: vb.lastVisitAt ? formatRelativeDate(vb.lastVisitAt) : '',
         }))
       )
     : null

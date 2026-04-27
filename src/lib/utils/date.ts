@@ -33,3 +33,49 @@ export function addDaysLocal(ymd: string, days: number): string {
   dt.setDate(dt.getDate() + days)
   return toLocalYMD(dt)
 }
+
+/**
+ * Human-relative past date label (Russian).
+ *
+ * сегодня / вчера / N дней назад (up to 29)
+ * месяц назад / 2 месяца назад (30–89 days)
+ * full date "27 апр. 2026 г." (90+ days)
+ *
+ * Future dates are returned as a full date string unchanged.
+ * Do NOT use in calendar/scheduling UI — use toLocalDateString directly there.
+ */
+export function formatRelativeDate(input: string | Date): string {
+  const d = typeof input === 'string' ? new Date(input) : input
+  if (isNaN(d.getTime())) return ''
+
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const dateStart = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const diffDays = Math.round((todayStart.getTime() - dateStart.getTime()) / 86_400_000)
+
+  if (diffDays < 0) return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })
+  if (diffDays === 0) return 'сегодня'
+  if (diffDays === 1) return 'вчера'
+  if (diffDays < 30) return `${diffDays} ${pluralDays(diffDays)} назад`
+
+  const months = Math.floor(diffDays / 30)
+  if (months < 3) return `${months} ${pluralMonths(months)} назад`
+
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function pluralDays(n: number): string {
+  const m10 = n % 10, m100 = n % 100
+  if (m100 >= 11 && m100 <= 14) return 'дней'
+  if (m10 === 1) return 'день'
+  if (m10 >= 2 && m10 <= 4) return 'дня'
+  return 'дней'
+}
+
+function pluralMonths(n: number): string {
+  const m10 = n % 10, m100 = n % 100
+  if (m100 >= 11 && m100 <= 14) return 'месяцев'
+  if (m10 === 1) return 'месяц'
+  if (m10 >= 2 && m10 <= 4) return 'месяца'
+  return 'месяцев'
+}
