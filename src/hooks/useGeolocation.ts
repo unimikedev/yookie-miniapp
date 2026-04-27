@@ -38,11 +38,29 @@ const GEO_OPTIONS: PositionOptions = {
   maximumAge: 300000, // Cache for 5 minutes
 }
 
-// Module-level cache shared across all useGeolocation instances.
-// Prevents re-firing the Telegram native location dialog on every remount.
+// Module-level cache — shared within a single JS session (fast path).
 let _geoCache: GeoPosition | null = null
 let _geoCacheTs = 0
 const GEO_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+
+// localStorage persistence — survives Telegram WebView re-initializations.
+const GEO_LS_KEY = 'yookie_geo_cache'
+
+function readGeoCache(): GeoPosition | null {
+  try {
+    const raw = localStorage.getItem(GEO_LS_KEY)
+    if (!raw) return null
+    const { lat, lng, accuracy, ts } = JSON.parse(raw) as GeoPosition & { ts: number }
+    if (Date.now() - ts > GEO_CACHE_TTL) return null
+    return { lat, lng, accuracy }
+  } catch { return null }
+}
+
+function writeGeoCache(pos: GeoPosition) {
+  try {
+    localStorage.setItem(GEO_LS_KEY, JSON.stringify({ ...pos, ts: Date.now() }))
+  } catch { /* noop */ }
+}
 
 export function useGeolocation(autoRequest = true): UseGeolocationResult {
   const [position, setPosition] = useState<GeoPosition | null>(null)
@@ -77,9 +95,19 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
       return
     }
 
-    // Return cached position if fresh enough — avoids re-firing Telegram's confirm dialog
+    // 1. Module-level cache — same JS session, zero cost
     if (_geoCache && Date.now() - _geoCacheTs < GEO_CACHE_TTL) {
       setPosition(_geoCache)
+      setPermission('granted')
+      return
+    }
+
+    // 2. localStorage cache — survives WebView re-init (Telegram minimize/reopen)
+    const lsCache = readGeoCache()
+    if (lsCache) {
+      _geoCache = lsCache
+      _geoCacheTs = Date.now()
+      setPosition(lsCache)
       setPermission('granted')
       return
     }
@@ -96,6 +124,7 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
         }
         _geoCache = geo
         _geoCacheTs = Date.now()
+        writeGeoCache(geo)   // persist so next re-open skips the dialog
         setPosition(geo)
         setPermission('granted')
         setIsLoading(false)
