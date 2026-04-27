@@ -231,7 +231,7 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
       >
         <div className={styles.nearbyHomePhoto} aria-hidden="true">
           {allPhotos[photoIdx] && (
-            <img className={styles.nearbyHomePhotoImg} src={cardCoverUrl(allPhotos[photoIdx])} alt="" />
+            <img className={styles.nearbyHomePhotoImg} src={cardCoverUrl(allPhotos[photoIdx])} alt="" onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden' }} />
           )}
           <div className={styles.nearbyHomeBadges}>
             {nb.isPopular && <span className={styles.nearbyHomeBadge}>Популярное</span>}
@@ -302,7 +302,7 @@ export function NearbyCard({ item, onClick, compact, homeVertical }: NearbyCardP
     >
       <div className={styles.nearbyThumb} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.nearbyThumbImg} src={cardCoverUrl(item.photoUrl)} alt="" />
+          <img className={styles.nearbyThumbImg} src={cardCoverUrl(item.photoUrl)} alt="" onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden' }} />
         )}
       </div>
       <div className={styles.nearbyInfo}>
@@ -366,7 +366,7 @@ export function PopularMasterCardView({ item, onClick }: PopularMasterCardViewPr
     >
       <div className={styles.masterPhotoWrap} aria-hidden="true">
         {item.photoUrl && (
-          <img className={styles.masterPhoto} src={cardAvatarUrl(item.photoUrl)} alt="" />
+          <img className={styles.masterPhoto} src={cardAvatarUrl(item.photoUrl)} alt="" onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden' }} />
         )}
       </div>
       <div className={styles.masterBody}>
@@ -447,7 +447,7 @@ export function PopularStudioCardView({
         onTouchEnd={handleTouchEnd}
       >
         {allPhotos[currentPhoto] && (
-          <img key={currentPhoto} className={`${styles.psCover} ${slideClass}`} src={cardCoverUrl(allPhotos[currentPhoto])} alt={item.name} />
+          <img key={currentPhoto} className={`${styles.psCover} ${slideClass}`} src={cardCoverUrl(allPhotos[currentPhoto])} alt={item.name} onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden' }} />
         )}
         <button
           className={styles.psFav}

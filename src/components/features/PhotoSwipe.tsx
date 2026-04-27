@@ -3,7 +3,7 @@
  * Used on ProviderDetailPage and MasterDetailPage hero sections.
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import styles from './PhotoSwipe.module.css'
 
 interface PhotoSwipeProps {
@@ -16,6 +16,7 @@ interface PhotoSwipeProps {
 export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwipeProps) {
   const [current, setCurrent] = useState(0)
   const [slideDir, setSlideDir] = useState<'left' | 'right' | null>(null)
+  const [brokenIdxs, setBrokenIdxs] = useState<Set<number>>(new Set())
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
   const touchStartY = useRef(0)
@@ -53,11 +54,21 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
     setCurrent(idx)
   }, [current])
 
+  const markBroken = useCallback((idx: number) => {
+    setBrokenIdxs(prev => new Set([...prev, idx]))
+  }, [])
+
+  // Reset broken state when photo list changes
+  useEffect(() => { setBrokenIdxs(new Set()) }, [photos])
+
   if (!photos.length) return null
   if (photos.length === 1) {
     return (
       <div className={`${styles.swipeWrap} ${className ?? ''}`} style={{ height }}>
-        <img src={photos[0]} alt={alt} className={styles.photo} />
+        {brokenIdxs.has(0)
+          ? <div className={styles.photoPlaceholder} />
+          : <img src={photos[0]} alt={alt} className={styles.photo} onError={() => markBroken(0)} />
+        }
       </div>
     )
   }
@@ -72,7 +83,10 @@ export default function PhotoSwipe({ photos, alt, className, height }: PhotoSwip
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <img key={current} src={photos[current]} alt={alt} className={`${styles.photo} ${slideClass}`} />
+      {brokenIdxs.has(current)
+        ? <div key={current} className={`${styles.photoPlaceholder} ${slideClass}`} />
+        : <img key={current} src={photos[current]} alt={alt} className={`${styles.photo} ${slideClass}`} onError={() => markBroken(current)} />
+      }
 
       {/* N/N counter — top-right */}
       <div className={styles.counter}>{current + 1}/{photos.length}</div>
