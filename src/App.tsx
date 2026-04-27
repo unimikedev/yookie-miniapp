@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import Layout from '@/components/Layout'
 import { Router } from '@/Router'
 import { StartParamNavigator } from '@/components/StartParamNavigator'
+import { MerchantRedirect } from '@/components/MerchantRedirect'
 import SplashScreen from '@/components/SplashScreen'
 import { useTelegramNotifications } from '@/hooks/useTelegramNotifications'
 import { useThemeStore } from '@/stores/themeStore'
@@ -30,6 +31,7 @@ export default function App() {
       <PlatformContextProvider>
         <BrowserRouter>
           <StartParamNavigator />
+          <MerchantRedirect />
           <Layout>
             <Router />
           </Layout>

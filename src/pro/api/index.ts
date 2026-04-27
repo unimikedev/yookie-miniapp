@@ -606,6 +606,7 @@ export interface BusinessSummary {
   provider_type: 'individual' | 'business';
   role: string;
   joined_at: string;
+  notification_config?: { default_app?: string } | null;
 }
 
 /** List all businesses the current user belongs to (any role). */
