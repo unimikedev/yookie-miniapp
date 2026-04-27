@@ -7,10 +7,10 @@ import { RequestOtpPayload, VerifyOtpPayload, VerifyOtpResponse, GoogleAuthRespo
 
 /**
  * Request OTP code for phone number.
- * If telegramId provided, code is sent via Telegram bot DM instead of SMS.
+ * If initData provided (Telegram Mini App signed string), code is sent via Telegram bot DM.
  */
-export async function requestOtp(phone: string, telegramId?: number): Promise<void> {
-  const payload: RequestOtpPayload & { telegramId?: number } = { phone, telegramId };
+export async function requestOtp(phone: string, initData?: string): Promise<void> {
+  const payload: RequestOtpPayload & { initData?: string } = { phone, initData };
   await api.post('/auth/otp/send', payload);
 }
 
@@ -20,9 +20,9 @@ export async function requestOtp(phone: string, telegramId?: number): Promise<vo
 export async function verifyOtp(
   phone: string,
   code: string,
-  telegramId?: number
+  initData?: string
 ): Promise<VerifyOtpResponse> {
-  const payload: VerifyOtpPayload & { telegramId?: number } = { phone, code, telegramId };
+  const payload: VerifyOtpPayload & { initData?: string } = { phone, code, initData };
   const response = await api.post<VerifyOtpResponse>('/auth/otp/verify', payload);
   return response;
 }

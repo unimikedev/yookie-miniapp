@@ -103,10 +103,10 @@ export default function AuthPage() {
     return () => clearInterval(interval)
   }, [screen])
 
-  const getTelegramUserId = (): number | undefined => {
+  const getTelegramInitData = (): string | undefined => {
     try {
-      const tg = (window as any).Telegram?.WebApp
-      return tg?.initDataUnsafe?.user?.id ?? undefined
+      const raw = (window as any).Telegram?.WebApp?.initData
+      return raw && raw.length > 0 ? raw : undefined
     } catch {
       return undefined
     }
@@ -133,10 +133,10 @@ export default function AuthPage() {
 
     setIsLoading(true)
     setError(null)
-    const telegramId = getTelegramUserId()
-    setOtpViaTelegram(!!telegramId)
+    const initData = getTelegramInitData()
+    setOtpViaTelegram(!!initData)
     try {
-      await requestOtp(phone, telegramId)
+      await requestOtp(phone, initData)
       setScreen('otp')
     } catch (err) {
       setError(err instanceof Error ? err.message : t('auth.errorSend'))
@@ -216,10 +216,10 @@ export default function AuthPage() {
     setIsLoading(true)
     setError(null)
     setOtp(['', '', '', '', '', ''])
-    const telegramId = getTelegramUserId()
-    setOtpViaTelegram(!!telegramId)
+    const initData = getTelegramInitData()
+    setOtpViaTelegram(!!initData)
     try {
-      await requestOtp(phone, telegramId)
+      await requestOtp(phone, initData)
       setCountdown(OTP_RESEND_SECONDS)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('auth.errorSend'))
