@@ -28,16 +28,11 @@ export async function verifyOtp(
 }
 
 /**
- * Authenticate via Telegram requestContact() — no OTP needed.
- * phone comes from tg.initDataUnsafe.contact.phone_number (Telegram-verified).
- * initData is HMAC-signed by Telegram and validated on the backend.
+ * One-tap Telegram login — just initData, no phone or OTP needed.
+ * Backend validates HMAC and looks up/creates user by telegram_chat_id.
  */
-export async function loginWithTelegramContact(
-  phone: string,
-  initData: string,
-  name?: string
-): Promise<VerifyOtpResponse> {
-  const response = await api.post<VerifyOtpResponse>('/auth/telegram-contact', { phone, initData, name });
+export async function loginWithTelegram(initData: string): Promise<VerifyOtpResponse> {
+  const response = await api.post<VerifyOtpResponse>('/auth/telegram', { initData });
   return response;
 }
 

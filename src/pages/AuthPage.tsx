@@ -5,22 +5,18 @@ import styles from './AuthPage.module.css'
 
 const GOOGLE_CLIENT_ID = '133260309518-kqgcacogqjrcmjbb8lh5k36el9mgth0a.apps.googleusercontent.com'
 
-type BtnState = 'idle' | 'requesting' | 'authenticating' | 'declined'
-
 export default function AuthPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const authStore = useAuthStore()
   const returnTo = searchParams.get('return') || '/account'
 
-  const [btnState, setBtnState] = useState<BtnState>('idle')
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
   const googleBtnRef = useRef<HTMLDivElement>(null)
 
   const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : null
   const isInTelegram = !!tg?.initData
-  const hasRequestContact = !!tg?.requestContact
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -29,21 +25,20 @@ export default function AuthPage() {
 
   // Google Sign-In callback
   const handleGoogleCallback = useCallback(async (response: { credential: string }) => {
-    setBtnState('authenticating')
+    setLoading(true)
     setError(null)
     try {
       await authStore.googleLogin(response.credential)
       navigate(returnTo, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка входа через Google')
-      setBtnState('idle')
+      setLoading(false)
     }
   }, [returnTo])
 
   // Initialize Google Sign-In
   useEffect(() => {
     if (!googleBtnRef.current) return
-
     const initGoogle = () => {
       const google = (window as any).google
       if (!google?.accounts?.id) return
@@ -62,71 +57,37 @@ export default function AuthPage() {
         logo_alignment: 'center',
       })
     }
-
     if ((window as any).google?.accounts?.id) {
       initGoogle()
     } else {
       const timer = setInterval(() => {
-        if ((window as any).google?.accounts?.id) {
-          clearInterval(timer)
-          initGoogle()
-        }
+        if ((window as any).google?.accounts?.id) { clearInterval(timer); initGoogle() }
       }, 100)
       return () => clearInterval(timer)
     }
   }, [handleGoogleCallback])
 
-  const handleSharePhone = () => {
-    if (!tg?.requestContact) return
+  const handleTelegramLogin = async () => {
+    const initData = tg?.initData as string | undefined
+    if (!initData) {
+      setError('Откройте приложение через Telegram.')
+      return
+    }
+    setLoading(true)
     setError(null)
-    setBtnState('requesting')
-
-    tg.requestContact(async (ok: boolean) => {
-      if (!ok) {
-        setError('Для входа необходим доступ к номеру телефона')
-        setBtnState('declined')
-        return
-      }
-
-      const raw = tg.initDataUnsafe?.contact?.phone_number as string | undefined
-      const initData = tg.initData as string | undefined
-
-      if (!raw || !initData) {
-        setError('Не удалось получить данные. Перезапустите приложение.')
-        setBtnState('idle')
-        return
-      }
-
-      const digits = raw.replace(/\D/g, '')
-      const phone = '+' + digits
-
-      setBtnState('authenticating')
-      try {
-        await authStore.telegramContactLogin(phone, initData)
-        navigate(returnTo, { replace: true })
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ошибка входа. Попробуйте снова.')
-        setBtnState('idle')
-      }
-    })
+    try {
+      await authStore.telegramLogin(initData)
+      navigate(returnTo, { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка входа. Попробуйте снова.')
+      setLoading(false)
+    }
   }
-
-  const isDisabled = btnState === 'requesting' || btnState === 'authenticating'
-
-  const shareLabel =
-    btnState === 'requesting'    ? 'Запрашиваем...' :
-    btnState === 'authenticating' ? 'Входим...'       :
-    btnState === 'declined'       ? 'Попробовать снова' :
-    'Поделиться номером'
 
   return (
     <div className={styles.page}>
-      {/* Back button */}
-      <button
-        className={styles.backBtn}
-        onClick={() => navigate(-1)}
-        aria-label="Назад"
-      >
+      {/* Back */}
+      <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Назад">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M12 4L6 10L12 16" />
         </svg>
@@ -142,29 +103,30 @@ export default function AuthPage() {
         <h1 className={styles.title}>Добро пожаловать!</h1>
         <p className={styles.subtitle}>
           {isInTelegram
-            ? 'Нажмите кнопку ниже, чтобы войти через ваш аккаунт Telegram'
+            ? 'Войдите одним нажатием через ваш аккаунт Telegram'
             : 'Войдите, чтобы записываться к мастерам'}
         </p>
 
         {error && <p className={styles.errorText}>{error}</p>}
 
-        {/* Telegram contact share — primary CTA */}
-        {isInTelegram && hasRequestContact && (
+        {/* Telegram one-tap login */}
+        {isInTelegram && (
           <>
             <button
               className={styles.primaryBtn}
-              onClick={handleSharePhone}
-              disabled={isDisabled}
+              onClick={handleTelegramLogin}
+              disabled={loading}
             >
               <span className={styles.btnInner}>
-                {isDisabled ? (
+                {loading ? (
                   <span className={styles.btnSpinner} />
                 ) : (
+                  /* Telegram logo */
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8-1.54 7.27c-.11.52-.42.65-.85.4l-2.36-1.74-1.14 1.1c-.13.13-.24.24-.49.24l.17-2.43 4.47-4.04c.19-.17-.04-.27-.3-.1L7.46 14.6l-2.3-.72c-.5-.16-.51-.5.1-.74l8.99-3.47c.42-.15.79.1.65.73z"/>
                   </svg>
                 )}
-                {shareLabel}
+                {loading ? 'Входим...' : 'Войти через Telegram'}
               </span>
             </button>
 
@@ -176,13 +138,7 @@ export default function AuthPage() {
           </>
         )}
 
-        {isInTelegram && !hasRequestContact && (
-          <p className={styles.errorText}>
-            Обновите Telegram до последней версии для входа по номеру телефона
-          </p>
-        )}
-
-        {/* Dev shortcut — only in local dev, non-Telegram context */}
+        {/* Dev shortcut — only in local dev when not in Telegram */}
         {import.meta.env.DEV && !isInTelegram && (
           <button
             className={styles.primaryBtn}
