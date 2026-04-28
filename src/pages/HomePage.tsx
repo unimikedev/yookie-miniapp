@@ -31,6 +31,7 @@ import { formatRelativeDate } from '@/lib/utils/date'
 import { fetchBusinesses } from '@/lib/api/businesses'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import styles from './HomePage.module.css'
+import { BetaBanner } from '@/components/ui/BetaBanner'
 
 interface SearchResultItem {
   type: 'business' | 'master' | 'category'
@@ -768,6 +769,7 @@ export default function HomePage() {
         </div>
       </div>{/* end mainCard */}
       <CitySelector open={citySelectorOpen} onClose={() => setCitySelectorOpen(false)} />
+      {!authStore.isAuthenticated && <BetaBanner />}
     </div>
   )
 }
