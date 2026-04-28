@@ -185,7 +185,13 @@ export default function HomePage() {
   const marqueeScrollPosRef = useRef(0)
 
   const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
-  const handleMarqueeTouchEnd = () => { setTimeout(() => { marqueePausedRef.current = false }, 1500) }
+  const handleMarqueeTouchEnd = () => {
+    setTimeout(() => {
+      // Sync float position from real scrollLeft so resume continues from where user left off
+      if (marqueeRef.current) marqueeScrollPosRef.current = marqueeRef.current.scrollLeft
+      marqueePausedRef.current = false
+    }, 1500)
+  }
 
   useEffect(() => {
     const el = marqueeRef.current
@@ -195,7 +201,8 @@ export default function HomePage() {
         marqueeScrollPosRef.current += 0.5
         const half = el.scrollWidth / 2
         if (half > 0 && marqueeScrollPosRef.current >= half) marqueeScrollPosRef.current -= half
-        el.scrollLeft = Math.round(marqueeScrollPosRef.current)
+        // Write float directly — browser renders sub-pixel scroll smoothly, no rounding
+        el.scrollLeft = marqueeScrollPosRef.current
       }
       marqueeRafRef.current = requestAnimationFrame(tick)
     }
