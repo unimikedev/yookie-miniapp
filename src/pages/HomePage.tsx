@@ -183,32 +183,40 @@ export default function HomePage() {
   const marqueeRef = useRef<HTMLDivElement>(null)
   const marqueeRafRef = useRef<number | null>(null)
   const marqueePausedRef = useRef(false)
-  const marqueeScrollPosRef = useRef(0)
 
   const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
-  const handleMarqueeTouchEnd = () => {
-    setTimeout(() => {
-      // Sync float position from real scrollLeft so resume continues from where user left off
-      if (marqueeRef.current) marqueeScrollPosRef.current = marqueeRef.current.scrollLeft
-      marqueePausedRef.current = false
-    }, 1500)
-  }
+  const handleMarqueeRelease = () => { setTimeout(() => { marqueePausedRef.current = false }, 1200) }
 
   useEffect(() => {
     const el = marqueeRef.current
     if (!el) return
+
     const tick = () => {
-      if (!marqueePausedRef.current) {
-        marqueeScrollPosRef.current += 0.5
+      if (!marqueePausedRef.current && el.scrollWidth > el.clientWidth) {
+        el.scrollLeft += 0.5
         const half = el.scrollWidth / 2
-        if (half > 0 && marqueeScrollPosRef.current >= half) marqueeScrollPosRef.current -= half
-        // Write float directly — browser renders sub-pixel scroll smoothly, no rounding
-        el.scrollLeft = marqueeScrollPosRef.current
+        if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
       }
       marqueeRafRef.current = requestAnimationFrame(tick)
     }
-    marqueeRafRef.current = requestAnimationFrame(tick)
-    return () => { if (marqueeRafRef.current) cancelAnimationFrame(marqueeRafRef.current) }
+
+    const startLoop = () => {
+      if (marqueeRafRef.current !== null) cancelAnimationFrame(marqueeRafRef.current)
+      marqueeRafRef.current = requestAnimationFrame(tick)
+    }
+
+    startLoop()
+
+    // Restart loop when page comes back into view (geo permission dialog, app switcher, etc.)
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') startLoop()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      if (marqueeRafRef.current !== null) cancelAnimationFrame(marqueeRafRef.current)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
   }, [])
 
   // Infinite feed state
@@ -601,7 +609,8 @@ export default function HomePage() {
           ref={marqueeRef}
           className={styles.catMarqueeWrap}
           onTouchStart={handleMarqueeTouchStart}
-          onTouchEnd={handleMarqueeTouchEnd}
+          onTouchEnd={handleMarqueeRelease}
+          onTouchCancel={handleMarqueeRelease}
         >
           {[...CATEGORIES, ...CATEGORIES].map((cat, idx) => (
             <HomeCategoryChip
