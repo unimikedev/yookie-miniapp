@@ -188,11 +188,10 @@ export default function HomePage() {
   const handleMarqueeRelease = () => { setTimeout(() => { marqueePausedRef.current = false }, 1200) }
 
   useEffect(() => {
-    const el = marqueeRef.current
-    if (!el) return
-
     const tick = () => {
-      if (!marqueePausedRef.current && el.scrollWidth > el.clientWidth) {
+      // Read ref every frame — survives re-renders and first-load timing issues
+      const el = marqueeRef.current
+      if (el && !marqueePausedRef.current && el.scrollWidth > el.clientWidth) {
         el.scrollLeft += 0.5
         const half = el.scrollWidth / 2
         if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
