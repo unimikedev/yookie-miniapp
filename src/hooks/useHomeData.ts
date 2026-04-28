@@ -163,17 +163,41 @@ function toPopularStudio(b: Business): PopularStudioCard {
   };
 }
 
-// Module-level position cache — persists across component remounts so Telegram's
-// native location confirm only fires once per session (or after 10 min TTL).
+// Module-level position cache — persists across component remounts.
 let _cachedPos: { lat: number; lng: number } | null = null
 let _cacheTs = 0
-const GEO_CACHE_TTL = 10 * 60 * 1000 // 10 minutes
+const GEO_CACHE_TTL = 10 * 60 * 1000
+// Shared with useGeolocation.ts so both hooks read/write the same entry.
+const GEO_LS_KEY = 'yookie_geo_cache'
+
+function readGeoLS(): { lat: number; lng: number } | null {
+  try {
+    const raw = localStorage.getItem(GEO_LS_KEY)
+    if (!raw) return null
+    const { lat, lng, ts } = JSON.parse(raw) as { lat: number; lng: number; ts: number }
+    if (Date.now() - ts > GEO_CACHE_TTL) return null
+    return { lat, lng }
+  } catch { return null }
+}
+
+function writeGeoLS(pos: { lat: number; lng: number }) {
+  try { localStorage.setItem(GEO_LS_KEY, JSON.stringify({ ...pos, ts: Date.now() })) } catch { /* noop */ }
+}
 
 /** Get user GPS position (one-shot, non-blocking). Returns null on denial/error. */
 function getUserPosition(): Promise<{ lat: number; lng: number } | null> {
   return new Promise((resolve) => {
+    // 1. Module-level cache — same JS session
     if (_cachedPos && Date.now() - _cacheTs < GEO_CACHE_TTL) {
       resolve(_cachedPos)
+      return
+    }
+    // 2. localStorage cache — survives app close/reopen, shared with useGeolocation
+    const lsCache = readGeoLS()
+    if (lsCache) {
+      _cachedPos = lsCache
+      _cacheTs = Date.now()
+      resolve(lsCache)
       return
     }
     if (!navigator.geolocation) { resolve(null); return; }
@@ -181,12 +205,13 @@ function getUserPosition(): Promise<{ lat: number; lng: number } | null> {
       (pos) => {
         _cachedPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         _cacheTs = Date.now()
+        writeGeoLS(_cachedPos)
         resolve(_cachedPos)
       },
       () => resolve(null),
-      { timeout: 5000, maximumAge: 60000 }
-    );
-  });
+      { timeout: 5000, maximumAge: GEO_CACHE_TTL }
+    )
+  })
 }
 
 /** Only show businesses with at least 1 active master and at least 1 service (min_price > 0) */

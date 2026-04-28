@@ -182,6 +182,7 @@ export default function HomePage() {
   const marqueeRef = useRef<HTMLDivElement>(null)
   const marqueeRafRef = useRef<number | null>(null)
   const marqueePausedRef = useRef(false)
+  const marqueeScrollPosRef = useRef(0)
 
   const handleMarqueeTouchStart = () => { marqueePausedRef.current = true }
   const handleMarqueeTouchEnd = () => { setTimeout(() => { marqueePausedRef.current = false }, 1500) }
@@ -191,9 +192,10 @@ export default function HomePage() {
     if (!el) return
     const tick = () => {
       if (!marqueePausedRef.current) {
-        el.scrollLeft += 0.3
+        marqueeScrollPosRef.current += 0.5
         const half = el.scrollWidth / 2
-        if (half > 0 && el.scrollLeft >= half) el.scrollLeft -= half
+        if (half > 0 && marqueeScrollPosRef.current >= half) marqueeScrollPosRef.current -= half
+        el.scrollLeft = Math.round(marqueeScrollPosRef.current)
       }
       marqueeRafRef.current = requestAnimationFrame(tick)
     }
