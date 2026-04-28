@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
  * Handles Telegram Mini App deep links via initDataUnsafe.start_param.
  * Supported formats:
  *   b_<businessId>  → /business/<businessId>
+ *   inv_<token>     → /invite/<token>
+ *   pro_reg         → /auth?return=/pro/settings  (master onboarding)
  */
 export function StartParamNavigator() {
   const navigate = useNavigate()
@@ -23,6 +25,8 @@ export function StartParamNavigator() {
     } else if (startParam.startsWith('b_')) {
       const businessId = startParam.slice(2)
       navigate(`/business/${businessId}`, { replace: true })
+    } else if (startParam === 'pro_reg') {
+      navigate('/auth?return=/pro/settings', { replace: true })
     }
   }, [navigate])
 
