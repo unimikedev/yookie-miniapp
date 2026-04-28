@@ -366,61 +366,154 @@
   margin-bottom: 12px;
 }
 
-.successContainer {
+/* ── Success screen ─────────────────────────────────────── */
+.successPage {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  animation: successFadeIn 0.25s ease;
+}
+
+@keyframes successFadeIn {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+.successInner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 20px;
-  text-align: center;
+  width: 100%;
+  max-width: 360px;
 }
 
-.successCheckmark {
+/* SVG animated checkmark */
+.checkSvg {
   width: 80px;
   height: 80px;
-  border-radius: 50%;
-  background-color: var(--color-accent);
+  overflow: visible;
+}
+
+.checkCircle {
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  animation: drawCircle 0.5s ease-out 0.1s forwards;
+}
+
+.checkPath {
+  stroke: var(--color-accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: drawCheck 0.3s ease-out 0.55s forwards;
+}
+
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0 }
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0 }
+}
+
+/* Title */
+.successHeading {
+  font-size: var(--text-h2-size);
+  font-weight: var(--text-h2-weight);
+  color: var(--color-text);
+  text-align: center;
+  margin: 16px 0 0;
+  opacity: 0;
+  animation: successFadeUp 0.4s ease 0.65s forwards;
+}
+
+/* Details card */
+.successCard {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 20px;
+  opacity: 0;
+  animation: successFadeUp 0.4s ease 0.85s forwards;
+}
+
+@keyframes successFadeUp {
+  from { opacity: 0; transform: translateY(10px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+
+.successBiz {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  color: white;
-  margin-bottom: 20px;
-  animation: successPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-@keyframes successPop {
-  0% {
-    transform: scale(0.3);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.successBizPhoto {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-.successTitle {
-  font-size: var(--text-h3-size);
-  font-weight: var(--text-h3-weight);
-  color: var(--color-text);
-  margin-bottom: 8px;
-}
-
-.successMessage {
+.successBizName {
   font-size: var(--text-body-size);
-  color: var(--color-text-secondary);
-  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
-.successSubtext {
+.successDivider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 10px 0;
+}
+
+.successRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.successRowLabel {
   font-size: var(--text-caption-size);
   color: var(--color-text-muted);
-  margin: 0;
+  flex-shrink: 0;
+}
+
+.successRowValue {
+  font-size: var(--text-body-size);
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* CTA */
+.successBtn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: var(--text-body-size);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  animation: successFadeUp 0.3s ease 1.05s forwards;
 }
 
 .footer {

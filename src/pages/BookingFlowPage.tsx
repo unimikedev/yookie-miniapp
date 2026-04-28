@@ -10,6 +10,21 @@ import { useAlternativeSlots } from '@/hooks/useAlternativeSlots'
 import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/lib/utils/phone'
 import styles from './BookingFlowPage.module.css'
 
+interface SuccessData {
+  businessName: string
+  businessPhoto?: string | null
+  date: string
+  slotStart: string
+  services: Array<{ name: string; masterName: string }>
+  count: number
+}
+
+function extractHM(slotStart: string): string {
+  if (!slotStart) return ''
+  if (slotStart.includes('T')) return slotStart.split('T')[1].substring(0, 5)
+  return slotStart.substring(0, 5)
+}
+
 export default function BookingFlowPage() {
   const navigate = useNavigate()
   const bookingStore = useBookingStore()
@@ -23,6 +38,7 @@ export default function BookingFlowPage() {
   const [error, setError] = useState<string | null>(null)
   const [successState, setSuccessState] = useState(false)
   const [bookedCount, setBookedCount] = useState(0)
+  const [successData, setSuccessData] = useState<SuccessData | null>(null)
   const [showAlternativeSlots, setShowAlternativeSlots] = useState(false)
   const [conflictSlotInfo, setConflictSlotInfo] = useState<{ serviceId: string; masterId: string; dateTime: string } | null>(null)
 
@@ -144,6 +160,17 @@ export default function BookingFlowPage() {
 
       bookedList.forEach((b) => syncBookingToMerchant(b));
 
+      setSuccessData({
+        businessName: bookingStore.selectedBusiness?.name ?? '',
+        businessPhoto: bookingStore.selectedBusiness?.photo_url,
+        date: bookingStore.selectedDate ?? '',
+        slotStart: bookingStore.selectedSlot?.start ?? '',
+        services: services.map(s => ({
+          name: s.service.name,
+          masterName: masters?.find(m => m.id === s.masterId)?.name ?? '',
+        })),
+        count: services.length,
+      })
       setBookedCount(services.length)
       setSuccessState(true)
       bookingStore.reset()
@@ -182,21 +209,61 @@ export default function BookingFlowPage() {
     return null
   }
 
-  if (successState) {
-    const multiCount = bookedCount || 1;
+  if (successState && successData) {
     return (
-      <div className={styles.container}>
-        <div className={styles.successContainer}>
-          <div className={styles.successCheckmark}>✓</div>
-          <h2 className={styles.successTitle}>
-            {multiCount > 1 ? `${multiCount} записи созданы!` : 'Запись подтверждена!'}
+      <div className={styles.successPage}>
+        <div className={styles.successInner}>
+          <svg className={styles.checkSvg} viewBox="0 0 52 52" fill="none">
+            <circle className={styles.checkCircle} cx="26" cy="26" r="23" />
+            <path className={styles.checkPath} d="M13 27 L22 36 L39 17" />
+          </svg>
+
+          <h2 className={styles.successHeading}>
+            {successData.count > 1 ? 'Записи созданы!' : 'Запись подтверждена!'}
           </h2>
-          <p className={styles.successMessage}>
-            {multiCount > 1
-              ? `Создано ${multiCount} отдельных записей для каждой услуги. Вы можете просмотреть их в разделе «Мои записи»`
-              : 'Вы можете просмотреть детали в разделе «Мои записи»'}
-          </p>
-          <p className={styles.successSubtext}>Перенаправление...</p>
+
+          <div className={styles.successCard}>
+            {successData.businessPhoto && (
+              <div className={styles.successBiz}>
+                <img src={successData.businessPhoto} className={styles.successBizPhoto} alt="" />
+                <span className={styles.successBizName}>{successData.businessName}</span>
+              </div>
+            )}
+            {!successData.businessPhoto && successData.businessName && (
+              <div className={styles.successBiz}>
+                <span className={styles.successBizName}>{successData.businessName}</span>
+              </div>
+            )}
+
+            <div className={styles.successDivider} />
+
+            <div className={styles.successRow}>
+              <span className={styles.successRowLabel}>Дата</span>
+              <span className={styles.successRowValue}>{formatDate(successData.date)}</span>
+            </div>
+            <div className={styles.successRow}>
+              <span className={styles.successRowLabel}>Время</span>
+              <span className={styles.successRowValue}>{extractHM(successData.slotStart)}</span>
+            </div>
+
+            {successData.services.length > 0 && (
+              <>
+                <div className={styles.successDivider} />
+                {successData.services.map((s, i) => (
+                  <div key={i} className={styles.successRow}>
+                    <span className={styles.successRowValue}>{s.name}</span>
+                    {s.masterName && (
+                      <span className={styles.successRowLabel}>{s.masterName}</span>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
+          <button className={styles.successBtn} onClick={() => navigate('/my-bookings')}>
+            Мои записи
+          </button>
         </div>
       </div>
     )
