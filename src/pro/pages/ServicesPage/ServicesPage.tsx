@@ -2,9 +2,9 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { listServices, listStaff, upsertService, deleteService, updateMasterServices, reorderService } from '@/pro/api';
-import type { ServiceInput } from '@/pro/api';
-import type { Master, Service } from '@/lib/api/types';
+import { listServices, listStaff, upsertService, deleteService, updateMasterServices, reorderService, listAddons, upsertAddon, deleteAddon } from '@/pro/api';
+import type { ServiceInput, AddonInput } from '@/pro/api';
+import type { Master, Service, ServiceAddon } from '@/lib/api/types';
 import { emit } from '@/pro/realtime';
 import { Toast } from '@/components/ui/Toast';
 import styles from './ServicesPage.module.css';
@@ -32,6 +32,13 @@ export default function ServicesPage() {
   const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  // Addon management
+  const [expandedAddonsId, setExpandedAddonsId] = useState<string | null>(null);
+  const [addonsByService, setAddonsByService] = useState<Record<string, ServiceAddon[]>>({});
+  const [editingAddon, setEditingAddon] = useState<(AddonInput & { serviceId: string }) | null>(null);
+  const [savingAddon, setSavingAddon] = useState(false);
+  const EMPTY_ADDON: AddonInput = { name: '', price: 0, duration_min: 0, max_qty: 1 };
 
   const showToast = (msg: string) => setToast({ msg, key: Date.now() });
 
@@ -118,6 +125,55 @@ export default function ServicesPage() {
     } finally {
       setMasterAssigning(null);
     }
+  };
+
+  const loadAddons = async (serviceId: string) => {
+    if (!merchantId) return;
+    const addons = await listAddons(merchantId, serviceId).catch(() => []);
+    setAddonsByService(prev => ({ ...prev, [serviceId]: addons }));
+  };
+
+  const handleToggleAddons = (serviceId: string) => {
+    if (expandedAddonsId === serviceId) {
+      setExpandedAddonsId(null);
+    } else {
+      setExpandedAddonsId(serviceId);
+      if (!addonsByService[serviceId]) loadAddons(serviceId);
+    }
+  };
+
+  const handleSaveAddon = async () => {
+    if (!merchantId || !editingAddon || !editingAddon.name.trim()) return;
+    setSavingAddon(true);
+    try {
+      const saved = await upsertAddon(merchantId, editingAddon.serviceId, editingAddon);
+      setAddonsByService(prev => {
+        const list = prev[editingAddon.serviceId] ?? [];
+        const existing = list.findIndex(a => a.id === saved.id);
+        return {
+          ...prev,
+          [editingAddon.serviceId]: existing >= 0
+            ? list.map(a => a.id === saved.id ? saved : a)
+            : [...list, saved],
+        };
+      });
+      setEditingAddon(null);
+      showToast('Сохранено');
+    } catch {
+      showToast('Ошибка сохранения');
+    } finally {
+      setSavingAddon(false);
+    }
+  };
+
+  const handleDeleteAddon = async (serviceId: string, addonId: string) => {
+    if (!merchantId) return;
+    await deleteAddon(merchantId, serviceId, addonId).catch(() => {});
+    setAddonsByService(prev => ({
+      ...prev,
+      [serviceId]: (prev[serviceId] ?? []).filter(a => a.id !== addonId),
+    }));
+    showToast('Удалено');
   };
 
   const handleCardDrop = (targetId: string) => {
@@ -270,6 +326,11 @@ export default function ServicesPage() {
                         title={t('pro.services.masterAssignTitle')}
                       >👤</button>
                     )}
+                    <button
+                      className={`${styles.mastersBtn} ${expandedAddonsId === s.id ? styles.mastersBtnActive : ''}`}
+                      onClick={() => handleToggleAddons(s.id)}
+                      title="Подуслуги"
+                    >＋</button>
                     <button className={styles.editBtn} onClick={() => { setEditing({ ...s }); setSaveError(null); }}>✎</button>
                     <button className={styles.deleteBtn} onClick={() => handleDelete(s.id)}>✕</button>
                   </div>
@@ -294,6 +355,86 @@ export default function ServicesPage() {
                         );
                       })}
                     </div>
+                  </div>
+                )}
+
+                {expandedAddonsId === s.id && (
+                  <div className={styles.addonPanel}>
+                    <div className={styles.addonPanelHead}>
+                      <p className={styles.addonPanelTitle}>Подуслуги</p>
+                      <button
+                        className={styles.addonAddBtn}
+                        onClick={() => setEditingAddon({ ...EMPTY_ADDON, serviceId: s.id })}
+                      >+ Добавить</button>
+                    </div>
+
+                    {(addonsByService[s.id] ?? []).length === 0 && (
+                      <p className={styles.addonEmpty}>Нет подуслуг. Нажмите «+ Добавить»</p>
+                    )}
+
+                    {(addonsByService[s.id] ?? []).map(addon => (
+                      <div key={addon.id} className={styles.addonRow}>
+                        <div className={styles.addonInfo}>
+                          <span className={styles.addonName}>{addon.name}</span>
+                          <span className={styles.addonMeta}>
+                            {addon.duration_min > 0 ? `+${addon.duration_min} мин · ` : ''}
+                            {addon.price.toLocaleString('ru')} сум
+                            {addon.max_qty > 1 ? ` · макс ${addon.max_qty}` : ''}
+                          </span>
+                        </div>
+                        <div className={styles.addonActions}>
+                          <button className={styles.addonEditBtn} onClick={() => setEditingAddon({ ...addon, serviceId: s.id })}>✎</button>
+                          <button className={styles.addonDeleteBtn} onClick={() => handleDeleteAddon(s.id, addon.id)}>✕</button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {editingAddon?.serviceId === s.id && (
+                      <div className={styles.addonForm}>
+                        <input
+                          className={styles.input}
+                          placeholder="Название *"
+                          value={editingAddon.name}
+                          onChange={e => setEditingAddon({ ...editingAddon, name: e.target.value })}
+                          autoFocus
+                        />
+                        <div className={styles.row}>
+                          <input
+                            className={styles.input}
+                            type="number"
+                            placeholder="Цена"
+                            value={editingAddon.price || ''}
+                            onChange={e => setEditingAddon({ ...editingAddon, price: Number(e.target.value) })}
+                          />
+                          <input
+                            className={styles.input}
+                            type="number"
+                            placeholder="Мин"
+                            value={editingAddon.duration_min || ''}
+                            onChange={e => setEditingAddon({ ...editingAddon, duration_min: Number(e.target.value) })}
+                          />
+                          <input
+                            className={styles.input}
+                            type="number"
+                            placeholder="Макс. кол"
+                            value={editingAddon.max_qty || 1}
+                            min={1}
+                            max={99}
+                            onChange={e => setEditingAddon({ ...editingAddon, max_qty: Number(e.target.value) })}
+                          />
+                        </div>
+                        <div className={styles.formActions}>
+                          <button className={styles.cancelBtn} onClick={() => setEditingAddon(null)}>Отмена</button>
+                          <button
+                            className={styles.saveBtn}
+                            onClick={handleSaveAddon}
+                            disabled={savingAddon || !editingAddon.name.trim()}
+                          >
+                            {savingAddon ? '…' : 'Сохранить'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

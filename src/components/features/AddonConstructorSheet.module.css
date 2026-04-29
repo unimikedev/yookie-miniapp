@@ -1,0 +1,175 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.baseRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--color-surface-elevated);
+  border-radius: 10px;
+}
+
+.baseLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.baseMeta {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 2px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.addonRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s;
+  gap: 12px;
+}
+
+.addonRowActive {
+  border-color: var(--color-accent);
+}
+
+.addonInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.addonName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.addonMeta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* Stepper (qty > 1) */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.stepBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.stepBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.stepVal {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Checkbox (max_qty = 1) */
+.checkBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.checkBtnOn {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #000;
+}
+
+/* Summary */
+.summary {
+  background: var(--color-surface-elevated);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.summaryTotal {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+/* Confirm */
+.confirmBtn {
+  width: 100%;
+  padding: 14px;
+  background: var(--color-accent);
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+}

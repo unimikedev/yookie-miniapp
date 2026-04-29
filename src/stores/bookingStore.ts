@@ -13,6 +13,14 @@
 import { create } from 'zustand';
 import { Business, Master, Service, TimeSlot } from '../lib/api/types';
 
+export interface AddonSelection {
+  addonId: string;
+  name: string;
+  qty: number;
+  price_each: number;
+  duration_min_each: number;
+}
+
 type BookingStep = 1 | 2 | 3 | 4;
 
 /**
@@ -22,6 +30,7 @@ type BookingStep = 1 | 2 | 3 | 4;
 export interface ServiceAssignment {
   service: Service;
   masterId: string | null;
+  addons: AddonSelection[];
 }
 
 interface BookingState {
@@ -56,6 +65,8 @@ interface BookingActions {
   assignMasterToService: (serviceId: string, masterId: string) => void;
   /** Remove master assignment for a service */
   unassignMasterFromService: (serviceId: string) => void;
+  /** Set addon selections for a service */
+  setServiceAddons: (serviceId: string, addons: AddonSelection[]) => void;
   /** Set master (legacy, for master detail pages) */
   setMaster: (master: Master | null) => void;
   setDate: (date: string) => void;
@@ -104,7 +115,7 @@ export const useBookingStore = create<BookingState & BookingActions>((set, get) 
 
   /** Legacy: replace single service (used by MasterDetailPage) */
   setService: (service: Service | null) => {
-    set({ selectedServices: service ? [{ service, masterId: null }] : [] });
+    set({ selectedServices: service ? [{ service, masterId: null, addons: [] }] : [] });
   },
 
   /** New: toggle service in multi-select list */
@@ -117,7 +128,7 @@ export const useBookingStore = create<BookingState & BookingActions>((set, get) 
         };
       }
       return {
-        selectedServices: [...state.selectedServices, { service, masterId: null }],
+        selectedServices: [...state.selectedServices, { service, masterId: null, addons: [] }],
       };
     });
   },
@@ -138,6 +149,14 @@ export const useBookingStore = create<BookingState & BookingActions>((set, get) 
     set((state) => ({
       selectedServices: state.selectedServices.map((s) =>
         s.service.id === serviceId ? { ...s, masterId: null } : s
+      ),
+    }));
+  },
+
+  setServiceAddons: (serviceId: string, addons: AddonSelection[]) => {
+    set((state) => ({
+      selectedServices: state.selectedServices.map((s) =>
+        s.service.id === serviceId ? { ...s, addons } : s
       ),
     }));
   },

@@ -316,6 +316,35 @@ export type ServiceInput = Partial<Service> & {
   duration_min: number;
 };
 
+export type AddonInput = {
+  id?: string;
+  name: string;
+  price: number;
+  duration_min: number;
+  max_qty: number;
+};
+
+export async function listAddons(merchantId: string, serviceId: string): Promise<import('@/lib/api/types').ServiceAddon[]> {
+  return api.get<import('@/lib/api/types').ServiceAddon[]>(`/businesses/${merchantId}/services/${serviceId}/addons`) ?? [];
+}
+
+export async function upsertAddon(merchantId: string, serviceId: string, input: AddonInput): Promise<import('@/lib/api/types').ServiceAddon> {
+  if (input.id) {
+    return api.patch<import('@/lib/api/types').ServiceAddon>(
+      `/businesses/${merchantId}/services/${serviceId}/addons/${input.id}`,
+      { name: input.name, price: input.price, duration_min: input.duration_min, max_qty: input.max_qty }
+    );
+  }
+  return api.post<import('@/lib/api/types').ServiceAddon>(
+    `/businesses/${merchantId}/services/${serviceId}/addons`,
+    { name: input.name, price: input.price, duration_min: input.duration_min, max_qty: input.max_qty }
+  );
+}
+
+export async function deleteAddon(merchantId: string, serviceId: string, addonId: string): Promise<void> {
+  await api.delete<unknown>(`/businesses/${merchantId}/services/${serviceId}/addons/${addonId}`);
+}
+
 /**
  * Create or update a service.
  * Backend: POST /businesses/:id/services (create)

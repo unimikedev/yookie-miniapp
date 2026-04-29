@@ -39,6 +39,8 @@ import { formatPhoneMask, isPhoneComplete, stripDigits, getCleanPhone } from '@/
 import { fetchBusinessReviews } from '@/lib/api/reviews'
 import { formatMasterName } from '@/lib/utils/name'
 import { toLocalYMD, formatRelativeDate } from '@/lib/utils/date'
+import { AddonConstructorSheet } from '@/components/features/AddonConstructorSheet'
+import type { Service } from '@/lib/api/types'
 import styles from './ProviderDetailPage.module.css'
 
 const TAB_KEYS = ['provider.tabServices', 'provider.tabMasters', 'provider.tabReviews', 'provider.tabAbout']
@@ -111,8 +113,11 @@ export default function ProviderDetailPage() {
   const selectedServices = useBookingStore((s) => s.selectedServices)
   const toggleService = useBookingStore((s) => s.toggleService)
   const assignMasterToService = useBookingStore((s) => s.assignMasterToService)
+  const setServiceAddons = useBookingStore((s) => s.setServiceAddons)
   const setMaster = useBookingStore((s) => s.setMaster)
   const setBusiness = useBookingStore((s) => s.setBusiness)
+
+  const [addonSheetService, setAddonSheetService] = useState<Service | null>(null)
 
   // ── Provider type flag ──────────────────────────────────────────
   const isIndividual = business?.provider_type === 'individual'
@@ -253,8 +258,11 @@ export default function ProviderDetailPage() {
   // For individual providers, allAssigned is always true (auto-assigned)
   const canBook = hasServices && allAssigned && hasTime
 
-  // Compute total booking duration and how many slots it occupies
-  const totalServiceDuration = selectedServices.reduce((sum, s) => sum + (s.service.duration_min || 30), 0)
+  // Compute total booking duration including selected addons
+  const totalServiceDuration = selectedServices.reduce((sum, s) => {
+    const addonsDur = (s.addons ?? []).reduce((a, addon) => a + addon.duration_min_each * addon.qty, 0)
+    return sum + (s.service.duration_min || 30) + addonsDur
+  }, 0)
   const slotDuration = business?.slot_duration_min ?? 30
   const slotsOccupied = Math.max(1, Math.ceil(totalServiceDuration / slotDuration))
 
@@ -321,6 +329,7 @@ export default function ProviderDetailPage() {
           services: selectedServices.map((svc) => ({
             serviceId: svc.service.id,
             masterId: svc.masterId!,
+            addons: svc.addons.length > 0 ? svc.addons.map(a => ({ addonId: a.addonId, qty: a.qty })) : undefined,
           })),
         })
       } else {
@@ -332,6 +341,7 @@ export default function ProviderDetailPage() {
           startsAt,
           clientPhone: effectivePhone,
           clientName,
+          addons: svc.addons.length > 0 ? svc.addons.map(a => ({ addonId: a.addonId, qty: a.qty })) : undefined,
         })
         bookedList = [booking]
       }
@@ -752,6 +762,8 @@ export default function ProviderDetailPage() {
                           service={service}
                           selected={isSelected}
                           onSelect={handleServiceToggle}
+                          selectedAddons={svcAssignment?.addons ?? []}
+                          onEditAddons={(svc) => setAddonSheetService(svc)}
                         />
                         {isSelected && eligibleMasters.length > 1 && (
                           <div className={styles.masterChipRow}>
@@ -1077,6 +1089,19 @@ export default function ProviderDetailPage() {
         onClick={handleCTAClick}
         disabled={bookingLoading}
       />
+
+      {addonSheetService && (
+        <AddonConstructorSheet
+          open={!!addonSheetService}
+          onClose={() => setAddonSheetService(null)}
+          serviceName={addonSheetService.name}
+          basePrice={addonSheetService.price}
+          baseDuration={addonSheetService.duration_min}
+          addons={addonSheetService.addons ?? []}
+          initial={selectedServices.find(s => s.service.id === addonSheetService.id)?.addons ?? []}
+          onConfirm={(addons) => setServiceAddons(addonSheetService.id, addons)}
+        />
+      )}
     </div>
   )
 }

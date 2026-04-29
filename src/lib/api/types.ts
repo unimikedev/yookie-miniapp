@@ -101,6 +101,17 @@ export interface Master {
   } | null;
 }
 
+export interface ServiceAddon {
+  id: string;
+  service_id: string;
+  name: string;
+  price: number;
+  duration_min: number;
+  max_qty: number;
+  position: number;
+  is_active: boolean;
+}
+
 export interface Service {
   id: string;
   business_id: string;
@@ -111,6 +122,7 @@ export interface Service {
   category: string;
   is_active: boolean;
   position: number;
+  addons?: ServiceAddon[];
   created_at?: string;
   updated_at?: string;
 }
@@ -249,6 +261,7 @@ export interface CreateBookingPayload {
   clientName: string;
   notes?: string;
   telegramId?: number;
+  addons?: Array<{ addonId: string; qty: number }>;
 }
 
 export interface CancelBookingPayload {

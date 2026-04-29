@@ -77,23 +77,66 @@
 /* ── ServiceCard ─────────────────────────────────────────── */
 .serviceCard {
   display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1.5px solid transparent;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.serviceCardMain {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 16px;
-  background: var(--color-surface);
-  border: 1.5px solid transparent;
-  border-radius: 16px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
 }
 
-.serviceCard:active {
+.serviceCardMain:active {
   transform: scale(0.98);
 }
 
 .serviceCardSelected {
   border-color: var(--color-accent);
+}
+
+/* Addons strip */
+.serviceAddonsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  border-top: 1px solid var(--color-border-subtle, var(--color-border));
+}
+
+.serviceAddonsSummary {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.serviceAddonsEmpty {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  flex: 1;
+}
+
+.serviceAddonsBtn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  flex-shrink: 0;
+  font-family: var(--font-family);
 }
 
 .serviceInfo {

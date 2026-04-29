@@ -51,37 +51,63 @@ export interface ServiceCardProps {
   service: Service
   selected?: boolean
   onSelect?: (service: Service) => void
+  selectedAddons?: import('@/stores/bookingStore').AddonSelection[]
+  onEditAddons?: (service: Service) => void
 }
 
-export function ServiceCard({ service, selected, onSelect }: ServiceCardProps) {
+export function ServiceCard({ service, selected, onSelect, selectedAddons = [], onEditAddons }: ServiceCardProps) {
+  const hasAddons = (service.addons ?? []).length > 0
+  const addonsTotalPrice = selectedAddons.reduce((s, a) => s + a.price_each * a.qty, 0)
+  const addonsTotalDuration = selectedAddons.reduce((s, a) => s + a.duration_min_each * a.qty, 0)
+
   return (
-    <div
-      className={`${styles.serviceCard} ${selected ? styles.serviceCardSelected : ''}`}
-      onClick={() => onSelect?.(service)}
-      role="button"
-      tabIndex={0}
-    >
-      <div className={styles.serviceInfo}>
-        <span className={styles.serviceName}>{service.name}</span>
-        <span className={styles.servicePrice}>
-          {service.price.toLocaleString('ru')} сўм
-        </span>
-        <span className={styles.serviceMeta}>
-          ⏱ {service.duration_min} мин
-          {service.description && ` • ${service.description}`}
-        </span>
+    <div className={`${styles.serviceCard} ${selected ? styles.serviceCardSelected : ''}`}>
+      <div
+        className={styles.serviceCardMain}
+        onClick={() => onSelect?.(service)}
+        role="button"
+        tabIndex={0}
+      >
+        <div className={styles.serviceInfo}>
+          <span className={styles.serviceName}>{service.name}</span>
+          <span className={styles.servicePrice}>
+            {(service.price + addonsTotalPrice).toLocaleString('ru')} сўм
+          </span>
+          <span className={styles.serviceMeta}>
+            ⏱ {service.duration_min + addonsTotalDuration} мин
+            {service.description && ` • ${service.description}`}
+          </span>
+        </div>
+        <div className={styles.serviceAction}>
+          {selected ? (
+            <div className={styles.serviceCheck}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#6BCEFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 8L7 12L13 4" />
+              </svg>
+            </div>
+          ) : (
+            <span className={styles.serviceSelectBtn}>Выбрать</span>
+          )}
+        </div>
       </div>
-      <div className={styles.serviceAction}>
-        {selected ? (
-          <div className={styles.serviceCheck}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#6BCEFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 8L7 12L13 4" />
-            </svg>
-          </div>
-        ) : (
-          <span className={styles.serviceSelectBtn}>Выбрать</span>
-        )}
-      </div>
+
+      {selected && hasAddons && (
+        <div className={styles.serviceAddonsRow}>
+          {selectedAddons.length > 0 ? (
+            <span className={styles.serviceAddonsSummary}>
+              {selectedAddons.map(a => `${a.name}${a.qty > 1 ? ` ×${a.qty}` : ''}`).join(', ')}
+            </span>
+          ) : (
+            <span className={styles.serviceAddonsEmpty}>Дополнения не выбраны</span>
+          )}
+          <button
+            className={styles.serviceAddonsBtn}
+            onClick={(e) => { e.stopPropagation(); onEditAddons?.(service) }}
+          >
+            {selectedAddons.length > 0 ? 'Изменить' : '+ Добавить'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
