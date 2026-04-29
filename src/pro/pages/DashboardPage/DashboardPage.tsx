@@ -36,7 +36,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
-  const { merchantId } = useMerchantStore();
+  const { merchantId, businessName } = useMerchantStore();
   const tgSyncDone = useRef(false);
 
   const [pending, setPending] = useState<Booking[]>([]);
@@ -160,7 +160,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <ProLayout title={t('pro.dashboard.title')}>
+    <ProLayout title={businessName || t('pro.dashboard.title')}>
 
       {/* ── Date navigation ── */}
       <div className={styles.dateNav}>

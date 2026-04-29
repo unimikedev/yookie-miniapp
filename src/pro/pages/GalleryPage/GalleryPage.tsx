@@ -40,8 +40,8 @@ export default function GalleryPage() {
   useEffect(() => {
     if (!merchantId) return
     Promise.all([
-      api.get<Photo[]>(`${API_BASE}/businesses/${merchantId}/photos`),
-      api.get<Master[]>(`${API_BASE}/businesses/${merchantId}/masters`),
+      api.get<Photo[]>(`/businesses/${merchantId}/photos`),
+      api.get<Master[]>(`/businesses/${merchantId}/masters`),
     ])
       .then(([ph, ms]) => {
         setPhotos(Array.isArray(ph) ? ph : [])
@@ -116,7 +116,7 @@ export default function GalleryPage() {
     if (!confirmed) return
     setDeletingId(id)
     try {
-      await api.delete(`${API_BASE}/businesses/${merchantId}/photos/${id}`)
+      await api.delete(`/businesses/${merchantId}/photos/${id}`)
       setPhotos(prev => prev.filter(p => p.id !== id))
     } catch {
       setError('Не удалось удалить фото')

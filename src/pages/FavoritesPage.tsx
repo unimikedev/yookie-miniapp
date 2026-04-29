@@ -4,7 +4,6 @@ import { useFavoritesStore } from '@/stores/favoritesStore'
 import { Business, CATEGORY_LABELS } from '@/lib/api/types'
 import { fetchBusiness } from '@/lib/api/businesses'
 import { getMockBusinessImage } from '@/lib/utils/mockImages'
-import { MOCK_BUSINESSES } from '@/lib/mockBusinesses'
 import { Skeleton } from '@/shared/ui'
 import { FavoriteButton } from '@/components/features'
 import styles from './FavoritesPage.module.css'
@@ -37,14 +36,9 @@ export default function FavoritesPage() {
 
     Promise.allSettled(
       ids.map(async (id) => {
-        // Try real API first
         try {
-          const biz = await fetchBusiness(id)
-          return biz
+          return await fetchBusiness(id)
         } catch {
-          // Fall back to mock data
-          const mock = MOCK_BUSINESSES.find(b => b.id === id)
-          if (mock) return mock
           return null
         }
       })

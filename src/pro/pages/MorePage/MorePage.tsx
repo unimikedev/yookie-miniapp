@@ -3,24 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
+import { useAuthStore } from '@/stores/authStore';
 import { getMerchantShareLink, getTelegramShareUrl } from '@/shared/constants';
-import { api } from '@/lib/api/client';
-import { useBusinessExit } from '@/pro/hooks/useBusinessExit';
+import { leaveBusinessApi } from '@/pro/api';
 import styles from './MorePage.module.css';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
 export default function MorePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { merchantId } = useMerchantStore();
-  const { leaveWithoutResigning, logout, loading: exitLoading, error: exitError } = useBusinessExit();
+  const { merchantId, setMerchantId, setRole, setMasterId } = useMerchantStore();
+  const { logout: authLogout } = useAuthStore();
 
   const [copied, setCopied] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
-  const [broadcasting, setBroadcasting] = useState(false);
-  const [broadcastResult, setBroadcastResult] = useState<{ sent: number; total: number } | null>(null);
+  const [exitSheetOpen, setExitSheetOpen] = useState(false);
+  const [exitLoading, setExitLoading] = useState(false);
 
   const shareLink = merchantId ? getMerchantShareLink(merchantId) : null;
 
@@ -41,55 +40,46 @@ export default function MorePage() {
     window.Telegram?.WebApp?.openTelegramLink(url);
   };
 
-  const handleBroadcast = async () => {
-    if (!merchantId || !shareLink) return;
-
-    const confirmed = await new Promise<boolean>((resolve) => {
-      window.Telegram?.WebApp?.showConfirm(
-        'Отправить ссылку на ваш салон всем клиентам в Telegram?',
-        resolve,
-      );
-    });
-    if (!confirmed) return;
-
-    setBroadcasting(true);
-    setBroadcastResult(null);
+  const handleLeaveOnly = async () => {
+    if (!merchantId) return;
+    setExitLoading(true);
     try {
-      const text =
-        `✨ Теперь вы можете записаться к нам онлайн!\n\n` +
-        `Перейдите по ссылке и запишитесь в пару кликов:\n${shareLink}`;
-
-      const result = await api.post<{ sent: number; total: number }>(
-        `${API_BASE}/merchants/${merchantId}/broadcast`,
-        { message: text },
-      );
-      setBroadcastResult(result);
+      const res = await leaveBusinessApi(merchantId);
+      localStorage.setItem('yookie_auth_token', res.token);
+      if (res.nextBusinessId) {
+        setMerchantId(res.nextBusinessId);
+      } else {
+        setMerchantId(null);
+        setRole(null);
+        setMasterId(null);
+      }
+      setExitSheetOpen(false);
+      navigate('/pro', { replace: true });
     } catch {
-      window.Telegram?.WebApp?.showAlert('Не удалось отправить рассылку. Попробуйте позже.');
+      window.Telegram?.WebApp?.showAlert('Не удалось выйти из заведения');
     } finally {
-      setBroadcasting(false);
+      setExitLoading(false);
     }
   };
 
-  const items = [
-    { label: t('pro.more.schedule'),        path: '/pro/schedule' },
-    { label: t('pro.more.services'),        path: '/pro/services' },
-    { label: t('pro.more.staff'),           path: '/pro/staff' },
-    { label: 'Галерея',                     path: '/pro/gallery' },
-    { label: t('pro.more.profileSettings'), path: '/pro/settings' },
-    { label: t('pro.more.preview'),         path: '/pro/preview' },
-    { label: t('pro.more.myBusinesses'),    path: '/pro/select' },
-  ];
+  const handleFullLogout = () => {
+    setExitSheetOpen(false);
+    setMerchantId(null);
+    setRole(null);
+    setMasterId(null);
+    authLogout();
+    navigate('/', { replace: true });
+  };
 
   return (
     <ProLayout title={t('pro.more.title')}>
       <div className={styles.list}>
+
+        {/* ── Share card ── */}
         {shareLink && (
           <div className={styles.shareCard}>
             <p className={styles.shareTitle}>{t('pro.more.shareTitle')}</p>
-            <p className={styles.shareHint}>
-              {t('pro.more.shareHint')}
-            </p>
+            <p className={styles.shareHint}>{t('pro.more.shareHint')}</p>
 
             <div className={styles.linkBox}>
               <span className={styles.linkText}>{shareLink}</span>
@@ -104,80 +94,83 @@ export default function MorePage() {
               </button>
             </div>
 
-            <button
-              className={styles.qrToggle}
-              onClick={() => setQrVisible((v) => !v)}
-            >
+            <button className={styles.qrToggle} onClick={() => setQrVisible(v => !v)}>
               {qrVisible ? t('pro.more.hideQr') : t('pro.more.showQr')}
             </button>
 
             {qrVisible && (
               <div className={styles.qrWrap}>
-                <QRCodeSVG
-                  value={shareLink}
-                  size={200}
-                  bgColor="transparent"
-                  fgColor="var(--color-text)"
-                  level="M"
-                />
+                <QRCodeSVG value={shareLink} size={200} bgColor="transparent" fgColor="var(--color-text)" level="M" />
                 <p className={styles.qrHint}>{t('pro.more.qrHint')}</p>
               </div>
-            )}
-
-            <div className={styles.divider} />
-
-            <button
-              className={styles.broadcastBtn}
-              onClick={handleBroadcast}
-              disabled={broadcasting}
-            >
-              {broadcasting ? t('pro.more.broadcasting') : `📣 ${t('pro.more.broadcastBtn')}`}
-            </button>
-
-            {broadcastResult && (
-              <p className={styles.broadcastResult}>
-                {t('pro.more.broadcastResult', { sent: broadcastResult.sent, total: broadcastResult.total })}
-              </p>
             )}
           </div>
         )}
 
-        {items.map((item) => (
-          <button
-            key={item.path}
-            className={styles.row}
-            onClick={() => navigate(item.path)}
-          >
-            <span>{item.label}</span>
-            <span className={styles.chev}>›</span>
-          </button>
-        ))}
+        {/* ── Команда ── */}
+        <p className={styles.groupLabel}>Команда</p>
+        <button className={styles.row} onClick={() => navigate('/pro/staff')}>
+          <span>Мастера</span><span className={styles.chev}>›</span>
+        </button>
+        <button className={styles.row} onClick={() => navigate('/pro/services')}>
+          <span>{t('pro.more.services')}</span><span className={styles.chev}>›</span>
+        </button>
+        <button className={styles.row} onClick={() => navigate('/pro/gallery')}>
+          <span>Галерея</span><span className={styles.chev}>›</span>
+        </button>
 
-        <button
-          className={styles.addBusinessBtn}
-          onClick={() => navigate('/pro/new-business')}
-        >
+        {/* ── Заведение ── */}
+        <p className={styles.groupLabel}>Заведение</p>
+        <button className={styles.row} onClick={() => navigate('/pro/schedule')}>
+          <span>{t('pro.more.schedule')}</span><span className={styles.chev}>›</span>
+        </button>
+        <button className={styles.row} onClick={() => navigate('/pro/settings')}>
+          <span>{t('pro.more.profileSettings')}</span><span className={styles.chev}>›</span>
+        </button>
+        <button className={styles.row} onClick={() => navigate('/pro/select')}>
+          <span>Сменить бизнес</span><span className={styles.chev}>›</span>
+        </button>
+        <button className={styles.addBusinessBtn} onClick={() => navigate('/pro/new-business')}>
           {t('pro.more.addBusiness')}
         </button>
 
-        <div className={styles.accountSection}>
-          {exitError && <p className={styles.accountError}>{exitError}</p>}
+        {/* ── Выход ── */}
+        <p className={styles.groupLabel}>Аккаунт</p>
+        <button className={styles.logoutBtn} onClick={() => setExitSheetOpen(true)}>
+          Выйти
+        </button>
+
+      </div>
+
+      {/* ── Exit bottom sheet ── */}
+      <BottomSheet open={exitSheetOpen} onClose={() => setExitSheetOpen(false)} title="Выйти">
+        <div className={styles.exitOptions}>
           <button
-            className={styles.leaveBtn}
-            onClick={() => merchantId && leaveWithoutResigning(merchantId)}
+            className={styles.exitOptionBtn}
+            onClick={handleLeaveOnly}
             disabled={exitLoading}
           >
-            {t('pro.more.leaveBusiness')}
+            <span className={styles.exitOptionTitle}>Выйти из заведения</span>
+            <span className={styles.exitOptionDesc}>Только выйти из бизнеса. Аккаунт и записи сохранятся. Можно вернуться позже.</span>
+          </button>
+          <div className={styles.exitDivider} />
+          <button
+            className={`${styles.exitOptionBtn} ${styles.exitOptionDanger}`}
+            onClick={handleFullLogout}
+            disabled={exitLoading}
+          >
+            <span className={styles.exitOptionTitle}>Выйти из аккаунта</span>
+            <span className={styles.exitOptionDesc}>Полный выход из учётной записи и заведения.</span>
           </button>
           <button
-            className={styles.logoutBtn}
-            onClick={logout}
+            className={styles.cancelBtn}
+            onClick={() => setExitSheetOpen(false)}
             disabled={exitLoading}
           >
-            {t('pro.more.logoutBtn')}
+            Отмена
           </button>
         </div>
-      </div>
+      </BottomSheet>
     </ProLayout>
   );
 }

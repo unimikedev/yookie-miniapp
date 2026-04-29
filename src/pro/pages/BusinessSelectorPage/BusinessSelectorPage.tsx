@@ -50,6 +50,7 @@ export default function BusinessSelectorPage() {
       setMerchantId(result.businessId);
       setRole(result.role as 'owner' | 'staff');
       if (result.masterId) setMasterId(result.masterId);
+      useMerchantStore.getState().setBusinessName(biz.name);
       navigate('/pro', { replace: true });
     } catch {
       setSwitching(null);

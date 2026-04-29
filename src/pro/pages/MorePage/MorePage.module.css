@@ -170,42 +170,18 @@
   color: var(--color-accent);
 }
 
-/* ── Account section ── */
-.accountSection {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-border);
-}
-
-.accountError {
+/* ── Group labels ── */
+.groupLabel {
+  font-size: var(--text-caption-xs-size, 11px);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 4px 2px;
   margin: 0;
-  padding: 10px 12px;
-  background: rgba(239,68,68,0.1);
-  border: 1px solid var(--color-error, #ef4444);
-  border-radius: 10px;
-  color: var(--color-error, #ef4444);
-  font-size: 13px;
 }
 
-.leaveBtn {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: 14px;
-  color: var(--color-text-secondary);
-  font-family: var(--font-family);
-  font-size: var(--text-body-size);
-  font-weight: 500;
-  cursor: pointer;
-  text-align: left;
-}
-
-.leaveBtn:disabled { opacity: 0.5; }
-
+/* ── Logout button ── */
 .logoutBtn {
   width: 100%;
   padding: 14px 16px;
@@ -220,4 +196,63 @@
   text-align: left;
 }
 
-.logoutBtn:disabled { opacity: 0.5; }
+/* ── Exit bottom sheet ── */
+.exitOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exitOptionBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.exitOptionTitle {
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.exitOptionDanger .exitOptionTitle {
+  color: var(--color-error, #ef4444);
+}
+
+.exitOptionDesc {
+  font-family: var(--font-family);
+  font-size: var(--text-caption-size, 12px);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.exitDivider {
+  height: 1px;
+  background: var(--color-border-subtle);
+  margin: 2px 0;
+}
+
+.cancelBtn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 4px;
+  background: var(--color-surface-elevated);
+  border: 0;
+  border-radius: 14px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family);
+  font-size: var(--text-body-size);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancelBtn:disabled { opacity: 0.5; }

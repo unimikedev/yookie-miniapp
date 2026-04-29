@@ -68,6 +68,7 @@ function ProIndex() {
             setMerchantId(result.businessId);
             setRole(result.role as 'owner' | 'staff');
             if (result.masterId) setMasterId(result.masterId);
+            useMerchantStore.getState().setBusinessName(biz.name);
           } catch {
             setMerchantId(biz.id);
             setRole(biz.role as 'owner' | 'staff');
@@ -97,7 +98,6 @@ export function ProRouter() {
       <Route path="staff" element={<RequireOwner><StaffPage /></RequireOwner>} />
       <Route path="clients" element={<RequireOwner><ClientsPage /></RequireOwner>} />
       <Route path="settings" element={<MerchantSettingsPage />} />
-      <Route path="preview" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
       <Route path="more" element={<RequireOwner><MorePage /></RequireOwner>} />
       <Route path="my-profile" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
       <Route path="gallery" element={<RequireOwner><GalleryPage /></RequireOwner>} />

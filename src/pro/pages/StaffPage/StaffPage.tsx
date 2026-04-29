@@ -33,7 +33,8 @@ export default function StaffPage() {
     admin: t('pro.staff.roleAdmin'),
     staff: t('pro.staff.roleStaff'),
   };
-  const myUserId = useAuthStore((s) => s.user?.id);
+  const myUser = useAuthStore((s) => s.user);
+  const myUserId = myUser?.id;
   const [tab, setTab] = useState<Tab>('users');
 
   // Virtual masters (no user_id)
@@ -71,7 +72,24 @@ export default function StaffPage() {
   useEffect(() => { loadAll(); }, [merchantId]);
 
   const virtualMasters = staff.filter((s) => !s.user_id);
-  const realUsers = members.filter((m) => m.user_id);
+  const realUsersFromAPI = members.filter((m) => m.user_id);
+
+  // Include the current owner if they're not already in the members list
+  const ownerAlreadyListed = realUsersFromAPI.some((m) => m.user_id === myUserId);
+  const ownerEntry: Master[] = (!ownerAlreadyListed && myUser)
+    ? [{
+        id: myUser.id,
+        name: myUser.name,
+        specialization: '',
+        user_id: myUser.id,
+        user_accounts: { phone: myUser.phone ?? '', role: 'owner', avatar_url: myUser.avatarUrl ?? null },
+        photo_url: myUser.avatarUrl ?? null,
+        rating: 0,
+        is_active: true,
+        master_services: [],
+      } as unknown as Master]
+    : [];
+  const realUsers = [...ownerEntry, ...realUsersFromAPI];
 
   // ─── Photo upload ──────────────────────────────────────────────
 
@@ -203,7 +221,7 @@ export default function StaffPage() {
           className={`${styles.tab} ${tab === 'users' ? styles.tabActive : ''}`}
           onClick={() => setTab('users')}
         >
-          {t('pro.staff.tabUsers')}
+          Менеджеры
         </button>
         <button
           className={`${styles.tab} ${tab === 'masters' ? styles.tabActive : ''}`}
@@ -216,6 +234,9 @@ export default function StaffPage() {
       {/* ── Tab: Real Users ── */}
       {tab === 'users' && (
         <div className={styles.list}>
+          <p className={styles.managersNote}>
+            Менеджеры управляют записями и настройками. Они не оказывают услуги клиентам.
+          </p>
           {realUsers.length === 0 && (
             <p className={styles.emptyHint}>
               {t('pro.staff.noUsers')}

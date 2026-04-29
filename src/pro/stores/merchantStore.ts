@@ -14,15 +14,11 @@ import { create } from 'zustand';
 export type ProMode = 'off' | 'on';
 
 interface MerchantState {
-  /** Active business id the user manages. Null if not a merchant. */
   merchantId: string | null;
-  /** Whether the user is currently viewing Pro surfaces. */
   mode: ProMode;
-  /** Role of the current user in the business context. */
   role: 'owner' | 'staff' | null;
-  /** Linked master profile id (populated for staff role). */
   masterId: string | null;
-  /** Validation status of the merchantId */
+  businessName: string | null;
   isValidating: boolean;
   validationError: string | null;
 }
@@ -31,6 +27,7 @@ interface MerchantActions {
   setMerchantId: (id: string | null) => void;
   setRole: (role: 'owner' | 'staff' | null) => void;
   setMasterId: (masterId: string | null) => void;
+  setBusinessName: (name: string) => void;
   enterProMode: () => void;
   exitProMode: () => void;
   toggleMode: () => void;
@@ -64,8 +61,11 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
   mode: 'off',
   role: null,
   masterId: null,
+  businessName: null,
   isValidating: false,
   validationError: null,
+
+  setBusinessName: (name) => set({ businessName: name }),
 
   setMerchantId: (id) => {
     try {

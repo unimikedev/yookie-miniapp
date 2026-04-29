@@ -79,26 +79,12 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
       const phone = getPhone();
       if (phone) {
         if (state.favoriteIds.has(businessId)) {
-          // Was favorited → now removing
           api.delete(`/favorites/${businessId}`, { phone }).catch((err) => {
             console.error('[favoritesStore] Failed to remove favorite:', err);
-            // Rollback on failure
-            set((s) => {
-              const rollbackSet = new Set(s.favoriteIds);
-              rollbackSet.add(businessId);
-              return { favoriteIds: rollbackSet };
-            });
           });
         } else {
-          // Was not favorited → now adding
           api.post(`/favorites/${businessId}`, {}).catch((err) => {
             console.error('[favoritesStore] Failed to add favorite:', err);
-            // Rollback on failure
-            set((s) => {
-              const rollbackSet = new Set(s.favoriteIds);
-              rollbackSet.delete(businessId);
-              return { favoriteIds: rollbackSet };
-            });
           });
         }
       }

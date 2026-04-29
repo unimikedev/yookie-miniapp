@@ -1,34 +1,55 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/authStore'
 import { useCityStore } from '@/stores/cityStore'
 import CitySelector from '@/components/features/CitySelector'
 import LanguageSwitcher from '@/components/features/LanguageSwitcher'
+import { Toast } from '@/components/ui/Toast'
 import styles from './ProfileEditPage.module.css'
 
 export default function ProfileEditPage() {
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { name, phone, updateProfile } = useAuthStore()
   const { city } = useCityStore()
 
   const [displayName, setDisplayName] = useState(name || '')
   const [displayPhone, setDisplayPhone] = useState(phone || '')
-  const [saved, setSaved] = useState(false)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; key: number } | null>(null)
+
+  // Track initial values to detect any change
+  const initial = useRef({ name: name || '', phone: phone || '', city: city.id, lang: i18n.language })
+
+  const hasChanged =
+    displayName.trim() !== initial.current.name ||
+    displayPhone.trim() !== initial.current.phone ||
+    city.id !== initial.current.city ||
+    i18n.language !== initial.current.lang
 
   useEffect(() => {
     if (name) setDisplayName(name)
     if (phone) setDisplayPhone(phone)
   }, [])
 
+  // Re-arm initial when city or language changes (they save immediately via their own stores)
+  // so we track if name/phone also changed independently
+  useEffect(() => {
+    initial.current.city = city.id
+  }, [city.id])
+
+  useEffect(() => {
+    initial.current.lang = i18n.language
+  }, [i18n.language])
+
   const handleSave = () => {
+    if (!displayName.trim() || !displayPhone.trim()) return
     updateProfile(displayName.trim(), displayPhone.trim())
-    setSaved(true)
-    setTimeout(() => {
-      navigate('/account')
-    }, 800)
+    initial.current.name = displayName.trim()
+    initial.current.phone = displayPhone.trim()
+    setToast({ msg: t('profile.saved', 'Изменения сохранены'), key: Date.now() })
+    setTimeout(() => navigate('/account'), 1200)
   }
 
   const handlePhoneInput = (value: string) => {
@@ -89,13 +110,14 @@ export default function ProfileEditPage() {
         <button
           className={styles.saveBtn}
           onClick={handleSave}
-          disabled={!displayName.trim() || !displayPhone.trim()}
+          disabled={!hasChanged || !displayName.trim() || !displayPhone.trim()}
         >
-          {saved ? '✓ Сохранено' : t('profile.save', 'Сохранить')}
+          {t('profile.save', 'Сохранить')}
         </button>
       </div>
 
       <CitySelector open={citySelectorOpen} onClose={() => setCitySelectorOpen(false)} />
+      {toast && <Toast key={toast.key} message={toast.msg} onDone={() => setToast(null)} />}
     </div>
   )
 }
