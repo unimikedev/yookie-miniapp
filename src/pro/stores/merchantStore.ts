@@ -74,7 +74,7 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
     } catch {
       /* noop */
     }
-    set({ merchantId: id, validationError: null });
+    set({ merchantId: id, validationError: null, ...(id === null ? { businessName: null } : {}) });
   },
 
   setRole: (role) => set({ role }),

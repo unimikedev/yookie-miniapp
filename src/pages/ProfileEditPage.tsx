@@ -7,17 +7,25 @@ import CitySelector from '@/components/features/CitySelector'
 import LanguageSwitcher from '@/components/features/LanguageSwitcher'
 import { Toast } from '@/components/ui/Toast'
 import styles from './ProfileEditPage.module.css'
+import { api } from '@/lib/api/client'
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'
 
 export default function ProfileEditPage() {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
-  const { name, phone, updateProfile } = useAuthStore()
+  const { name, phone, user, updateProfile } = useAuthStore()
   const { city } = useCityStore()
 
   const [displayName, setDisplayName] = useState(name || '')
   const [displayPhone, setDisplayPhone] = useState(phone || '')
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [citySelectorOpen, setCitySelectorOpen] = useState(false)
   const [toast, setToast] = useState<{ msg: string; key: number } | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Track initial values to detect any change
   const initial = useRef({ name: name || '', phone: phone || '', city: city.id, lang: i18n.language })
@@ -31,10 +39,9 @@ export default function ProfileEditPage() {
   useEffect(() => {
     if (name) setDisplayName(name)
     if (phone) setDisplayPhone(phone)
+    if (user?.avatarUrl) setAvatarUrl(user.avatarUrl)
   }, [])
 
-  // Re-arm initial when city or language changes (they save immediately via their own stores)
-  // so we track if name/phone also changed independently
   useEffect(() => {
     initial.current.city = city.id
   }, [city.id])
@@ -43,13 +50,53 @@ export default function ProfileEditPage() {
     initial.current.lang = i18n.language
   }, [i18n.language])
 
-  const handleSave = () => {
+  const handleAvatarClick = () => fileInputRef.current?.click()
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setUploadingAvatar(true)
+    try {
+      const token = localStorage.getItem('yookie_auth_token')
+      const formData = new FormData()
+      formData.append('image', file)
+      const res = await fetch(`${API_BASE}/auth/upload-avatar`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || 'Upload failed')
+      }
+      const json = await res.json()
+      const url: string = json?.data?.url ?? json?.url
+      setAvatarUrl(url)
+      updateProfile(displayName.trim() || name || '', displayPhone.trim() || phone || '', url)
+      setToast({ msg: 'Фото обновлено', key: Date.now() })
+    } catch (err) {
+      setToast({ msg: err instanceof Error ? err.message : 'Ошибка загрузки фото', key: Date.now() })
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  const handleSave = async () => {
     if (!displayName.trim() || !displayPhone.trim()) return
-    updateProfile(displayName.trim(), displayPhone.trim())
-    initial.current.name = displayName.trim()
-    initial.current.phone = displayPhone.trim()
-    setToast({ msg: t('profile.saved', 'Изменения сохранены'), key: Date.now() })
-    setTimeout(() => navigate('/account'), 1200)
+    setSaving(true)
+    try {
+      await api.patch('/auth/me', { name: displayName.trim(), phone: displayPhone.trim() })
+      updateProfile(displayName.trim(), displayPhone.trim(), avatarUrl || undefined)
+      initial.current.name = displayName.trim()
+      initial.current.phone = displayPhone.trim()
+      setToast({ msg: t('profile.saved', 'Изменения сохранены'), key: Date.now() })
+      setTimeout(() => navigate('/account'), 1200)
+    } catch (err) {
+      setToast({ msg: err instanceof Error ? err.message : 'Ошибка сохранения', key: Date.now() })
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handlePhoneInput = (value: string) => {
@@ -60,6 +107,37 @@ export default function ProfileEditPage() {
   return (
     <div className={styles.page}>
       <div className={styles.content}>
+        {/* Avatar */}
+        <div className={styles.avatarSection}>
+          <button className={styles.avatarBtn} onClick={handleAvatarClick} disabled={uploadingAvatar}>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="avatar" className={styles.avatarImg} />
+            ) : (
+              <div className={styles.avatarPlaceholder}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 12C14.7 12 17 9.7 17 7C17 4.3 14.7 2 12 2C9.3 2 7 4.3 7 7C7 9.7 9.3 12 12 12ZM12 14C8.7 14 2 15.7 2 19V21H22V19C22 15.7 15.3 14 12 14Z" fill="currentColor"/>
+                </svg>
+              </div>
+            )}
+            <div className={styles.avatarOverlay}>
+              {uploadingAvatar ? (
+                <span className={styles.avatarLoading} />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V15M21 3L12 12M21 3H15M21 3V9" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              )}
+            </div>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic"
+            style={{ display: 'none' }}
+            onChange={handleAvatarChange}
+          />
+        </div>
+
         {/* Name */}
         <div className={styles.field}>
           <label className={styles.fieldLabel}>{t('profile.name', 'Имя')}</label>
@@ -110,9 +188,9 @@ export default function ProfileEditPage() {
         <button
           className={styles.saveBtn}
           onClick={handleSave}
-          disabled={!hasChanged || !displayName.trim() || !displayPhone.trim()}
+          disabled={!hasChanged || !displayName.trim() || !displayPhone.trim() || saving}
         >
-          {t('profile.save', 'Сохранить')}
+          {saving ? '...' : t('profile.save', 'Сохранить')}
         </button>
       </div>
 

@@ -42,7 +42,7 @@ interface AuthActions {
   logout: () => void;
   setPhone: (phone: string) => void;
   setName: (name: string) => void;
-  updateProfile: (name: string, phone: string) => void;
+  updateProfile: (name: string, phone: string, avatarUrl?: string) => void;
   loadFromStorage: () => void;
   clearError: () => void;
   initialize: () => Promise<void>;
@@ -234,10 +234,11 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
     set({ name });
   },
 
-  updateProfile: (name: string, phone: string) => {
+  updateProfile: (name: string, phone: string, avatarUrl?: string) => {
     set((state) => {
-      const updatedUser = state.user ? { ...state.user, name, phone } : state.user;
-      // Persist updated user object
+      const updatedUser = state.user
+        ? { ...state.user, name, phone, ...(avatarUrl !== undefined ? { avatarUrl } : {}) }
+        : state.user;
       try {
         if (updatedUser) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
       } catch { /* noop */ }
