@@ -6,6 +6,9 @@
 import { create } from 'zustand';
 import { verifyOtp, loginWithGoogle, loginWithTelegram } from '../lib/api/auth';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
+import { useRecentViewsStore } from './recentViewsStore';
+import { useFavoritesStore } from './favoritesStore';
+import { useBookingStore } from './bookingStore';
 
 export interface AuthUser {
   id: string;
@@ -39,6 +42,7 @@ interface AuthActions {
   logout: () => void;
   setPhone: (phone: string) => void;
   setName: (name: string) => void;
+  updateProfile: (name: string, phone: string) => void;
   loadFromStorage: () => void;
   clearError: () => void;
   initialize: () => Promise<void>;
@@ -193,12 +197,24 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
   },
 
   logout: () => {
+    const USER_DATA_KEYS = [
+      STORAGE_KEY,
+      USER_STORAGE_KEY,
+      'yookie_user_gender',
+      'yookie_booking_phone',
+      'yookie_favorites',
+      'yookie-recent-views',
+    ];
     try {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(USER_STORAGE_KEY);
+      for (const key of USER_DATA_KEYS) localStorage.removeItem(key);
     } catch {
       // Storage unavailable
     }
+
+    // Reset all user-specific stores
+    useRecentViewsStore.getState().clearHistory();
+    useFavoritesStore.getState().clear();
+    useBookingStore.getState().reset();
 
     set({
       phone: null,
@@ -216,6 +232,17 @@ export const useAuthStore = create<AuthState & AuthActions>((set, _get) => ({
 
   setName: (name: string) => {
     set({ name });
+  },
+
+  updateProfile: (name: string, phone: string) => {
+    set((state) => {
+      const updatedUser = state.user ? { ...state.user, name, phone } : state.user;
+      // Persist updated user object
+      try {
+        if (updatedUser) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
+      } catch { /* noop */ }
+      return { name, phone, user: updatedUser };
+    });
   },
 
   clearError: () => {

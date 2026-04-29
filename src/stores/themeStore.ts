@@ -25,13 +25,18 @@ function readStoredTheme(): ThemeMode | null {
   }
 }
 
+function getTimeBasedTheme(): ThemeMode {
+  const hour = new Date().getHours();
+  return hour >= 20 || hour < 7 ? 'dark' : 'light';
+}
+
 function getInitialTheme(): ThemeMode {
   if (typeof window === 'undefined') return 'dark';
   const stored = readStoredTheme();
   if (stored) return stored;
-  // Fall back to Telegram's color scheme if available, else dark
   const tgScheme = window.Telegram?.WebApp?.colorScheme;
-  return tgScheme === 'light' || tgScheme === 'dark' ? tgScheme : 'dark';
+  if (tgScheme === 'light' || tgScheme === 'dark') return tgScheme;
+  return getTimeBasedTheme();
 }
 
 function applyTheme(theme: ThemeMode) {

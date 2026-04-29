@@ -84,34 +84,30 @@
   color: var(--color-text-muted);
 }
 
-/* ── Gender chips ───────────────────────────────────────── */
-.genderRow {
+/* ── City / Language fields ─────────────────────────────── */
+.fieldSelectBtn {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.genderChip {
-  padding: 10px 18px;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  font-family: 'Gilroy', sans-serif;
-  font-size: var(--text-body-size);
-  font-weight: var(--text-body-weight);
-  color: var(--color-text-secondary);
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  font-family: 'Gilroy', sans-serif;
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-body-lg-weight);
+  color: var(--color-text);
+  width: 100%;
+  text-align: left;
 }
 
-.genderChip:active {
-  background: var(--color-border);
+.fieldSelectBtn:active {
+  opacity: 0.7;
 }
 
-.genderChipActive {
-  background: var(--color-accent);
-  color: var(--color-bg);
-  border-color: var(--color-accent);
+.fieldLangRow {
+  display: flex;
+  align-items: center;
 }
 
 /* ── Save button ────────────────────────────────────────── */

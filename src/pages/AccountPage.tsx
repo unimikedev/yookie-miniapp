@@ -234,17 +234,6 @@ export default function AccountPage() {
             <div className={styles.menuItemRight}><ChevronRight /></div>
           </button>
 
-          <button className={styles.menuItem} onClick={() => setCitySelectorOpen(true)}>
-            <div className={styles.menuItemLeft}>
-              <div className={styles.menuIconWrap}><IconCity /></div>
-              <span className={styles.menuLabel}>{t('account.city')}</span>
-            </div>
-            <div className={styles.menuItemRight}>
-              <span className={styles.menuHint}>{city.name}</span>
-              <ChevronRight />
-            </div>
-          </button>
-
           <button className={styles.menuItem} onClick={() => window.open(SUPPORT_URL, '_blank')}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconSupport /></div>
@@ -263,7 +252,7 @@ export default function AccountPage() {
 
         </div>
 
-        {/* Secondary section: theme + language + logout */}
+        {/* Secondary section: theme + logout */}
         <div className={styles.menuList}>
 
           <button className={styles.menuItem} onClick={() => themeStore.toggle()}>
@@ -279,15 +268,6 @@ export default function AccountPage() {
             </div>
           </button>
 
-          <div className={styles.menuItem}>
-            <div className={styles.menuItemLeft}>
-              <span className={styles.menuLabel}>{t('account.language')}</span>
-            </div>
-            <div className={styles.menuItemRight}>
-              <LanguageSwitcher compact />
-            </div>
-          </div>
-
           <button className={styles.menuItem} onClick={() => { authStore.logout(); navigate('/') }}>
             <div className={styles.menuItemLeft}>
               <div className={styles.menuIconWrap}><IconLogout /></div>
@@ -299,8 +279,6 @@ export default function AccountPage() {
         </div>
 
       </div>
-
-      <CitySelector open={citySelectorOpen} onClose={() => setCitySelectorOpen(false)} />
     </div>
   )
 }

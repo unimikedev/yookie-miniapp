@@ -1,55 +1,30 @@
-/**
- * ProfileEditPage — edit name, phone, gender.
- */
-
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/authStore'
+import { useCityStore } from '@/stores/cityStore'
+import CitySelector from '@/components/features/CitySelector'
+import LanguageSwitcher from '@/components/features/LanguageSwitcher'
 import styles from './ProfileEditPage.module.css'
-
-type Gender = 'male' | 'female' | 'other' | ''
-
-const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'male', label: 'Мужской' },
-  { value: 'female', label: 'Женский' },
-  { value: 'other', label: 'Другой' },
-]
 
 export default function ProfileEditPage() {
   const navigate = useNavigate()
-  const { name, phone, setName, setPhone, loadFromStorage } = useAuthStore()
+  const { t } = useTranslation()
+  const { name, phone, updateProfile } = useAuthStore()
+  const { city } = useCityStore()
 
   const [displayName, setDisplayName] = useState(name || '')
   const [displayPhone, setDisplayPhone] = useState(phone || '')
-  const [gender, setGender] = useState<Gender>('')
   const [saved, setSaved] = useState(false)
+  const [citySelectorOpen, setCitySelectorOpen] = useState(false)
 
   useEffect(() => {
     if (name) setDisplayName(name)
     if (phone) setDisplayPhone(phone)
-    // Load gender from localStorage
-    try {
-      const stored = localStorage.getItem('yookie_user_gender')
-      if (stored) setGender(stored as Gender)
-    } catch { /* noop */ }
   }, [])
 
   const handleSave = () => {
-    setName(displayName.trim())
-    setPhone(displayPhone.trim())
-    try {
-      localStorage.setItem('yookie_user_gender', gender)
-    } catch { /* noop */ }
-    // Also update the full user object in storage
-    try {
-      const userJson = localStorage.getItem('yookie_auth_user')
-      if (userJson) {
-        const user = JSON.parse(userJson)
-        user.name = displayName.trim()
-        user.phone = displayPhone.trim()
-        localStorage.setItem('yookie_auth_user', JSON.stringify(user))
-      }
-    } catch { /* noop */ }
+    updateProfile(displayName.trim(), displayPhone.trim())
     setSaved(true)
     setTimeout(() => {
       navigate('/account')
@@ -57,7 +32,6 @@ export default function ProfileEditPage() {
   }
 
   const handlePhoneInput = (value: string) => {
-    // Only allow digits, +, -, (, ), spaces
     const cleaned = value.replace(/[^\d+\-() ]/g, '')
     setDisplayPhone(cleaned)
   }
@@ -67,11 +41,11 @@ export default function ProfileEditPage() {
       <div className={styles.content}>
         {/* Name */}
         <div className={styles.field}>
-          <label className={styles.fieldLabel}>Имя</label>
+          <label className={styles.fieldLabel}>{t('profile.name', 'Имя')}</label>
           <input
             className={styles.fieldInput}
             type="text"
-            placeholder="Ваше имя"
+            placeholder={t('profile.namePlaceholder', 'Ваше имя')}
             value={displayName}
             onChange={e => setDisplayName(e.target.value)}
           />
@@ -79,7 +53,7 @@ export default function ProfileEditPage() {
 
         {/* Phone */}
         <div className={styles.field}>
-          <label className={styles.fieldLabel}>Телефон</label>
+          <label className={styles.fieldLabel}>{t('profile.phone', 'Телефон')}</label>
           <input
             className={styles.fieldInput}
             type="tel"
@@ -89,19 +63,25 @@ export default function ProfileEditPage() {
           />
         </div>
 
-        {/* Gender */}
+        {/* City */}
         <div className={styles.field}>
-          <label className={styles.fieldLabel}>Пол</label>
-          <div className={styles.genderRow}>
-            {GENDER_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                className={`${styles.genderChip} ${gender === opt.value ? styles.genderChipActive : ''}`}
-                onClick={() => setGender(opt.value)}
-              >
-                {opt.label}
-              </button>
-            ))}
+          <label className={styles.fieldLabel}>{t('account.city', 'Город')}</label>
+          <button
+            className={styles.fieldSelectBtn}
+            onClick={() => setCitySelectorOpen(true)}
+          >
+            <span>{city.name}</span>
+            <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+              <path d="M4.6 6L0 1.4L1.4 0L7.4 6L1.4 12L0 10.6L4.6 6Z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Language */}
+        <div className={styles.field}>
+          <label className={styles.fieldLabel}>{t('account.language', 'Язык')}</label>
+          <div className={styles.fieldLangRow}>
+            <LanguageSwitcher compact />
           </div>
         </div>
 
@@ -111,9 +91,11 @@ export default function ProfileEditPage() {
           onClick={handleSave}
           disabled={!displayName.trim() || !displayPhone.trim()}
         >
-          {saved ? '✓ Сохранено' : 'Сохранить'}
+          {saved ? '✓ Сохранено' : t('profile.save', 'Сохранить')}
         </button>
       </div>
+
+      <CitySelector open={citySelectorOpen} onClose={() => setCitySelectorOpen(false)} />
     </div>
   )
 }
