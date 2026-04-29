@@ -1032,7 +1032,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
           setDefaultApp(cfg?.default_app === 'pro' ? 'pro' : 'b2c');
         }
       })
-      .catch(() => {});
+      .catch(err => setError(err instanceof Error ? err.message : t('common.error', 'Ошибка загрузки')));
   }, [merchantId]);
 
   const uploadImage = async (file: File, variant: 'cover' | 'avatar' = 'cover'): Promise<string> => {
