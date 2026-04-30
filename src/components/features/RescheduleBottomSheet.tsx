@@ -124,14 +124,16 @@ export default function RescheduleBottomSheet({
         {/* Scrollable content */}
         <div ref={contentRef} className={styles.content}>
           {/* Current booking info */}
-          <div className={styles.currentInfo}>
-            <span className={styles.currentLabel}>Текущая запись:</span>
-            <span className={styles.currentValue}>
-              {new Date(currentStartsAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
-              {' '}в{' '}
-              {new Date(currentStartsAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          </div>
+          {currentStartsAt && !isNaN(new Date(currentStartsAt).getTime()) && (
+            <div className={styles.currentInfo}>
+              <span className={styles.currentLabel}>Текущая запись:</span>
+              <span className={styles.currentValue}>
+                {new Date(currentStartsAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
+                {' '}в{' '}
+                {new Date(currentStartsAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
 
           {/* Date picker */}
           <div className={styles.section}>
