@@ -284,8 +284,8 @@ export default function DashboardPage() {
       {/* ── Tour overlay ── */}
       {showTour && <TourModal onClose={() => setShowTour(false)} />}
 
-      {/* ── Onboarding card ── */}
-      {onboardPhase === 'done' && (
+      {/* ── Onboarding card — only render after businessActive is known (avoids flicker) ── */}
+      {businessActive !== null && onboardPhase === 'done' && (
         <div className={styles.publishedCard}>
           <span className={styles.publishedIcon}>🎉</span>
           <div className={styles.publishedText}>
@@ -295,8 +295,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {onboardPhase === 'published_incomplete' && (
-        <div className={styles.onboardCard} style={{ borderColor: 'rgba(251,191,36,0.6)', background: 'rgba(251,191,36,0.04)' }}>
+      {businessActive !== null && onboardPhase === 'published_incomplete' && (
+        <div className={`${styles.onboardCard} ${styles.onboardCardWarn}`}>
           <div className={styles.onboardProgress}>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
               ⚠️ Профиль не виден клиентам
@@ -311,7 +311,7 @@ export default function DashboardPage() {
                 {hasStaff ? `Мастер${staff.length > 1 ? 'а' : ''} добавлен${staff.length > 1 ? 'ы' : ''} (${staff.length})` : 'Добавить мастера'}
               </span>
               {!hasStaff && (
-                <button className={styles.setupItemBtn} onClick={() => navigate('/pro/staff')}>→</button>
+                <button className={styles.setupItemBtn} onClick={() => navigate('/pro/staff?tab=masters')}>→</button>
               )}
             </div>
             <div className={`${styles.onboardCheckRow} ${hasServices ? styles.onboardCheckRowDone : styles.onboardCheckRowActive}`}>
@@ -324,20 +324,10 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-          {!hasStaff && (
-            <button className={styles.onboardCTA} onClick={() => navigate('/pro/staff')}>
-              Добавить мастера →
-            </button>
-          )}
-          {hasStaff && !hasServices && (
-            <button className={styles.onboardCTA} onClick={() => navigate('/pro/services')}>
-              Добавить услугу →
-            </button>
-          )}
         </div>
       )}
 
-      {onboardPhase === 'pending' && (
+      {businessActive !== null && onboardPhase === 'pending' && (
         <div className={styles.pendingModCard}>
           <span className={styles.pendingModIcon}>⏳</span>
           <p className={styles.pendingModTitle}>На проверке</p>
@@ -345,7 +335,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {(onboardPhase === 'staff' || onboardPhase === 'service' || onboardPhase === 'publish') && (
+      {businessActive !== null && (onboardPhase === 'staff' || onboardPhase === 'service' || onboardPhase === 'publish') && (
         <div className={styles.onboardCard}>
           {/* Progress dots */}
           <div className={styles.onboardProgress}>
@@ -375,7 +365,7 @@ export default function DashboardPage() {
                   <span className={`${styles.onboardCheckLabel} ${styles.onboardCheckLabelDone}`} style={{ opacity: 0.4 }}>Опубликовать</span>
                 </div>
               </div>
-              <button className={styles.onboardCTA} onClick={() => navigate('/pro/staff')}>
+              <button className={styles.onboardCTA} onClick={() => navigate('/pro/staff?tab=masters')}>
                 Добавить мастера →
               </button>
             </>

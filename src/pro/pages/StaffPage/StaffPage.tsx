@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
@@ -35,7 +36,8 @@ export default function StaffPage() {
   };
   const myUser = useAuthStore((s) => s.user);
   const myUserId = myUser?.id;
-  const [tab, setTab] = useState<Tab>('users');
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(searchParams.get('tab') === 'masters' ? 'masters' : 'users');
 
   // Virtual masters (no user_id)
   const [staff, setStaff] = useState<Master[]>([]);

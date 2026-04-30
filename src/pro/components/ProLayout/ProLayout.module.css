@@ -4,7 +4,7 @@
   color: var(--color-text);
   display: flex;
   flex-direction: column;
-  padding-top: 64px;
+  padding-top: var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px));
 }
 
 .pageHeader {

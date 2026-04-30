@@ -605,6 +605,15 @@
   pointer-events: none;
 }
 
+.onboardCardWarn {
+  border-color: rgba(251, 191, 36, 0.6);
+  background: rgba(251, 191, 36, 0.04);
+}
+
+.onboardCardWarn::before {
+  display: none;
+}
+
 .onboardProgress {
   display: flex;
   align-items: center;
