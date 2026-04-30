@@ -19,6 +19,7 @@ interface MerchantState {
   role: 'owner' | 'staff' | null;
   masterId: string | null;
   businessName: string | null;
+  isPublished: boolean | null;
   isValidating: boolean;
   validationError: string | null;
 }
@@ -28,6 +29,7 @@ interface MerchantActions {
   setRole: (role: 'owner' | 'staff' | null) => void;
   setMasterId: (masterId: string | null) => void;
   setBusinessName: (name: string) => void;
+  setIsPublished: (v: boolean | null) => void;
   enterProMode: () => void;
   exitProMode: () => void;
   toggleMode: () => void;
@@ -62,10 +64,12 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
   role: null,
   masterId: null,
   businessName: null,
+  isPublished: null,
   isValidating: false,
   validationError: null,
 
   setBusinessName: (name) => set({ businessName: name }),
+  setIsPublished: (v) => set({ isPublished: v }),
 
   setMerchantId: (id) => {
     try {
@@ -74,7 +78,7 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
     } catch {
       /* noop */
     }
-    set({ merchantId: id, validationError: null, ...(id === null ? { businessName: null } : {}) });
+    set({ merchantId: id, validationError: null, ...(id === null ? { businessName: null, isPublished: null } : {}) });
   },
 
   setRole: (role) => set({ role }),

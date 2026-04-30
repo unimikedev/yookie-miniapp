@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, Outlet, useLocation, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import DashboardPage from '@/pro/pages/DashboardPage/DashboardPage';
 import BookingsBoardPage from '@/pro/pages/BookingsBoardPage/BookingsBoardPage';
@@ -19,12 +19,44 @@ import { LoadingState } from '@/components/ui/LoadingState';
 
 const TAB_PATHS = ['/pro', '/pro/bookings', '/pro/clients', '/pro/more', '/pro/schedule', '/pro/my-profile'];
 
+function UnpublishedBanner() {
+  return (
+    <div style={{
+      position: 'fixed',
+      left: 0,
+      right: 0,
+      bottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)',
+      zIndex: 99,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '10px',
+      padding: '7px 16px',
+      background: 'rgba(251,191,36,0.93)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      fontSize: '13px',
+      fontWeight: 500,
+      color: '#78350f',
+      boxShadow: '0 -1px 6px rgba(0,0,0,0.07)',
+    }}>
+      <span>⚠️ Заведение не опубликовано</span>
+      <Link to="/pro" style={{ color: '#92400e', fontWeight: 600, textDecoration: 'none', fontSize: '13px' }}>
+        Настроить →
+      </Link>
+    </div>
+  );
+}
+
 function ProShell() {
   const location = useLocation();
   const isTabPage = TAB_PATHS.includes(location.pathname);
+  const isPublished = useMerchantStore(s => s.isPublished);
+  const showBanner = isPublished === false && isTabPage;
   return (
     <>
       <Outlet />
+      {showBanner && <UnpublishedBanner />}
       <ProBottomNav visible={isTabPage} />
     </>
   );

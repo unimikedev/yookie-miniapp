@@ -20,9 +20,11 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
   const auth = useAuthStore();
   const merchant = useMerchantStore();
 
+  const isPublished = useMerchantStore(s => s.isPublished);
   const isSubPage = location.pathname !== '/pro';
   const isTabPage = TAB_PATHS.includes(location.pathname);
   const shouldHideNav = hideNav || !isTabPage;
+  const hasBanner = isPublished === false && isTabPage;
 
   // Use Telegram's native back button on sub-pages
   useEffect(() => {
@@ -83,7 +85,10 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
         </div>
       )}
 
-      <main className={`${styles.main} ${shouldHideNav ? '' : styles.withNav} ${title || actions ? styles.withPageHeader : ''}`}>
+      <main
+        className={`${styles.main} ${shouldHideNav ? '' : styles.withNav} ${title || actions ? styles.withPageHeader : ''}`}
+        style={hasBanner ? { paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 132px)' } : undefined}
+      >
         {children}
       </main>
     </div>

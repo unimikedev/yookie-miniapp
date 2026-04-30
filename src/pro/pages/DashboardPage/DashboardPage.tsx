@@ -82,8 +82,16 @@ export default function DashboardPage() {
     listStaff(merchantId).then(setStaff).catch(() => {});
     listServices(merchantId).then(setServices).catch(() => {});
     api.get<{ is_active: boolean }>(`/businesses/${merchantId}`)
-      .then(b => { if (b) setBusinessActive(b.is_active); })
-      .catch(() => {});
+      .then(b => {
+        if (b) {
+          setBusinessActive(b.is_active);
+          useMerchantStore.getState().setIsPublished(b.is_active);
+        }
+      })
+      .catch(() => {
+        setBusinessActive(false);
+        useMerchantStore.getState().setIsPublished(false);
+      });
   }, [merchantId]);
 
   const loadPending = useCallback(() => {
@@ -167,6 +175,7 @@ export default function DashboardPage() {
     try {
       await patchBusiness(merchantId, { is_active: true });
       setBusinessActive(true);
+      useMerchantStore.getState().setIsPublished(true);
       showToast(t('pro.dashboard.published', 'Профиль опубликован!'));
     } catch {
       showToast(t('pro.dashboard.publishError', 'Не удалось опубликовать'));
