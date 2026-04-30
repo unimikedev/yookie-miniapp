@@ -1157,3 +1157,61 @@
   cursor: pointer;
   z-index: 10;
 }
+
+/* ── Frozen / hidden business banner ──────────────────────── */
+.frozenBanner {
+  margin: 0 0 16px;
+  padding: 16px;
+  background: #fff8ec;
+  border: 1.5px solid #f59e0b;
+  border-radius: var(--radius-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.frozenBannerBody {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.frozenIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.frozenTitle {
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-h3-weight);
+  color: #92400e;
+  margin: 0 0 2px;
+}
+
+.frozenSub {
+  font-size: var(--text-caption-size);
+  color: #b45309;
+  margin: 0;
+}
+
+.reactivateBtn {
+  width: 100%;
+  padding: 14px 0;
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-2xl);
+  font-size: var(--text-body-lg-size);
+  font-weight: var(--text-h3-weight);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.reactivateBtn:active {
+  opacity: 0.85;
+}
+
+.reactivateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

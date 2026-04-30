@@ -1004,6 +1004,8 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   const [lng, setLng] = useState<number | null>(null);
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [defaultApp, setDefaultApp] = useState<'b2c' | 'pro'>('b2c');
+  const [isActive, setIsActive] = useState(true);
+  const [reactivating, setReactivating] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1013,6 +1015,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
     api.get<Business>(`/businesses/${merchantId}`)
       .then(b => {
         if (b) {
+          setIsActive(b.is_active);
           setName(b.name || '');
           setDescription(b.description || '');
           setAddress(b.address || '');
@@ -1034,6 +1037,29 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       })
       .catch(err => setError(err instanceof Error ? err.message : t('common.error', 'Ошибка загрузки')));
   }, [merchantId]);
+
+  const handleReactivate = async () => {
+    setReactivating(true);
+    setError(null);
+    try {
+      const res = await api.post<{ success: boolean; token: string }>(`/businesses/${merchantId}/reactivate`, {});
+      if (res?.token) {
+        localStorage.setItem('yookie_auth_token', res.token);
+        try {
+          const stored = JSON.parse(localStorage.getItem('yookie_auth_user') || '{}');
+          stored.businessId = merchantId;
+          localStorage.setItem('yookie_auth_user', JSON.stringify(stored));
+          useAuthStore.setState(s => ({ user: s.user ? { ...s.user, businessId: merchantId } : s.user }));
+        } catch { /* noop */ }
+      }
+      setIsActive(true);
+      setToast({ msg: 'Заведение восстановлено', key: Date.now() });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка восстановления');
+    } finally {
+      setReactivating(false);
+    }
+  };
 
   const uploadImage = async (file: File, variant: 'cover' | 'avatar' = 'cover'): Promise<string> => {
     const fd = new FormData();
@@ -1124,6 +1150,25 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
 
   return (
     <ProLayout title={t('pro.settings.profileTitle')}>
+      {!isActive && (
+        <div className={styles.frozenBanner}>
+          <div className={styles.frozenBannerBody}>
+            <span className={styles.frozenIcon}>🔒</span>
+            <div>
+              <p className={styles.frozenTitle}>Заведение скрыто</p>
+              <p className={styles.frozenSub}>Клиенты не видят вас в ленте и поиске</p>
+            </div>
+          </div>
+          <button
+            className={styles.reactivateBtn}
+            onClick={handleReactivate}
+            disabled={reactivating}
+          >
+            {reactivating ? '...' : 'Разморозить'}
+          </button>
+        </div>
+      )}
+
       {showMapPicker && (
         <MapPickerOverlay
           initialCenter={mapCenter}
@@ -1258,11 +1303,11 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <button className={styles.saveBtn} onClick={handleSave} disabled={saving || uploading}>
+      <button className={styles.saveBtn} onClick={handleSave} disabled={saving || uploading || !isActive}>
         {saving ? t('pro.settings.saving') : t('pro.settings.save')}
       </button>
 
-      <button className={styles.deleteBtn} onClick={handleDelete} disabled={saving}>
+      <button className={styles.deleteBtn} onClick={handleDelete} disabled={saving || !isActive}>
         {t('pro.settings.deleteBtn')}
       </button>
 

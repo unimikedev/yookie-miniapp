@@ -47,7 +47,13 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+}
+
+.cardWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .sectionHead {
