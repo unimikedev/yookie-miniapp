@@ -871,6 +871,20 @@
 
 /* Legacy setup aliases (keep old names pointing to new card) */
 .setupCard { display: none; }
+
+.setupItemBtn {
+  padding: 4px 10px;
+  border: 1px solid var(--color-accent);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-accent);
+  font-family: var(--font-family);
+  font-size: var(--text-caption-xs-size);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .publishBtn {
   width: 100%;
   padding: 13px;

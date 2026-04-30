@@ -7,11 +7,54 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { useBusinessExit } from '@/pro/hooks/useBusinessExit';
 import styles from './MerchantPreviewPage.module.css';
 
+function SetupStatusCard({
+  hasStaff, staffCount, hasServices, servicesCount, isPublished, onGoStaff, onGoServices,
+}: {
+  hasStaff: boolean; staffCount: number;
+  hasServices: boolean; servicesCount: number;
+  isPublished: boolean;
+  onGoStaff: () => void; onGoServices: () => void;
+}) {
+  const allDone = hasStaff && hasServices && isPublished;
+  return (
+    <div style={{
+      margin: '0 16px 16px',
+      padding: '16px',
+      borderRadius: 16,
+      background: allDone ? 'rgba(52,211,153,0.07)' : 'rgba(251,191,36,0.06)',
+      border: `1.5px solid ${allDone ? '#34D399' : 'rgba(251,191,36,0.45)'}`,
+    }}>
+      <p style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 700, color: 'var(--color-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        {allDone ? '✅ Заведение готово к работе' : '⚙️ Статус профиля'}
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {[
+          { done: hasStaff,    icon: hasStaff ? '✅' : '👤', label: hasStaff ? `Мастеров: ${staffCount}` : 'Мастера не добавлены',        action: !hasStaff ? onGoStaff : undefined,    btn: 'Добавить' },
+          { done: hasServices, icon: hasServices ? '✅' : '✂️', label: hasServices ? `Услуг: ${servicesCount}` : 'Услуги не добавлены', action: !hasServices ? onGoServices : undefined, btn: 'Добавить' },
+          { done: isPublished, icon: isPublished ? '✅' : '🚀', label: isPublished ? 'Профиль опубликован' : 'Не опубликован — не виден клиентам', action: undefined, btn: '' },
+        ].map((row, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 10, background: 'var(--color-bg)', opacity: row.done ? 0.7 : 1 }}>
+            <span style={{ fontSize: 15, flexShrink: 0 }}>{row.icon}</span>
+            <span style={{ flex: 1, fontSize: 13, color: 'var(--color-text)', fontWeight: row.done ? 400 : 500 }}>{row.label}</span>
+            {row.action && (
+              <button onClick={row.action} style={{
+                padding: '4px 10px', border: '1px solid var(--color-accent)', borderRadius: 8,
+                background: 'transparent', color: 'var(--color-accent)',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+              }}>{row.btn} →</button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function MerchantPreviewPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { merchantId, role } = useMerchantStore();
-  const { business, isLoading, error } = useBusiness(merchantId!);
+  const { business, masters, services, isLoading, error } = useBusiness(merchantId!);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -153,24 +196,16 @@ export default function MerchantPreviewPage() {
           )}
         </div>
 
-        {/* Status banner */}
-        {isPublished ? (
-          <div className={styles.publishedBanner}>
-            <span>✅</span>
-            <div className={styles.warningText}>
-              <strong>Профиль опубликован</strong>
-              <p>Клиенты могут найти и записаться к вам.</p>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.warningBanner}>
-            <span className={styles.warningIcon}>⚠️</span>
-            <div className={styles.warningText}>
-              <strong>Профиль не опубликован</strong>
-              <p>Клиенты пока не видят ваш профиль. Опубликуйте, когда будете готовы.</p>
-            </div>
-          </div>
-        )}
+        {/* Setup status card */}
+        <SetupStatusCard
+          hasStaff={masters.filter(m => m.user_accounts?.role !== 'owner' && m.is_active).length > 0}
+          staffCount={masters.filter(m => m.user_accounts?.role !== 'owner' && m.is_active).length}
+          hasServices={services.length > 0}
+          servicesCount={services.length}
+          isPublished={isPublished}
+          onGoStaff={() => navigate('/pro/staff')}
+          onGoServices={() => navigate('/pro/services')}
+        />
       </div>
 
       {/* Action buttons */}

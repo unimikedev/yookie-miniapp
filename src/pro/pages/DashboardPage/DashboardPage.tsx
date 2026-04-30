@@ -268,8 +268,11 @@ export default function DashboardPage() {
   );
 
   // Onboarding card phase
-  const onboardPhase: 'staff' | 'service' | 'publish' | 'pending' | 'done' =
-    isPublished ? 'done'
+  // 'done' requires published + staff + services — a business that is_active=true but missing
+  // masters/services is technically invisible in the catalog (catalog filters them out)
+  const onboardPhase: 'staff' | 'service' | 'publish' | 'pending' | 'published_incomplete' | 'done' =
+    isPublished && hasStaff && hasServices ? 'done'
+    : isPublished && (!hasStaff || !hasServices) ? 'published_incomplete'
     : pendingMod ? 'pending'
     : !hasStaff ? 'staff'
     : !hasServices ? 'service'
@@ -289,6 +292,48 @@ export default function DashboardPage() {
             <p className={styles.publishedTitle}>Профиль опубликован!</p>
             <p className={styles.publishedSub}>Клиенты могут вас найти в Yookie</p>
           </div>
+        </div>
+      )}
+
+      {onboardPhase === 'published_incomplete' && (
+        <div className={styles.onboardCard} style={{ borderColor: 'rgba(251,191,36,0.6)', background: 'rgba(251,191,36,0.04)' }}>
+          <div className={styles.onboardProgress}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+              ⚠️ Профиль не виден клиентам
+            </span>
+          </div>
+          <p className={styles.onboardTitle}>Добавьте мастеров и услуги</p>
+          <p className={styles.onboardDesc}>Профиль опубликован, но каталог скрывает заведения без мастеров или услуг. Добавьте оба — и клиенты вас найдут.</p>
+          <div className={styles.onboardChecklist}>
+            <div className={`${styles.onboardCheckRow} ${hasStaff ? styles.onboardCheckRowDone : styles.onboardCheckRowActive}`}>
+              <span className={styles.onboardCheckIcon}>{hasStaff ? '✅' : '👤'}</span>
+              <span className={`${styles.onboardCheckLabel} ${hasStaff ? styles.onboardCheckLabelDone : ''}`}>
+                {hasStaff ? `Мастер${staff.length > 1 ? 'а' : ''} добавлен${staff.length > 1 ? 'ы' : ''} (${staff.length})` : 'Добавить мастера'}
+              </span>
+              {!hasStaff && (
+                <button className={styles.setupItemBtn} onClick={() => navigate('/pro/staff')}>→</button>
+              )}
+            </div>
+            <div className={`${styles.onboardCheckRow} ${hasServices ? styles.onboardCheckRowDone : styles.onboardCheckRowActive}`}>
+              <span className={styles.onboardCheckIcon}>{hasServices ? '✅' : '✂️'}</span>
+              <span className={`${styles.onboardCheckLabel} ${hasServices ? styles.onboardCheckLabelDone : ''}`}>
+                {hasServices ? `Услуг добавлено: ${services.length}` : 'Добавить услугу'}
+              </span>
+              {!hasServices && (
+                <button className={styles.setupItemBtn} onClick={() => navigate('/pro/services')}>→</button>
+              )}
+            </div>
+          </div>
+          {!hasStaff && (
+            <button className={styles.onboardCTA} onClick={() => navigate('/pro/staff')}>
+              Добавить мастера →
+            </button>
+          )}
+          {hasStaff && !hasServices && (
+            <button className={styles.onboardCTA} onClick={() => navigate('/pro/services')}>
+              Добавить услугу →
+            </button>
+          )}
         </div>
       )}
 
