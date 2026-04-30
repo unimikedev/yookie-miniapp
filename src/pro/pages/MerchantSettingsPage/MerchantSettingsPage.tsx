@@ -40,7 +40,7 @@ interface PendingStaff {
 /* ── Map Picker Overlay ─────────────────────────────────────────── */
 interface MapPickerProps {
   initialCenter: [number, number];
-  onConfirm: (lat: number, lng: number) => void;
+  onConfirm: (lat: number, lng: number, address: string) => void;
   onClose: () => void;
 }
 
@@ -70,10 +70,15 @@ function MapPickerOverlay({ initialCenter, onConfirm, onClose }: MapPickerProps)
     };
   }, []);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!ymapRef.current) return;
     const [lat, lng] = ymapRef.current.getCenter();
-    onConfirm(lat, lng);
+    let resolvedAddress = '';
+    try {
+      const result = await window.ymaps.geocode([lat, lng], { results: 1 });
+      resolvedAddress = result.geoObjects.get(0)?.getAddressLine?.() ?? '';
+    } catch { /* reverse geocoding not critical */ }
+    onConfirm(lat, lng, resolvedAddress);
   };
 
   return (
@@ -336,8 +341,16 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
 
   // Step 2 — basic info
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<CategoryEnum>('other');
+  const [categories, setCategories] = useState<CategoryEnum[]>([]);
   const [description, setDescription] = useState('');
+
+  const toggleCategory = (cat: CategoryEnum) => {
+    setCategories(prev => {
+      if (prev.includes(cat)) return prev.filter(c => c !== cat);
+      if (prev.length >= 3) return prev;
+      return [...prev, cat];
+    });
+  };
 
   // Step 2 — location & contacts
   const [city, setCity] = useState('Tashkent');
@@ -464,9 +477,11 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
     setSaving(true);
     setError(null);
     try {
+      const resolvedCategories = categories.length > 0 ? categories : ['other' as CategoryEnum];
       const body: Record<string, unknown> = {
         name: name.trim(),
-        category,
+        category: resolvedCategories[0],
+        categories: resolvedCategories,
         provider_type: providerType,
         description: description.trim() || undefined,
         city,
@@ -546,7 +561,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
       {showMapPicker && (
         <MapPickerOverlay
           initialCenter={mapCenter}
-          onConfirm={(lt, ln) => { setLat(lt); setLng(ln); setShowMapPicker(false); }}
+          onConfirm={(lt, ln, addr) => { setLat(lt); setLng(ln); if (addr) setAddress(addr); setShowMapPicker(false); }}
           onClose={() => setShowMapPicker(false)}
         />
       )}
@@ -627,16 +642,32 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
             </div>
 
             <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>{t('pro.onboarding.wizardCategoryLabel')} <span className={styles.required}>*</span></label>
-              <select
-                className={styles.fieldInput}
-                value={category}
-                onChange={e => setCategory(e.target.value as CategoryEnum)}
-              >
-                {CATEGORY_VALUES.map(v => (
-                  <option key={v} value={v}>{t(`categories.${v}`)}</option>
-                ))}
-              </select>
+              <label className={styles.fieldLabel}>
+                {t('pro.onboarding.wizardCategoryLabel')} <span className={styles.required}>*</span>
+                <span className={styles.fieldHint} style={{ marginLeft: 6, fontWeight: 400 }}>{t('pro.onboarding.wizardCategoryHint', 'до 3 категорий')}</span>
+              </label>
+              <div className={styles.categoryChips}>
+                {CATEGORY_VALUES.map(v => {
+                  const selected = categories.includes(v);
+                  const disabled = !selected && categories.length >= 3;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      className={`${styles.categoryChip} ${selected ? styles.categoryChipActive : ''} ${disabled ? styles.categoryChipDisabled : ''}`}
+                      onClick={() => toggleCategory(v)}
+                      disabled={disabled}
+                    >
+                      {t(`categories.${v}`)}
+                    </button>
+                  );
+                })}
+              </div>
+              {categories.length === 0 && (
+                <p className={styles.fieldHint} style={{ color: 'var(--color-error, #e53e3e)', marginTop: 4 }}>
+                  {t('pro.onboarding.wizardCategoryRequired', 'Выберите хотя бы одну категорию')}
+                </p>
+              )}
             </div>
 
             <div className={styles.fieldGroup}>
@@ -934,13 +965,6 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         >
           {saving ? t('pro.onboarding.wizardCreating') : step < TOTAL_STEPS ? t('pro.onboarding.wizardNextBtn') : t('pro.onboarding.wizardCreateBtn')}
         </button>
-        <button
-          className={styles.wizardSkipBtn}
-          onClick={handleCreate}
-          disabled={saving || photoUploading}
-        >
-          {step <= 2 ? t('pro.onboarding.wizardSkipNow') : t('pro.onboarding.wizardSkip')}
-        </button>
       </div>
     </div>
   );
@@ -1172,7 +1196,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
       {showMapPicker && (
         <MapPickerOverlay
           initialCenter={mapCenter}
-          onConfirm={(lt, ln) => { setLat(lt); setLng(ln); setShowMapPicker(false); }}
+          onConfirm={(lt, ln, addr) => { setLat(lt); setLng(ln); if (addr) setAddress(addr); setShowMapPicker(false); }}
           onClose={() => setShowMapPicker(false)}
         />
       )}

@@ -484,6 +484,38 @@
   min-height: 72px;
 }
 
+/* ── Category chips ──────────────────────────────────────────── */
+
+.categoryChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryChip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.categoryChipActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.categoryChipDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* ── Address row with map pin button ─────────────────────────── */
 
 .addressRow {
