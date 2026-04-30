@@ -7,6 +7,7 @@
   justify-content: center;
   pointer-events: none;
   z-index: 100;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .pill {
@@ -35,7 +36,8 @@
   border-radius: 20px;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.18s ease, color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tabActive {

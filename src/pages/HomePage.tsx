@@ -523,7 +523,26 @@ export default function HomePage() {
   )
 
   if (!filteredData && !effectiveVisitedLoading) {
-    return <div className={styles.page}><p>Loading...</p></div>
+    return (
+      <div className={styles.page}>
+        <div className={styles.gradientBlock} style={{ height: 180, pointerEvents: 'none' }} />
+        <div style={{ padding: '0 16px', marginTop: -36 }}>
+          <Skeleton variant="rect" height={120} width="100%" />
+          <div style={{ height: 16 }} />
+          <Skeleton variant="text" height={20} width="40%" />
+          <div style={{ height: 12 }} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[1,2,3,4].map(i => <Skeleton key={i} variant="rect" height={80} width={80} />)}
+          </div>
+          <div style={{ height: 20 }} />
+          <Skeleton variant="text" height={20} width="50%" />
+          <div style={{ height: 12 }} />
+          <Skeleton variant="rect" height={200} width="100%" />
+          <div style={{ height: 12 }} />
+          <Skeleton variant="rect" height={200} width="100%" />
+        </div>
+      </div>
+    )
   }
 
   const fd = filteredData!

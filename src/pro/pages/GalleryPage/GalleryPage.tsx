@@ -33,6 +33,7 @@ export default function GalleryPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [upload, setUpload] = useState<UploadState | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
 
   const salonInputRef = useRef<HTMLInputElement>(null)
   const portfolioInputRef = useRef<HTMLInputElement>(null)
@@ -55,16 +56,20 @@ export default function GalleryPage() {
   const portfolioPhotos = photos.filter(p => p.type === 'portfolio')
 
   const handleFileSelect = (type: 'salon' | 'portfolio') => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files ?? [])
+    if (files.length === 0) return
     e.target.value = ''
 
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+    const oversized = files.find(f => f.size > MAX_FILE_MB * 1024 * 1024)
+    if (oversized) {
       setError(`Файл слишком большой. Максимум ${MAX_FILE_MB} МБ`)
       return
     }
     setError(null)
+    // Show preview for first file; rest queued via pendingFiles
+    const file = files[0]
     const preview = URL.createObjectURL(file)
+    setPendingFiles(files.slice(1))
     setUpload({ preview, file, type, master_id: '' })
   }
 
@@ -93,7 +98,15 @@ export default function GalleryPage() {
       const json = await res.json() as { data: Photo }
       setPhotos(prev => [...prev, json.data])
       URL.revokeObjectURL(upload.preview)
-      setUpload(null)
+
+      // If there are more files queued, open next one automatically
+      if (pendingFiles.length > 0) {
+        const [next, ...rest] = pendingFiles
+        setPendingFiles(rest)
+        setUpload({ preview: URL.createObjectURL(next), file: next, type: upload.type, master_id: upload.master_id })
+      } else {
+        setUpload(null)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось загрузить фото')
     } finally {
@@ -103,6 +116,8 @@ export default function GalleryPage() {
 
   const handleUploadCancel = () => {
     if (upload) URL.revokeObjectURL(upload.preview)
+    pendingFiles.forEach(f => URL.revokeObjectURL(URL.createObjectURL(f)))
+    setPendingFiles([])
     setUpload(null)
     setError(null)
   }
@@ -138,6 +153,7 @@ export default function GalleryPage() {
               <div className={styles.uploadMeta}>
                 <p className={styles.uploadLabel}>
                   {upload.type === 'salon' ? 'Фото салона' : 'Портфолио'}
+                  {pendingFiles.length > 0 && <span style={{ color: 'var(--color-text-muted)', marginLeft: 6 }}>+{pendingFiles.length} ещё</span>}
                 </p>
                 {upload.type === 'portfolio' && masters.length > 0 && (
                   <select
@@ -207,6 +223,7 @@ export default function GalleryPage() {
                 ref={salonInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic"
+                multiple
                 className={styles.hiddenInput}
                 onChange={handleFileSelect('salon')}
               />
@@ -267,6 +284,7 @@ export default function GalleryPage() {
                 ref={portfolioInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic"
+                multiple
                 className={styles.hiddenInput}
                 onChange={handleFileSelect('portfolio')}
               />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { patchBusiness } from '@/pro/api';
 import { useBusiness } from '@/hooks/useBusiness';
@@ -7,12 +7,9 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { useBusinessExit } from '@/pro/hooks/useBusinessExit';
 import styles from './MerchantPreviewPage.module.css';
 
-/**
- * #18 Preview Mode - Как видят клиенты профиль мерчанта
- * Позволяет мерчанту увидеть свой профиль глазами клиента перед публикацией
- */
 export default function MerchantPreviewPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { merchantId, role } = useMerchantStore();
   const { business, isLoading, error } = useBusiness(merchantId!);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
@@ -41,6 +38,8 @@ export default function MerchantPreviewPage() {
     }
   };
 
+  const fromWizard = searchParams.get('from') === 'wizard';
+
   if (!merchantId) {
     return <LoadingState emptyTitle="Бизнес не найден" emptyDescription="Сначала создайте бизнес" hasData={false} />;
   }
@@ -59,13 +58,19 @@ export default function MerchantPreviewPage() {
     <div className={styles.preview}>
       {/* Header with close button */}
       <div className={styles.previewHeader}>
-        <button className={styles.closeBtn} onClick={() => navigate('/pro/settings')}>
+        <button className={styles.closeBtn} onClick={() => navigate(fromWizard ? '/pro/settings' : -1 as any)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className={styles.previewTitle}>Предпросмотр</span>
-        <div className={styles.placeholder} />
+        <span className={styles.previewTitle}>Как видят клиенты</span>
+        <button
+          className={styles.viewRealBtn}
+          onClick={() => navigate(`/business/${merchantId}`)}
+          title="Открыть страницу клиента"
+        >
+          ↗
+        </button>
       </div>
 
       {/* Cover photo */}

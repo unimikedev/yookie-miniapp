@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
-import { listBookings, listPendingBookings, listStaff, updateBookingStatus, listActivity, patchBusiness } from '@/pro/api';
+import { listBookings, listPendingBookings, listStaff, listServices, updateBookingStatus, listActivity, patchBusiness } from '@/pro/api';
 import type { ActivityEvent } from '@/pro/api';
+import type { Service } from '@/lib/api/types';
+import { api } from '@/lib/api/client';
 import { subscribe, startPolling } from '@/pro/realtime';
 import type { Booking, BookingStatus, Master } from '@/lib/api/types';
 import { BottomSheet } from '@/components/ui/BottomSheet';
@@ -43,6 +45,9 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [staff, setStaff] = useState<Master[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [businessActive, setBusinessActive] = useState<boolean | null>(null);
+  const [publishing, setPublishing] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -75,6 +80,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!merchantId) return;
     listStaff(merchantId).then(setStaff).catch(() => {});
+    listServices(merchantId).then(setServices).catch(() => {});
+    api.get<{ is_active: boolean }>(`/businesses/${merchantId}`)
+      .then(b => { if (b) setBusinessActive(b.is_active); })
+      .catch(() => {});
   }, [merchantId]);
 
   const loadPending = useCallback(() => {
@@ -151,6 +160,25 @@ export default function DashboardPage() {
       setActionLoading(false);
     }
   };
+
+  const handlePublish = async () => {
+    if (!merchantId) return;
+    setPublishing(true);
+    try {
+      await patchBusiness(merchantId, { is_active: true });
+      setBusinessActive(true);
+      showToast(t('pro.dashboard.published', 'Профиль опубликован!'));
+    } catch {
+      showToast(t('pro.dashboard.publishError', 'Не удалось опубликовать'));
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const hasStaff = staff.length > 0;
+  const hasServices = services.length > 0;
+  const isReadyToPublish = hasStaff && hasServices;
+  const isPublished = businessActive === true;
 
   const staffMap = new Map(staff.map(s => [s.id, s.name]));
 
@@ -289,12 +317,53 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ── Quick links ── */}
-      <section className={styles.links}>
-        <LinkRow label={t('pro.more.services')}      onClick={() => navigate('/pro/services')} />
-        <LinkRow label={t('pro.more.staff')}         onClick={() => navigate('/pro/staff')} />
-        <LinkRow label={t('pro.clients.title')}      onClick={() => navigate('/pro/clients')} />
-        <LinkRow label={t('pro.more.profileSettings')} onClick={() => navigate('/pro/settings')} />
+      {/* ── Setup CTA (when not ready to publish) ── */}
+      {!isPublished && businessActive !== null && (
+        <section className={styles.setupCard}>
+          <h3 className={styles.setupTitle}>
+            {isReadyToPublish ? '🚀 ' + t('pro.dashboard.readyToPublish', 'Готово к публикации!') : '📋 ' + t('pro.dashboard.setupTitle', 'Настройте профиль')}
+          </h3>
+          {!isReadyToPublish && (
+            <div className={styles.setupChecklist}>
+              <div className={`${styles.setupItem} ${hasStaff ? styles.setupItemDone : ''}`}>
+                <span className={styles.setupItemIcon}>{hasStaff ? '✅' : '⬜'}</span>
+                <span className={styles.setupItemLabel}>{t('pro.dashboard.setupAddStaff', 'Добавьте мастера')}</span>
+                {!hasStaff && (
+                  <button className={styles.setupItemBtn} onClick={() => navigate('/pro/staff')}>
+                    {t('common.add', 'Добавить')} →
+                  </button>
+                )}
+              </div>
+              <div className={`${styles.setupItem} ${hasServices ? styles.setupItemDone : ''}`}>
+                <span className={styles.setupItemIcon}>{hasServices ? '✅' : '⬜'}</span>
+                <span className={styles.setupItemLabel}>{t('pro.dashboard.setupAddService', 'Добавьте услугу')}</span>
+                {!hasServices && (
+                  <button className={styles.setupItemBtn} onClick={() => navigate('/pro/services')}>
+                    {t('common.add', 'Добавить')} →
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          {isReadyToPublish && (
+            <p className={styles.setupDesc}>{t('pro.dashboard.readyDesc', 'Мастера и услуги добавлены. Опубликуйте профиль — клиенты смогут вас найти.')}</p>
+          )}
+          <button
+            className={styles.publishBtn}
+            onClick={handlePublish}
+            disabled={!isReadyToPublish || publishing}
+          >
+            {publishing ? '...' : t('pro.dashboard.publishBtn', 'Опубликовать')}
+          </button>
+        </section>
+      )}
+
+      {/* ── Quick actions ── */}
+      <section className={styles.quickActions}>
+        <QuickAction icon="💆" label={t('pro.more.services')} onClick={() => navigate('/pro/services')} />
+        <QuickAction icon="👤" label={t('pro.more.staff')} onClick={() => navigate('/pro/staff')} />
+        <QuickAction icon="👥" label={t('pro.clients.title')} onClick={() => navigate('/pro/clients')} />
+        <QuickAction icon="⚙️" label={t('pro.more.profileSettings')} onClick={() => navigate('/pro/settings')} />
       </section>
 
       {toast && (
@@ -463,11 +532,11 @@ function relativeTime(iso: string, t: (key: string, opts?: Record<string, unknow
   return d === 1 ? t('pro.dashboard.yesterday') : t('pro.dashboard.daysAgo', { d });
 }
 
-function LinkRow({ label, onClick }: { label: string; onClick: () => void }) {
+function QuickAction({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
   return (
-    <button className={styles.linkRow} onClick={onClick}>
-      <span>{label}</span>
-      <span className={styles.chev}>›</span>
+    <button className={styles.quickAction} onClick={onClick}>
+      <span className={styles.quickActionIcon}>{icon}</span>
+      <span className={styles.quickActionLabel}>{label}</span>
     </button>
   );
 }

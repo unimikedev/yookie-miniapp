@@ -100,6 +100,7 @@ export function ProRouter() {
       <Route path="settings" element={<MerchantSettingsPage />} />
       <Route path="more" element={<RequireOwner><MorePage /></RequireOwner>} />
       <Route path="my-profile" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
+      <Route path="preview" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
       <Route path="gallery" element={<RequireOwner><GalleryPage /></RequireOwner>} />
       <Route path="*" element={<Navigate to="/pro" replace />} />
     </Routes>

@@ -1101,6 +1101,29 @@
   background: rgba(0, 0, 0, 0.02);
 }
 
+/* ── Wizard progress summary (step 4) ─── */
+.wizardProgressSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.wizardSummaryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-body-size);
+  color: var(--color-text-secondary);
+}
+
+.wizardSummaryDone {
+  color: var(--color-text);
+}
+
 /* ── Map picker overlay ───────────────────────────────────────── */
 
 .mapPickerOverlay {

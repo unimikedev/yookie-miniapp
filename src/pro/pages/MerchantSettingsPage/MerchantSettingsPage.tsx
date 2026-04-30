@@ -8,7 +8,6 @@ import { upsertStaff, getInviteInfo, acceptInvite } from '@/pro/api';
 import { api } from '@/lib/api/client';
 import { UZBEKISTAN_CITIES } from '@/stores/cityStore';
 import { formatPhoneMask } from '@/lib/utils/phone';
-import { useMerchantProfileValidation, getOnboardingSteps, type OnboardingStep } from '@/hooks/useMerchantProfileValidation';
 import type { Business, CategoryEnum } from '@/lib/api/types';
 import { Toast } from '@/components/ui/Toast';
 import styles from './MerchantSettingsPage.module.css';
@@ -328,21 +327,27 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
   const { t } = useTranslation();
   const { setMerchantId, setRole, setMasterId } = useMerchantStore();
 
-  const TOTAL_STEPS = 4;
-  const [step, setStep] = useState(1);
-  const [createdBusinessId, setCreatedBusinessId] = useState<string | null>(null);
+  const WIZARD_STORAGE_KEY = 'yookie_wizard_state';
 
-  // Use validation hook after business is created
-  const { isValidated, validationErrors, completionPercentage, isReadyForB2C } = useMerchantProfileValidation(createdBusinessId);
-  const onboardingSteps = getOnboardingSteps(createdBusinessId);
+  const loadWizardState = () => {
+    try {
+      const raw = sessionStorage.getItem(WIZARD_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  };
+
+  const saved = loadWizardState();
+
+  const TOTAL_STEPS = 4;
+  const [step, setStep] = useState(() => saved?.step ?? 1);
 
   // Step 1 — provider type
-  const [providerType, setProviderType] = useState<'individual' | 'business'>('individual');
+  const [providerType, setProviderType] = useState<'individual' | 'business'>(saved?.providerType ?? 'individual');
 
   // Step 2 — basic info
-  const [name, setName] = useState('');
-  const [categories, setCategories] = useState<CategoryEnum[]>([]);
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState(saved?.name ?? '');
+  const [categories, setCategories] = useState<CategoryEnum[]>(saved?.categories ?? []);
+  const [description, setDescription] = useState(saved?.description ?? '');
 
   const toggleCategory = (cat: CategoryEnum) => {
     setCategories(prev => {
@@ -353,15 +358,15 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
   };
 
   // Step 2 — location & contacts
-  const [city, setCity] = useState('Tashkent');
-  const [address, setAddress] = useState('');
-  const [lat, setLat] = useState<number | null>(null);
-  const [lng, setLng] = useState<number | null>(null);
-  const [phone, setPhone] = useState('+998');
-  const [instagram, setInstagram] = useState('');
-  const [instagramPostUrls, setInstagramPostUrls] = useState<string[]>([]);
+  const [city, setCity] = useState(saved?.city ?? 'Tashkent');
+  const [address, setAddress] = useState(saved?.address ?? '');
+  const [lat, setLat] = useState<number | null>(saved?.lat ?? null);
+  const [lng, setLng] = useState<number | null>(saved?.lng ?? null);
+  const [phone, setPhone] = useState(saved?.phone ?? '+998');
+  const [instagram, setInstagram] = useState(saved?.instagram ?? '');
+  const [instagramPostUrls, setInstagramPostUrls] = useState<string[]>(saved?.instagramPostUrls ?? []);
   const [instagramPostInput, setInstagramPostInput] = useState('');
-  const [telegramUsername, setTelegramUsername] = useState('');
+  const [telegramUsername, setTelegramUsername] = useState(saved?.telegramUsername ?? '');
   const [showMapPicker, setShowMapPicker] = useState(false);
 
   // Step 3 — photos & staff
@@ -376,10 +381,21 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createdBusinessId, setCreatedBusinessId] = useState<string | null>(null);
   const creatingRef = useRef(false);
 
   const photoInputRef = useRef<HTMLInputElement>(null);
   const staffPhotoInputRef = useRef<HTMLInputElement>(null);
+
+  // Save wizard progress on every change
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify({
+        step, providerType, name, categories, description,
+        city, address, lat, lng, phone, instagram, instagramPostUrls, telegramUsername,
+      }));
+    } catch { /* noop */ }
+  }, [step, providerType, name, categories, description, city, address, lat, lng, phone, instagram, instagramPostUrls, telegramUsername]);
 
   const mapCenter: [number, number] = lat && lng
     ? [lat, lng]
@@ -404,13 +420,13 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
   };
 
   const handlePhotoAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
     setPhotoUploading(true);
     setError(null);
     try {
-      const url = await uploadImage(file);
-      setPhotoUrls(prev => [...prev, url]);
+      const urls = await Promise.all(files.map(f => uploadImage(f)));
+      setPhotoUrls(prev => [...prev, ...urls]);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('pro.settings.uploadError'));
     } finally {
@@ -451,28 +467,19 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
     if (step === 2) {
       if (!name.trim()) { setError(t('pro.onboarding.wizardErrName')); return; }
     }
-    setStep(s => s + 1);
+    setStep((s: number) => s + 1);
   };
 
   const handleBack = () => {
     if (step === 1) { onBack ? onBack() : navigate(-1); return; }
-    setStep(s => s - 1);
+    setStep((s: number) => s - 1);
     setError(null);
   };
 
   const handleCreate = async () => {
     if (creatingRef.current) return;
     if (!name.trim()) { setStep(2); setError(t('pro.onboarding.wizardErrName2')); return; }
-    
-    // Check validation before allowing business creation
-    // Critical fields: name (checked above), services, staff, schedule
-    // Photo is optional
-    const hasCriticalIssues = validationErrors.filter(e => !e.includes('фото')).length > 0;
-    if (hasCriticalIssues && createdBusinessId) {
-      setError(t('pro.onboarding.wizardErrCritical'));
-      return;
-    }
-    
+
     creatingRef.current = true;
     setSaving(true);
     setError(null);
@@ -547,6 +554,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         }
       }
 
+      sessionStorage.removeItem(WIZARD_STORAGE_KEY);
       navigate('/pro');
     } catch (err) {
       setError(err instanceof Error ? err.message : t('pro.onboarding.wizardErrCreate'));
@@ -798,30 +806,23 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
               <p className={styles.stepSubtitle}>{t('pro.onboarding.wizardStep4Subtitle')}</p>
             </div>
 
-            {/* Onboarding checklist */}
-            <div className={styles.onboardingChecklist}>
-              <div className={styles.checklistHeader}>
-                <h3 className={styles.checklistTitle}>{t('pro.onboarding.wizardLaunchReadiness')}</h3>
-                <span className={styles.checklistProgress}>{completionPercentage}%</span>
+            {/* Progress summary */}
+            <div className={styles.wizardProgressSummary}>
+              <div className={`${styles.wizardSummaryItem} ${name.trim() ? styles.wizardSummaryDone : ''}`}>
+                <span>{name.trim() ? '✅' : '⬜'}</span>
+                <span>{t('pro.onboarding.wizardNameLabel')}: {name.trim() || '—'}</span>
               </div>
-              {onboardingSteps.map((step) => (
-                <div
-                  key={step.id}
-                  className={`${styles.checklistItem} ${step.isCompleted ? styles.checklistItemCompleted : ''}`}
-                >
-                  <div className={styles.checklistIcon}>
-                    {step.isCompleted ? '✅' : '⬜'}
-                  </div>
-                  <div className={styles.checklistContent}>
-                    <span className={styles.checklistItemTitle}>{step.title}</span>
-                    <span className={styles.checklistItemDesc}>{step.description}</span>
-                  </div>
+              {categories.length > 0 && (
+                <div className={`${styles.wizardSummaryItem} ${styles.wizardSummaryDone}`}>
+                  <span>✅</span>
+                  <span>{categories.map(c => t(`categories.${c}`)).join(', ')}</span>
                 </div>
-              ))}
-              {!isValidated && (
-                <p className={styles.checklistWarning}>
-                  {t('pro.onboarding.wizardLaunchWarning')}
-                </p>
+              )}
+              {(city || address.trim()) && (
+                <div className={`${styles.wizardSummaryItem} ${styles.wizardSummaryDone}`}>
+                  <span>✅</span>
+                  <span>📍 {city}{address.trim() ? `, ${address.trim()}` : ''}</span>
+                </div>
               )}
             </div>
 
@@ -852,6 +853,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
                 ref={photoInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                multiple
                 className={styles.fileInput}
                 onChange={handlePhotoAdd}
               />
@@ -943,15 +945,15 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
       {/* Error */}
       {error && <p className={styles.wizardError}>{error}</p>}
 
-      {/* Preview button on last step */}
-      {step === TOTAL_STEPS && (
+      {/* Preview button on last step (only after business created) */}
+      {step === TOTAL_STEPS && createdBusinessId && (
         <div className={styles.wizardPreviewBtnWrapper}>
           <button
             className={styles.wizardPreviewBtn}
-            onClick={() => navigate('/pro/preview')}
+            onClick={() => navigate(`/business/${createdBusinessId}?from=wizard`)}
             type="button"
           >
-            {t('pro.onboarding.wizardPreviewBtn')}
+            👁 {t('pro.onboarding.wizardPreviewBtn', 'Как видят клиенты')}
           </button>
         </div>
       )}
@@ -1101,13 +1103,13 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
   };
 
   const handlePhotoAdd = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
     setUploading(true);
     setError(null);
     try {
-      const url = await uploadImage(file);
-      setPhotoUrls(prev => [...prev, url]);
+      const urls = await Promise.all(files.map(f => uploadImage(f)));
+      setPhotoUrls(prev => [...prev, ...urls]);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('pro.settings.uploadError'));
     } finally {
@@ -1217,7 +1219,7 @@ function BusinessEditForm({ merchantId }: { merchantId: string }) {
             <span className={styles.photoAddLabel}>{uploading ? t('pro.onboarding.uploadingPhoto') : t('pro.settings.addPhoto')}</span>
           </button>
         </div>
-        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className={styles.fileInput} onChange={handlePhotoAdd} />
+        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className={styles.fileInput} onChange={handlePhotoAdd} />
       </div>
 
       <div className={styles.form}>
