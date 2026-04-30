@@ -55,6 +55,7 @@ export default function AuthPage() {
         text: 'continue_with',
         shape: 'pill',
         logo_alignment: 'center',
+        locale: 'ru',
       })
     }
     if ((window as any).google?.accounts?.id) {
