@@ -240,7 +240,7 @@ export default function BookingsBoardPage() {
         <button className={styles.dateArrow} onClick={prevDay}>‹</button>
         <div className={styles.dateLabelWrap}>
           <span className={styles.dateLabel} style={{ textTransform: 'capitalize' }}>{dateLabel}</span>
-          {!isToday && <button className={styles.todayBtn} onClick={goToday}>{t('common.today')}</button>}
+          {!isToday && <button className={styles.todayBtn} onClick={goToday}>← {t('common.today')}</button>}
         </div>
         <button className={styles.dateArrow} onClick={nextDay}>›</button>
       </div>
@@ -461,7 +461,8 @@ function TimelineView({ hours, staff, bookings, isToday, dragging, dragOverStaff
     return (
       <div className={styles.emptyDay}>
         <span className={styles.emptyDayIcon}>👤</span>
-        <p className={styles.emptyDayText}>{t('pro.bookings.noStaffTimeline')}</p>
+        <p className={styles.emptyDayTitle}>{t('pro.bookings.noStaff', 'Нет мастеров')}</p>
+        <p className={styles.emptyDayText}>{t('pro.bookings.noStaffTimeline', 'Добавьте мастеров в разделе «Персонал», чтобы начать принимать записи')}</p>
       </div>
     );
   }
@@ -562,7 +563,8 @@ function ListView({ bookings, staff, onBookingClick }: { bookings: Booking[]; st
     return (
       <div className={styles.emptyDay}>
         <span className={styles.emptyDayIcon}>📋</span>
-        <p className={styles.emptyDayText}>{t('pro.bookings.noDayBookings')}</p>
+        <p className={styles.emptyDayTitle}>{t('pro.bookings.noDayBookings', 'Нет записей')}</p>
+        <p className={styles.emptyDayText}>{t('pro.bookings.noDayBookingsHint', 'Переключитесь на расписание и нажмите на слот, чтобы добавить запись')}</p>
       </div>
     );
   }

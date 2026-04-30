@@ -525,21 +525,47 @@ export default function HomePage() {
   if (!filteredData && !effectiveVisitedLoading) {
     return (
       <div className={styles.page}>
-        <div className={styles.gradientBlock} style={{ height: 180, pointerEvents: 'none' }} />
-        <div style={{ padding: '0 16px', marginTop: -36 }}>
-          <Skeleton variant="rect" height={120} width="100%" />
-          <div style={{ height: 16 }} />
-          <Skeleton variant="text" height={20} width="40%" />
-          <div style={{ height: 12 }} />
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[1,2,3,4].map(i => <Skeleton key={i} variant="rect" height={80} width={80} />)}
+        <div className={styles.gradientBlock}>
+          <div className={styles.safeAreaSpacer} />
+          <header className={styles.blueHeader}>
+            <div className={styles.logoBlock}>
+              <img src="/logo.svg" alt="Yookie" className={`${styles.logoImage} ${styles.logoWhite}`} />
+              <span className={`${styles.logoSub} ${styles.logoSubWhite}`}>{t('home.subtitle')}</span>
+            </div>
+          </header>
+        </div>
+        <div className={styles.mainCard}>
+          <div className={styles.searchSticky}>
+            <div className={styles.searchBox}>
+              <div className={styles.searchInputWrap} style={{ pointerEvents: 'none' }}>
+                <Skeleton variant="rect" height={44} width="100%" />
+              </div>
+            </div>
           </div>
-          <div style={{ height: 20 }} />
-          <Skeleton variant="text" height={20} width="50%" />
-          <div style={{ height: 12 }} />
-          <Skeleton variant="rect" height={200} width="100%" />
-          <div style={{ height: 12 }} />
-          <Skeleton variant="rect" height={200} width="100%" />
+          <div className={styles.catMarqueeWrap} style={{ pointerEvents: 'none' }}>
+            {[72, 80, 68, 76, 64, 80].map((w, i) => (
+              <Skeleton key={i} variant="rect" height={32} width={w} />
+            ))}
+          </div>
+          <div className={styles.sections}>
+            <div className={styles.sectionInner}>
+              <Skeleton variant="text" height={18} width="40%" />
+              <div style={{ height: 8 }} />
+              <Skeleton variant="rect" height={104} width="100%" />
+            </div>
+            <div className={styles.sectionInner}>
+              <Skeleton variant="text" height={18} width="50%" />
+              <div style={{ height: 8 }} />
+              <Skeleton variant="rect" height={120} width="100%" />
+            </div>
+            <div className={styles.sectionInner}>
+              <Skeleton variant="text" height={18} width="45%" />
+              <div style={{ height: 8 }} />
+              <Skeleton variant="rect" height={200} width="100%" />
+              <div style={{ height: 10 }} />
+              <Skeleton variant="rect" height={200} width="100%" />
+            </div>
+          </div>
         </div>
       </div>
     )

@@ -69,11 +69,15 @@ export default function ClientsPage() {
       <div className={styles.list}>
         {filtered.length === 0 && totalItems > 0 ? (
           <div className={styles.emptyState}>
-            {t('common.notFound')}
+            <span className={styles.emptyIcon}>🔍</span>
+            <p className={styles.emptyTitle}>{t('common.notFound', 'Не найдено')}</p>
+            <p className={styles.emptyDesc}>{t('pro.clients.searchNoMatch', 'Попробуйте другой запрос')}</p>
           </div>
         ) : filtered.length === 0 && totalItems === 0 ? (
           <div className={styles.emptyState}>
-            {t('pro.clients.noClientsDesc')}
+            <span className={styles.emptyIcon}>👥</span>
+            <p className={styles.emptyTitle}>{t('pro.clients.noClients', 'Клиентов пока нет')}</p>
+            <p className={styles.emptyDesc}>{t('pro.clients.noClientsDesc', 'Клиенты появятся здесь после первых записей')}</p>
           </div>
         ) : (
           filtered.map((c) => {

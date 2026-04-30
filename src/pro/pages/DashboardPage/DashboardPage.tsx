@@ -197,7 +197,7 @@ export default function DashboardPage() {
           <span className={styles.dateLabel} style={{ textTransform: 'capitalize' }}>{dateLabel}</span>
           <button className={styles.dateArrow} onClick={nextDay}>›</button>
           {!isToday && (
-            <button className={styles.todayBtn} onClick={goToToday}>{t('pro.dashboard.today')}</button>
+            <button className={styles.todayBtn} onClick={goToToday}>← {t('pro.dashboard.today')}</button>
           )}
         </div>
         <button className={styles.newBookingBtn} onClick={() => navigate('/pro/bookings?new=1')}>
@@ -274,9 +274,11 @@ export default function DashboardPage() {
 
         {sortedBookings.length === 0 ? (
           <div className={styles.emptyDay}>
-            <span>{t('pro.dashboard.noBookingsDesc')}</span>
+            <span className={styles.emptyDayIcon}>📅</span>
+            <p className={styles.emptyDayTitle}>{t('pro.dashboard.noBookings', 'Нет записей')}</p>
+            <p className={styles.emptyDayDesc}>{t('pro.dashboard.noBookingsDesc', 'На этот день пока нет записей')}</p>
             <button className={styles.emptyAddBtn} onClick={() => navigate('/pro/bookings?new=1')}>
-              {t('pro.dashboard.addBooking')} →
+              + {t('pro.dashboard.addBooking', 'Добавить запись')}
             </button>
           </div>
         ) : (

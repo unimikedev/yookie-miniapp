@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import DashboardPage from '@/pro/pages/DashboardPage/DashboardPage';
 import BookingsBoardPage from '@/pro/pages/BookingsBoardPage/BookingsBoardPage';
@@ -11,10 +11,24 @@ import MerchantPreviewPage from '@/pro/pages/MerchantPreviewPage/MerchantPreview
 import MorePage from '@/pro/pages/MorePage/MorePage';
 import BusinessSelectorPage from '@/pro/pages/BusinessSelectorPage/BusinessSelectorPage';
 import GalleryPage from '@/pro/pages/GalleryPage/GalleryPage';
+import { ProBottomNav } from '@/pro/components/ProBottomNav/ProBottomNav';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listMyBusinesses, switchBusiness } from '@/pro/api';
 import { useAuthStore } from '@/stores/authStore';
 import { LoadingState } from '@/components/ui/LoadingState';
+
+const TAB_PATHS = ['/pro', '/pro/bookings', '/pro/clients', '/pro/more', '/pro/schedule', '/pro/my-profile'];
+
+function ProShell() {
+  const location = useLocation();
+  const isTabPage = TAB_PATHS.includes(location.pathname);
+  return (
+    <>
+      <Outlet />
+      {isTabPage && <ProBottomNav />}
+    </>
+  );
+}
 
 function RequireMerchant({ children }: { children: React.ReactNode }) {
   const { merchantId } = useMerchantStore();
@@ -89,20 +103,22 @@ function ProIndex() {
 export function ProRouter() {
   return (
     <Routes>
-      <Route index element={<ProIndex />} />
-      <Route path="select" element={<BusinessSelectorPage />} />
-      <Route path="new-business" element={<MerchantSettingsPage forceNew />} />
-      <Route path="bookings" element={<RequireMerchant><BookingsBoardPage /></RequireMerchant>} />
-      <Route path="schedule" element={<RequireMerchant><SchedulePage /></RequireMerchant>} />
-      <Route path="services" element={<RequireMerchant><ServicesPage /></RequireMerchant>} />
-      <Route path="staff" element={<RequireOwner><StaffPage /></RequireOwner>} />
-      <Route path="clients" element={<RequireOwner><ClientsPage /></RequireOwner>} />
-      <Route path="settings" element={<MerchantSettingsPage />} />
-      <Route path="more" element={<RequireOwner><MorePage /></RequireOwner>} />
-      <Route path="my-profile" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
-      <Route path="preview" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
-      <Route path="gallery" element={<RequireOwner><GalleryPage /></RequireOwner>} />
-      <Route path="*" element={<Navigate to="/pro" replace />} />
+      <Route element={<ProShell />}>
+        <Route index element={<ProIndex />} />
+        <Route path="select" element={<BusinessSelectorPage />} />
+        <Route path="new-business" element={<MerchantSettingsPage forceNew />} />
+        <Route path="bookings" element={<RequireMerchant><BookingsBoardPage /></RequireMerchant>} />
+        <Route path="schedule" element={<RequireMerchant><SchedulePage /></RequireMerchant>} />
+        <Route path="services" element={<RequireMerchant><ServicesPage /></RequireMerchant>} />
+        <Route path="staff" element={<RequireOwner><StaffPage /></RequireOwner>} />
+        <Route path="clients" element={<RequireOwner><ClientsPage /></RequireOwner>} />
+        <Route path="settings" element={<MerchantSettingsPage />} />
+        <Route path="more" element={<RequireOwner><MorePage /></RequireOwner>} />
+        <Route path="my-profile" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
+        <Route path="preview" element={<RequireMerchant><MerchantPreviewPage /></RequireMerchant>} />
+        <Route path="gallery" element={<RequireOwner><GalleryPage /></RequireOwner>} />
+        <Route path="*" element={<Navigate to="/pro" replace />} />
+      </Route>
     </Routes>
   );
 }

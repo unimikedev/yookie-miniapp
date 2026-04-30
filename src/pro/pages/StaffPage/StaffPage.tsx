@@ -375,9 +375,11 @@ export default function StaffPage() {
 
           <div className={styles.list}>
             {virtualMasters.length === 0 && !editing && (
-              <p className={styles.emptyHint}>
-                {t('pro.staff.noMasters')}
-              </p>
+              <div className={styles.emptyState}>
+                <span className={styles.emptyIcon}>💆</span>
+                <p className={styles.emptyTitle}>{t('pro.staff.noMasters', 'Мастеров пока нет')}</p>
+                <p className={styles.emptyDesc}>{t('pro.staff.noMastersDesc', 'Добавьте мастеров — они будут принимать записи от клиентов')}</p>
+              </div>
             )}
             {virtualMasters.map((s) => {
               const link = inviteLinks[s.id];

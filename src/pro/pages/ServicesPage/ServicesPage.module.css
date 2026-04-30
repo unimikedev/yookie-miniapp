@@ -307,7 +307,7 @@
   text-align: center;
 }
 
-.emptyIcon { font-size: 40px; line-height: 1; }
+.emptyIcon { font-size: 52px; line-height: 1; margin-bottom: 4px; }
 
 .emptyTitle {
   font-size: var(--text-body-lg-size);

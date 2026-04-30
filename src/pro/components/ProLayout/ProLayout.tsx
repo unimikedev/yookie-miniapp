@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const TAB_PATHS = ['/pro', '/pro/bookings', '/pro/clients', '/pro/more', '/pro/schedule', '/pro/my-profile'];
 import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { useAuthStore } from '@/stores/authStore';
-import { ProBottomNav } from '@/pro/components/ProBottomNav/ProBottomNav';
 import styles from './ProLayout.module.css';
 
 interface ProLayoutProps {
@@ -87,8 +86,6 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
       <main className={`${styles.main} ${shouldHideNav ? '' : styles.withNav} ${title || actions ? styles.withPageHeader : ''}`}>
         {children}
       </main>
-
-      {!shouldHideNav && <ProBottomNav />}
     </div>
   );
 }

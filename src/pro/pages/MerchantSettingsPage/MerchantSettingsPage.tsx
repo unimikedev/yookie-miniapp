@@ -499,7 +499,7 @@ function BusinessWizard({ onBack }: { onBack?: () => void }) {
         telegram_username: telegramUsername.trim() ? telegramUsername.replace(/^@/, '') : undefined,
         photo_url: photoUrls[0] || undefined,
         photo_urls: photoUrls.length > 0 ? photoUrls : undefined,
-        is_active: true,
+        is_active: false,
         ...(lat !== null && lng !== null ? { lat, lng } : {}),
       };
 
