@@ -525,6 +525,7 @@ export default function HomePage() {
   if (!filteredData && !effectiveVisitedLoading) {
     return (
       <div className={styles.page}>
+        {/* exact same gradient block as real page */}
         <div className={styles.gradientBlock}>
           <div className={styles.safeAreaSpacer} />
           <header className={styles.blueHeader}>
@@ -535,35 +536,53 @@ export default function HomePage() {
           </header>
         </div>
         <div className={styles.mainCard}>
+          {/* searchbar: same wrapper, just filled with skeleton at exact 56px */}
           <div className={styles.searchSticky}>
             <div className={styles.searchBox}>
-              <div className={styles.searchInputWrap} style={{ pointerEvents: 'none' }}>
-                <Skeleton variant="rect" height={44} width="100%" />
-              </div>
+              <Skeleton variant="rect" height={56} width="100%" style={{ borderRadius: 999 }} />
             </div>
           </div>
+          {/* category chips: 6 pills, 58px tall buttons matching real catChipBtn */}
           <div className={styles.catMarqueeWrap} style={{ pointerEvents: 'none' }}>
-            {[72, 80, 68, 76, 64, 80].map((w, i) => (
-              <Skeleton key={i} variant="rect" height={32} width={w} />
+            {[74, 74, 74, 74, 74, 74].map((w, i) => (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                <Skeleton variant="rect" height={58} width={w} style={{ borderRadius: 16 }} />
+                <Skeleton variant="text" height={12} width={50} />
+              </div>
             ))}
           </div>
           <div className={styles.sections}>
+            {/* "Рядом с вами" — NearbyCard homeVertical: photo 4/3 ratio + body ≈ 182px */}
             <div className={styles.sectionInner}>
-              <Skeleton variant="text" height={18} width="40%" />
-              <div style={{ height: 8 }} />
-              <Skeleton variant="rect" height={104} width="100%" />
+              <div style={{ height: 36, padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                <Skeleton variant="text" height={20} width={160} />
+              </div>
+              <div style={{ display: 'flex', gap: 12, padding: '0 16px', overflow: 'hidden' }}>
+                {[1, 2].map(i => (
+                  <Skeleton key={i} variant="rect" height={182} width={168} style={{ borderRadius: 20, flexShrink: 0 }} />
+                ))}
+              </div>
             </div>
+            {/* "Доступные специалисты" — MasterCard nearbyStyle: min-height 80px */}
             <div className={styles.sectionInner}>
-              <Skeleton variant="text" height={18} width="50%" />
-              <div style={{ height: 8 }} />
-              <Skeleton variant="rect" height={120} width="100%" />
+              <div style={{ height: 36, padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                <Skeleton variant="text" height={20} width={200} />
+              </div>
+              <div style={{ display: 'flex', gap: 12, padding: '0 16px', overflow: 'hidden' }}>
+                {[1, 2].map(i => (
+                  <Skeleton key={i} variant="rect" height={80} width="55vw" style={{ borderRadius: 999, flexShrink: 0 }} />
+                ))}
+              </div>
             </div>
+            {/* Popular studio cards — psCard: cover 160px + body ~70px = ~230px */}
             <div className={styles.sectionInner}>
-              <Skeleton variant="text" height={18} width="45%" />
-              <div style={{ height: 8 }} />
-              <Skeleton variant="rect" height={200} width="100%" />
-              <div style={{ height: 10 }} />
-              <Skeleton variant="rect" height={200} width="100%" />
+              <div style={{ height: 36, padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                <Skeleton variant="text" height={20} width={140} />
+              </div>
+              <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <Skeleton variant="rect" height={230} width="100%" style={{ borderRadius: 20 }} />
+                <Skeleton variant="rect" height={230} width="100%" style={{ borderRadius: 20 }} />
+              </div>
             </div>
           </div>
         </div>

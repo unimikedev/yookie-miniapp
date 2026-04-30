@@ -25,7 +25,7 @@ function ProShell() {
   return (
     <>
       <Outlet />
-      {isTabPage && <ProBottomNav />}
+      <ProBottomNav visible={isTabPage} />
     </>
   );
 }

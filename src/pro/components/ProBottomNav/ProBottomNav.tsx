@@ -59,7 +59,7 @@ const staffTabs: Tab[] = [
   { key: 'profile',  labelKey: 'nav.proProfile',     path: '/pro/my-profile',  icon: <IconClients /> },
 ];
 
-export function ProBottomNav() {
+export function ProBottomNav({ visible = true }: { visible?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { role } = useMerchantStore();
@@ -73,7 +73,7 @@ export function ProBottomNav() {
   };
 
   return (
-    <nav className={styles.nav}>
+    <nav className={styles.nav} style={visible ? undefined : { display: 'none' }}>
       <div className={styles.pill}>
         {tabs.map((tab) => {
           const active = isActive(tab.path);

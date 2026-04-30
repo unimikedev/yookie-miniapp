@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
@@ -296,7 +296,9 @@ export default function DashboardPage() {
       {/* ── Activity feed ── */}
       {activity.length > 0 && (
         <section className={styles.activitySection}>
-          <h3 className={styles.sectionTitle}>{t('pro.dashboard.activityTitle')}</h3>
+          <div className={styles.scheduleTitleRow}>
+            <h3 className={styles.sectionTitle}>{t('pro.dashboard.activityTitle')}</h3>
+          </div>
           {activity.slice(0, 5).map((ev) => {
             const info = activityInfo(ev, t);
             return (
@@ -362,10 +364,10 @@ export default function DashboardPage() {
 
       {/* ── Quick actions ── */}
       <section className={styles.quickActions}>
-        <QuickAction icon="💆" label={t('pro.more.services')} onClick={() => navigate('/pro/services')} />
-        <QuickAction icon="👤" label={t('pro.more.staff')} onClick={() => navigate('/pro/staff')} />
-        <QuickAction icon="👥" label={t('pro.clients.title')} onClick={() => navigate('/pro/clients')} />
-        <QuickAction icon="⚙️" label={t('pro.more.profileSettings')} onClick={() => navigate('/pro/settings')} />
+        <QuickAction icon={<QAIconScissors />} label={t('pro.more.services')} onClick={() => navigate('/pro/services')} />
+        <QuickAction icon={<QAIconPerson />} label={t('pro.more.staff')} onClick={() => navigate('/pro/staff')} />
+        <QuickAction icon={<QAIconClients />} label={t('pro.clients.title')} onClick={() => navigate('/pro/clients')} />
+        <QuickAction icon={<QAIconSettings />} label={t('pro.more.profileSettings')} onClick={() => navigate('/pro/settings')} />
       </section>
 
       {toast && (
@@ -534,7 +536,7 @@ function relativeTime(iso: string, t: (key: string, opts?: Record<string, unknow
   return d === 1 ? t('pro.dashboard.yesterday') : t('pro.dashboard.daysAgo', { d });
 }
 
-function QuickAction({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
+function QuickAction({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
     <button className={styles.quickAction} onClick={onClick}>
       <span className={styles.quickActionIcon}>{icon}</span>
@@ -542,3 +544,34 @@ function QuickAction({ icon, label, onClick }: { icon: string; label: string; on
     </button>
   );
 }
+
+const QAIconScissors = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+    <path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/>
+  </svg>
+)
+
+const QAIconPerson = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="7" r="4"/>
+    <path d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/>
+    <path d="M16 3.5c1.5.5 2.5 2 2 4-.5 1.5-2 2.5-3.5 2.5"/>
+  </svg>
+)
+
+const QAIconClients = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="9" cy="7" r="3.5"/>
+    <path d="M3 20c0-3 2.7-5.5 6-5.5s6 2.5 6 5.5"/>
+    <circle cx="17" cy="8" r="2.5"/>
+    <path d="M21 20c0-2.2-1.8-4-4-4"/>
+  </svg>
+)
+
+const QAIconSettings = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+  </svg>
+)

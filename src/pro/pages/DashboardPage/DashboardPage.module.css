@@ -64,7 +64,11 @@
 
 /* ── Pending confirmations ──────────────────── */
 .pendingSection {
-  margin-bottom: 24px;
+  background: rgba(251, 191, 36, 0.06);
+  border: 1.5px solid rgba(251, 191, 36, 0.35);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 .pendingTitle {
@@ -201,22 +205,26 @@
 
 /* ── Day schedule list ──────────────────────── */
 .scheduleSection {
-  margin-bottom: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 .scheduleTitleRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .sectionTitle {
-  font-size: var(--text-caption-size);
-  font-weight: var(--text-caption-weight);
+  font-size: 11px;
+  font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
   margin: 0;
 }
 
@@ -462,18 +470,22 @@
 
 /* ── Activity feed ──────────────────────────── */
 .activitySection {
-  margin-bottom: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 .activityRow {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 11px 14px;
-  border-radius: 12px;
-  margin-bottom: 6px;
-  background: var(--color-surface);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
+
+.activityRow:last-child { border-bottom: none; }
 
 .activityIcon {
   font-size: 14px;
@@ -520,12 +532,12 @@
   margin-top: 2px;
 }
 
-.activity-new         { border-left: 3px solid var(--color-accent); }
-.activity-confirmed   { border-left: 3px solid #34D399; }
-.activity-cancelled   { border-left: 3px solid #F87171; }
-.activity-completed   { border-left: 3px solid #6B7280; }
-.activity-noshow      { border-left: 3px solid #FBBF24; }
-.activity-rescheduled { border-left: 3px solid #A78BFA; }
+.activity-new         .activityIcon { color: var(--color-accent); }
+.activity-confirmed   .activityIcon { color: #34D399; }
+.activity-cancelled   .activityIcon { color: #F87171; }
+.activity-completed   .activityIcon { color: #6B7280; }
+.activity-noshow      .activityIcon { color: #FBBF24; }
+.activity-rescheduled .activityIcon { color: #A78BFA; }
 
 /* ── Quick actions ───────────────────────────── */
 .quickActions {
@@ -540,24 +552,37 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 16px 8px;
+  gap: 8px;
+  padding: 18px 8px;
   background: var(--color-surface);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
-  color: var(--color-text);
+  color: var(--color-text-secondary);
   font-family: var(--font-family);
-  font-size: var(--text-caption-size);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.quickAction:active { background: var(--color-surface-elevated); }
+.quickAction:active {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+}
 
-.quickActionIcon { font-size: 24px; line-height: 1; }
-.quickActionLabel { text-align: center; line-height: 1.2; }
+.quickActionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent);
+}
+
+.quickActionLabel { text-align: center; line-height: 1.2; color: var(--color-text); }
 
 /* ── Setup CTA card ──────────────────────────── */
 .setupCard {

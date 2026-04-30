@@ -14,6 +14,7 @@ export interface SkeletonProps {
   height?: string | number;
   count?: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const toPx = (v: string | number): string =>
@@ -25,6 +26,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   height,
   count = 1,
   className,
+  style,
 }) => {
   const resolvedHeight =
     height ?? (variant === 'circle' ? 40 : variant === 'text' ? 16 : 200);
@@ -41,6 +43,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
             {
               '--sk-w': toPx(width),
               '--sk-h': toPx(resolvedHeight),
+              ...style,
             } as React.CSSProperties
           }
           role="status"
