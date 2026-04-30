@@ -4,6 +4,7 @@
   color: var(--color-text);
   display: flex;
   flex-direction: column;
+  padding-top: 64px;
 }
 
 .pageHeader {

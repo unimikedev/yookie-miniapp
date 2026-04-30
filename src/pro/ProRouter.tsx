@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useNavigate, Outlet, useLocation, Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DashboardPage from '@/pro/pages/DashboardPage/DashboardPage';
+import { api } from '@/lib/api/client';
 import BookingsBoardPage from '@/pro/pages/BookingsBoardPage/BookingsBoardPage';
 import SchedulePage from '@/pro/pages/SchedulePage/SchedulePage';
 import ServicesPage from '@/pro/pages/ServicesPage/ServicesPage';
@@ -51,7 +52,18 @@ function UnpublishedBanner() {
 function ProShell() {
   const location = useLocation();
   const isTabPage = TAB_PATHS.includes(location.pathname);
-  const isPublished = useMerchantStore(s => s.isPublished);
+  const { merchantId, isPublished, setIsPublished } = useMerchantStore();
+  const fetchedRef = useRef(false);
+
+  // Load isPublished once per session so the banner shows on any tab, not just after Dashboard
+  useEffect(() => {
+    if (!merchantId || fetchedRef.current || isPublished !== null) return;
+    fetchedRef.current = true;
+    api.get<{ is_active: boolean }>(`/businesses/${merchantId}`)
+      .then(b => { if (b) setIsPublished(b.is_active); })
+      .catch(() => setIsPublished(false));
+  }, [merchantId]);
+
   const showBanner = isPublished === false && isTabPage;
   return (
     <>

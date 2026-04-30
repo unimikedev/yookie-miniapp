@@ -584,65 +584,293 @@
 
 .quickActionLabel { text-align: center; line-height: 1.2; color: var(--color-text); }
 
-/* ── Setup CTA card ──────────────────────────── */
-.setupCard {
+/* ── Onboarding card (top of dashboard) ─────── */
+.onboardCard {
   background: var(--color-surface);
   border: 1.5px solid var(--color-accent);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 20px;
+  padding: 18px;
   margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
-.setupTitle {
-  font-size: var(--text-body-lg-size);
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0 0 12px;
+.onboardCard::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  pointer-events: none;
 }
 
-.setupChecklist {
+.onboardProgress {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 14px;
 }
 
-.setupItem {
+.onboardDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: background 0.2s, width 0.2s;
+}
+
+.onboardDotActive {
+  width: 18px;
+  border-radius: 3px;
+  background: var(--color-accent);
+}
+
+.onboardDotDone {
+  background: var(--color-accent);
+  opacity: 0.4;
+}
+
+.onboardPhase {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-left: auto;
+}
+
+.onboardTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
+.onboardDesc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px;
+  line-height: 1.45;
+}
+
+.onboardChecklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.onboardCheckRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.onboardCheckRowDone {
+  opacity: 0.5;
+}
+
+.onboardCheckRowActive {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+}
+
+.onboardCheckIcon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.onboardCheckLabel {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.onboardCheckLabelDone {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.onboardCTA {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-family);
+  font-size: var(--text-button-size);
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.onboardCTA:disabled { opacity: 0.5; cursor: default; }
+
+/* Pending moderation card */
+.pendingModCard {
+  background: var(--color-surface);
+  border: 1.5px solid #A78BFA;
+  border-radius: 20px;
+  padding: 20px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.pendingModIcon { font-size: 36px; line-height: 1; }
+
+.pendingModTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.pendingModDesc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Published success card */
+.publishedCard {
+  background: color-mix(in srgb, #34D399 10%, var(--color-surface));
+  border: 1.5px solid #34D399;
+  border-radius: 20px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.publishedIcon { font-size: 28px; flex-shrink: 0; }
+
+.publishedText { flex: 1; }
+
+.publishedTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 2px;
+}
+
+.publishedSub {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Tour modal ──────────────────────────────── */
+.tourOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.tourSheet {
+  background: var(--color-surface-elevated, var(--color-surface));
+  border-radius: 24px;
+  width: 100%;
+  padding: 24px 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tourEmoji {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.tourTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.tourDesc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+.tourNav {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.setupItemDone .setupItemLabel { color: var(--color-text-muted); text-decoration: line-through; }
-
-.setupItemIcon { font-size: 16px; flex-shrink: 0; }
-
-.setupItemLabel {
-  flex: 1;
-  font-size: var(--text-body-size);
-  color: var(--color-text);
+.tourSkip {
+  background: transparent;
+  border: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 4px;
+  cursor: pointer;
 }
 
-.setupItemBtn {
-  padding: 4px 10px;
-  border: 1px solid var(--color-accent);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--color-accent);
+.tourDots {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+.tourDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: width 0.2s, background 0.2s;
+}
+
+.tourDotActive {
+  width: 18px;
+  border-radius: 3px;
+  background: var(--color-accent);
+}
+
+.tourNext {
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-accent);
+  color: var(--color-bg);
   font-family: var(--font-family);
-  font-size: var(--text-caption-xs-size);
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
 }
 
-.setupDesc {
-  font-size: var(--text-body-size);
-  color: var(--color-text-secondary);
-  margin: 0 0 14px;
-  line-height: 1.4;
-}
-
+/* Legacy setup aliases (keep old names pointing to new card) */
+.setupCard { display: none; }
 .publishBtn {
   width: 100%;
   padding: 13px;
@@ -655,5 +883,4 @@
   font-weight: 700;
   cursor: pointer;
 }
-
 .publishBtn:disabled { opacity: 0.5; cursor: default; }

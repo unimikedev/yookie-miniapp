@@ -34,6 +34,59 @@ function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+const TOUR_SLIDES = [
+  {
+    emoji: '📋',
+    title: 'Записи',
+    desc: 'Клиенты записываются онлайн через Telegram. Подтверждайте, переносите и отмечайте визиты прямо здесь.',
+  },
+  {
+    emoji: '📅',
+    title: 'Расписание',
+    desc: 'Полная картина занятости по мастерам и дням. Удобно планировать рабочее время.',
+  },
+  {
+    emoji: '👥',
+    title: 'Клиенты',
+    desc: 'Вся клиентская база собирается автоматически. Имена, телефоны, история визитов.',
+  },
+];
+
+function TourModal({ onClose }: { onClose: () => void }) {
+  const [step, setStep] = useState(0);
+  const slide = TOUR_SLIDES[step];
+  const isLast = step === TOUR_SLIDES.length - 1;
+
+  const close = () => {
+    localStorage.setItem('yookie_pro_tour_seen', '1');
+    onClose();
+  };
+
+  return (
+    <div className={styles.tourOverlay} onClick={close}>
+      <div className={styles.tourSheet} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.tourEmoji}>{slide.emoji}</div>
+        <p className={styles.tourTitle}>{slide.title}</p>
+        <p className={styles.tourDesc}>{slide.desc}</p>
+        <div className={styles.tourNav}>
+          <button className={styles.tourSkip} onClick={close}>Пропустить</button>
+          <div className={styles.tourDots}>
+            {TOUR_SLIDES.map((_, i) => (
+              <span key={i} className={`${styles.tourDot} ${i === step ? styles.tourDotActive : ''}`} />
+            ))}
+          </div>
+          <button
+            className={styles.tourNext}
+            onClick={() => isLast ? close() : setStep(s => s + 1)}
+          >
+            {isLast ? 'Начнём!' : 'Далее →'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -48,6 +101,8 @@ export default function DashboardPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [businessActive, setBusinessActive] = useState<boolean | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [pendingMod, setPendingMod] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -77,6 +132,12 @@ export default function DashboardPage() {
     patchBusiness(merchantId, { admin_telegram_id: tgId }).catch(() => {});
   }, [merchantId]);
 
+  // Tour: show once ever (if not seen)
+  useEffect(() => {
+    if (!merchantId) return;
+    if (!localStorage.getItem('yookie_pro_tour_seen')) setShowTour(true);
+  }, [merchantId]);
+
   useEffect(() => {
     if (!merchantId) return;
     listStaff(merchantId).then(setStaff).catch(() => {});
@@ -86,11 +147,20 @@ export default function DashboardPage() {
         if (b) {
           setBusinessActive(b.is_active);
           useMerchantStore.getState().setIsPublished(b.is_active);
+          if (b.is_active) {
+            // Approved — clear pending moderation flag
+            localStorage.removeItem(`yookie_biz_${merchantId}_pending`);
+            setPendingMod(false);
+          } else {
+            // Check if merchant already submitted for review
+            setPendingMod(localStorage.getItem(`yookie_biz_${merchantId}_pending`) === '1');
+          }
         }
       })
       .catch(() => {
         setBusinessActive(false);
         useMerchantStore.getState().setIsPublished(false);
+        setPendingMod(localStorage.getItem(`yookie_biz_${merchantId}_pending`) === '1');
       });
   }, [merchantId]);
 
@@ -173,12 +243,13 @@ export default function DashboardPage() {
     if (!merchantId) return;
     setPublishing(true);
     try {
-      await patchBusiness(merchantId, { is_active: true });
-      setBusinessActive(true);
-      useMerchantStore.getState().setIsPublished(true);
-      showToast(t('pro.dashboard.published', 'Профиль опубликован!'));
+      // Set submission_status to pending_review; is_active stays false until admin approves
+      await patchBusiness(merchantId, { submission_status: 'pending_review' } as any);
+      localStorage.setItem(`yookie_biz_${merchantId}_pending`, '1');
+      setPendingMod(true);
+      showToast('Отправлено на проверку!');
     } catch {
-      showToast(t('pro.dashboard.publishError', 'Не удалось опубликовать'));
+      showToast(t('pro.dashboard.publishError', 'Не удалось отправить'));
     } finally {
       setPublishing(false);
     }
@@ -196,8 +267,128 @@ export default function DashboardPage() {
     [bookings]
   );
 
+  // Onboarding card phase
+  const onboardPhase: 'staff' | 'service' | 'publish' | 'pending' | 'done' =
+    isPublished ? 'done'
+    : pendingMod ? 'pending'
+    : !hasStaff ? 'staff'
+    : !hasServices ? 'service'
+    : 'publish';
+
   return (
     <ProLayout title={businessName || t('pro.dashboard.title')}>
+
+      {/* ── Tour overlay ── */}
+      {showTour && <TourModal onClose={() => setShowTour(false)} />}
+
+      {/* ── Onboarding card ── */}
+      {onboardPhase === 'done' && (
+        <div className={styles.publishedCard}>
+          <span className={styles.publishedIcon}>🎉</span>
+          <div className={styles.publishedText}>
+            <p className={styles.publishedTitle}>Профиль опубликован!</p>
+            <p className={styles.publishedSub}>Клиенты могут вас найти в Yookie</p>
+          </div>
+        </div>
+      )}
+
+      {onboardPhase === 'pending' && (
+        <div className={styles.pendingModCard}>
+          <span className={styles.pendingModIcon}>⏳</span>
+          <p className={styles.pendingModTitle}>На проверке</p>
+          <p className={styles.pendingModDesc}>Ваш профиль отправлен. Обычно проверка занимает несколько часов — мы пришлём уведомление в Telegram.</p>
+        </div>
+      )}
+
+      {(onboardPhase === 'staff' || onboardPhase === 'service' || onboardPhase === 'publish') && (
+        <div className={styles.onboardCard}>
+          {/* Progress dots */}
+          <div className={styles.onboardProgress}>
+            <span className={`${styles.onboardDot} ${onboardPhase === 'staff' ? styles.onboardDotActive : styles.onboardDotDone}`} />
+            <span className={`${styles.onboardDot} ${onboardPhase === 'service' ? styles.onboardDotActive : onboardPhase === 'publish' ? styles.onboardDotDone : ''}`} />
+            <span className={`${styles.onboardDot} ${onboardPhase === 'publish' ? styles.onboardDotActive : ''}`} />
+            <span className={styles.onboardPhase}>
+              {onboardPhase === 'staff' ? 'Шаг 1 из 3' : onboardPhase === 'service' ? 'Шаг 2 из 3' : 'Шаг 3 из 3'}
+            </span>
+          </div>
+
+          {onboardPhase === 'staff' && (
+            <>
+              <p className={styles.onboardTitle}>Добавьте мастера</p>
+              <p className={styles.onboardDesc}>Мастера — основа записи. Добавьте хотя бы одного, чтобы клиенты могли записаться.</p>
+              <div className={styles.onboardChecklist}>
+                <div className={`${styles.onboardCheckRow} ${styles.onboardCheckRowActive}`}>
+                  <span className={styles.onboardCheckIcon}>👤</span>
+                  <span className={styles.onboardCheckLabel}>Добавить мастера</span>
+                </div>
+                <div className={styles.onboardCheckRow}>
+                  <span className={styles.onboardCheckIcon}>✂️</span>
+                  <span className={`${styles.onboardCheckLabel} ${styles.onboardCheckLabelDone}`} style={{ opacity: 0.4 }}>Добавить услугу</span>
+                </div>
+                <div className={styles.onboardCheckRow}>
+                  <span className={styles.onboardCheckIcon}>🚀</span>
+                  <span className={`${styles.onboardCheckLabel} ${styles.onboardCheckLabelDone}`} style={{ opacity: 0.4 }}>Опубликовать</span>
+                </div>
+              </div>
+              <button className={styles.onboardCTA} onClick={() => navigate('/pro/staff')}>
+                Добавить мастера →
+              </button>
+            </>
+          )}
+
+          {onboardPhase === 'service' && (
+            <>
+              <p className={styles.onboardTitle}>Добавьте услугу</p>
+              <p className={styles.onboardDesc}>Отлично — мастер добавлен! Теперь добавьте хотя бы одну услугу.</p>
+              <div className={styles.onboardChecklist}>
+                <div className={`${styles.onboardCheckRow} ${styles.onboardCheckRowDone}`}>
+                  <span className={styles.onboardCheckIcon}>✅</span>
+                  <span className={`${styles.onboardCheckLabel} ${styles.onboardCheckLabelDone}`}>Мастер добавлен</span>
+                </div>
+                <div className={`${styles.onboardCheckRow} ${styles.onboardCheckRowActive}`}>
+                  <span className={styles.onboardCheckIcon}>✂️</span>
+                  <span className={styles.onboardCheckLabel}>Добавить услугу</span>
+                </div>
+                <div className={styles.onboardCheckRow}>
+                  <span className={styles.onboardCheckIcon}>🚀</span>
+                  <span className={`${styles.onboardCheckLabel} ${styles.onboardCheckLabelDone}`} style={{ opacity: 0.4 }}>Опубликовать</span>
+                </div>
+              </div>
+              <button className={styles.onboardCTA} onClick={() => navigate('/pro/services')}>
+                Добавить услугу →
+              </button>
+            </>
+          )}
+
+          {onboardPhase === 'publish' && (
+            <>
+              <p className={styles.onboardTitle}>Готово! Опубликуйте профиль</p>
+              <p className={styles.onboardDesc}>Мастер и услуги добавлены. После публикации клиенты смогут вас найти в Yookie.</p>
+              <div className={styles.onboardChecklist}>
+                <div className={`${styles.onboardCheckRow} ${styles.onboardCheckRowDone}`}>
+                  <span className={styles.onboardCheckIcon}>✅</span>
+                  <span className={`${styles.onboardCheckLabel} ${styles.onboardCheckLabelDone}`}>Мастер добавлен</span>
+                </div>
+                <div className={`${styles.onboardCheckRow} ${styles.onboardCheckRowDone}`}>
+                  <span className={styles.onboardCheckIcon}>✅</span>
+                  <span className={`${styles.onboardCheckLabel} ${styles.onboardCheckLabelDone}`}>Услуги добавлены{services.length > 1 ? ` (${services.length})` : ''}</span>
+                </div>
+                <div className={`${styles.onboardCheckRow} ${styles.onboardCheckRowActive}`}>
+                  <span className={styles.onboardCheckIcon}>🚀</span>
+                  <span className={styles.onboardCheckLabel}>Опубликовать профиль</span>
+                </div>
+              </div>
+              <button
+                className={styles.onboardCTA}
+                onClick={handlePublish}
+                disabled={publishing}
+              >
+                {publishing ? 'Отправляем...' : 'Отправить на публикацию →'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* ── Date navigation ── */}
       <div className={styles.dateNav}>
@@ -327,47 +518,6 @@ export default function DashboardPage() {
               </div>
             );
           })}
-        </section>
-      )}
-
-      {/* ── Setup CTA (when not ready to publish) ── */}
-      {!isPublished && businessActive !== null && (
-        <section className={styles.setupCard}>
-          <h3 className={styles.setupTitle}>
-            {isReadyToPublish ? '🚀 ' + t('pro.dashboard.readyToPublish', 'Готово к публикации!') : '📋 ' + t('pro.dashboard.setupTitle', 'Настройте профиль')}
-          </h3>
-          {!isReadyToPublish && (
-            <div className={styles.setupChecklist}>
-              <div className={`${styles.setupItem} ${hasStaff ? styles.setupItemDone : ''}`}>
-                <span className={styles.setupItemIcon}>{hasStaff ? '✅' : '⬜'}</span>
-                <span className={styles.setupItemLabel}>{t('pro.dashboard.setupAddStaff', 'Добавьте мастера')}</span>
-                {!hasStaff && (
-                  <button className={styles.setupItemBtn} onClick={() => navigate('/pro/staff')}>
-                    {t('common.add', 'Добавить')} →
-                  </button>
-                )}
-              </div>
-              <div className={`${styles.setupItem} ${hasServices ? styles.setupItemDone : ''}`}>
-                <span className={styles.setupItemIcon}>{hasServices ? '✅' : '⬜'}</span>
-                <span className={styles.setupItemLabel}>{t('pro.dashboard.setupAddService', 'Добавьте услугу')}</span>
-                {!hasServices && (
-                  <button className={styles.setupItemBtn} onClick={() => navigate('/pro/services')}>
-                    {t('common.add', 'Добавить')} →
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-          {isReadyToPublish && (
-            <p className={styles.setupDesc}>{t('pro.dashboard.readyDesc', 'Мастера и услуги добавлены. Опубликуйте профиль — клиенты смогут вас найти.')}</p>
-          )}
-          <button
-            className={styles.publishBtn}
-            onClick={handlePublish}
-            disabled={!isReadyToPublish || publishing}
-          >
-            {publishing ? '...' : t('pro.dashboard.publishBtn', 'Опубликовать')}
-          </button>
         </section>
       )}
 
