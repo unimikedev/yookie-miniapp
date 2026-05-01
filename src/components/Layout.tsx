@@ -57,6 +57,17 @@ export default function Layout({ children }: LayoutProps) {
     const newChildren = children
     const newKey = location.key
 
+    // Pro→Pro tab switches: skip Layout transition entirely so ProBottomNav stays fixed
+    const skipTransition = fromPath.startsWith('/pro') && toPath.startsWith('/pro')
+
+    if (skipTransition) {
+      shownPathRef.current = toPath
+      shownKeyRef.current = newKey
+      setShownChildren(newChildren)
+      setTransClass('')
+      return
+    }
+
     setTransClass(getExitClass(fromPath, toPath))
 
     if (timerRef.current) clearTimeout(timerRef.current)

@@ -23,6 +23,11 @@
   transform: translateY(12px);
 }
 
+/* pill has pointer-events:auto which overrides parent's none — block explicitly */
+.navHidden .pill {
+  pointer-events: none;
+}
+
 .pill {
   pointer-events: auto;
   display: inline-flex;
