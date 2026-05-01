@@ -355,16 +355,11 @@ export async function upsertService(
   input: ServiceInput
 ): Promise<Service> {
   try {
+    const body = { name: input.name, price: input.price, duration_min: input.duration_min, description: input.description, category: input.category, photo_url: input.photo_url ?? null };
     if (input.id) {
-      return api.patch<Service>(
-        `/businesses/${merchantId}/services/${input.id}`,
-        { name: input.name, price: input.price, duration_min: input.duration_min, description: input.description, category: input.category }
-      );
+      return api.patch<Service>(`/businesses/${merchantId}/services/${input.id}`, body);
     }
-    return api.post<Service>(
-      `/businesses/${merchantId}/services`,
-      { name: input.name, price: input.price, duration_min: input.duration_min, description: input.description, category: input.category }
-    );
+    return api.post<Service>(`/businesses/${merchantId}/services`, body);
   } catch (err) {
     if (shouldFallback(err)) return mockUpsertService(merchantId, input);
     throw err;

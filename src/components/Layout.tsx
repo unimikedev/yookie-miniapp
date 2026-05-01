@@ -39,8 +39,9 @@ export default function Layout({ children }: LayoutProps) {
 
   useTelegramSafeArea()
 
-  const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen
-  const showTgBack = !PAGES_WITH_NAV.includes(location.pathname)
+  const isRestricted = (() => { try { return !!sessionStorage.getItem('yookie_restricted') } catch { return false } })()
+  const showNav = PAGES_WITH_NAV.includes(location.pathname) && !isOverlayOpen && !isRestricted
+  const showTgBack = !PAGES_WITH_NAV.includes(location.pathname) || isRestricted
 
   const [shownChildren, setShownChildren] = useState<React.ReactNode>(children)
   const [transClass, setTransClass] = useState<string>('')

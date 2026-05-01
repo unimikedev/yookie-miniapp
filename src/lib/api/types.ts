@@ -122,6 +122,7 @@ export interface Service {
   category: string;
   is_active: boolean;
   position: number;
+  photo_url?: string | null;
   addons?: ServiceAddon[];
   created_at?: string;
   updated_at?: string;

@@ -32,6 +32,7 @@ export default function ServicesPage() {
   const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   // Addon management
   const [expandedAddonsId, setExpandedAddonsId] = useState<string | null>(null);
@@ -193,6 +194,18 @@ export default function ServicesPage() {
     list.forEach((s, idx) => reorderService(merchantId, s.id, idx));
   };
 
+  const uploadServicePhoto = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('variant', 'cover');
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+    const res = await fetch(`${API_BASE}/businesses/upload-image`, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error('Ошибка загрузки фото');
+    const json = await res.json() as { url?: string };
+    if (!json.url) throw new Error('Нет URL в ответе');
+    return json.url;
+  };
+
   const openAdd = () => { setEditing({ ...EMPTY }); setSaveError(null); };
 
   const actions = <button className={styles.addBtn} onClick={openAdd}>+</button>;
@@ -273,6 +286,41 @@ export default function ServicesPage() {
               onChange={e => setEditing({ ...editing, duration_min: Number(e.target.value) })}
             />
           </div>
+
+          {/* Service photo upload */}
+          <div className={styles.photoUploadRow}>
+            {editing.photo_url ? (
+              <div className={styles.photoPreviewWrap}>
+                <img src={editing.photo_url} alt="Фото услуги" className={styles.photoPreview} />
+                <button
+                  type="button"
+                  className={styles.photoRemoveBtn}
+                  onClick={() => setEditing({ ...editing, photo_url: null })}
+                >✕</button>
+              </div>
+            ) : (
+              <label className={`${styles.photoUploadBtn} ${photoUploading ? styles.photoUploadBtnLoading : ''}`}>
+                {photoUploading ? 'Загрузка…' : '+ Фото услуги'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  disabled={photoUploading}
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setPhotoUploading(true);
+                    try {
+                      const url = await uploadServicePhoto(file);
+                      setEditing({ ...editing, photo_url: url });
+                    } catch { setSaveError('Не удалось загрузить фото'); }
+                    finally { setPhotoUploading(false); }
+                  }}
+                />
+              </label>
+            )}
+          </div>
+
           {saveError && <p className={styles.formError}>{saveError}</p>}
           <div className={styles.formActions}>
             <button className={styles.cancelBtn} onClick={() => { setEditing(null); setSaveError(null); }}>{t('common.cancel')}</button>

@@ -23,7 +23,12 @@ export function StartParamNavigator() {
       const token = startParam.slice(4)
       navigate(`/invite/${token}`, { replace: true })
     } else if (startParam.startsWith('b_')) {
-      const businessId = startParam.slice(2)
+      const withoutPrefix = startParam.slice(2) // e.g. "<id>" or "<id>_r"
+      const restricted = withoutPrefix.endsWith('_r')
+      const businessId = restricted ? withoutPrefix.slice(0, -2) : withoutPrefix
+      if (restricted) {
+        try { sessionStorage.setItem('yookie_restricted', '1') } catch {}
+      }
       navigate(`/business/${businessId}`, { replace: true })
     } else if (startParam === 'pro_reg') {
       navigate('/auth?return=/pro/settings', { replace: true })

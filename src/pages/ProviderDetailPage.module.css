@@ -1123,3 +1123,116 @@
 .masterRowBtn:active {
   opacity: 0.75;
 }
+
+/* ── Master nearest slots ────────────────────────────────── */
+.masterSlotChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.masterSlotChip {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.masterSlotChip:active {
+  background: rgba(107, 206, 255, 0.15);
+  border-color: var(--color-accent);
+}
+
+.masterNoSlots {
+  font-size: var(--text-caption-size);
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* ── Date section with nearest slot button ───────────────── */
+.dateSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.nearestSlotBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-accent);
+  background: rgba(107, 206, 255, 0.1);
+  color: var(--color-accent);
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.nearestSlotBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nearestSlotBtn:not(:disabled):active {
+  background: rgba(107, 206, 255, 0.2);
+}
+
+.nearestSlotSpinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(107, 206, 255, 0.3);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Service photo overlay ───────────────────────────────── */
+.servicePhotoOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.servicePhotoFull {
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 16px;
+  object-fit: contain;
+}
+
+.servicePhotoClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+}

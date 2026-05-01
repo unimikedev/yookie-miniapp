@@ -457,3 +457,65 @@
   background: var(--color-surface-elevated);
   border-radius: 12px;
 }
+
+/* ── Service photo upload ─────────────────────────────────── */
+.photoUploadRow {
+  display: flex;
+  align-items: center;
+}
+
+.photoUploadBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1.5px dashed var(--color-border);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.photoUploadBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.photoUploadBtnLoading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.photoPreviewWrap {
+  position: relative;
+  width: 80px;
+}
+
+.photoPreview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+.photoRemoveBtn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

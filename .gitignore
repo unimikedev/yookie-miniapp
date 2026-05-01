@@ -455,3 +455,4 @@ coverage.xml
 *.cover
 *.log
 .gitattributes
+.gstack/

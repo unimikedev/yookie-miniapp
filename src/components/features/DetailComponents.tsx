@@ -53,9 +53,10 @@ export interface ServiceCardProps {
   onSelect?: (service: Service) => void
   selectedAddons?: import('@/stores/bookingStore').AddonSelection[]
   onEditAddons?: (service: Service) => void
+  onPhotoClick?: (url: string) => void
 }
 
-export function ServiceCard({ service, selected, onSelect, selectedAddons = [], onEditAddons }: ServiceCardProps) {
+export function ServiceCard({ service, selected, onSelect, selectedAddons = [], onEditAddons, onPhotoClick }: ServiceCardProps) {
   const hasAddons = (service.addons ?? []).length > 0
   const addonsTotalPrice = selectedAddons.reduce((s, a) => s + a.price_each * a.qty, 0)
   const addonsTotalDuration = selectedAddons.reduce((s, a) => s + a.duration_min_each * a.qty, 0)
@@ -68,6 +69,16 @@ export function ServiceCard({ service, selected, onSelect, selectedAddons = [], 
         role="button"
         tabIndex={0}
       >
+        {service.photo_url && (
+          <button
+            type="button"
+            className={styles.servicePhoto}
+            onClick={e => { e.stopPropagation(); onPhotoClick?.(service.photo_url!) }}
+            aria-label="Фото услуги"
+          >
+            <img src={service.photo_url} alt={service.name} className={styles.servicePhotoImg} />
+          </button>
+        )}
         <div className={styles.serviceInfo}>
           <span className={styles.serviceName}>{service.name}</span>
           <span className={styles.servicePrice}>

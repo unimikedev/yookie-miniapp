@@ -25,7 +25,7 @@ import { useBusiness } from '@/hooks/useBusiness'
 import { useSlots } from '@/hooks/useSlots'
 import { useBookingStore } from '@/stores/bookingStore'
 import { useAuthStore } from '@/stores/authStore'
-import { createBooking, createBookingBatch } from '@/lib/api/bookings'
+import { createBooking, createBookingBatch, fetchSlots } from '@/lib/api/bookings'
 import { syncBookingToMerchant } from '@/lib/syncBookingToMerchant'
 import { CATEGORY_LABELS } from '@/lib/api/types'
 import type { Master, TimeSlot } from '@/lib/api/types'
@@ -75,6 +75,9 @@ export default function ProviderDetailPage() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([])
   const [galleryTab, setGalleryTab] = useState<'salon' | 'portfolio'>('salon')
+  const [servicePhotoUrl, setServicePhotoUrl] = useState<string | null>(null)
+  const [masterNextSlots, setMasterNextSlots] = useState<Map<string, Array<{ date: string; slot: TimeSlot }>>>(new Map())
+  const [findingNearestSlot, setFindingNearestSlot] = useState(false)
 
   // Swipe-back gesture refs
   const swipeStartX = useRef(0)
@@ -395,6 +398,58 @@ export default function ProviderDetailPage() {
     setTimeout(() => {
       timeSlotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 100)
+  }
+
+  // Find first N available slots across the next maxDays days for a given master
+  const findNextAvailableSlots = async (
+    masterId: string,
+    maxSlots = 4,
+    maxDays = 7
+  ): Promise<Array<{ date: string; slot: TimeSlot }>> => {
+    if (!id) return []
+    const results: Array<{ date: string; slot: TimeSlot }> = []
+    for (let i = 0; i < maxDays && results.length < maxSlots; i++) {
+      const d = new Date()
+      d.setDate(d.getDate() + i)
+      const dateStr = toLocalYMD(d)
+      try {
+        const slots = await fetchSlots(id, masterId, dateStr, activeServiceId, totalDuration)
+        for (const slot of slots) {
+          if (slot.is_available && results.length < maxSlots) {
+            results.push({ date: dateStr, slot })
+          }
+        }
+      } catch { /* skip */ }
+    }
+    return results
+  }
+
+  // Load 4 nearest slots for each master when masters tab opens
+  useEffect(() => {
+    if (activeTab !== 1 || !id || masters.length === 0) return
+    masters.forEach(async (master) => {
+      if (masterNextSlots.has(master.id)) return
+      const slots = await findNextAvailableSlots(master.id, 4, 5)
+      setMasterNextSlots(prev => new Map(prev).set(master.id, slots))
+    })
+  }, [activeTab, id, masters.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFindNearestSlot = async () => {
+    if (!activeMasterId) return
+    setFindingNearestSlot(true)
+    try {
+      const results = await findNextAvailableSlots(activeMasterId, 1, 14)
+      if (results.length > 0) {
+        const { date, slot } = results[0]
+        setSelectedDate(date)
+        setSelectedSlot(slot)
+        setTimeout(() => {
+          timeSlotsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 100)
+      }
+    } finally {
+      setFindingNearestSlot(false)
+    }
   }
 
   // Load reviews from API
@@ -764,6 +819,7 @@ export default function ProviderDetailPage() {
                           onSelect={handleServiceToggle}
                           selectedAddons={svcAssignment?.addons ?? []}
                           onEditAddons={(svc) => setAddonSheetService(svc)}
+                          onPhotoClick={(url) => setServicePhotoUrl(url)}
                         />
                         {isSelected && eligibleMasters.length > 1 && (
                           <div className={styles.masterChipRow}>
@@ -792,7 +848,22 @@ export default function ProviderDetailPage() {
             {hasServices && (
               <div ref={timeSlotsRef}>
                 <section className={styles.section} ref={dateRef}>
-                  <h2 className={styles.sectionTitle}>{t('provider.selectDate')}</h2>
+                  <div className={styles.dateSectionHead}>
+                    <h2 className={styles.sectionTitle}>{t('provider.selectDate')}</h2>
+                    {activeMasterId && (
+                      <button
+                        type="button"
+                        className={styles.nearestSlotBtn}
+                        onClick={handleFindNearestSlot}
+                        disabled={findingNearestSlot}
+                      >
+                        {findingNearestSlot ? (
+                          <span className={styles.nearestSlotSpinner} />
+                        ) : '⚡'}
+                        {' '}Ближайшее окно
+                      </button>
+                    )}
+                  </div>
                   <div className={styles.dateRow}>
                     {Array.from({ length: 7 }).map((_, i) => {
                       const d = new Date()
@@ -965,36 +1036,68 @@ export default function ProviderDetailPage() {
               </div>
             ) : masters.length > 0 ? (
               <div className={styles.mastersList}>
-                {masters.map(master => (
-                  <div key={master.id} className={styles.masterRow}>
-                    <div className={styles.masterRowPhoto}>
-                      {master.photo_url
-                        ? <img src={cardAvatarUrl(master.photo_url)} alt={master.name} />
-                        : <span className={styles.masterRowPhotoFallback}>{master.name.charAt(0)}</span>
-                      }
+                {masters.map(master => {
+                  const mSlots = masterNextSlots.get(master.id)
+                  const today = toLocalYMD(new Date())
+                  return (
+                    <div key={master.id} className={styles.masterRow}>
+                      <div className={styles.masterRowPhoto}>
+                        {master.photo_url
+                          ? <img src={cardAvatarUrl(master.photo_url)} alt={master.name} />
+                          : <span className={styles.masterRowPhotoFallback}>{master.name.charAt(0)}</span>
+                        }
+                      </div>
+                      <div className={styles.masterRowInfo}>
+                        <span className={styles.masterRowName}>{formatMasterName(master.name)}</span>
+                        {master.specialization && (
+                          <span className={styles.masterRowSpec}>{master.specialization}</span>
+                        )}
+                        {master.rating > 0 && (
+                          <span className={styles.masterRowRating}>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                              <path d="M6 0.5L7.545 3.63L11 4.135L8.5 6.57L9.09 10.01L6 8.385L2.91 10.01L3.5 6.57L1 4.135L4.455 3.63L6 0.5Z" fill="#6BCEFF" />
+                            </svg>
+                            {master.rating.toFixed(1)}
+                          </span>
+                        )}
+                        {/* Nearest slots chips */}
+                        {mSlots && mSlots.length > 0 && (
+                          <div className={styles.masterSlotChips}>
+                            {mSlots.slice(0, 4).map(({ date, slot }) => {
+                              const label = date === today
+                                ? `${slot.start} · сег`
+                                : `${slot.start} · ${new Date(date + 'T00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`
+                              return (
+                                <button
+                                  key={slot.id}
+                                  type="button"
+                                  className={styles.masterSlotChip}
+                                  onClick={() => {
+                                    setMasterFilter(master.id)
+                                    setSelectedDate(date)
+                                    setSelectedSlot(slot)
+                                    setActiveTab(0)
+                                  }}
+                                >
+                                  {label}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+                        {mSlots && mSlots.length === 0 && (
+                          <span className={styles.masterNoSlots}>Нет окон на 5 дней</span>
+                        )}
+                      </div>
+                      <button
+                        className={styles.masterRowBtn}
+                        onClick={() => { setMasterFilter(master.id); setActiveTab(0) }}
+                      >
+                        {t('provider.services_btn')}
+                      </button>
                     </div>
-                    <div className={styles.masterRowInfo}>
-                      <span className={styles.masterRowName}>{formatMasterName(master.name)}</span>
-                      {master.specialization && (
-                        <span className={styles.masterRowSpec}>{master.specialization}</span>
-                      )}
-                      {master.rating > 0 && (
-                        <span className={styles.masterRowRating}>
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 0.5L7.545 3.63L11 4.135L8.5 6.57L9.09 10.01L6 8.385L2.91 10.01L3.5 6.57L1 4.135L4.455 3.63L6 0.5Z" fill="#6BCEFF" />
-                          </svg>
-                          {master.rating.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      className={styles.masterRowBtn}
-                      onClick={() => { setMasterFilter(master.id); setActiveTab(0) }}
-                    >
-                      {t('provider.services_btn')}
-                    </button>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <EmptyState title={t('provider.mastersNotFound')} description={t('provider.mastersNotAdded')} compact />
@@ -1101,6 +1204,23 @@ export default function ProviderDetailPage() {
           initial={selectedServices.find(s => s.service.id === addonSheetService.id)?.addons ?? []}
           onConfirm={(addons) => setServiceAddons(addonSheetService.id, addons)}
         />
+      )}
+
+      {/* Service photo fullscreen overlay */}
+      {servicePhotoUrl && (
+        <div className={styles.servicePhotoOverlay} onClick={() => setServicePhotoUrl(null)}>
+          <button className={styles.servicePhotoClose} onClick={() => setServicePhotoUrl(null)} aria-label="Закрыть">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <img
+            src={servicePhotoUrl}
+            alt="Фото услуги"
+            className={styles.servicePhotoFull}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
       )}
     </div>
   )

@@ -152,12 +152,20 @@ export default function AuthPage() {
 
         <div ref={googleBtnRef} className={styles.googleBtn} />
 
-        <p className={styles.agreement}>
-          Продолжая, вы соглашаетесь с{' '}
-          <a href="https://t.me/yookie_bot" target="_blank" rel="noopener noreferrer" className={styles.link}>
-            условиями использования
-          </a>
-        </p>
+        <label className={styles.consentRow}>
+          <input type="checkbox" className={styles.consentCheck} defaultChecked />
+          <span className={styles.consentText}>
+            Я соглашаюсь с{' '}
+            <a href="https://t.me/yookie_bot" target="_blank" rel="noopener noreferrer"
+              className={styles.link} onClick={e => e.stopPropagation()}>
+              Политикой конфиденциальности
+            </a>{' '}и{' '}
+            <a href="https://t.me/yookie_bot" target="_blank" rel="noopener noreferrer"
+              className={styles.link} onClick={e => e.stopPropagation()}>
+              Пользовательским соглашением
+            </a>
+          </span>
+        </label>
       </div>
     </div>
   )

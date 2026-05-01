@@ -5,6 +5,7 @@ import { patchBusiness } from '@/pro/api';
 import { useBusiness } from '@/hooks/useBusiness';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { useBusinessExit } from '@/pro/hooks/useBusinessExit';
+import { getMerchantShareLink, getTelegramShareUrl } from '@/shared/constants';
 import styles from './MerchantPreviewPage.module.css';
 
 function SetupStatusCard({
@@ -59,6 +60,8 @@ export default function MerchantPreviewPage() {
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [localPublished, setLocalPublished] = useState(false);
+  const [restrictedLink, setRestrictedLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const { leaveWithoutResigning, resignAndLeave, logout, loading: exitLoading, error: exitError } = useBusinessExit();
 
   const isPublished = localPublished || (business?.is_active ?? false);
@@ -206,6 +209,48 @@ export default function MerchantPreviewPage() {
           onGoStaff={() => navigate('/pro/staff')}
           onGoServices={() => navigate('/pro/services')}
         />
+      </div>
+
+      {/* Booking link share */}
+      <div className={styles.shareSection}>
+        <div className={styles.shareSectionHead}>
+          <span className={styles.shareSectionTitle}>Ссылка на запись</span>
+          <label className={styles.restrictToggle}>
+            <input
+              type="checkbox"
+              className={styles.restrictCheck}
+              checked={restrictedLink}
+              onChange={e => setRestrictedLink(e.target.checked)}
+            />
+            <span className={styles.restrictLabel}>Только этот салон</span>
+          </label>
+        </div>
+        {restrictedLink && (
+          <p className={styles.restrictHint}>
+            Клиент откроет только страницу вашего салона — без возможности перейти в другие разделы Yookie
+          </p>
+        )}
+        <div className={styles.shareRow}>
+          <button
+            className={styles.shareCopyBtn}
+            onClick={async () => {
+              const link = getMerchantShareLink(merchantId, restrictedLink);
+              try { await navigator.clipboard.writeText(link); } catch {}
+              setLinkCopied(true);
+              setTimeout(() => setLinkCopied(false), 2000);
+            }}
+          >
+            {linkCopied ? '✓ Скопировано' : '📋 Копировать ссылку'}
+          </button>
+          <a
+            className={styles.shareBtn}
+            href={getTelegramShareUrl(getMerchantShareLink(merchantId, restrictedLink), business.name)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ✈️ Поделиться
+          </a>
+        </div>
       </div>
 
       {/* Action buttons */}

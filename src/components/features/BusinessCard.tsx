@@ -21,6 +21,8 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick })
   const image = business.photo_url ? cardCoverUrl(rawImage) : rawImage
   const categoryLabel = CATEGORY_LABELS[business.category] ?? business.category
 
+  const extraPhotos = (business.photo_urls ?? []).filter(u => u !== rawImage).slice(0, 2)
+
   return (
     <div className={styles.card} onClick={() => onClick?.(business)}>
       <div className={styles.imageWrap}>
@@ -28,6 +30,13 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({ business, onClick })
           <img src={image} alt={business.name} className={styles.image} loading="lazy" />
         ) : (
           <div className={styles.imageFallback} />
+        )}
+        {extraPhotos.length > 0 && (
+          <div className={styles.thumbStrip}>
+            {extraPhotos.map((url, i) => (
+              <img key={i} src={cardCoverUrl(url)} alt="" className={styles.thumb} loading="lazy" />
+            ))}
+          </div>
         )}
       </div>
       <div className={styles.content}>

@@ -8,8 +8,9 @@ import type { CategoryEnum } from '@/lib/api/types';
 export const TELEGRAM_BOT_URL = 'https://t.me/yookie_bot';
 export const TELEGRAM_BOT_USERNAME = 'yookie_bot';
 
-export function getMerchantShareLink(businessId: string): string {
-  return `https://t.me/${TELEGRAM_BOT_USERNAME}?startapp=b_${businessId}`;
+export function getMerchantShareLink(businessId: string, restricted = false): string {
+  const param = restricted ? `b_${businessId}_r` : `b_${businessId}`;
+  return `https://t.me/${TELEGRAM_BOT_USERNAME}?startapp=${param}`;
 }
 
 export function getTelegramShareUrl(link: string, businessName: string): string {

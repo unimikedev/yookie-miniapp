@@ -41,6 +41,7 @@ export default function BookingFlowPage() {
   const [successData, setSuccessData] = useState<SuccessData | null>(null)
   const [showAlternativeSlots, setShowAlternativeSlots] = useState(false)
   const [conflictSlotInfo, setConflictSlotInfo] = useState<{ serviceId: string; masterId: string; dateTime: string } | null>(null)
+  const [reminderOffset, setReminderOffset] = useState<60 | 180 | 1440>(60)
 
   // Hook для альтернативных слотов (используется при конфликте)
   const { slots: alternativeSlots, isLoading: isLoadingAlternatives } = useAlternativeSlots(
@@ -341,11 +342,31 @@ export default function BookingFlowPage() {
                   ))}
                 </div>
 
-                {/* Date + time */}
-                <div className={styles.summaryDateTime}>{dateTimeStr}</div>
+                {/* Reminder selector */}
+                <div className={styles.reminderRow}>
+                  <span className={styles.reminderLabel}>Напоминание</span>
+                  <div className={styles.reminderChips}>
+                    {([{v: 60, l: 'За 1 час'}, {v: 180, l: 'За 3 часа'}, {v: 1440, l: 'За день'}] as const).map(opt => (
+                      <button
+                        key={opt.v}
+                        type="button"
+                        className={`${styles.reminderChip} ${reminderOffset === opt.v ? styles.reminderChipActive : ''}`}
+                        onClick={() => setReminderOffset(opt.v)}
+                      >
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                {/* Total */}
-                <div className={styles.summaryTotal}>{totalPrice.toLocaleString('ru')} сум</div>
+                {/* Divider */}
+                <div className={styles.summaryDivider} />
+
+                {/* Date + time + total */}
+                <div className={styles.summaryDateTimeBlock}>
+                  <div className={styles.summaryDateTime}>{dateTimeStr}</div>
+                  <div className={styles.summaryTotal}>{totalPrice.toLocaleString('ru')} сум</div>
+                </div>
 
                 {/* Input fields */}
                 <div className={styles.summaryInputs}>
