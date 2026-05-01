@@ -93,6 +93,7 @@ export default function DashboardPage() {
   const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
   const { merchantId, businessName } = useMerchantStore();
   const tgSyncDone = useRef(false);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const [pending, setPending] = useState<Booking[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -431,7 +432,21 @@ export default function DashboardPage() {
       <div className={styles.dateNav}>
         <div className={styles.dateNavLeft}>
           <button className={styles.dateArrow} onClick={prevDay}>‹</button>
-          <span className={styles.dateLabel} style={{ textTransform: 'capitalize' }}>{dateLabel}</span>
+          <button
+            className={styles.dateLabel}
+            style={{ textTransform: 'capitalize' }}
+            onClick={() => dateInputRef.current?.showPicker?.() ?? dateInputRef.current?.click()}
+          >
+            {dateLabel}
+          </button>
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={dateStr}
+            onChange={e => { if (e.target.value) setDate(new Date(e.target.value + 'T12:00:00')) }}
+            style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
+            tabIndex={-1}
+          />
           <button className={styles.dateArrow} onClick={nextDay}>›</button>
           {!isToday && (
             <button className={styles.todayBtn} onClick={goToToday}>← {t('pro.dashboard.today')}</button>
@@ -562,7 +577,7 @@ export default function DashboardPage() {
       <section className={styles.quickActions}>
         <QuickAction icon={<QAIconScissors />} label={t('pro.more.services')} onClick={() => navigate('/pro/services')} />
         <QuickAction icon={<QAIconPerson />} label={t('pro.more.staff')} onClick={() => navigate('/pro/staff')} />
-        <QuickAction icon={<QAIconClients />} label={t('pro.clients.title')} onClick={() => navigate('/pro/clients')} />
+        <QuickAction icon={<QAIconSchedule />} label={t('pro.dashboard.schedule')} onClick={() => navigate('/pro/schedule')} />
         <QuickAction icon={<QAIconSettings />} label={t('pro.more.profileSettings')} onClick={() => navigate('/pro/settings')} />
       </section>
 
@@ -769,5 +784,13 @@ const QAIconSettings = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3"/>
     <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+  </svg>
+)
+
+const QAIconSchedule = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2"/>
+    <path d="M16 2v4M8 2v4M3 10h18"/>
+    <path d="M8 14h1M12 14h1M16 14h1M8 18h1M12 18h1"/>
   </svg>
 )

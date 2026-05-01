@@ -72,6 +72,7 @@ function toFeedCard(b: Business): PopularStudioCard {
     photos: allPhotos.length > 1 ? allPhotos.slice(1) : undefined,
     businessId: b.id,
     priceFrom: ab.min_price ?? 0,
+    logoUrl: b.logo_url ?? null,
   }
 }
 
@@ -243,17 +244,15 @@ export default function HomePage() {
     }
     setSearchLoading(true)
     const q = query.toLowerCase().trim()
+    const words = q.split(/\s+/).filter(Boolean)
+    const fuzzyMatch = (text: string) => words.every(w => text.toLowerCase().includes(w))
     const results: SearchResultItem[] = []
 
     try {
       // 1. Search businesses
       const bizRes = await fetchBusinesses({ city: city.id, search: query, limit: 8 })
       for (const b of (bizRes.data ?? [])) {
-        if (
-          b.name.toLowerCase().includes(q) ||
-          (b.description ?? '').toLowerCase().includes(q) ||
-          (b.category ?? '').toLowerCase().includes(q)
-        ) {
+        if (fuzzyMatch([b.name, b.description ?? '', b.category ?? ''].join(' '))) {
           results.push({
             type: 'business',
             id: b.id,
@@ -269,10 +268,7 @@ export default function HomePage() {
     // 2. Search masters from home data
     const masters = data?.popularMasters ?? []
     for (const m of masters) {
-      if (
-        m.name.toLowerCase().includes(q) ||
-        m.specialization.toLowerCase().includes(q)
-      ) {
+      if (fuzzyMatch(m.name + ' ' + m.specialization)) {
         results.push({
           type: 'master',
           id: `master-${m.masterId}`,
@@ -288,7 +284,7 @@ export default function HomePage() {
     // 3. Search categories by label
     for (const cat of CATEGORIES) {
       const catLabel = t(`categories.${cat.key}`)
-      if (catLabel.toLowerCase().includes(q)) {
+      if (fuzzyMatch(catLabel)) {
         results.unshift({
           type: 'category',
           id: `cat-${cat.key}`,
@@ -699,11 +695,18 @@ export default function HomePage() {
               {isLoading || !data ? (
                 <div className={styles.skeleton}><Skeleton variant="rect" height={246} /></div>
               ) : (() => {
-                // Combine: show studios + masters filtered by category
+                // Combine: show studios + nearby filtered by category, deduplicated by businessId, exclude price=0
+                const seenCatIds = new Set<string>()
                 const allCatItems = [
                   ...fd.nearby.filter(n => n.category === selectedCategory),
                   ...fd.popularStudios.filter(s => s.category === selectedCategory),
-                ]
+                ].filter(item => {
+                  const bid = item.businessId ?? item.id
+                  if (seenCatIds.has(bid)) return false
+                  seenCatIds.add(bid)
+                  const price = (item as any).priceFrom ?? (item as any).minPrice
+                  return price == null || price > 0
+                })
 
                 if (allCatItems.length === 0) {
                   return <p className={styles.emptySection}>{t('home.noResults')}</p>

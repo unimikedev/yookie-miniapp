@@ -97,8 +97,7 @@ export default function SearchPage() {
 
         // Search masters and services from home data
         const masters = (data?.popularMasters ?? []).filter(m =>
-          m.name.toLowerCase().includes(query.toLowerCase()) ||
-          m.specialization.toLowerCase().includes(query.toLowerCase())
+          fuzzyMatch(m.name + ' ' + m.specialization)
         ).map(m => ({
           id: m.masterId,
           name: m.name,
@@ -111,13 +110,18 @@ export default function SearchPage() {
         // Collect all services from nearby and popular studios
         const services: Array<{ id: string; name: string; businessId: string; businessName: string; type: 'service' }> = []
 
-        // Filter results
-        const q = query.toLowerCase()
-        const filteredBusinesses = businesses.filter(b =>
-          b.name.toLowerCase().includes(q) ||
-          b.description.toLowerCase().includes(q) ||
-          (CATEGORY_LABELS[b.category as keyof typeof CATEGORY_LABELS] || '').toLowerCase().includes(q)
-        )
+        // Filter results — fuzzy: each word in query must match somewhere
+        const q = query.toLowerCase().trim()
+        const words = q.split(/\s+/).filter(Boolean)
+        const fuzzyMatch = (text: string) => words.every(w => text.toLowerCase().includes(w))
+        const filteredBusinesses = businesses.filter(b => {
+          const haystack = [
+            b.name,
+            b.description,
+            CATEGORY_LABELS[b.category as keyof typeof CATEGORY_LABELS] || '',
+          ].join(' ')
+          return fuzzyMatch(haystack)
+        })
 
         if (!controller.signal.aborted) {
           setSearchResults({

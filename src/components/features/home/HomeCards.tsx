@@ -449,6 +449,11 @@ export function PopularStudioCardView({
         {allPhotos[currentPhoto] && (
           <img key={currentPhoto} className={`${styles.psCover} ${slideClass}`} src={cardCoverUrl(allPhotos[currentPhoto])} alt={item.name} onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden' }} />
         )}
+        {item.logoUrl && (
+          <div className={styles.psLogo}>
+            <img src={item.logoUrl} alt="" />
+          </div>
+        )}
         <button
           className={styles.psFav}
           onClick={(e) => {

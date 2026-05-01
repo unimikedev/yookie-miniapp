@@ -13,6 +13,7 @@ export default function AuthPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [consentChecked, setConsentChecked] = useState(true)
   const googleBtnRef = useRef<HTMLDivElement>(null)
 
   const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : null
@@ -25,6 +26,10 @@ export default function AuthPage() {
 
   // Google Sign-In callback
   const handleGoogleCallback = useCallback(async (response: { credential: string }) => {
+    if (!consentChecked) {
+      setError('Пожалуйста, примите условия использования')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -34,7 +39,7 @@ export default function AuthPage() {
       setError(err instanceof Error ? err.message : 'Ошибка входа через Google')
       setLoading(false)
     }
-  }, [returnTo])
+  }, [returnTo, consentChecked])
 
   // Initialize Google Sign-In
   useEffect(() => {
@@ -69,6 +74,10 @@ export default function AuthPage() {
   }, [handleGoogleCallback])
 
   const handleTelegramLogin = async () => {
+    if (!consentChecked) {
+      setError('Пожалуйста, примите условия использования')
+      return
+    }
     const initData = tg?.initData as string | undefined
     if (!initData) {
       setError('Откройте приложение через Telegram.')
@@ -153,7 +162,12 @@ export default function AuthPage() {
         <div ref={googleBtnRef} className={styles.googleBtn} />
 
         <label className={styles.consentRow}>
-          <input type="checkbox" className={styles.consentCheck} defaultChecked />
+          <input
+            type="checkbox"
+            className={styles.consentCheck}
+            checked={consentChecked}
+            onChange={e => setConsentChecked(e.target.checked)}
+          />
           <span className={styles.consentText}>
             Я соглашаюсь с{' '}
             <a href="https://t.me/yookie_bot" target="_blank" rel="noopener noreferrer"

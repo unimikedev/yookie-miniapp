@@ -386,7 +386,7 @@ export default function BookingFlowPage() {
                     placeholder="+998 (XX) XXX-XX-XX"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(formatPhoneMask(e.target.value))}
-                    disabled={isLoading || authStore.isAuthenticated}
+                    disabled={isLoading}
                   />
                 </div>
               </div>

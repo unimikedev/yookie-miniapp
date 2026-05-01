@@ -62,6 +62,8 @@ export default function MerchantPreviewPage() {
   const [localPublished, setLocalPublished] = useState(false);
   const [restrictedLink, setRestrictedLink] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const { leaveWithoutResigning, resignAndLeave, logout, loading: exitLoading, error: exitError } = useBusinessExit();
 
   const isPublished = localPublished || (business?.is_active ?? false);
@@ -99,6 +101,7 @@ export default function MerchantPreviewPage() {
   }
 
   const photos = business.photo_url ? [business.photo_url] : [];
+  const effectiveLogoUrl = logoUrl ?? (business as any).logo_url ?? null;
 
   return (
     <div className={styles.preview}>
@@ -209,6 +212,67 @@ export default function MerchantPreviewPage() {
           onGoStaff={() => navigate('/pro/staff')}
           onGoServices={() => navigate('/pro/services')}
         />
+      </div>
+
+      {/* Logo upload */}
+      <div className={styles.logoSection}>
+        <div className={styles.logoSectionHead}>
+          <span className={styles.logoSectionTitle}>Логотип</span>
+          {effectiveLogoUrl && (
+            <button
+              className={styles.logoRemoveBtn}
+              onClick={async () => {
+                await patchBusiness(merchantId!, { logo_url: null });
+                setLogoUrl(null);
+              }}
+            >Удалить</button>
+          )}
+        </div>
+        <div className={styles.logoRow}>
+          {effectiveLogoUrl ? (
+            <div className={styles.logoPreview}>
+              <img src={effectiveLogoUrl} alt="Логотип" />
+            </div>
+          ) : (
+            <div className={styles.logoPlaceholder}>
+              <span>{(business.name || '?').charAt(0).toUpperCase()}</span>
+            </div>
+          )}
+          <label className={styles.logoUploadBtn}>
+            {logoUploading ? 'Загрузка...' : effectiveLogoUrl ? 'Заменить логотип' : 'Загрузить логотип'}
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              disabled={logoUploading}
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setLogoUploading(true);
+                try {
+                  const fd = new FormData();
+                  fd.append('file', file);
+                  fd.append('variant', 'avatar');
+                  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+                  const token = localStorage.getItem('yookie_auth_token');
+                  const res = await fetch(`${API_BASE}/businesses/upload-image`, {
+                    method: 'POST',
+                    body: fd,
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                  });
+                  const json = await res.json() as { url?: string };
+                  if (json.url) {
+                    await patchBusiness(merchantId!, { logo_url: json.url });
+                    setLogoUrl(json.url);
+                  }
+                } finally {
+                  setLogoUploading(false);
+                  e.target.value = '';
+                }
+              }}
+            />
+          </label>
+        </div>
       </div>
 
       {/* Booking link share */}

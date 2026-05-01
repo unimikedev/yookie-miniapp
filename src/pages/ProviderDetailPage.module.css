@@ -296,7 +296,16 @@
   line-height: var(--text-body-sm-lh);
   letter-spacing: var(--text-body-sm-ls);
   color: var(--color-text-secondary);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.infoAddress > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
 }
 
 .showOnMapBtn {
@@ -1063,6 +1072,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .masterRowPhoto img {
@@ -1085,6 +1097,18 @@
   gap: 2px;
 }
 
+.masterRowNameBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+}
+
 .masterRowName {
   font-size: var(--text-body-size);
   font-weight: 600;
@@ -1092,6 +1116,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.masterRowChevron {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 
 .masterRowSpec {

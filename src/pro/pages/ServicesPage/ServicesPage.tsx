@@ -199,7 +199,9 @@ export default function ServicesPage() {
     formData.append('file', file);
     formData.append('variant', 'cover');
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
-    const res = await fetch(`${API_BASE}/businesses/upload-image`, { method: 'POST', body: formData });
+    const token = localStorage.getItem('yookie_auth_token');
+    const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`${API_BASE}/businesses/upload-image`, { method: 'POST', body: formData, headers });
     if (!res.ok) throw new Error('Ошибка загрузки фото');
     const json = await res.json() as { url?: string };
     if (!json.url) throw new Error('Нет URL в ответе');
@@ -375,10 +377,9 @@ export default function ServicesPage() {
                       >👤</button>
                     )}
                     <button
-                      className={`${styles.mastersBtn} ${expandedAddonsId === s.id ? styles.mastersBtnActive : ''}`}
+                      className={`${styles.addonsBtn} ${expandedAddonsId === s.id ? styles.addonsBtnActive : ''}`}
                       onClick={() => handleToggleAddons(s.id)}
-                      title="Подуслуги"
-                    >＋</button>
+                    >Подуслуги</button>
                     <button className={styles.editBtn} onClick={() => { setEditing({ ...s }); setSaveError(null); }}>✎</button>
                     <button className={styles.deleteBtn} onClick={() => handleDelete(s.id)}>✕</button>
                   </div>

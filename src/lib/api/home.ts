@@ -70,6 +70,8 @@ export interface PopularStudioCard {
   photos?: string[];
   businessId: string;
   priceFrom?: number;
+  /** Circular logo shown on top-left of card */
+  logoUrl?: string | null;
 }
 
 export interface MapPreviewCard {

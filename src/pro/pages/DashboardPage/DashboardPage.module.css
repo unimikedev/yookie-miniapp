@@ -34,6 +34,17 @@
   color: var(--color-text);
   min-width: 110px;
   text-align: center;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: background 0.15s;
+}
+
+.dateLabel:hover {
+  background: var(--color-surface);
 }
 
 .todayBtn {

@@ -218,6 +218,27 @@
   color: var(--color-accent);
 }
 
+.addonsBtn {
+  height: 32px;
+  padding: 0 10px;
+  border: 1.5px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-family: var(--font-family);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.addonsBtnActive {
+  border-color: var(--color-accent);
+  background: rgba(107, 206, 255, 0.1);
+  color: var(--color-accent);
+}
+
 .editBtn,
 .deleteBtn {
   width: 32px;

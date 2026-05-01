@@ -342,7 +342,8 @@
       "yesterday": "вчера",
       "daysAgo": "{{d}} д назад",
       "statPending": "ожидает",
-      "statConfirmed": "подтверждено"
+      "statConfirmed": "подтверждено",
+      "schedule": "График"
     },
     "bookings": {
       "title": "Записи",

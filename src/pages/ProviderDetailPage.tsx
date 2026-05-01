@@ -77,6 +77,7 @@ export default function ProviderDetailPage() {
   const [galleryTab, setGalleryTab] = useState<'salon' | 'portfolio'>('salon')
   const [servicePhotoUrl, setServicePhotoUrl] = useState<string | null>(null)
   const [masterNextSlots, setMasterNextSlots] = useState<Map<string, Array<{ date: string; slot: TimeSlot }>>>(new Map())
+  const [expandedMasterTabId, setExpandedMasterTabId] = useState<string | null>(null)
   const [findingNearestSlot, setFindingNearestSlot] = useState(false)
 
   // Swipe-back gesture refs
@@ -424,15 +425,14 @@ export default function ProviderDetailPage() {
     return results
   }
 
-  // Load 4 nearest slots for each master when masters tab opens
+  // Load 4 nearest slots for the expanded master on demand
   useEffect(() => {
-    if (activeTab !== 1 || !id || masters.length === 0) return
-    masters.forEach(async (master) => {
-      if (masterNextSlots.has(master.id)) return
-      const slots = await findNextAvailableSlots(master.id, 4, 5)
-      setMasterNextSlots(prev => new Map(prev).set(master.id, slots))
+    if (activeTab !== 1 || !id || !expandedMasterTabId) return
+    if (masterNextSlots.has(expandedMasterTabId)) return
+    findNextAvailableSlots(expandedMasterTabId, 4, 5).then(slots => {
+      setMasterNextSlots(prev => new Map(prev).set(expandedMasterTabId, slots))
     })
-  }, [activeTab, id, masters.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab, id, expandedMasterTabId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFindNearestSlot = async () => {
     if (!activeMasterId) return
@@ -1012,7 +1012,7 @@ export default function ProviderDetailPage() {
                       value={clientPhone}
                       onChange={(e) => setClientPhone(formatPhoneMask(e.target.value))}
                       type="tel"
-                      disabled={bookingLoading || authStore.isAuthenticated}
+                      disabled={bookingLoading}
                     />
                   </div>
                 </div>
@@ -1037,18 +1037,29 @@ export default function ProviderDetailPage() {
             ) : masters.length > 0 ? (
               <div className={styles.mastersList}>
                 {masters.map(master => {
-                  const mSlots = masterNextSlots.get(master.id)
+                  const isExpanded = expandedMasterTabId === master.id
+                  const mSlots = isExpanded ? masterNextSlots.get(master.id) : undefined
                   const today = toLocalYMD(new Date())
                   return (
                     <div key={master.id} className={styles.masterRow}>
-                      <div className={styles.masterRowPhoto}>
+                      <button
+                        className={styles.masterRowPhoto}
+                        onClick={() => setExpandedMasterTabId(isExpanded ? null : master.id)}
+                        aria-label={master.name}
+                      >
                         {master.photo_url
                           ? <img src={cardAvatarUrl(master.photo_url)} alt={master.name} />
                           : <span className={styles.masterRowPhotoFallback}>{master.name.charAt(0)}</span>
                         }
-                      </div>
+                      </button>
                       <div className={styles.masterRowInfo}>
-                        <span className={styles.masterRowName}>{formatMasterName(master.name)}</span>
+                        <button
+                          className={styles.masterRowNameBtn}
+                          onClick={() => setExpandedMasterTabId(isExpanded ? null : master.id)}
+                        >
+                          <span className={styles.masterRowName}>{formatMasterName(master.name)}</span>
+                          <span className={styles.masterRowChevron}>{isExpanded ? '▲' : '▼'}</span>
+                        </button>
                         {master.specialization && (
                           <span className={styles.masterRowSpec}>{master.specialization}</span>
                         )}
@@ -1060,8 +1071,11 @@ export default function ProviderDetailPage() {
                             {master.rating.toFixed(1)}
                           </span>
                         )}
-                        {/* Nearest slots chips */}
-                        {mSlots && mSlots.length > 0 && (
+                        {/* Nearest slots chips — only for expanded master */}
+                        {isExpanded && !mSlots && (
+                          <span className={styles.masterNoSlots}>Загружаем...</span>
+                        )}
+                        {isExpanded && mSlots && mSlots.length > 0 && (
                           <div className={styles.masterSlotChips}>
                             {mSlots.slice(0, 4).map(({ date, slot }) => {
                               const label = date === today
@@ -1085,7 +1099,7 @@ export default function ProviderDetailPage() {
                             })}
                           </div>
                         )}
-                        {mSlots && mSlots.length === 0 && (
+                        {isExpanded && mSlots && mSlots.length === 0 && (
                           <span className={styles.masterNoSlots}>Нет окон на 5 дней</span>
                         )}
                       </div>
