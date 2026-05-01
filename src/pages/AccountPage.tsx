@@ -18,13 +18,6 @@ const ChevronRight = () => (
   </svg>
 )
 
-// Icons — sky blue accent color matching design filter
-const IconBookings = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-    <path d="M18 1.25C18.41 1.25 18.75 1.59 18.75 2V2.64C19.55 2.86 20.23 3.23 20.8 3.84C21.53 4.64 21.88 5.62 22.06 6.85C22.23 8.05 22.25 9.58 22.25 11.5C22.25 11.91 21.92 12.25 21.5 12.25C21.09 12.25 20.75 11.92 20.75 11.5C20.75 10.43 20.74 9.53 20.71 8.75H3.29C3.25 9.71 3.25 10.85 3.25 12.24V12.76C3.25 14.96 3.25 16.53 3.4 17.74C3.55 18.92 3.83 19.62 4.3 20.14C4.75 20.62 5.34 20.91 6.32 21.07C7.33 21.23 8.65 21.25 10.5 21.25C10.91 21.25 11.25 21.59 11.25 22C11.25 22.41 10.91 22.75 10.5 22.75C8.68 22.75 7.23 22.73 6.08 22.55C4.9 22.35 3.95 21.96 3.2 21.16C2.42 20.31 2.08 19.25 1.91 17.92C1.75 16.62 1.75 14.94 1.75 12.81V12.19C1.75 10.06 1.75 8.38 1.91 7.08C2.08 5.75 2.42 4.69 3.2 3.84C3.77 3.23 4.45 2.86 5.25 2.64V2C5.25 1.59 5.59 1.25 6 1.25C6.41 1.25 6.75 1.59 6.75 2V2.37C7.89 2.25 9.28 2.25 10.99 2.25H13.01C14.72 2.25 16.11 2.25 17.25 2.37V2C17.25 1.59 17.59 1.25 18 1.25Z" fill="#6BCEFF"/>
-  </svg>
-)
-
 const IconFavorite = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <path d="M12 21C11.7 21 11.4 20.9 11.14 20.7L3.5 14C2.53 13.08 2 11.83 2 10.5C2 7.74 4.24 5.5 7 5.5C8.9 5.5 10.57 6.61 11.4 8.2C11.54 8.38 11.76 8.5 12 8.5C12.24 8.5 12.46 8.38 12.6 8.2C13.43 6.61 15.1 5.5 17 5.5C19.76 5.5 22 7.74 22 10.5C22 11.83 21.47 13.08 20.5 14L12.86 20.7C12.6 20.9 12.3 21 12 21Z" fill="#6BCEFF"/>
@@ -217,14 +210,6 @@ export default function AccountPage() {
 
         {/* Menu list — card style per design spec */}
         <div className={styles.menuList}>
-
-          <button className={styles.menuItem} onClick={() => navigate('/my-bookings')}>
-            <div className={styles.menuItemLeft}>
-              <div className={styles.menuIconWrap}><IconBookings /></div>
-              <span className={styles.menuLabel}>{t('account.myBookings')}</span>
-            </div>
-            <div className={styles.menuItemRight}><ChevronRight /></div>
-          </button>
 
           <button className={styles.menuItem} onClick={() => navigate('/favorites')}>
             <div className={styles.menuItemLeft}>
