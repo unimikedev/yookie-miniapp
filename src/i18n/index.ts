@@ -13,6 +13,14 @@ function getStoredLang(): AppLanguage {
     const stored = localStorage.getItem(LANG_KEY)
     if (stored === 'ru' || stored === 'uz' || stored === 'en') return stored
   } catch {}
+  // No stored preference — detect from Telegram or browser
+  try {
+    const tgLang = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code as string | undefined
+    const sysLang = (tgLang || navigator.language || '').toLowerCase()
+    if (sysLang.startsWith('uz')) return 'uz'
+    if (sysLang.startsWith('en')) return 'en'
+    if (sysLang.startsWith('ru')) return 'ru'
+  } catch {}
   return 'ru'
 }
 

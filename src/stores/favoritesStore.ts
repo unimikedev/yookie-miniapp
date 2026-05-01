@@ -177,20 +177,11 @@ export const useFavoritesStore = create<FavoritesState & FavoritesActions>((set,
 
     set({ isLoading: true, initStatus: 'loading' });
     try {
-      // API client now unwraps { data: T } automatically, so response is directly the array
       const response = await api.get<Array<{ id: string }>>('/favorites', { phone });
+      // Backend is authoritative — use its list directly, don't merge with localStorage.
+      // Merging caused divergence across devices (local orphans accumulating on each device).
       const ids = new Set((response ?? []).map((item: { id: string }) => item.id));
-      // Merge with localStorage (union)
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const localIds = JSON.parse(stored) as string[];
-          for (const id of localIds) ids.add(id);
-        }
-      } catch { /* noop */ }
-
       set({ favoriteIds: ids, isLoading: false, initStatus: 'ready' });
-      // Persist merged result
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(ids)));
       } catch { /* noop */ }

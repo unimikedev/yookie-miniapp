@@ -142,11 +142,12 @@ export default function DashboardPage() {
     if (!merchantId) return;
     listStaff(merchantId).then(setStaff).catch(() => {});
     listServices(merchantId).then(setServices).catch(() => {});
-    api.get<{ is_active: boolean }>(`/businesses/${merchantId}`)
+    api.get<{ is_active: boolean; name?: string }>(`/businesses/${merchantId}`)
       .then(b => {
         if (b) {
           setBusinessActive(b.is_active);
           useMerchantStore.getState().setIsPublished(b.is_active);
+          if (b.name) useMerchantStore.getState().setBusinessName(b.name);
           if (b.is_active) {
             // Approved — clear pending moderation flag
             localStorage.removeItem(`yookie_biz_${merchantId}_pending`);
@@ -425,7 +426,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Date navigation ── */}
+      {/* ── Bookings hidden until staff + services are added ── */}
+      {hasStaff && hasServices && (
       <div className={styles.dateNav}>
         <div className={styles.dateNavLeft}>
           <button className={styles.dateArrow} onClick={prevDay}>‹</button>
@@ -439,9 +441,9 @@ export default function DashboardPage() {
           {t('pro.dashboard.newBooking')}
         </button>
       </div>
+      )}
 
-      {/* ── Pending confirmations ── */}
-      {pending.length > 0 && (
+      {hasStaff && hasServices && pending.length > 0 && (
         <section className={styles.pendingSection}>
           <h2 className={styles.pendingTitle}>
             {t('pro.dashboard.pendingTitle')}
@@ -499,7 +501,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Day schedule ── */}
-      <section className={styles.scheduleSection}>
+      {hasStaff && hasServices && <section className={styles.scheduleSection}>
         <div className={styles.scheduleTitleRow}>
           <h3 className={styles.sectionTitle}>{isToday ? t('pro.dashboard.today') : t('pro.bookings.title')}</h3>
           {bookings.length > 0 && (
@@ -526,10 +528,10 @@ export default function DashboardPage() {
             />
           ))
         )}
-      </section>
+      </section>}
 
       {/* ── Activity feed ── */}
-      {activity.length > 0 && (
+      {hasStaff && hasServices && activity.length > 0 && (
         <section className={styles.activitySection}>
           <div className={styles.scheduleTitleRow}>
             <h3 className={styles.sectionTitle}>{t('pro.dashboard.activityTitle')}</h3>

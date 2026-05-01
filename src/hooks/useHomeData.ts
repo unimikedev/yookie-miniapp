@@ -169,6 +169,9 @@ let _cacheTs = 0
 const GEO_CACHE_TTL = 10 * 60 * 1000
 // Shared with useGeolocation.ts so both hooks read/write the same entry.
 const GEO_LS_KEY = 'yookie_geo_cache'
+// Singleton promise — prevents duplicate browser dialogs when multiple
+// components call getUserPosition() concurrently during navigation.
+let _pendingGeo: Promise<{ lat: number; lng: number } | null> | null = null
 
 function readGeoLS(): { lat: number; lng: number } | null {
   try {
@@ -186,32 +189,34 @@ function writeGeoLS(pos: { lat: number; lng: number }) {
 
 /** Get user GPS position (one-shot, non-blocking). Returns null on denial/error. */
 function getUserPosition(): Promise<{ lat: number; lng: number } | null> {
-  return new Promise((resolve) => {
-    // 1. Module-level cache — same JS session
-    if (_cachedPos && Date.now() - _cacheTs < GEO_CACHE_TTL) {
-      resolve(_cachedPos)
-      return
-    }
-    // 2. localStorage cache — survives app close/reopen, shared with useGeolocation
-    const lsCache = readGeoLS()
-    if (lsCache) {
-      _cachedPos = lsCache
-      _cacheTs = Date.now()
-      resolve(lsCache)
-      return
-    }
-    if (!navigator.geolocation) { resolve(null); return; }
+  // 1. Module-level cache — same JS session
+  if (_cachedPos && Date.now() - _cacheTs < GEO_CACHE_TTL) {
+    return Promise.resolve(_cachedPos)
+  }
+  // 2. localStorage cache — survives app close/reopen
+  const lsCache = readGeoLS()
+  if (lsCache) {
+    _cachedPos = lsCache
+    _cacheTs = Date.now()
+    return Promise.resolve(lsCache)
+  }
+  // 3. Re-use in-flight request so navigating back doesn't show a second dialog
+  if (_pendingGeo) return _pendingGeo
+  if (!navigator.geolocation) return Promise.resolve(null)
+  _pendingGeo = new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         _cachedPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         _cacheTs = Date.now()
         writeGeoLS(_cachedPos)
+        _pendingGeo = null
         resolve(_cachedPos)
       },
-      () => resolve(null),
-      { timeout: 5000, maximumAge: GEO_CACHE_TTL }
+      () => { _pendingGeo = null; resolve(null) },
+      { timeout: 8000, maximumAge: GEO_CACHE_TTL }
     )
   })
+  return _pendingGeo
 }
 
 /** Only show businesses with at least 1 active master and at least 1 service (min_price > 0) */

@@ -6,7 +6,7 @@ import { BottomNav } from '@/shared/ui'
 import styles from './Layout.module.css'
 
 // The 4 root tab pages — everywhere else gets Telegram back button + no bottom nav
-const PAGES_WITH_NAV = ['/', '/nearby', '/my-bookings', '/account']
+const PAGES_WITH_NAV = ['/', '/nearby', '/account']
 const TAB_PATHS = new Set(PAGES_WITH_NAV)
 
 interface LayoutProps {
@@ -104,7 +104,7 @@ export default function Layout({ children }: LayoutProps) {
           {shownChildren}
         </div>
       </main>
-      {showNav && <BottomNav />}
+      <BottomNav visible={showNav} />
     </div>
   )
 }

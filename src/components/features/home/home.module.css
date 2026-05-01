@@ -678,7 +678,7 @@
 .psInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
   flex: 1;
 }
@@ -688,6 +688,28 @@
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+}
+
+.psRatingPriceRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.psBullet {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption-size);
+  flex-shrink: 0;
+}
+
+.psPriceInline {
+  font-size: var(--text-caption-size);
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .psName {

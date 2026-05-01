@@ -17,6 +17,12 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+.navHidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+}
+
 .pill {
   pointer-events: auto;
   display: inline-flex;

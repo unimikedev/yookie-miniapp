@@ -470,8 +470,8 @@ export function PopularStudioCardView({
       <div className={styles.psBody}>
         <div className={styles.psTopRow}>
           <div className={styles.psInfo}>
-            <div className={styles.psNameRatingWrap}>
-              <span className={styles.psName}>{item.name}</span>
+            <span className={styles.psName}>{item.name}</span>
+            <div className={styles.psRatingPriceRow}>
               {item.rating > 0 ? (
                 <span className={styles.psRatingRow}>
                   <StarIcon />
@@ -481,13 +481,14 @@ export function PopularStudioCardView({
               ) : (
                 <span className={styles.psNewBadge}>{t('common.new')}</span>
               )}
+              {item.priceFrom > 0 && (
+                <>
+                  <span className={styles.psBullet}>·</span>
+                  <span className={styles.psPriceInline}>{t('home.priceFrom', { price: Math.round(item.priceFrom / 1000) })}</span>
+                </>
+              )}
             </div>
           </div>
-          {item.priceFrom && (
-            <div className={styles.psPrice}>
-              <span className={styles.psPriceValue}>{t('home.priceFrom', { price: Math.round(item.priceFrom / 1000) })}</span>
-            </div>
-          )}
           <span className={styles.psBadge}>{t(`categories.${item.category}`)}</span>
         </div>
       </div>
