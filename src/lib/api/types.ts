@@ -263,6 +263,7 @@ export interface CreateBookingPayload {
   notes?: string;
   telegramId?: number;
   addons?: Array<{ addonId: string; qty: number }>;
+  reminderOffset?: number;
 }
 
 export interface CancelBookingPayload {

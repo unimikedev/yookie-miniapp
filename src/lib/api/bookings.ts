@@ -93,6 +93,7 @@ export async function createBooking(data: CreateBookingPayload): Promise<Booking
     };
     if (data.notes) body.notes = data.notes;
     if (data.addons && data.addons.length > 0) body.addons = data.addons;
+    if (data.reminderOffset != null) body.reminderOffset = data.reminderOffset;
 
     const response = await api.post<Booking>('/bookings', body);
     // Save phone for non-authenticated users so /my?phone= works
@@ -178,6 +179,7 @@ export interface BatchBookingPayload {
   notes?: string
   services: Array<{ serviceId: string; masterId: string; addons?: Array<{ addonId: string; qty: number }> }>
   telegramId?: number
+  reminderOffset?: number
 }
 
 /**
@@ -197,6 +199,7 @@ export async function createBookingBatch(data: BatchBookingPayload): Promise<Boo
     },
   }
   if (data.notes) body.notes = data.notes
+  if (data.reminderOffset != null) body.reminderOffset = data.reminderOffset
 
   const response = await api.post<Booking[]>('/bookings/batch', body)
   try { localStorage.setItem('yookie_booking_phone', data.clientPhone) } catch { /* noop */ }

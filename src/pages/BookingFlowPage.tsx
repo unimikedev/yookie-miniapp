@@ -144,6 +144,7 @@ export default function BookingFlowPage() {
             serviceId: svc.service.id,
             masterId: svc.masterId!,
           })),
+          reminderOffset,
         })
       } else {
         // Single booking
@@ -155,6 +156,7 @@ export default function BookingFlowPage() {
           clientPhone: effectivePhone,
           clientName,
           notes: notes || undefined,
+          reminderOffset,
         })
         bookedList = [booking]
       }
