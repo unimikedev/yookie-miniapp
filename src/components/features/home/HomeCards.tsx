@@ -465,10 +465,20 @@ export function PopularStudioCardView({
           <HeartIcon filled={isFavorite} size={20} />
         </button>
         {allPhotos.length > 1 && (
-          <div className={styles.psDots}>
-            {allPhotos.map((_, i) => (
-              <span key={i} className={`${styles.psDot} ${i === currentPhoto ? styles.psDotActive : ''}`} />
+          <div className={styles.psThumbnails} onClick={e => e.stopPropagation()}>
+            {allPhotos.slice(0, 3).map((p, i) => (
+              <img
+                key={i}
+                src={cardCoverUrl(p)}
+                className={`${styles.psThumbnail} ${i === currentPhoto ? styles.psThumbnailActive : ''}`}
+                alt=""
+                onClick={() => setCurrentPhoto(i)}
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+              />
             ))}
+            {allPhotos.length > 3 && (
+              <div className={styles.psThumbnailMore}>+{allPhotos.length - 3}</div>
+            )}
           </div>
         )}
       </div>

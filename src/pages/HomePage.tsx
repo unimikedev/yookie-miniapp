@@ -33,6 +33,38 @@ import { getMockBusinessImage } from '@/lib/utils/mockImages'
 import styles from './HomePage.module.css'
 import { BetaBanner } from '@/components/ui/BetaBanner'
 
+const KEYWORD_CATEGORIES: Record<string, CategoryEnum[]> = {
+  'стрижк': ['hair'], 'стрижка': ['hair'], 'стрижки': ['hair'],
+  'покраска': ['hair'], 'окраска': ['hair'], 'укладка': ['hair'],
+  'прическа': ['hair'], 'прически': ['hair'], 'осветление': ['hair'],
+  'ногт': ['nail'], 'ногти': ['nail'], 'маникюр': ['nail'],
+  'педикюр': ['nail'], 'гель': ['nail'], 'нейлс': ['nail'],
+  'лак': ['nail'], 'шеллак': ['nail'], 'наращивание ног': ['nail'],
+  'брови': ['brow_lash'], 'ресницы': ['brow_lash'], 'ламинирование': ['brow_lash'],
+  'наращивание рес': ['brow_lash'], 'архитектура': ['brow_lash'],
+  'макияж': ['makeup'], 'визаж': ['makeup'], 'мейкап': ['makeup'],
+  'массаж': ['spa_massage'], 'спа': ['spa_massage'], 'spa': ['spa_massage'],
+  'расслабляющий': ['spa_massage'], 'лечебный': ['spa_massage'],
+  'эпиляция': ['epilation'], 'шугаринг': ['epilation'], 'депиляция': ['epilation'],
+  'лазерная': ['epilation'], 'восковая': ['epilation'],
+  'косметол': ['cosmetology'], 'косметика': ['cosmetology'], 'чистка': ['cosmetology'],
+  'пилинг': ['cosmetology'], 'инъекци': ['cosmetology'], 'ботокс': ['cosmetology'],
+  'барбер': ['barber'], 'борода': ['barber'], 'бритье': ['barber'],
+  'мужская стр': ['barber', 'hair'], 'фейдинг': ['barber'],
+  'тату': ['tattoo'], 'татуировка': ['tattoo'], 'татуировк': ['tattoo'],
+  'пирсинг': ['piercing'],
+  'йога': ['yoga'], 'медитация': ['yoga'],
+  'фитнес': ['fitness'], 'тренировка': ['fitness'], 'тренировк': ['fitness'],
+}
+
+function getQueryCategories(q: string): CategoryEnum[] {
+  const cats = new Set<CategoryEnum>()
+  for (const [kw, c] of Object.entries(KEYWORD_CATEGORIES)) {
+    if (q.includes(kw)) c.forEach(cat => cats.add(cat))
+  }
+  return Array.from(cats)
+}
+
 interface SearchResultItem {
   type: 'business' | 'master' | 'category'
   id: string
@@ -246,13 +278,18 @@ export default function HomePage() {
     const q = query.toLowerCase().trim()
     const words = q.split(/\s+/).filter(Boolean)
     const fuzzyMatch = (text: string) => words.every(w => text.toLowerCase().includes(w))
+    const kwCategories = getQueryCategories(q)
     const results: SearchResultItem[] = []
 
     try {
-      // 1. Search businesses
+      // 1. Search businesses — also match by keyword category
       const bizRes = await fetchBusinesses({ city: city.id, search: query, limit: 8 })
+      const seenIds = new Set<string>()
       for (const b of (bizRes.data ?? [])) {
-        if (fuzzyMatch([b.name, b.description ?? '', b.category ?? ''].join(' '))) {
+        const textMatch = fuzzyMatch([b.name, b.description ?? '', b.category ?? ''].join(' '))
+        const catMatch = kwCategories.includes(b.category as CategoryEnum)
+        if (textMatch || catMatch) {
+          seenIds.add(b.id)
           results.push({
             type: 'business',
             id: b.id,
@@ -261,6 +298,25 @@ export default function HomePage() {
             iconSrc: CATEGORY_ICONS[b.category as keyof typeof CATEGORY_ICONS] || '/categories/cosmetology.png',
             businessId: b.id,
           })
+        }
+      }
+      // If keyword matched a category but no businesses came back from API search, fetch by category
+      if (kwCategories.length > 0 && results.length === 0) {
+        for (const cat of kwCategories) {
+          const catRes = await fetchBusinesses({ city: city.id, category: cat, limit: 5 })
+          for (const b of (catRes.data ?? [])) {
+            if (!seenIds.has(b.id)) {
+              seenIds.add(b.id)
+              results.push({
+                type: 'business',
+                id: b.id,
+                name: b.name,
+                meta: t(`categories.${b.category as CategoryEnum}`) || b.category || '',
+                iconSrc: CATEGORY_ICONS[b.category as keyof typeof CATEGORY_ICONS] || '/categories/cosmetology.png',
+                businessId: b.id,
+              })
+            }
+          }
         }
       }
     } catch { /* ignore */ }
@@ -281,10 +337,10 @@ export default function HomePage() {
       }
     }
 
-    // 3. Search categories by label
+    // 3. Search categories by label OR by keyword mapping
     for (const cat of CATEGORIES) {
       const catLabel = t(`categories.${cat.key}`)
-      if (fuzzyMatch(catLabel)) {
+      if (fuzzyMatch(catLabel) || kwCategories.includes(cat.key as CategoryEnum)) {
         results.unshift({
           type: 'category',
           id: `cat-${cat.key}`,

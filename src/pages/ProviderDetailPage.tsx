@@ -9,7 +9,7 @@
  */
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Skeleton, EmptyState, Badge, Rating } from '@/shared/ui'
 import {
@@ -1041,43 +1041,48 @@ export default function ProviderDetailPage() {
                   const mSlots = isExpanded ? masterNextSlots.get(master.id) : undefined
                   const today = toLocalYMD(new Date())
                   return (
-                    <div key={master.id} className={styles.masterRow}>
-                      <button
-                        className={styles.masterRowPhoto}
+                    <Fragment key={master.id}>
+                      <div
+                        className={`${styles.masterRow} ${isExpanded ? styles.masterRowActive : ''}`}
                         onClick={() => setExpandedMasterTabId(isExpanded ? null : master.id)}
-                        aria-label={master.name}
+                        role="button"
+                        tabIndex={0}
                       >
-                        {master.photo_url
-                          ? <img src={cardAvatarUrl(master.photo_url)} alt={master.name} />
-                          : <span className={styles.masterRowPhotoFallback}>{master.name.charAt(0)}</span>
-                        }
-                      </button>
-                      <div className={styles.masterRowInfo}>
-                        <button
-                          className={styles.masterRowNameBtn}
-                          onClick={() => setExpandedMasterTabId(isExpanded ? null : master.id)}
-                        >
+                        <div className={styles.masterRowPhoto}>
+                          {master.photo_url
+                            ? <img src={cardAvatarUrl(master.photo_url)} alt={master.name} />
+                            : <span className={styles.masterRowPhotoFallback}>{master.name.charAt(0)}</span>
+                          }
+                        </div>
+                        <div className={styles.masterRowInfo}>
                           <span className={styles.masterRowName}>{formatMasterName(master.name)}</span>
-                          <span className={styles.masterRowChevron}>{isExpanded ? '▲' : '▼'}</span>
+                          {master.specialization && (
+                            <span className={styles.masterRowSpec}>{master.specialization}</span>
+                          )}
+                          {master.rating > 0 && (
+                            <span className={styles.masterRowRating}>
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 0.5L7.545 3.63L11 4.135L8.5 6.57L9.09 10.01L6 8.385L2.91 10.01L3.5 6.57L1 4.135L4.455 3.63L6 0.5Z" fill="#6BCEFF" />
+                              </svg>
+                              {master.rating.toFixed(1)}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          className={styles.masterRowBtn}
+                          onClick={(e) => { e.stopPropagation(); setMasterFilter(master.id); setActiveTab(0) }}
+                        >
+                          {t('provider.services_btn')}
                         </button>
-                        {master.specialization && (
-                          <span className={styles.masterRowSpec}>{master.specialization}</span>
-                        )}
-                        {master.rating > 0 && (
-                          <span className={styles.masterRowRating}>
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                              <path d="M6 0.5L7.545 3.63L11 4.135L8.5 6.57L9.09 10.01L6 8.385L2.91 10.01L3.5 6.57L1 4.135L4.455 3.63L6 0.5Z" fill="#6BCEFF" />
-                            </svg>
-                            {master.rating.toFixed(1)}
-                          </span>
-                        )}
-                        {/* Nearest slots chips — only for expanded master */}
-                        {isExpanded && !mSlots && (
-                          <span className={styles.masterNoSlots}>Загружаем...</span>
-                        )}
-                        {isExpanded && mSlots && mSlots.length > 0 && (
-                          <div className={styles.masterSlotChips}>
-                            {mSlots.slice(0, 4).map(({ date, slot }) => {
+                      </div>
+                      {isExpanded && (
+                        <div className={styles.masterSlotChipsRow}>
+                          {!mSlots ? (
+                            <span className={styles.masterNoSlots}>Загружаем...</span>
+                          ) : mSlots.length === 0 ? (
+                            <span className={styles.masterNoSlots}>Нет окон на 5 дней</span>
+                          ) : (
+                            mSlots.slice(0, 5).map(({ date, slot }) => {
                               const label = date === today
                                 ? `${slot.start} · сег`
                                 : `${slot.start} · ${new Date(date + 'T00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`
@@ -1096,20 +1101,11 @@ export default function ProviderDetailPage() {
                                   {label}
                                 </button>
                               )
-                            })}
-                          </div>
-                        )}
-                        {isExpanded && mSlots && mSlots.length === 0 && (
-                          <span className={styles.masterNoSlots}>Нет окон на 5 дней</span>
-                        )}
-                      </div>
-                      <button
-                        className={styles.masterRowBtn}
-                        onClick={() => { setMasterFilter(master.id); setActiveTab(0) }}
-                      >
-                        {t('provider.services_btn')}
-                      </button>
-                    </div>
+                            })
+                          )}
+                        </div>
+                      )}
+                    </Fragment>
                   )
                 })}
               </div>

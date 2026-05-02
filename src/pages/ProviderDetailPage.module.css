@@ -1061,7 +1061,14 @@
   gap: 12px;
   padding: 8px 12px;
   background: var(--color-surface);
+  border: 1.5px solid transparent;
   border-radius: var(--radius-2xl);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.masterRowActive {
+  border-color: var(--color-accent);
 }
 
 .masterRowPhoto {
@@ -1074,9 +1081,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  padding: 0;
-  cursor: pointer;
 }
 
 .masterRowPhoto img {
@@ -1156,7 +1160,14 @@
   opacity: 0.75;
 }
 
-/* ── Master nearest slots ────────────────────────────────── */
+/* ── Master nearest slots (below card) ──────────────────── */
+.masterSlotChipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 4px 2px;
+}
+
 .masterSlotChips {
   display: flex;
   flex-wrap: wrap;

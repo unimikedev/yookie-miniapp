@@ -379,7 +379,15 @@ export default function ServicesPage() {
                     <button
                       className={`${styles.addonsBtn} ${expandedAddonsId === s.id ? styles.addonsBtnActive : ''}`}
                       onClick={() => handleToggleAddons(s.id)}
-                    >Подуслуги</button>
+                      title="Подуслуги"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="2" width="5" height="5" rx="1.2" />
+                        <rect x="9" y="2" width="5" height="5" rx="1.2" />
+                        <rect x="2" y="9" width="5" height="5" rx="1.2" />
+                        <rect x="9" y="9" width="5" height="5" rx="1.2" />
+                      </svg>
+                    </button>
                     <button className={styles.editBtn} onClick={() => { setEditing({ ...s }); setSaveError(null); }}>✎</button>
                     <button className={styles.deleteBtn} onClick={() => handleDelete(s.id)}>✕</button>
                   </div>
