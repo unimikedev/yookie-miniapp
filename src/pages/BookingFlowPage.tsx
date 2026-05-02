@@ -68,13 +68,14 @@ export default function BookingFlowPage() {
     }
   }, [])
 
-  // Pre-fill from authStore (only on mount for authenticated users)
+  // Pre-fill from authStore — wait until auth is fully initialized
   useEffect(() => {
+    if (authStore.initStatus !== 'ready') return
     if (authStore.isAuthenticated) {
-      if (authStore.phone && !clientPhone) setClientPhone(authStore.phone)
+      if (authStore.phone && !clientPhone) setClientPhone(formatPhoneMask(authStore.phone))
       if (authStore.name && !clientName) setClientName(authStore.name)
     }
-  }, [])
+  }, [authStore.initStatus])
 
   // Use auth phone for booking creation when authenticated
   const effectivePhone = authStore.isAuthenticated && authStore.phone
@@ -344,6 +345,9 @@ export default function BookingFlowPage() {
                   ))}
                 </div>
 
+                {/* Divider between services and footer */}
+                <div className={styles.summaryDivider} />
+
                 {/* Reminder selector */}
                 <div className={styles.reminderRow}>
                   <span className={styles.reminderLabel}>Напоминание</span>
@@ -360,9 +364,6 @@ export default function BookingFlowPage() {
                     ))}
                   </div>
                 </div>
-
-                {/* Divider */}
-                <div className={styles.summaryDivider} />
 
                 {/* Date + time + total */}
                 <div className={styles.summaryDateTimeBlock}>

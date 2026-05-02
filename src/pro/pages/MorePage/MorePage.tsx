@@ -121,6 +121,9 @@ export default function MorePage() {
 
         {/* ── Заведение ── */}
         <p className={styles.groupLabel}>Заведение</p>
+        <button className={styles.row} onClick={() => navigate('/pro/my-profile')}>
+          <span>Логотип и профиль</span><span className={styles.chev}>›</span>
+        </button>
         <button className={styles.row} onClick={() => navigate('/pro/schedule')}>
           <span>{t('pro.more.schedule')}</span><span className={styles.chev}>›</span>
         </button>

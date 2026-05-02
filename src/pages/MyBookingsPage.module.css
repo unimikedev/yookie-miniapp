@@ -351,6 +351,22 @@
   white-space: nowrap;
 }
 
+/* ── Section divider ─────────────────────────────────────── */
+.cardDivider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 8px 0;
+  border: none;
+}
+
+/* ── Date + time + total row ─────────────────────────────── */
+.bookingDateTimeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
 /* ── Date + time ─────────────────────────────────────────── */
 .bookingDateTime {
   font-size: var(--text-body-size);

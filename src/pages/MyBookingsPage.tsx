@@ -336,14 +336,17 @@ export default function MyBookingsPage() {
                         })}
                       </div>
 
-                      {/* Date + time */}
-                      <div className={styles.bookingDateTime}>
-                        {formatDate(first.starts_at)} • {timeRange}
-                      </div>
+                      {/* Divider */}
+                      <div className={styles.cardDivider} />
 
-                      {/* Total */}
-                      <div className={styles.bookingTotal}>
-                        {totalPrice.toLocaleString('ru')} {t('common.currency')}
+                      {/* Date + time + total in one row */}
+                      <div className={styles.bookingDateTimeRow}>
+                        <div className={styles.bookingDateTime}>
+                          {formatDate(first.starts_at)} • {timeRange}
+                        </div>
+                        <div className={styles.bookingTotal}>
+                          {totalPrice.toLocaleString('ru')} {t('common.currency')}
+                        </div>
                       </div>
 
                       {cancelError && <div className={styles.cancelError}>{cancelError}</div>}

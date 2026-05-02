@@ -120,9 +120,13 @@ export const useMerchantStore = create<MerchantState & MerchantActions>((set, ge
         }
         localStorage.setItem(STORAGE_KEY, businessId);
         set({ merchantId: businessId, validationError: null });
+      } else {
+        // JWT has no businessId — this user has no business access.
+        // Clear any stale merchantId from a previous session (security: prevents
+        // one user from inheriting another user's business via shared localStorage).
+        localStorage.removeItem(STORAGE_KEY);
+        set({ merchantId: null });
       }
-      // If token has no businessId, don't overwrite an existing merchantId —
-      // the user may have selected a business via the selector flow.
 
       if (jwtRole === 'owner' || jwtRole === 'staff') {
         set({ role: jwtRole });
