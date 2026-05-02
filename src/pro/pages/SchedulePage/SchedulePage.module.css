@@ -148,6 +148,32 @@
   padding: 0 1px;
 }
 
+/* ── Skeleton loading ────────────────────────────────────────────── */
+.skeletonList { display: flex; flex-direction: column; gap: 8px; }
+
+.skeletonChipsRow { display: flex; gap: 8px; margin-bottom: 8px; }
+
+.skeletonChip {
+  height: 36px;
+  width: 80px;
+  border-radius: 20px;
+  background: var(--color-surface);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonRow {
+  height: 52px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-color: var(--color-surface); }
+  50%  { background-color: var(--color-surface-elevated); }
+  100% { background-color: var(--color-surface); }
+}
+
 /* ── Empty state ─────────────────────────────────────────────────── */
 .emptyState {
   display: flex;

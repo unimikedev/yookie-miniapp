@@ -55,13 +55,24 @@ export const TASHKENT_DISTRICTS: TashkentDistrict[] = [
 
 const STORAGE_KEY = 'yookie_city'
 const DISTRICT_KEY = 'yookie_district'
+const MANUAL_KEY = 'yookie_city_manual'
 const DEFAULT_CITY = UZBEKISTAN_CITIES[0] // Ташкент
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
 
 interface CityState {
   city: City;
   district: TashkentDistrict | null;
   setCity: (city: City) => void;
   setDistrict: (district: TashkentDistrict | null) => void;
+  setFromGeolocation: (lat: number, lng: number) => void;
   loadFromStorage: () => void;
 }
 
@@ -71,11 +82,27 @@ export const useCityStore = create<CityState>((set) => ({
 
   setCity: (city: City) => {
     applyCity(city);
+    try { localStorage.setItem(MANUAL_KEY, '1') } catch {}
     // Clear district when switching to a non-Tashkent city
     if (city.id !== 'Tashkent') {
       try { localStorage.removeItem(DISTRICT_KEY) } catch {}
     }
     set({ city, district: null });
+  },
+
+  setFromGeolocation: (lat: number, lng: number) => {
+    try {
+      // Don't override if the user has manually chosen a city
+      if (localStorage.getItem(MANUAL_KEY)) return;
+    } catch { return }
+    let nearest = UZBEKISTAN_CITIES[0]
+    let minDist = Infinity
+    for (const c of UZBEKISTAN_CITIES) {
+      const d = haversineKm(lat, lng, c.lat, c.lng)
+      if (d < minDist) { minDist = d; nearest = c }
+    }
+    applyCity(nearest)
+    set({ city: nearest })
   },
 
   setDistrict: (district: TashkentDistrict | null) => {

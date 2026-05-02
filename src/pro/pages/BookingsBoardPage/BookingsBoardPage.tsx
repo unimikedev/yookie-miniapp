@@ -91,7 +91,7 @@ export default function BookingsBoardPage() {
   useEffect(() => {
     load();
     const unsub    = subscribe(ev => { if (ev.type.startsWith('booking.')) load(); });
-    const stopPoll = startPolling(load, 15000);
+    const stopPoll = startPolling(load, 300000);
     return () => { unsub(); stopPoll(); };
   }, [load]);
 

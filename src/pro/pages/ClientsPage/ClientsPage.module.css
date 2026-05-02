@@ -170,3 +170,27 @@
 .st-completed { color: var(--color-verified); }
 .st-cancelled { color: var(--color-error); }
 .st-pending { color: #FBBF24; }
+
+/* ── Skeleton loading ────────────────────────────────────────────── */
+.skeletonSearch {
+  height: 44px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  background: var(--color-surface);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonList { display: flex; flex-direction: column; gap: 8px; }
+
+.skeletonCard {
+  height: 68px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-color: var(--color-surface); }
+  50%  { background-color: var(--color-surface-elevated); }
+  100% { background-color: var(--color-surface); }
+}

@@ -43,16 +43,18 @@ export default function SchedulePage() {
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<AvailabilityDay[]>([]);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
 
   const showToast = (msg: string) => setToast({ msg, key: Date.now() });
 
   useEffect(() => {
     if (!merchantId) return;
+    setLoading(true);
     listStaff(merchantId).then((list) => {
       setStaff(list);
       if (list.length > 0 && !selectedStaff) setSelectedStaff(list[0].id);
-    });
+    }).finally(() => setLoading(false));
   }, [merchantId, selectedStaff]);
 
   useEffect(() => {
@@ -81,7 +83,14 @@ export default function SchedulePage() {
 
   return (
     <ProLayout title={t('pro.schedule.title')}>
-      {staff.length === 0 ? (
+      {loading ? (
+        <div className={styles.skeletonList}>
+          <div className={styles.skeletonChipsRow}>
+            {[1, 2, 3].map(i => <div key={i} className={styles.skeletonChip} />)}
+          </div>
+          {[1, 2, 3, 4, 5, 6, 7].map(i => <div key={i} className={styles.skeletonRow} />)}
+        </div>
+      ) : staff.length === 0 ? (
         <div className={styles.emptyState}>
           <span className={styles.emptyIcon}>🗓</span>
           <p className={styles.emptyTitle}>{t('pro.staff.noStaff')}</p>

@@ -82,7 +82,7 @@ export default function StaffPage() {
         loadAll();
       }
     });
-    const stopPoll = startPolling(loadAll, 30000);
+    const stopPoll = startPolling(loadAll, 300000);
     return () => { unsub(); stopPoll(); };
   }, [merchantId]);
 

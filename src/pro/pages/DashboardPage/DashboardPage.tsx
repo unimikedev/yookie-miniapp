@@ -104,6 +104,9 @@ export default function DashboardPage() {
   const [businessActive, setBusinessActive] = useState<boolean | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [pendingMod, setPendingMod] = useState(false);
+  const [publishedDismissed, setPublishedDismissed] = useState(
+    () => { try { return !!localStorage.getItem('yookie_pro_published_dismissed') } catch { return false } }
+  );
   const [showTour, setShowTour] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -203,7 +206,7 @@ export default function DashboardPage() {
       loadBookings();
       loadPending();
       loadActivity();
-    }, 15000);
+    }, 300000);
     return () => { unsub(); stopPoll(); };
   }, [merchantId, loadBookings, loadPending, loadActivity]);
 
@@ -289,13 +292,21 @@ export default function DashboardPage() {
       {showTour && <TourModal onClose={() => setShowTour(false)} />}
 
       {/* ── Onboarding card — only render after businessActive is known (avoids flicker) ── */}
-      {businessActive !== null && onboardPhase === 'done' && (
+      {businessActive !== null && onboardPhase === 'done' && !publishedDismissed && (
         <div className={styles.publishedCard}>
           <span className={styles.publishedIcon}>🎉</span>
           <div className={styles.publishedText}>
             <p className={styles.publishedTitle}>Профиль опубликован!</p>
             <p className={styles.publishedSub}>Клиенты могут вас найти в Yookie</p>
           </div>
+          <button
+            className={styles.publishedDismissBtn}
+            onClick={() => {
+              try { localStorage.setItem('yookie_pro_published_dismissed', '1') } catch {}
+              setPublishedDismissed(true);
+            }}
+            aria-label="Закрыть"
+          >×</button>
         </div>
       )}
 

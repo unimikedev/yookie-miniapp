@@ -13,19 +13,22 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!merchantId) return;
-    listClients(merchantId).then(setClients).catch(() => {});
-    // Load a wide range for history
+    setLoading(true);
     const from = new Date();
     from.setMonth(from.getMonth() - 6);
     const to = new Date();
     to.setMonth(to.getMonth() + 1);
-    listBookings(merchantId, {
-      from: from.toISOString(),
-      to: to.toISOString(),
-    }).then(setBookings).catch(() => {});
+    Promise.all([
+      listClients(merchantId).then(setClients).catch(() => {}),
+      listBookings(merchantId, {
+        from: from.toISOString(),
+        to: to.toISOString(),
+      }).then(setBookings).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, [merchantId]);
 
   // Use the new search hook for consistent UX
@@ -46,6 +49,17 @@ export default function ClientsPage() {
     bookings
       .filter((b) => b.client_id === clientId)
       .sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
+
+  if (loading) {
+    return (
+      <ProLayout title={t('pro.clients.title')}>
+        <div className={styles.skeletonSearch} />
+        <div className={styles.skeletonList}>
+          {[1, 2, 3, 4, 5].map(i => <div key={i} className={styles.skeletonCard} />)}
+        </div>
+      </ProLayout>
+    );
+  }
 
   return (
     <ProLayout title={t('pro.clients.title')}>

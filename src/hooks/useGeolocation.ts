@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useCityStore } from '../stores/cityStore'
 
 export interface GeoPosition {
   lat: number
@@ -125,6 +126,7 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
         _geoCache = geo
         _geoCacheTs = Date.now()
         writeGeoCache(geo)   // persist so next re-open skips the dialog
+        useCityStore.getState().setFromGeolocation(geo.lat, geo.lng)
         setPosition(geo)
         setPermission('granted')
         setIsLoading(false)

@@ -58,7 +58,7 @@ export default function ServicesPage() {
     const unsub = subscribe(ev => {
       if ('merchantId' in ev && ev.merchantId === merchantId) load();
     });
-    const stopPoll = startPolling(load, 30000);
+    const stopPoll = startPolling(load, 300000);
     return () => { unsub(); stopPoll(); };
   }, [load]);
 
