@@ -918,3 +918,20 @@
   cursor: pointer;
 }
 .publishBtn:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Skeleton loading ────────────────────────────────────────────── */
+
+.skeletonList { display: flex; flex-direction: column; gap: 8px; }
+
+.skeletonCard {
+  height: 68px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-color: var(--color-surface); }
+  50%  { background-color: var(--color-surface-elevated); }
+  100% { background-color: var(--color-surface); }
+}

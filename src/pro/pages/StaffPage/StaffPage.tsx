@@ -17,7 +17,7 @@ import {
 } from '@/pro/api';
 import type { StaffInput } from '@/pro/api';
 import type { Master, Service } from '@/lib/api/types';
-import { emit } from '@/pro/realtime';
+import { emit, subscribe, startPolling } from '@/pro/realtime';
 import styles from './StaffPage.module.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
@@ -61,17 +61,30 @@ export default function StaffPage() {
   // Member management
   const [roleChanging, setRoleChanging] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const isOwner = myRole === 'owner' || myRole === null;
 
   const loadAll = () => {
     if (!merchantId) return;
-    listStaff(merchantId).then(setStaff).catch(() => {});
-    listMembers(merchantId).then(setMembers).catch(() => {});
-    listServices(merchantId).then(setServices).catch(() => {});
+    setLoading(true);
+    Promise.all([
+      listStaff(merchantId).then(setStaff),
+      listMembers(merchantId).then(setMembers),
+      listServices(merchantId).then(setServices),
+    ]).finally(() => setLoading(false));
   };
 
-  useEffect(() => { loadAll(); }, [merchantId]);
+  useEffect(() => {
+    loadAll();
+    const unsub = subscribe(ev => {
+      if ('merchantId' in ev && ev.merchantId === merchantId && (ev.type === 'staff.changed' || ev.type === 'service.changed')) {
+        loadAll();
+      }
+    });
+    const stopPoll = startPolling(loadAll, 30000);
+    return () => { unsub(); stopPoll(); };
+  }, [merchantId]);
 
   const virtualMasters = staff.filter((s) => !s.user_id);
   const realUsersFromAPI = members.filter((m) => m.user_id);
@@ -216,7 +229,7 @@ export default function StaffPage() {
   ) : null;
 
   return (
-    <ProLayout title={t('pro.staff.title')} actions={addMasterBtn ?? undefined}>
+    <ProLayout title={t('pro.staff.title')} actions={addMasterBtn ?? undefined} onRefresh={loadAll}>
       {/* Tabs */}
       <div className={styles.tabs}>
         <button
@@ -239,12 +252,18 @@ export default function StaffPage() {
           <p className={styles.managersNote}>
             Менеджеры управляют записями и настройками. Они не оказывают услуги клиентам.
           </p>
-          {realUsers.length === 0 && (
+          {loading ? (
+            <div className={styles.skeletonList}>
+              {[1, 2, 3].map(i => (
+                <div key={i} className={styles.skeletonCard} />
+              ))}
+            </div>
+          ) : realUsers.length === 0 ? (
             <p className={styles.emptyHint}>
               {t('pro.staff.noUsers')}
             </p>
-          )}
-          {realUsers.map((m) => {
+          ) : null}
+          {!loading && realUsers.map((m) => {
             const ua = m.user_accounts;
             const userId = m.user_id!;
             const isMe = userId === myUserId;
@@ -376,14 +395,20 @@ export default function StaffPage() {
           {deleteError && <p className={styles.errorMsg}>{deleteError}</p>}
 
           <div className={styles.list}>
-            {virtualMasters.length === 0 && !editing && (
+            {loading ? (
+              <div className={styles.skeletonList}>
+                {[1, 2, 3].map(i => (
+                  <div key={i} className={styles.skeletonCard} />
+                ))}
+              </div>
+            ) : virtualMasters.length === 0 && !editing ? (
               <div className={styles.emptyState}>
                 <span className={styles.emptyIcon}>💆</span>
                 <p className={styles.emptyTitle}>{t('pro.staff.noMasters', 'Мастеров пока нет')}</p>
                 <p className={styles.emptyDesc}>{t('pro.staff.noMastersDesc', 'Добавьте мастеров — они будут принимать записи от клиентов')}</p>
               </div>
-            )}
-            {virtualMasters.map((s) => {
+            ) : null}
+            {!loading && virtualMasters.map((s) => {
               const link = inviteLinks[s.id];
               return (
                 <div key={s.id} className={styles.virtualCard}>

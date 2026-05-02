@@ -424,3 +424,20 @@
   white-space: nowrap;
 }
 
+/* ─── Skeleton loading ──────────────────────────────────────────── */
+
+.skeletonList { display: flex; flex-direction: column; gap: 10px; }
+
+.skeletonCard {
+  height: 72px;
+  border-radius: var(--radius-2xl, 16px);
+  background: var(--color-surface);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-color: var(--color-surface); }
+  50%  { background-color: var(--color-surface-elevated); }
+  100% { background-color: var(--color-surface); }
+}
+

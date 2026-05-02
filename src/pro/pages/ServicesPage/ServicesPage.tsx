@@ -5,7 +5,7 @@ import { useMerchantStore } from '@/pro/stores/merchantStore';
 import { listServices, listStaff, upsertService, deleteService, updateMasterServices, reorderService, listAddons, upsertAddon, deleteAddon } from '@/pro/api';
 import type { ServiceInput, AddonInput } from '@/pro/api';
 import type { Master, Service, ServiceAddon } from '@/lib/api/types';
-import { emit } from '@/pro/realtime';
+import { emit, subscribe, startPolling } from '@/pro/realtime';
 import { Toast } from '@/components/ui/Toast';
 import styles from './ServicesPage.module.css';
 
@@ -35,6 +35,7 @@ export default function ServicesPage() {
   const [photoUploading, setPhotoUploading] = useState(false);
 
   // Addon management
+  const [loading, setLoading] = useState(true);
   const [expandedAddonsId, setExpandedAddonsId] = useState<string | null>(null);
   const [addonsByService, setAddonsByService] = useState<Record<string, ServiceAddon[]>>({});
   const [editingAddon, setEditingAddon] = useState<(AddonInput & { serviceId: string }) | null>(null);
@@ -45,13 +46,21 @@ export default function ServicesPage() {
 
   const load = useCallback(() => {
     if (!merchantId) return;
-    listServices(merchantId)
-      .then(list => setServices([...list].sort((a, b) => a.position - b.position)))
-      .catch(() => {});
-    listStaff(merchantId).then(setStaff).catch(() => {});
+    setLoading(true);
+    Promise.all([
+      listServices(merchantId).then(list => setServices([...list].sort((a, b) => a.position - b.position))),
+      listStaff(merchantId).then(setStaff),
+    ]).finally(() => setLoading(false));
   }, [merchantId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    const unsub = subscribe(ev => {
+      if ('merchantId' in ev && ev.merchantId === merchantId) load();
+    });
+    const stopPoll = startPolling(load, 30000);
+    return () => { unsub(); stopPoll(); };
+  }, [load]);
 
   const categories = useMemo(() => {
     const seen = new Set<string>();
@@ -213,7 +222,7 @@ export default function ServicesPage() {
   const actions = <button className={styles.addBtn} onClick={openAdd}>+</button>;
 
   return (
-    <ProLayout title={t('pro.services.title')} actions={actions}>
+    <ProLayout title={t('pro.services.title')} actions={actions} onRefresh={load}>
       {/* Category filter — L2 underline tabs */}
       {categories.length > 1 && (
         <div className={styles.catFilter}>
@@ -334,8 +343,13 @@ export default function ServicesPage() {
       )}
 
       <div className={styles.list}>
-        {/* Empty state */}
-        {services.length === 0 ? (
+        {/* Loading skeleton */}
+        {loading ? (
+          <div className={styles.skeletonList}>
+            {[1, 2, 3].map(i => <div key={i} className={styles.skeletonCard} />)}
+          </div>
+        ) : services.length === 0 ? (
+          /* Empty state */
           <div className={styles.emptyState}>
             <span className={styles.emptyIcon}>✂️</span>
             <p className={styles.emptyTitle}>{t('pro.services.noServices')}</p>

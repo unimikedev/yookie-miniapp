@@ -49,6 +49,7 @@ export default function BookingsBoardPage() {
   const { merchantId, role, masterId: myMasterId } = useMerchantStore();
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en-US' : i18n.language === 'uz' ? 'uz-UZ' : 'ru-RU';
+  const [loading, setLoading]             = useState(true);
   const [bookings, setBookings]           = useState<Booking[]>([]);
   const [staff, setStaff]                 = useState<Master[]>([]);
   const [services, setServices]           = useState<Service[]>([]);
@@ -75,9 +76,11 @@ export default function BookingsBoardPage() {
 
   const load = useCallback(() => {
     if (!merchantId) return;
-    listBookings(merchantId, { from: `${dateStr}T00:00:00`, to: `${dateStr}T23:59:59` })
-      .then(setBookings).catch(() => {});
-    listStaff(merchantId).then(setStaff).catch(() => {});
+    setLoading(true);
+    Promise.all([
+      listBookings(merchantId, { from: `${dateStr}T00:00:00`, to: `${dateStr}T23:59:59` }).then(setBookings),
+      listStaff(merchantId).then(setStaff),
+    ]).finally(() => setLoading(false));
   }, [merchantId, dateStr]);
 
   useEffect(() => {
@@ -233,7 +236,7 @@ export default function BookingsBoardPage() {
   );
 
   return (
-    <ProLayout title={t('pro.bookings.title')} actions={actions}>
+    <ProLayout title={t('pro.bookings.title')} actions={actions} onRefresh={load}>
 
       {/* Date navigation */}
       <div className={styles.dateNav}>
@@ -286,7 +289,11 @@ export default function BookingsBoardPage() {
       )}
 
       {/* Views */}
-      {view === 'timeline' ? (
+      {loading ? (
+        <div className={styles.skeletonList}>
+          {[1, 2, 3].map(i => <div key={i} className={styles.skeletonCard} />)}
+        </div>
+      ) : view === 'timeline' ? (
         <TimelineView
           hours={HOURS}
           staff={filteredStaff}

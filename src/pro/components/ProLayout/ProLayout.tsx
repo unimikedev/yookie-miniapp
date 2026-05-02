@@ -10,11 +10,12 @@ interface ProLayoutProps {
   children: React.ReactNode;
   title?: string;
   actions?: React.ReactNode;
+  onRefresh?: () => void;
   hideNav?: boolean;
   allowWithoutBusiness?: boolean;
 }
 
-export function ProLayout({ children, title, actions, hideNav, allowWithoutBusiness }: ProLayoutProps) {
+export function ProLayout({ children, title, actions, onRefresh, hideNav, allowWithoutBusiness }: ProLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuthStore();
@@ -78,15 +79,26 @@ export function ProLayout({ children, title, actions, hideNav, allowWithoutBusin
 
   return (
     <div className={styles.layout}>
-      {(title || actions) && (
+      {(title || actions || onRefresh) && (
         <div className={styles.pageHeader}>
           {title && <h1 className={styles.pageTitle}>{title}</h1>}
-          {actions && <div className={styles.pageActions}>{actions}</div>}
+          <div className={styles.pageActions}>
+            {onRefresh && (
+              <button className={styles.refreshBtn} onClick={onRefresh} aria-label="Обновить">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M13.5 2.5A7 7 0 1 0 14 8" />
+                  <path d="M14 2.5V6H10.5" />
+                </svg>
+                Обновить
+              </button>
+            )}
+            {actions}
+          </div>
         </div>
       )}
 
       <main
-        className={`${styles.main} ${shouldHideNav ? '' : styles.withNav} ${title || actions ? styles.withPageHeader : ''}`}
+        className={`${styles.main} ${shouldHideNav ? '' : styles.withNav} ${title || actions || onRefresh ? styles.withPageHeader : ''}`}
         style={hasBanner ? { paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 132px)' } : undefined}
       >
         {children}

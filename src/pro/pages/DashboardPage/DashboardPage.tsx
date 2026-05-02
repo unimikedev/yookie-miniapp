@@ -97,6 +97,7 @@ export default function DashboardPage() {
 
   const [pending, setPending] = useState<Booking[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [staff, setStaff] = useState<Master[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -178,10 +179,11 @@ export default function DashboardPage() {
 
   const loadBookings = useCallback(() => {
     if (!merchantId) return;
+    setLoadingBookings(true);
     listBookings(merchantId, {
       from: `${dateStr}T00:00:00`,
       to:   `${dateStr}T23:59:59`,
-    }).then(setBookings).catch(() => {});
+    }).then(setBookings).catch(() => {}).finally(() => setLoadingBookings(false));
   }, [merchantId, dateStr]);
 
   useEffect(() => {
@@ -281,7 +283,7 @@ export default function DashboardPage() {
     : 'publish';
 
   return (
-    <ProLayout title={businessName || t('pro.dashboard.title')}>
+    <ProLayout title={businessName || t('pro.dashboard.title')} onRefresh={() => { loadBookings(); loadPending(); loadActivity(); }}>
 
       {/* ── Tour overlay ── */}
       {showTour && <TourModal onClose={() => setShowTour(false)} />}
@@ -524,7 +526,11 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {sortedBookings.length === 0 ? (
+        {loadingBookings ? (
+          <div className={styles.skeletonList}>
+            {[1, 2, 3].map(i => <div key={i} className={styles.skeletonCard} />)}
+          </div>
+        ) : sortedBookings.length === 0 ? (
           <div className={styles.emptyDay}>
             <span className={styles.emptyDayIcon}>📅</span>
             <p className={styles.emptyDayTitle}>{t('pro.dashboard.noBookings', 'Нет записей')}</p>
