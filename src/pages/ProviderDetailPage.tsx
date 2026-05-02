@@ -103,10 +103,11 @@ export default function ProviderDetailPage() {
   const [clientPhone, setClientPhone] = useState('')
 
   useEffect(() => {
+    if (authStore.initStatus !== 'ready') return
     if (authStore.isAuthenticated) {
-      if (authStore.phone && !clientPhone) setClientPhone(authStore.phone)
+      if (authStore.phone && !clientPhone) setClientPhone(formatPhoneMask(authStore.phone))
     }
-  }, [])
+  }, [authStore.initStatus])
 
   // Use clientPhone (pre-filled from authStore on mount, but always editable)
   const effectivePhone = getCleanPhone(clientPhone)
@@ -987,14 +988,17 @@ export default function ProviderDetailPage() {
                     )
                   })()}
 
-                  {/* Date + time */}
-                  <div className={styles.confirmationDateTime}>
-                    {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} • {selectedSlot?.start}
-                  </div>
+                  {/* Divider */}
+                  <hr className={styles.confirmationDivider} />
 
-                  {/* Total */}
-                  <div className={styles.confirmationTotalValue}>
-                    {selectedServices.reduce((sum, s) => sum + s.service.price, 0).toLocaleString('ru')} {t('common.currency')}
+                  {/* Date + time and Total on one row */}
+                  <div className={styles.confirmationDateTimeRow}>
+                    <div className={styles.confirmationDateTime}>
+                      {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} • {selectedSlot?.start}
+                    </div>
+                    <div className={styles.confirmationTotalValue}>
+                      {selectedServices.reduce((sum, s) => sum + s.service.price, 0).toLocaleString('ru')} {t('common.currency')}
+                    </div>
                   </div>
 
                   {/* Input fields */}

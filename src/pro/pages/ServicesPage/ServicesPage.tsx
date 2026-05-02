@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProLayout } from '@/pro/components/ProLayout/ProLayout';
 import { useMerchantStore } from '@/pro/stores/merchantStore';
@@ -41,16 +41,20 @@ export default function ServicesPage() {
   const [editingAddon, setEditingAddon] = useState<(AddonInput & { serviceId: string }) | null>(null);
   const [savingAddon, setSavingAddon] = useState(false);
   const EMPTY_ADDON: AddonInput = { name: '', price: 0, duration_min: 0, max_qty: 1 };
+  const initializedRef = useRef(false);
 
   const showToast = (msg: string) => setToast({ msg, key: Date.now() });
 
   const load = useCallback(() => {
     if (!merchantId) return;
-    setLoading(true);
+    if (!initializedRef.current) setLoading(true);
     Promise.all([
       listServices(merchantId).then(list => setServices([...list].sort((a, b) => a.position - b.position))),
       listStaff(merchantId).then(setStaff),
-    ]).finally(() => setLoading(false));
+    ]).finally(() => {
+      initializedRef.current = true;
+      setLoading(false);
+    });
   }, [merchantId]);
 
   useEffect(() => {

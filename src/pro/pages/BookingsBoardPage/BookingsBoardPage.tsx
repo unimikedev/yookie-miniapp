@@ -67,6 +67,7 @@ export default function BookingsBoardPage() {
   const [clients, setClients]             = useState<Client[]>([]);
   const [selectedMasterId, setSelectedMasterId] = useState<string | null>(null);
   const [toast, setToast]                 = useState<{ msg: string; key: number } | null>(null);
+  const initializedRef                     = useRef(false);
 
   const showToast = (msg: string) => setToast({ msg, key: Date.now() });
 
@@ -74,13 +75,16 @@ export default function BookingsBoardPage() {
   const todayStr = useMemo(() => isoDate(new Date()), []);
   const isToday  = dateStr === todayStr;
 
-  const load = useCallback(() => {
+  const load = useCallback((showSkeleton = false) => {
     if (!merchantId) return;
-    setLoading(true);
+    if (showSkeleton || !initializedRef.current) setLoading(true);
     Promise.all([
       listBookings(merchantId, { from: `${dateStr}T00:00:00`, to: `${dateStr}T23:59:59` }).then(setBookings),
       listStaff(merchantId).then(setStaff),
-    ]).finally(() => setLoading(false));
+    ]).finally(() => {
+      initializedRef.current = true;
+      setLoading(false);
+    });
   }, [merchantId, dateStr]);
 
   useEffect(() => {

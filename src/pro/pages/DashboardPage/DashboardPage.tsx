@@ -94,6 +94,7 @@ export default function DashboardPage() {
   const { merchantId, businessName } = useMerchantStore();
   const tgSyncDone = useRef(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const bookingsInitializedRef = useRef(false);
 
   const [pending, setPending] = useState<Booking[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -182,11 +183,14 @@ export default function DashboardPage() {
 
   const loadBookings = useCallback(() => {
     if (!merchantId) return;
-    setLoadingBookings(true);
+    if (!bookingsInitializedRef.current) setLoadingBookings(true);
     listBookings(merchantId, {
       from: `${dateStr}T00:00:00`,
       to:   `${dateStr}T23:59:59`,
-    }).then(setBookings).catch(() => {}).finally(() => setLoadingBookings(false));
+    }).then(setBookings).catch(() => {}).finally(() => {
+      bookingsInitializedRef.current = true;
+      setLoadingBookings(false);
+    });
   }, [merchantId, dateStr]);
 
   useEffect(() => {
@@ -595,7 +599,6 @@ export default function DashboardPage() {
         <QuickAction icon={<QAIconScissors />} label={t('pro.more.services')} onClick={() => navigate('/pro/services')} />
         <QuickAction icon={<QAIconPerson />} label={t('pro.more.staff')} onClick={() => navigate('/pro/staff')} />
         <QuickAction icon={<QAIconSchedule />} label={t('pro.dashboard.schedule')} onClick={() => navigate('/pro/schedule')} />
-        <QuickAction icon={<QAIconSettings />} label={t('pro.more.profileSettings')} onClick={() => navigate('/pro/settings')} />
       </section>
 
       {toast && (

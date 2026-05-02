@@ -93,7 +93,9 @@ export default function Layout({ children }: LayoutProps) {
     }
 
     if (showTgBack) {
-      const handler = () => navigate(-1)
+      // On restricted pages (opened via personal salon link), back should close the bot
+      // since there's no meaningful previous page to return to.
+      const handler = isRestricted ? () => tg.close() : () => navigate(-1)
       tgBackHandlerRef.current = handler
       tg.BackButton.onClick(handler)
       tg.BackButton.show()
@@ -107,7 +109,7 @@ export default function Layout({ children }: LayoutProps) {
         tgBackHandlerRef.current = null
       }
     }
-  }, [showTgBack, navigate])
+  }, [showTgBack, isRestricted, navigate])
 
   return (
     <div className={styles.layout}>

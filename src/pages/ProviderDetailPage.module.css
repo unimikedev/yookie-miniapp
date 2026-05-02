@@ -682,6 +682,20 @@
   white-space: nowrap;
 }
 
+.confirmationDivider {
+  height: 1px;
+  background: var(--color-border);
+  border: none;
+  margin: 0;
+}
+
+.confirmationDateTimeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .confirmationDateTime {
   font-size: var(--text-body-size);
   font-weight: 700;
@@ -690,10 +704,11 @@
 }
 
 .confirmationTotalValue {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--color-accent);
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .confirmationInputs {

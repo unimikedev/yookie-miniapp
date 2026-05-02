@@ -62,17 +62,21 @@ export default function StaffPage() {
   const [roleChanging, setRoleChanging] = useState<string | null>(null);
   const [revoking, setRevoking] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const initializedRef = useRef(false);
 
   const isOwner = myRole === 'owner' || myRole === null;
 
   const loadAll = () => {
     if (!merchantId) return;
-    setLoading(true);
+    if (!initializedRef.current) setLoading(true);
     Promise.all([
       listStaff(merchantId).then(setStaff),
       listMembers(merchantId).then(setMembers),
       listServices(merchantId).then(setServices),
-    ]).finally(() => setLoading(false));
+    ]).finally(() => {
+      initializedRef.current = true;
+      setLoading(false);
+    });
   };
 
   useEffect(() => {
