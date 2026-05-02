@@ -98,6 +98,7 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
 
     // 1. Module-level cache — same JS session, zero cost
     if (_geoCache && Date.now() - _geoCacheTs < GEO_CACHE_TTL) {
+      useCityStore.getState().setFromGeolocation(_geoCache.lat, _geoCache.lng)
       setPosition(_geoCache)
       setPermission('granted')
       return
@@ -108,10 +109,15 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
     if (lsCache) {
       _geoCache = lsCache
       _geoCacheTs = Date.now()
+      useCityStore.getState().setFromGeolocation(lsCache.lat, lsCache.lng)
       setPosition(lsCache)
       setPermission('granted')
       return
     }
+
+    // 3. Native request — guard against duplicate calls within same mount
+    if (requestedRef.current) return
+    requestedRef.current = true
 
     setIsLoading(true)
     setError(null)
@@ -125,7 +131,7 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
         }
         _geoCache = geo
         _geoCacheTs = Date.now()
-        writeGeoCache(geo)   // persist so next re-open skips the dialog
+        writeGeoCache(geo)
         useCityStore.getState().setFromGeolocation(geo.lat, geo.lng)
         setPosition(geo)
         setPermission('granted')
@@ -133,6 +139,7 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
         setError(null)
       },
       (err) => {
+        requestedRef.current = false  // allow retry on error
         setIsLoading(false)
         switch (err.code) {
           case err.PERMISSION_DENIED:
@@ -153,10 +160,9 @@ export function useGeolocation(autoRequest = true): UseGeolocationResult {
     )
   }, [])
 
-  // Auto-request on mount
+  // Auto-request on mount and when permission changes (e.g. user grants via system settings)
   useEffect(() => {
-    if (autoRequest && !requestedRef.current && permission !== 'denied' && permission !== 'unavailable') {
-      requestedRef.current = true
+    if (autoRequest && permission !== 'denied' && permission !== 'unavailable') {
       requestPosition()
     }
   }, [autoRequest, permission, requestPosition])
