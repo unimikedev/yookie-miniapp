@@ -60,6 +60,7 @@ export default function MyBookingsPage() {
   const [rescheduleSuccess, setRescheduleSuccess] = useState(false)
   const [cancelConfirmGroup, setCancelConfirmGroup] = useState<typeof bookings | null>(null)
   const [expandedPastId, setExpandedPastId] = useState<string | null>(null)
+  const [moreSheetGroup, setMoreSheetGroup] = useState<typeof bookings | null>(null)
   const authStore = useAuthStore()
   const { close: closeOverlay } = useOverlayStore()
 
@@ -238,7 +239,10 @@ export default function MyBookingsPage() {
                   const first = group[0]
                   const businessName = (first.businesses as { name?: string } | null)?.name || t('bookings.business')
                   const isCancelling = cancelLoading === first.id
-                  const timeRange = formatTimeRange(first.starts_at, first.ends_at)
+                  // For multi-service groups: start = first booking start, end = last booking end
+                  const sortedGroup = [...group].sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+                  const lastBooking = sortedGroup[sortedGroup.length - 1]
+                  const timeRange = formatTimeRange(sortedGroup[0].starts_at, lastBooking.ends_at)
                   // Aggregate status across all masters in this booking group
                   const gn = group.length
                   const gConfirmed = group.filter(b => b.status === 'confirmed').length
@@ -347,24 +351,8 @@ export default function MyBookingsPage() {
                         <div className={styles.cancelError}>{rescheduleError}</div>
                       )}
 
-                      {/* Actions: row1 reschedule+cancel, row2 calendar+map */}
+                      {/* Actions: row calendar+map, then "Еще" below */}
                       <div className={styles.cardActionsCol}>
-                        <div className={styles.cardActionsRow}>
-                          <button
-                            className={styles.btnSecondary}
-                            disabled={rescheduleLoading}
-                            onClick={() => handleRescheduleOpen(group)}
-                          >
-                            {t('bookings.reschedule')}
-                          </button>
-                          <button
-                            className={styles.btnCancel}
-                            disabled={isCancelling || rescheduleLoading}
-                            onClick={() => setCancelConfirmGroup(group)}
-                          >
-                            {isCancelling ? t('bookings.cancelLoading') : t('bookings.cancelBtn')}
-                          </button>
-                        </div>
                         {group.every(b => b.status === 'confirmed') && (
                           <div className={styles.cardActionsRow}>
                             <a
@@ -382,11 +370,17 @@ export default function MyBookingsPage() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                Показать на карте
+                                На карте
                               </a>
                             )}
                           </div>
                         )}
+                        <button
+                          className={styles.btnMore}
+                          onClick={() => setMoreSheetGroup(group)}
+                        >
+                          Ещё
+                        </button>
                       </div>
                     </div>
                   )
@@ -506,6 +500,35 @@ export default function MyBookingsPage() {
                 Да, отменить
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* "Ещё" bottom sheet — reschedule / cancel */}
+      {moreSheetGroup && (
+        <div className={styles.sheetOverlay} onClick={() => setMoreSheetGroup(null)}>
+          <div className={styles.sheetPanel} onClick={e => e.stopPropagation()}>
+            <div className={styles.sheetHandle} />
+            <p className={styles.sheetTitle}>
+              {(moreSheetGroup[0].businesses as { name?: string } | null)?.name ?? 'Запись'}
+            </p>
+            <button
+              className={styles.sheetBtn}
+              onClick={() => { setMoreSheetGroup(null); handleRescheduleOpen(moreSheetGroup) }}
+              disabled={rescheduleLoading}
+            >
+              {t('bookings.reschedule')}
+            </button>
+            <button
+              className={`${styles.sheetBtn} ${styles.sheetBtnDanger}`}
+              onClick={() => { setMoreSheetGroup(null); setCancelConfirmGroup(moreSheetGroup) }}
+              disabled={cancelLoading === moreSheetGroup[0].id || rescheduleLoading}
+            >
+              {t('bookings.cancelBtn')}
+            </button>
+            <button className={styles.sheetBtnClose} onClick={() => setMoreSheetGroup(null)}>
+              Закрыть
+            </button>
           </div>
         </div>
       )}

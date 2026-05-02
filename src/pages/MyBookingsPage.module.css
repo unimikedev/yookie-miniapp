@@ -502,6 +502,97 @@
   text-align: center;
 }
 
+/* ── "Ещё" button ─────────────────────────────────────── */
+.btnMore {
+  width: 100%;
+  padding: 12px;
+  background: var(--color-surface-elevated);
+  border-radius: 12px;
+  font-size: var(--text-button-sm-size);
+  font-weight: var(--text-button-sm-weight);
+  color: var(--color-text-secondary);
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.btnMore:active {
+  opacity: 0.7;
+}
+
+/* ── "Ещё" bottom sheet ───────────────────────────────── */
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+}
+
+.sheetPanel {
+  width: 100%;
+  background: var(--color-surface);
+  border-radius: 24px 24px 0 0;
+  padding: 12px 16px calc(24px + var(--safe-area-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sheetHandle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  margin: 0 auto 12px;
+}
+
+.sheetTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+  margin: 0 0 4px;
+}
+
+.sheetBtn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  background: var(--color-surface-elevated);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text);
+  text-align: center;
+  transition: opacity 0.15s;
+}
+
+.sheetBtn:active {
+  opacity: 0.7;
+}
+
+.sheetBtnDanger {
+  color: #F87171;
+  background: rgba(248, 113, 113, 0.10);
+}
+
+.sheetBtnClose {
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: 4px;
+  transition: opacity 0.15s;
+}
+
+.sheetBtnClose:active {
+  opacity: 0.7;
+}
+
 /* ── Past booking cards ───────────────────────────────── */
 
 .pastCard {

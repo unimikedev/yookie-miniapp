@@ -132,9 +132,11 @@ export async function createBooking(data: CreateBookingPayload): Promise<Booking
  * API client unwraps the outer { data: ... }, so we receive Booking[] directly.
  * Falls back to mock when backend is unavailable (DEV only).
  */
-export async function fetchMyBookings(phone: string): Promise<Booking[]> {
+export async function fetchMyBookings(phone?: string): Promise<Booking[]> {
   try {
-    const response = await api.get<Booking[]>('/my', { phone });
+    const params: Record<string, string> = {}
+    if (phone) params.phone = phone
+    const response = await api.get<Booking[]>('/my', Object.keys(params).length ? params : undefined);
     return response ?? [];
   } catch (err) {
     if (import.meta.env.DEV && err instanceof Error && (

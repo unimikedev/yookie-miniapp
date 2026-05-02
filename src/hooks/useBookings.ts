@@ -20,6 +20,8 @@ export function useBookings(): UseBookingsResult {
   const [error, setError] = useState<ApiError | null>(null);
 
   const authPhone = useAuthStore((state) => state.phone);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const initStatus = useAuthStore((state) => state.initStatus);
 
   // For non-authenticated users, use the phone from last booking creation
   const getFallbackPhone = (): string | null => {
@@ -29,8 +31,14 @@ export function useBookings(): UseBookingsResult {
   // Use auth phone if available, otherwise fall back to booking phone
   const phone = authPhone || getFallbackPhone();
 
+  // Can fetch if we have a phone OR if the user is authenticated (JWT will resolve identity)
+  const canFetch = !!phone || isAuthenticated;
+
   useEffect(() => {
-    if (!phone) {
+    // Wait for auth to initialize before deciding whether to fetch
+    if (initStatus === 'idle' || initStatus === 'loading') return;
+
+    if (!canFetch) {
       setBookings([]);
       setIsLoading(false);
       return;
@@ -43,7 +51,8 @@ export function useBookings(): UseBookingsResult {
       setError(null);
 
       try {
-        const bookingsData = await fetchMyBookings(phone);
+        // Pass phone if known; if null but user is authenticated, JWT in header resolves identity
+        const bookingsData = await fetchMyBookings(phone ?? undefined);
 
         if (!controller.signal.aborted) {
           setBookings(bookingsData);
@@ -73,11 +82,11 @@ export function useBookings(): UseBookingsResult {
     return () => {
       controller.abort();
     };
-  }, [phone]);
+  }, [phone, canFetch, initStatus]);
 
   const refetch = async () => {
     const effectivePhone = authPhone || getFallbackPhone();
-    if (!effectivePhone) {
+    if (!effectivePhone && !isAuthenticated) {
       return;
     }
 
@@ -85,7 +94,7 @@ export function useBookings(): UseBookingsResult {
     setError(null);
 
     try {
-      const bookingsData = await fetchMyBookings(effectivePhone);
+      const bookingsData = await fetchMyBookings(effectivePhone ?? undefined);
       setBookings(bookingsData);
     } catch (err) {
       if (err instanceof ApiError) {
